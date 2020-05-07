@@ -1,0 +1,47 @@
+{
+  "name": "codenames-server",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "prebuild": "npm run clean && npm run lint",
+    "postbuild": "npm test",
+    "build": "npm run tsc",
+    "tsn": "ts-node",
+    "tsc": "tsc --project tsconfig.json",
+    "clean": "rm -rf dist",
+    "lint": "tslint --project tsconfig.json",
+    "dev": "nodemon --exec 'ts-node --files' ./src/index.ts",
+    "start": "NODE_ENV=production node dist/index.js",
+    "start:dev": "node dist/index.js",
+    "test": "jest --testPathPattern=test/.+\\.spec\\.ts",
+    "test:watch": "npm test -- --watch",
+    "prettier": "prettier --no-semi --tab-width 2 --print-width 120 --trailing-comma all --parser typescript --list-different \"{src,test}/**/*.ts\"",
+    "prettier-fix": "prettier --no-semi --tab-width 2 --print-width 120 --trailing-comma all --parser typescript --write \"{src,test}/**/*.ts\""
+  },
+  "author": "psousa50",
+  "license": "ISC",
+  "dependencies": {
+    "convict": "^5.2.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "fp-ts": "^2.5.3",
+    "mongodb": "^3.5.7",
+    "ramda": "^0.27.0"
+  },
+  "devDependencies": {
+    "@types/convict": "^5.2.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.6",
+    "@types/jest": "^25.2.1",
+    "@types/mongodb": "^3.5.16",
+    "@types/ramda": "^0.27.4",
+    "@types/supertest": "^2.0.9",
+    "jest": "^26.0.1",
+    "nodemon": "^2.0.2",
+    "supertest": "^4.0.2",
+    "ts-jest": "^25.5.0",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.7.4"
+  }
+}
