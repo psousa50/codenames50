@@ -3,7 +3,31 @@ import { gamesRepository } from "../../src/repositories/games"
 import { buildEnvironment as buildTestEnvironment, getRightAction } from "../helpers"
 import { connect } from "../../src/mongodb/main"
 
-it("insert a Game", async () => {
+it("insert and getById", async () => {
+  const mongoServer = new MongoMemoryServer()
+  const mongoUri = await mongoServer.getUri()
+
+  const dbClient = await connect(mongoUri)
+  const environment = {
+    dbClient,
+  } as any
+
+  const gameToInsert = {
+    userId: "id2",
+    players: [],
+    something: "else",
+  }
+
+  const gameId = await getRightAction(gamesRepository.insert(gameToInsert), environment)
+
+  const insertedGame = await getRightAction(gamesRepository.getById(gameId), environment)
+
+  mongoServer.stop()
+
+  expect(insertedGame).toMatchObject({ ...gameToInsert, gameId })
+})
+
+it("update and getById", async () => {
   const mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getUri()
 
@@ -15,15 +39,24 @@ it("insert a Game", async () => {
   const gameToInsert = {
     userId: "id2",
     something: "else",
-  }
+  } as any
 
   const gameId = await getRightAction(gamesRepository.insert(gameToInsert), environment)
 
-  const insertedGame = await getRightAction(gamesRepository.getById(gameId), environment)
+  const gameToUpdate = {
+    gameId,
+    userId: "id2",
+    something: "different",
+    andAlso: "this",
+  } as any
+
+  await getRightAction(gamesRepository.update(gameToUpdate), environment)
+
+  const updatedGame = await getRightAction(gamesRepository.getById(gameId), environment)
 
   mongoServer.stop()
 
-  expect(insertedGame).toMatchObject({ ...gameToInsert, gameId })
+  expect(updatedGame).toMatchObject(gameToUpdate)
 })
 
 describe("getById", () => {

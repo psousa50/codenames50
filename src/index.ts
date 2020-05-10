@@ -9,7 +9,7 @@ import { ServiceError } from "./utils/audit"
 import { isDev } from "./app/config"
 import { logDebug } from "./utils/debug"
 
-// dotenv.config()
+dotenv.config()
 
 const exitProcess = (error: ServiceError) => {
   logDebug("Shutting down app", error.message)
@@ -23,7 +23,7 @@ const startApplication = async () => {
       e => task.of(exitProcess(e)),
       environment => {
         if (isDev(environment.config)) {
-          logDebug("App Config =====>\n", environment.config)
+          logDebug("App Config:\n", environment.config)
         }
 
         run(application(), environment)

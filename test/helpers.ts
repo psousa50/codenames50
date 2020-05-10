@@ -24,6 +24,7 @@ const defaultEnvironment: Environment = {
   },
   gamesRepository: {
     insert: () => actionOf(""),
+    update: () => actionOf(undefined),
     getById: () => actionOf({} as CodeNameGame),
   },
   dbClient: {} as MongoClient,

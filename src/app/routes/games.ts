@@ -8,4 +8,12 @@ const createRequestTransformer = (params: Stringify<Games.CreateRequest>): Games
   userId: params.userId!,
 })
 
-export const games = (env: Environment) => Router().post("/", handler(env, Games.create, createRequestTransformer))
+const joinRequestTransformer = (params: Stringify<Games.JoinRequest>): Games.JoinRequest => ({
+  gameId: params.gameId!,
+  userId: params.userId!,
+})
+
+export const games = (env: Environment) =>
+  Router()
+    .post("/create", handler(env, Games.create, createRequestTransformer))
+    .post("/join", handler(env, Games.join, joinRequestTransformer))

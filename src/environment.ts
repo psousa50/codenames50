@@ -23,12 +23,9 @@ const connectDb = (mongoUri: string) =>
   )
 
 export const buildEnvironment = () => {
-  console.log("1")
   const config = appConfig.get()
-  console.log("2")
 
   const mongoUri = process.env.MONGODB_URI || config.mongodb.uri || ""
-  console.log("=====>\n", mongoUri)
   return pipe(
     connectDb(mongoUri),
     map(mongoClient => ({

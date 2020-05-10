@@ -14,5 +14,8 @@ export const insert = (game: NewCodeNameGame) => (client: MongoClient) => {
     .then(_ => gameId)
 }
 
+export const update = (game: CodeNameGame) => (client: MongoClient) =>
+  client.db().collection<CodeNameGame>(GAMES).updateOne({ gameId: game.gameId }, { $set: game })
+
 export const getById = (gameId: UUID) => (client: MongoClient) =>
   client.db().collection<CodeNameGame>(GAMES).findOne({ gameId: gameId })
