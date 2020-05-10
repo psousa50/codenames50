@@ -7,7 +7,7 @@ import { GameStates, Teams, CodeNameGame } from "../../../src/repositories/games
 import moment from "moment"
 
 describe("games/create", () => {
-  it("create a game in idle state with on player and no words", async () => {
+  it("create a game in idle state with one player and an empty board", async () => {
     const gameId = "some-game-id"
     const allWords = {
       words: ["w1", "w2", "w3", "w4"],
@@ -39,7 +39,7 @@ describe("games/create", () => {
       players: [player1],
       state: GameStates.idle,
       turn: Teams.red,
-      words: [],
+      board: [],
       timestamp: environment.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
     }
 
@@ -68,8 +68,8 @@ describe("games/create", () => {
 
       await request(app).post("/api/v1/games/create").send({ userId: "some-user-id" }).expect(200)
       await request(app).post("/api/v1/games/create").send({ userId: "some-user-id" }).expect(200)
-      expect(insert.mock.calls[1][0].words.length).toBe(environment.config.numberOfWords)
-      expect(insert.mock.calls[1][0].words).not.toEqual(insert.mock.calls[0][0].words)
+      expect(insert.mock.calls[1][0].board.length).toBe(environment.config.numberOfWords)
+      expect(insert.mock.calls[1][0].board.map(b => b.word)).not.toEqual(insert.mock.calls[0][0].board.map(b => b.word))
     })
 
     it("for the language chosen", async () => {

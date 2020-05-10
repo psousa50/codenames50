@@ -13,12 +13,25 @@ export enum GameStates {
   ended = "ended",
 }
 
+export enum WordType {
+  red = "red",
+  blue = "blue",
+  inocent = "inocent",
+  assassin = "assassin",
+}
+
+export interface BoardWord {
+  word: string
+  type: WordType
+  revealed: boolean
+}
+
 export interface NewCodeNameGame {
   userId: string
   players: Player[]
   state: GameStates
   turn: Teams
-  words: string[]
+  board: BoardWord[]
 }
 
 export interface CodeNameGame extends NewCodeNameGame {
