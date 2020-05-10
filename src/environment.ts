@@ -4,14 +4,14 @@ import { MongoClient } from "mongodb"
 import { config as appConfig } from "./app/config"
 import { AppConfig } from "./app/config"
 import { logDebug } from "./utils/debug"
-import { NewCodeNameGame, CodeNameGame } from "./repositories/games"
-import { Repository } from "./repositories/models"
-import { gamesRepository } from "./repositories/games"
+import { gamesRepository, GamesRepository } from "./repositories/games"
 import { ServiceError } from "./utils/audit"
+import { WordsRepository, wordsRepository } from "./repositories/words"
 
 export type Environment = {
   config: AppConfig
-  gamesRepository: Repository<NewCodeNameGame, CodeNameGame>
+  gamesRepository: GamesRepository
+  wordsRepository: WordsRepository
   dbClient: MongoClient
   log: (message: string) => void
 }
@@ -31,6 +31,7 @@ export const buildEnvironment = () => {
     map(mongoClient => ({
       config,
       gamesRepository,
+      wordsRepository,
       dbClient: mongoClient,
       log: logDebug,
     })),

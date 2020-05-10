@@ -2,9 +2,22 @@ import { UUID } from "../utils/types"
 import { Action, fromPromise, fromVoidPromise } from "../utils/actions"
 import * as MongoGames from "../mongodb/games"
 
+export enum Teams {
+  red = "red",
+  blue = "blue",
+}
+
+export enum GameStates {
+  idle = "idle",
+  running = "running",
+  ended = "ended",
+}
+
 export interface NewCodeNameGame {
   userId: string
   players: Player[]
+  state: GameStates
+  turn: Teams
 }
 
 export interface CodeNameGame extends NewCodeNameGame {
@@ -14,7 +27,6 @@ export interface CodeNameGame extends NewCodeNameGame {
 interface Player {
   userId: string
 }
-
 const insert: Action<NewCodeNameGame, UUID> = game => fromPromise(env => MongoGames.insert(game)(env.dbClient))
 
 const update: Action<CodeNameGame, void> = game => fromVoidPromise(env => MongoGames.update(game)(env.dbClient))
@@ -26,3 +38,5 @@ export const gamesRepository = {
   update,
   getById,
 }
+
+export type GamesRepository = typeof gamesRepository

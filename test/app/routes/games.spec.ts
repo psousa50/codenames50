@@ -2,6 +2,7 @@ import request from "supertest"
 import { buildEnvironment } from "../../helpers"
 import { actionOf } from "../../../src/utils/actions"
 import { expressApp } from "../../../src/app/main"
+import { GameStates, Teams } from "../../../src/repositories/games"
 
 it("games/create", async () => {
   const gameId = "some-game-id"
@@ -18,7 +19,7 @@ it("games/create", async () => {
     userId,
   }
 
-  const gameToInsert = { userId, players: [player1] }
+  const gameToInsert = { userId, players: [player1], state: GameStates.idle, turn: Teams.red }
 
   await request(app).post("/api/v1/games/create").send({ userId }).expect(200, { gameId })
   expect(environment.gamesRepository.insert).toHaveBeenCalledWith(gameToInsert)
@@ -34,7 +35,8 @@ it("games/join", async () => {
     gameId,
     userId,
     players: [player1],
-  }
+  } as any
+
   const environment = buildEnvironment({
     gamesRepository: {
       getById: jest.fn(() => actionOf(game)),

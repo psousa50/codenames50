@@ -2,8 +2,7 @@ import { Action, withEnv, transform, actionOf } from "../utils/actions"
 import { UUID } from "../utils/types"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain } from "fp-ts/lib/ReaderTaskEither"
-import { CodeNameGame } from "../repositories/games"
-import { lj } from "../utils/debug"
+import { CodeNameGame, GameStates, Teams } from "../repositories/games"
 
 export interface CreateRequest {
   userId: string
@@ -28,6 +27,8 @@ export const create: Action<CreateRequest, CreateResponse> = req => {
   const newGame = {
     userId,
     players: [{ userId }],
+    state: GameStates.idle,
+    turn: Teams.red,
   }
 
   return withEnv(env => transform(env.gamesRepository.insert(newGame), gameId => ({ gameId })))
