@@ -18,16 +18,18 @@ export interface NewCodeNameGame {
   players: Player[]
   state: GameStates
   turn: Teams
+  words: string[]
 }
 
 export interface CodeNameGame extends NewCodeNameGame {
   gameId: string
+  timestamp: string
 }
 
 interface Player {
   userId: string
 }
-const insert: Action<NewCodeNameGame, UUID> = game => fromPromise(env => MongoGames.insert(game)(env.dbClient))
+const insert: Action<CodeNameGame, UUID> = game => fromPromise(env => MongoGames.insert(game)(env.dbClient))
 
 const update: Action<CodeNameGame, void> = game => fromVoidPromise(env => MongoGames.update(game)(env.dbClient))
 

@@ -25,8 +25,8 @@ it("getByLanguage", async () => {
   await getRightAction(wordsRepository.insert(wordsEn), environment)
   await getRightAction(wordsRepository.insert(wordsPt), environment)
 
-  const wPt = await getRightAction(wordsRepository.getBylanguage("pt"), environment)
-  const wEn = await getRightAction(wordsRepository.getBylanguage("en"), environment)
+  const wPt = await getRightAction(wordsRepository.getByLanguage("pt"), environment)
+  const wEn = await getRightAction(wordsRepository.getByLanguage("en"), environment)
 
   mongoServer.stop()
 

@@ -1,11 +1,14 @@
-import { Action, withEnv, transform, actionOf } from "../utils/actions"
+import { Action, withEnv, actionOf, actionErrorOf } from "../utils/actions"
 import { UUID } from "../utils/types"
 import { pipe } from "fp-ts/lib/pipeable"
-import { chain } from "fp-ts/lib/ReaderTaskEither"
-import { CodeNameGame, GameStates, Teams } from "../repositories/games"
+import { chain, map } from "fp-ts/lib/ReaderTaskEither"
+import { CodeNameGame, GameStates, Teams, NewCodeNameGame } from "../repositories/games"
+import { ServiceError, ErrorCodes } from "../utils/audit"
+import { shuffle } from "../utils/random"
 
 export interface CreateRequest {
   userId: string
+  language: string
 }
 
 export interface CreateResponse {
@@ -24,14 +27,33 @@ const addPlayer = (userId: string) => (game: CodeNameGame) => ({
 
 export const create: Action<CreateRequest, CreateResponse> = req => {
   const userId = req.userId
-  const newGame = {
+  const newGame: NewCodeNameGame = {
     userId,
     players: [{ userId }],
     state: GameStates.idle,
     turn: Teams.red,
+    words: [],
   }
 
-  return withEnv(env => transform(env.gamesRepository.insert(newGame), gameId => ({ gameId })))
+  return withEnv(env =>
+    pipe(
+      env.wordsRepository.getByLanguage(req.language),
+      chain(allWords =>
+        allWords
+          ? actionOf(shuffle(allWords.words).slice(0, env.config.numberOfWords))
+          : actionErrorOf<string[]>(new ServiceError("Language not found", ErrorCodes.NOT_FOUND)),
+      ),
+      chain(words =>
+        env.gamesRepository.insert({
+          ...newGame,
+          words,
+          gameId: env.uuid(),
+          timestamp: env.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+        }),
+      ),
+      map(gameId => ({ gameId })),
+    ),
+  )
 }
 
 export const join: Action<JoinRequest, void> = req => {

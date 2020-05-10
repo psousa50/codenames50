@@ -1,28 +1,107 @@
+import * as R from "ramda"
 import request from "supertest"
-import { buildEnvironment } from "../../helpers"
+import { buildTestEnvironment } from "../../helpers"
 import { actionOf } from "../../../src/utils/actions"
 import { expressApp } from "../../../src/app/main"
-import { GameStates, Teams } from "../../../src/repositories/games"
+import { GameStates, Teams, CodeNameGame } from "../../../src/repositories/games"
+import moment from "moment"
 
-it("games/create", async () => {
-  const gameId = "some-game-id"
-  const environment = buildEnvironment({
-    gamesRepository: {
-      insert: jest.fn(() => actionOf(gameId)),
-    },
+describe("games/create", () => {
+  it("create a game in idle state with on player and no words", async () => {
+    const gameId = "some-game-id"
+    const allWords = {
+      words: ["w1", "w2", "w3", "w4"],
+    } as any
+    const insert = jest.fn((_: CodeNameGame) => actionOf(gameId))
+    const environment = buildTestEnvironment({
+      config: {
+        numberOfWords: 0,
+      },
+      gamesRepository: {
+        insert,
+      },
+      wordsRepository: {
+        getByLanguage: jest.fn(() => actionOf(allWords)),
+      },
+      uuid: () => gameId,
+      currentUtcDateTime: () => moment.utc("2000-01-01"),
+    })
+    const app = expressApp(environment)
+
+    const userId = "john@something.com"
+
+    const player1 = {
+      userId,
+    }
+    const gameToInsert = {
+      gameId,
+      userId,
+      players: [player1],
+      state: GameStates.idle,
+      turn: Teams.red,
+      words: [],
+      timestamp: environment.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+    }
+
+    await request(app).post("/api/v1/games/create").send({ userId }).expect(200, { gameId })
+    expect(insert).toHaveBeenCalledWith(gameToInsert)
   })
-  const app = expressApp(environment)
 
-  const userId = "john@something.com"
+  describe("add words to game", () => {
+    it("randomly", async () => {
+      const allWords = {
+        words: R.range(0, 30).map(i => `word-${i}`),
+      } as any
+      const insert = jest.fn((_: CodeNameGame) => actionOf("some-id"))
+      const environment = buildTestEnvironment({
+        config: {
+          numberOfWords: 25,
+        },
+        gamesRepository: {
+          insert,
+        },
+        wordsRepository: {
+          getByLanguage: jest.fn(() => actionOf(allWords)),
+        },
+      })
+      const app = expressApp(environment)
 
-  const player1 = {
-    userId,
-  }
+      await request(app).post("/api/v1/games/create").send({ userId: "some-user-id" }).expect(200)
+      await request(app).post("/api/v1/games/create").send({ userId: "some-user-id" }).expect(200)
+      expect(insert.mock.calls[1][0].words.length).toBe(environment.config.numberOfWords)
+      expect(insert.mock.calls[1][0].words).not.toEqual(insert.mock.calls[0][0].words)
+    })
 
-  const gameToInsert = { userId, players: [player1], state: GameStates.idle, turn: Teams.red }
+    it("for the language chosen", async () => {
+      const language = "pt"
+      const environment = buildTestEnvironment({
+        gamesRepository: {
+          insert: jest.fn(() => actionOf("some-id")),
+        },
+        wordsRepository: {
+          getByLanguage: jest.fn(() => actionOf({ words: [] } as any)),
+        },
+      })
+      const app = expressApp(environment)
 
-  await request(app).post("/api/v1/games/create").send({ userId }).expect(200, { gameId })
-  expect(environment.gamesRepository.insert).toHaveBeenCalledWith(gameToInsert)
+      await request(app).post("/api/v1/games/create").send({ userId: "some-user-id", language })
+      expect(environment.wordsRepository.getByLanguage).toHaveBeenCalledWith(language)
+    })
+
+    it("gives a 404 if language does not exist", async () => {
+      const environment = buildTestEnvironment({
+        gamesRepository: {
+          insert: jest.fn(() => actionOf("some-id")),
+        },
+        wordsRepository: {
+          getByLanguage: jest.fn(() => actionOf(null)),
+        },
+      })
+      const app = expressApp(environment)
+
+      await request(app).post("/api/v1/games/create").send({ userId: "some-user-id", language: "" }).expect(404)
+    })
+  })
 })
 
 it("games/join", async () => {
@@ -37,7 +116,7 @@ it("games/join", async () => {
     players: [player1],
   } as any
 
-  const environment = buildEnvironment({
+  const environment = buildTestEnvironment({
     gamesRepository: {
       getById: jest.fn(() => actionOf(game)),
       update: jest.fn(() => actionOf(undefined)),

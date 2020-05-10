@@ -8,10 +8,8 @@ export enum ErrorCodes {
 
 export class ServiceError {
   constructor(
-    public readonly message: string  | undefined,
+    public readonly message: string | undefined,
     public readonly errorCode: ErrorCodes = ErrorCodes.UNKNOWN,
-    public readonly dependencyError: boolean = false,
-    public readonly metricValue?: number,
   ) {}
 }
 

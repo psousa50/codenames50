@@ -5,6 +5,7 @@ import { handler } from "../handlers"
 import { Stringify } from "./transformers"
 
 const createRequestTransformer = (params: Stringify<Games.CreateRequest>): Games.CreateRequest => ({
+  language: params.language!,
   userId: params.userId!,
 })
 

@@ -1,18 +1,15 @@
-import { v4 as uuidv4 } from "uuid"
 import { MongoClient } from "mongodb"
-import { NewCodeNameGame, CodeNameGame } from "../repositories/games"
+import { CodeNameGame } from "../repositories/games"
 import { UUID } from "../utils/types"
 
 const GAMES = "Games"
 
-export const insert = (game: NewCodeNameGame) => (client: MongoClient) => {
-  const gameId = uuidv4()
-  return client
+export const insert = (game: CodeNameGame) => (client: MongoClient) =>
+  client
     .db()
     .collection<CodeNameGame>(GAMES)
-    .insertOne({ gameId, ...game })
-    .then(_ => gameId)
-}
+    .insertOne(game)
+    .then(_ => game.gameId)
 
 export const update = (game: CodeNameGame) => (client: MongoClient) =>
   client.db().collection<CodeNameGame>(GAMES).updateOne({ gameId: game.gameId }, { $set: game })

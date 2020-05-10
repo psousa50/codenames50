@@ -22,7 +22,7 @@ export function createNotFoundHandler(): RequestHandler {
 }
 
 export const errorHandler = (res: Response) => (error: ServiceError) => {
-  res.sendStatus(error.dependencyError ? (error.errorCode === ErrorCodes.NOT_FOUND ? 404 : 502) : 400)
+  res.sendStatus(error.errorCode === ErrorCodes.NOT_FOUND ? 404 : 400)
 }
 
 export const okHandler = (res: Response) => (responseBody: any) => {

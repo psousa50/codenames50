@@ -8,12 +8,12 @@ export interface Words {
 
 const insert: Action<Words> = words => fromVoidPromise(env => MongoWords.insert(words)(env.dbClient))
 
-const getBylanguage: Action<string, Words | null> = language =>
+const getByLanguage: Action<string, Words | null> = language =>
   fromPromise(env => MongoWords.getByLanguage(language)(env.dbClient))
 
 export const wordsRepository = {
   insert,
-  getBylanguage,
+  getByLanguage,
 }
 
 export type WordsRepository = typeof wordsRepository

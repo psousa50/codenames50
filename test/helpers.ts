@@ -1,4 +1,5 @@
 import * as R from "ramda"
+import { currentUtcDateTime } from ".../../../src/utils/dates"
 import { Either, fold, getOrElse } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/pipeable"
 import { identity } from "fp-ts/lib/function"
@@ -9,6 +10,7 @@ import { DeepPartial } from "../src/utils/types"
 import { ActionResult, actionOf } from "../src/utils/actions"
 import { CodeNameGame } from "../src/repositories/games"
 import { MongoClient } from "mongodb"
+import { Words } from "../src/repositories/words"
 
 export const createApp = async (environment: Environment) => getRight(await run(createApplication(), environment))
 
@@ -21,17 +23,24 @@ const defaultEnvironment: Environment = {
     },
     nodeEnv: "DEV",
     port: 3000,
+    numberOfWords: 25,
   },
   gamesRepository: {
     insert: () => actionOf(""),
     update: () => actionOf(undefined),
     getById: () => actionOf({} as CodeNameGame),
   },
+  wordsRepository: {
+    insert: () => actionOf(undefined),
+    getByLanguage: () => actionOf({} as Words),
+  },
   dbClient: {} as MongoClient,
+  uuid: () => "",
+  currentUtcDateTime,
   log: () => undefined,
 }
 
-export const buildEnvironment = (environment: DeepPartial<Environment>): Environment =>
+export const buildTestEnvironment = (environment: DeepPartial<Environment>): Environment =>
   R.mergeDeepRight(defaultEnvironment, environment)
 
 export const getRight = <L, A>(fa: Either<L, A>) =>
