@@ -24,10 +24,4 @@ export const toUtcDate = (d: DateString) => moment.utc(d).toDate()
 export const currentUtcDateString = () => toExistingDateString(moment.utc().toDate())
 export const currentUtcDateTime = () => moment.utc()
 
-export const addDays = (d: DateString, days: number) =>
-  toExistingDateString(
-    moment
-      .utc(d)
-      .add(days, "days")
-      .toDate(),
-  )
+export const addDays = (d: DateString, days: number) => toExistingDateString(moment.utc(d).add(days, "days").toDate())

@@ -9,7 +9,7 @@ import { ServiceError } from "./utils/audit"
 import { isDev } from "./app/config"
 import { logDebug } from "./utils/debug"
 
-dotenv.config()
+// dotenv.config()
 
 const exitProcess = (error: ServiceError) => {
   logDebug("Shutting down app", error.message)
@@ -36,4 +36,7 @@ const startApplication = async () => {
   await process()
 }
 
-startApplication().then(() => logDebug("App Started"), e => logDebug(`Error: ${e.message}`))
+startApplication().then(
+  () => logDebug("App Started"),
+  e => logDebug(`Error: ${e.message}`),
+)

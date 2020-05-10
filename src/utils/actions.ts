@@ -2,14 +2,7 @@ import { fold, left, right } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/pipeable"
 import { ask as askReader } from "fp-ts/lib/Reader"
 
-import {
-  chain,
-  fromEither,
-  fromTaskEither,
-  map,
-  ReaderTaskEither,
-  rightReader,
-} from "fp-ts/lib/ReaderTaskEither"
+import { chain, fromEither, fromTaskEither, map, ReaderTaskEither, rightReader } from "fp-ts/lib/ReaderTaskEither"
 import { tryCatch } from "fp-ts/lib/TaskEither"
 import { Environment } from "../environment"
 import { ServiceError } from "./audit"
@@ -20,6 +13,9 @@ export type Action<I = void, R = void> = (i: I) => ActionResult<R>
 
 export const ask = () => rightReader<Environment, ServiceError, Environment>(askReader<Environment>())
 
+export const withEnv = <R>(f: (env: Environment) => ActionResult<R>) => pipe(ask(), chain(f))
+export const transform = <R = void, T = void>(action: ActionResult<R>, t: (r: R) => T) => pipe(action, map(t))
+
 export const delay = <E, A, R>(env: E) => (
   millis: number,
 ): ((rte: ReaderTaskEither<E, A, R>) => ReaderTaskEither<E, A, R>) => rte => {
@@ -29,7 +25,12 @@ export const delay = <E, A, R>(env: E) => (
     }, millis)
   })
 
-  return fromTaskEither(tryCatch(() => promiseDelay, e => e as A))
+  return fromTaskEither(
+    tryCatch(
+      () => promiseDelay,
+      e => e as A,
+    ),
+  )
 }
 
 export const actionOf = <R>(v: R): ActionResult<R> => fromEither(right(v))

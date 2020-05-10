@@ -1,5 +1,5 @@
 import { isNil } from "ramda"
-import { toDateString } from "../../../utils/dates"
+import { toDateString } from "../../utils/dates"
 
 export type Stringify<T> = {
   [k in keyof T]?: string

@@ -14,7 +14,6 @@ export const config = convict<AppConfig>({
       default: "mongodb://localhost:27017/codenames",
       doc: "",
       env: "MONGODB_URI",
-      format: "url",
     },
   },
   nodeEnv: {

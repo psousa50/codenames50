@@ -5,13 +5,19 @@ import { tryCatch } from "fp-ts/lib/TaskEither"
 import { Server } from "http"
 import { Action, ask } from "../utils/actions"
 import { logDebug } from "../utils/debug"
-import { createErrorHandler, createNotFoundHandler } from "./errorHandler"
-import { router as v1Router } from "./routes/v1/router"
+import { createErrorHandler, createNotFoundHandler } from "./handlers"
 import { Environment } from "../environment"
+import { root } from "./routes/root"
+import { games } from "./routes/games"
+import bodyParser from "body-parser"
 
 export const expressApp = (environment: Environment) => {
   const app: Express = express()
-  app.use("/api/v1", v1Router(environment))
+
+  app.use(bodyParser.json())
+  app.use(bodyParser.urlencoded({ extended: true }))
+  app.use("/api/v1", root(environment))
+  app.use("/api/v1/games", games(environment))
   app.all("*", createNotFoundHandler())
   app.use(createErrorHandler())
 
