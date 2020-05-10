@@ -3,7 +3,7 @@ import request from "supertest"
 import { buildTestEnvironment } from "../../helpers"
 import { actionOf } from "../../../src/utils/actions"
 import { expressApp } from "../../../src/app/main"
-import { GameStates, Teams, CodeNameGame } from "../../../src/repositories/games"
+import { GameStates, Teams, CodeNameGame, WordType } from "../../../src/repositories/games"
 import moment from "moment"
 
 describe("games/create", () => {
@@ -47,8 +47,8 @@ describe("games/create", () => {
     expect(insert).toHaveBeenCalledWith(gameToInsert)
   })
 
-  describe("add words to game", () => {
-    it("randomly", async () => {
+  describe("adds a board to the game", () => {
+    it("with random words", async () => {
       const allWords = {
         words: R.range(0, 30).map(i => `word-${i}`),
       } as any
@@ -70,6 +70,34 @@ describe("games/create", () => {
       await request(app).post("/api/v1/games/create").send({ userId: "some-user-id" }).expect(200)
       expect(insert.mock.calls[1][0].board.length).toBe(environment.config.numberOfWords)
       expect(insert.mock.calls[1][0].board.map(b => b.word)).not.toEqual(insert.mock.calls[0][0].board.map(b => b.word))
+    })
+
+    it("with words for all teams, inocents and one assassin", async () => {
+      const allWords = {
+        words: R.range(0, 40).map(i => `word-${i}`),
+      } as any
+      const insert = jest.fn((_: CodeNameGame) => actionOf("some-id"))
+      const environment = buildTestEnvironment({
+        config: {
+          numberOfWords: 25,
+        },
+        gamesRepository: {
+          insert,
+        },
+        wordsRepository: {
+          getByLanguage: jest.fn(() => actionOf(allWords)),
+        },
+      })
+      const app = expressApp(environment)
+
+      await request(app).post("/api/v1/games/create").send({ userId: "some-user-id" }).expect(200)
+      const board = insert.mock.calls[0][0].board
+
+      expect(board.filter(b => b.type === WordType.red).length).toBe(8)
+      expect(board.filter(b => b.type === WordType.blue).length).toBe(8)
+      expect(board.filter(b => b.type === WordType.inocent).length).toBe(8)
+      expect(board.filter(b => b.type === WordType.assassin).length).toBe(1)
+      expect(board.filter(b => b.revealed).length).toBe(0)
     })
 
     it("for the language chosen", async () => {
