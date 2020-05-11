@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb"
-import { CodeNameGame } from "../repositories/games"
+import { CodeNameGame } from "../domain/models"
 import { UUID } from "../utils/types"
 
 const GAMES = "Games"

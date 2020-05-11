@@ -1,47 +1,8 @@
 import { UUID } from "../utils/types"
 import { Action, fromPromise, fromVoidPromise } from "../utils/actions"
 import * as MongoGames from "../mongodb/games"
+import { CodeNameGame } from "../domain/models"
 
-export enum Teams {
-  red = "red",
-  blue = "blue",
-}
-
-export enum GameStates {
-  idle = "idle",
-  running = "running",
-  ended = "ended",
-}
-
-export enum WordType {
-  red = "red",
-  blue = "blue",
-  inocent = "inocent",
-  assassin = "assassin",
-}
-
-export interface BoardWord {
-  word: string
-  type: WordType
-  revealed: boolean
-}
-
-export interface NewCodeNameGame {
-  userId: string
-  players: Player[]
-  state: GameStates
-  turn: Teams
-  board: BoardWord[]
-}
-
-export interface CodeNameGame extends NewCodeNameGame {
-  gameId: string
-  timestamp: string
-}
-
-interface Player {
-  userId: string
-}
 const insert: Action<CodeNameGame, UUID> = game => fromPromise(env => MongoGames.insert(game)(env.dbClient))
 
 const update: Action<CodeNameGame, void> = game => fromVoidPromise(env => MongoGames.update(game)(env.dbClient))

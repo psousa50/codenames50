@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb"
-import { Words } from "../repositories/words"
+import { Words } from "../domain/models"
 
 const WORDS = "Words"
 

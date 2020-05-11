@@ -8,9 +8,8 @@ import { createApplication } from "../src/app/main"
 import { run } from "fp-ts/lib/ReaderTaskEither"
 import { DeepPartial } from "../src/utils/types"
 import { ActionResult, actionOf } from "../src/utils/actions"
-import { CodeNameGame } from "../src/repositories/games"
+import { CodeNameGame, Words } from "../src/domain/models"
 import { MongoClient } from "mongodb"
-import { Words } from "../src/repositories/words"
 
 export const createApp = async (environment: Environment) => getRight(await run(createApplication(), environment))
 

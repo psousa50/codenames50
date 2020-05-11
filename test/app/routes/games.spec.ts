@@ -3,7 +3,7 @@ import request from "supertest"
 import { buildTestEnvironment } from "../../helpers"
 import { actionOf } from "../../../src/utils/actions"
 import { expressApp } from "../../../src/app/main"
-import { GameStates, Teams, CodeNameGame, WordType } from "../../../src/repositories/games"
+import { GameStates, Teams, CodeNameGame, WordType } from "../../../src/domain/models"
 import moment from "moment"
 
 describe("games/create", () => {
@@ -153,7 +153,10 @@ it("games/join", async () => {
   const app = expressApp(environment)
 
   const secondUserId = "second-user-id"
-  await request(app).post("/api/v1/games/join").send({ gameId, userId: secondUserId }).expect(200)
+  await request(app)
+    .post("/api/v1/games/join")
+    .send({ gameId, userId: secondUserId })
+    .expect(200, { gameId, userId: secondUserId })
 
   const player2 = {
     userId: secondUserId,

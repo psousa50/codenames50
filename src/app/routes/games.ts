@@ -4,12 +4,12 @@ import * as Games from "../../domain/games"
 import { handler } from "../handlers"
 import { Stringify } from "./transformers"
 
-const createRequestTransformer = (params: Stringify<Games.CreateRequest>): Games.CreateRequest => ({
+const createRequestTransformer = (params: Stringify<Games.CreateInput>): Games.CreateInput => ({
   language: params.language!,
   userId: params.userId!,
 })
 
-const joinRequestTransformer = (params: Stringify<Games.JoinRequest>): Games.JoinRequest => ({
+const joinRequestTransformer = (params: Stringify<Games.JoinInput>): Games.JoinInput => ({
   gameId: params.gameId!,
   userId: params.userId!,
 })

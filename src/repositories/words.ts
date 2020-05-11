@@ -1,10 +1,6 @@
 import { Action, fromPromise, fromVoidPromise } from "../utils/actions"
 import * as MongoWords from "../mongodb/words"
-
-export interface Words {
-  language: string
-  words: string[]
-}
+import { Words } from "../domain/models"
 
 const insert: Action<Words> = words => fromVoidPromise(env => MongoWords.insert(words)(env.dbClient))
 

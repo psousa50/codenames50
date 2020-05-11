@@ -2,22 +2,26 @@ import { Action, withEnv, actionOf, actionErrorOf } from "../utils/actions"
 import { UUID } from "../utils/types"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, map } from "fp-ts/lib/ReaderTaskEither"
-import { CodeNameGame, GameStates, Teams, NewCodeNameGame, BoardWord, WordType } from "../repositories/games"
+import { CodeNameGame, GameStates, Teams, BoardWord, WordType } from "./models"
 import { ServiceError, ErrorCodes } from "../utils/audit"
 import { shuffle } from "../utils/random"
 
-export interface CreateRequest {
+export interface CreateInput {
   userId: string
   language: string
 }
 
-export interface CreateResponse {
+export interface CreateOutput {
   gameId: UUID
 }
 
-export interface JoinRequest {
+export interface JoinInput {
   gameId: string
   userId: string
+}
+
+export interface JoinOutput {
+  gameId: string
 }
 
 const addPlayer = (userId: string) => (game: CodeNameGame) => ({
@@ -38,15 +42,8 @@ const determineWordTypes = (words: string[]): BoardWord[] => {
   return shuffle(words.map((word, i) => ({ word, type: types[i], revealed: false })))
 }
 
-export const create: Action<CreateRequest, CreateResponse> = req => {
+export const create: Action<CreateInput, CreateOutput> = req => {
   const userId = req.userId
-  const newGame: NewCodeNameGame = {
-    userId,
-    players: [{ userId }],
-    state: GameStates.idle,
-    turn: Teams.red,
-    board: [],
-  }
 
   return withEnv(env =>
     pipe(
@@ -59,10 +56,13 @@ export const create: Action<CreateRequest, CreateResponse> = req => {
       map(determineWordTypes),
       chain(board =>
         env.gamesRepository.insert({
-          ...newGame,
-          board,
           gameId: env.uuid(),
           timestamp: env.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+          userId,
+          players: [{ userId }],
+          state: GameStates.idle,
+          turn: Teams.red,
+          board,
         }),
       ),
       map(gameId => ({ gameId })),
@@ -70,7 +70,7 @@ export const create: Action<CreateRequest, CreateResponse> = req => {
   )
 }
 
-export const join: Action<JoinRequest, void> = req => {
+export const join: Action<JoinInput, JoinOutput> = req => {
   const gameId = req.gameId
   const userId = req.userId
 
@@ -79,6 +79,7 @@ export const join: Action<JoinRequest, void> = req => {
       env.gamesRepository.getById(gameId),
       chain(game => actionOf(addPlayer(userId)(game!))),
       chain(env.gamesRepository.update),
+      map(_ => ({ gameId, userId })),
     ),
   )
 }
