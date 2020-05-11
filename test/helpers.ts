@@ -8,7 +8,7 @@ import { createApplication } from "../src/app/main"
 import { run } from "fp-ts/lib/ReaderTaskEither"
 import { DeepPartial } from "../src/utils/types"
 import { ActionResult, actionOf } from "../src/utils/actions"
-import { CodeNameGame, Words } from "../src/domain/models"
+import { CodeNamesGame, Words } from "../src/domain/models"
 import { MongoClient } from "mongodb"
 
 export const createApp = async (environment: Environment) => getRight(await run(createApplication(), environment))
@@ -25,9 +25,9 @@ const defaultEnvironment: Environment = {
     numberOfWords: 25,
   },
   gamesRepository: {
-    insert: () => actionOf(""),
-    update: () => actionOf(undefined),
-    getById: () => actionOf({} as CodeNameGame),
+    insert: () => actionOf({} as CodeNamesGame),
+    update: () => actionOf({} as CodeNamesGame),
+    getById: () => actionOf({} as CodeNamesGame),
   },
   wordsRepository: {
     insert: () => actionOf(undefined),

@@ -1,30 +1,21 @@
 import { Action, withEnv, actionOf, actionErrorOf } from "../utils/actions"
-import { UUID } from "../utils/types"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, map } from "fp-ts/lib/ReaderTaskEither"
-import { CodeNameGame, GameStates, Teams, BoardWord, WordType } from "./models"
+import {
+  CodeNamesGame,
+  GameStates,
+  Teams,
+  BoardWord,
+  WordType,
+  CreateInput,
+  CreateOutput,
+  JoinInput,
+  JoinOutput,
+} from "./models"
 import { ServiceError, ErrorCodes } from "../utils/audit"
 import { shuffle } from "../utils/random"
 
-export interface CreateInput {
-  userId: string
-  language: string
-}
-
-export interface CreateOutput {
-  gameId: UUID
-}
-
-export interface JoinInput {
-  gameId: string
-  userId: string
-}
-
-export interface JoinOutput {
-  gameId: string
-}
-
-const addPlayer = (userId: string) => (game: CodeNameGame) =>
+const addPlayer = (userId: string) => (game: CodeNamesGame) =>
   game.players.find(p => p.userId === userId)
     ? game
     : {
@@ -46,6 +37,7 @@ const determineWordTypes = (words: string[]): BoardWord[] => {
 }
 
 export const create: Action<CreateInput, CreateOutput> = input => {
+  console.log("=====>\n", input)
   const userId = input.userId
 
   return withEnv(env =>
@@ -68,7 +60,6 @@ export const create: Action<CreateInput, CreateOutput> = input => {
           board,
         }),
       ),
-      map(gameId => ({ gameId })),
     ),
   )
 }
@@ -83,7 +74,7 @@ export const join: Action<JoinInput, JoinOutput> = input => {
       chain(game =>
         game
           ? actionOf(addPlayer(userId)(game))
-          : actionErrorOf<CodeNameGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+          : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
       ),
       chain(env.gamesRepository.update),
       map(_ => ({ gameId, userId })),

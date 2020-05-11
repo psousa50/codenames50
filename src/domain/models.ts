@@ -1,3 +1,19 @@
+export interface CreateInput {
+  userId: string
+  language: string
+}
+
+export type CreateOutput = CodeNamesGame
+
+export interface JoinInput {
+  gameId: string
+  userId: string
+}
+
+export interface JoinOutput {
+  gameId: string
+}
+
 export enum Teams {
   red = "red",
   blue = "blue",
@@ -22,7 +38,7 @@ export interface BoardWord {
   revealed: boolean
 }
 
-export interface CodeNameGame {
+export interface CodeNamesGame {
   gameId: string
   timestamp: string
   userId: string

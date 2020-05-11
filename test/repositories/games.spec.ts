@@ -19,9 +19,9 @@ it("insert and getById", async () => {
     something: "else",
   } as any
 
-  const gameId = await getRightAction(gamesRepository.insert(gameToInsert), environment)
+  const game = await getRightAction(gamesRepository.insert(gameToInsert), environment)
 
-  const insertedGame = await getRightAction(gamesRepository.getById(gameId), environment)
+  const insertedGame = await getRightAction(gamesRepository.getById(game.gameId), environment)
 
   mongoServer.stop()
 

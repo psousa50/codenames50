@@ -3,7 +3,7 @@ import request from "supertest"
 import { buildTestEnvironment } from "../../helpers"
 import { actionOf } from "../../../src/utils/actions"
 import { expressApp } from "../../../src/app/main"
-import { GameStates, Teams, CodeNameGame, WordType } from "../../../src/domain/models"
+import { GameStates, Teams, CodeNamesGame, WordType } from "../../../src/domain/models"
 import moment from "moment"
 
 describe("games/create", () => {
@@ -12,7 +12,7 @@ describe("games/create", () => {
     const allWords = {
       words: ["w1", "w2", "w3", "w4"],
     } as any
-    const insert = jest.fn((_: CodeNameGame) => actionOf(gameId))
+    const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
     const environment = buildTestEnvironment({
       config: {
         numberOfWords: 0,
@@ -33,6 +33,7 @@ describe("games/create", () => {
     const player1 = {
       userId,
     }
+
     const gameToInsert = {
       gameId,
       userId,
@@ -43,7 +44,7 @@ describe("games/create", () => {
       timestamp: environment.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
     }
 
-    await request(app).post("/api/v1/games/create").send({ userId }).expect(200, { gameId })
+    await request(app).post("/api/v1/games/create").send({ userId }).expect(200, gameToInsert)
     expect(insert).toHaveBeenCalledWith(gameToInsert)
   })
 
@@ -52,7 +53,7 @@ describe("games/create", () => {
       const allWords = {
         words: R.range(0, 30).map(i => `word-${i}`),
       } as any
-      const insert = jest.fn((_: CodeNameGame) => actionOf("some-id"))
+      const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
       const environment = buildTestEnvironment({
         config: {
           numberOfWords: 25,
@@ -76,7 +77,7 @@ describe("games/create", () => {
       const allWords = {
         words: R.range(0, 40).map(i => `word-${i}`),
       } as any
-      const insert = jest.fn((_: CodeNameGame) => actionOf("some-id"))
+      const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
       const environment = buildTestEnvironment({
         config: {
           numberOfWords: 25,
@@ -104,7 +105,7 @@ describe("games/create", () => {
       const language = "pt"
       const environment = buildTestEnvironment({
         gamesRepository: {
-          insert: jest.fn(() => actionOf("some-id")),
+          insert: jest.fn(game => actionOf(game)),
         },
         wordsRepository: {
           getByLanguage: jest.fn(() => actionOf({ words: [] } as any)),
@@ -119,7 +120,7 @@ describe("games/create", () => {
     it("gives a 404 if language does not exist", async () => {
       const environment = buildTestEnvironment({
         gamesRepository: {
-          insert: jest.fn(() => actionOf("some-id")),
+          insert: jest.fn(game => actionOf(game)),
         },
         wordsRepository: {
           getByLanguage: jest.fn(() => actionOf(null)),
@@ -148,7 +149,7 @@ describe("games/join", () => {
     const environment = buildTestEnvironment({
       gamesRepository: {
         getById: jest.fn(() => actionOf(game)),
-        update: jest.fn(() => actionOf(undefined)),
+        update: jest.fn(() => actionOf(game)),
       },
     })
     const app = expressApp(environment)
@@ -183,7 +184,7 @@ describe("games/join", () => {
     const environment = buildTestEnvironment({
       gamesRepository: {
         getById: jest.fn(() => actionOf(game)),
-        update: jest.fn(() => actionOf(undefined)),
+        update: jest.fn(() => actionOf(game)),
       },
     })
     const app = expressApp(environment)

@@ -9,11 +9,14 @@ import { createErrorHandler, createNotFoundHandler } from "./handlers"
 import { Environment } from "../environment"
 import { root } from "./routes/root"
 import { games } from "./routes/games"
+import cors from "cors"
+
 import bodyParser from "body-parser"
 
 export const expressApp = (environment: Environment) => {
   const app: Express = express()
 
+  app.use(cors())
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: true }))
   app.use("/api/v1", root(environment))
