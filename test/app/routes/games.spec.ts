@@ -168,6 +168,33 @@ describe("games/join", () => {
     expect(environment.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
   })
 
+  it("does not add user if it has already joiened the game", async () => {
+    const gameId = "some-game-id"
+    const userId = "user-id"
+    const player1 = {
+      userId,
+    }
+    const game = {
+      gameId,
+      userId,
+      players: [player1],
+    } as any
+
+    const environment = buildTestEnvironment({
+      gamesRepository: {
+        getById: jest.fn(() => actionOf(game)),
+        update: jest.fn(() => actionOf(undefined)),
+      },
+    })
+    const app = expressApp(environment)
+
+    await request(app).post("/api/v1/games/join").send({ gameId, userId }).expect(200, { gameId, userId })
+
+    const gameToUpdate = { gameId, userId, players: [player1] }
+
+    expect(environment.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
+  })
+
   it("gives a 404 if game does not exist", async () => {
     const gameId = "some-unexistant-id"
     const userId = "user-id"

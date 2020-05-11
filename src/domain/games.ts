@@ -24,10 +24,13 @@ export interface JoinOutput {
   gameId: string
 }
 
-const addPlayer = (userId: string) => (game: CodeNameGame) => ({
-  ...game,
-  players: [...game.players, { userId }],
-})
+const addPlayer = (userId: string) => (game: CodeNameGame) =>
+  game.players.find(p => p.userId === userId)
+    ? game
+    : {
+        ...game,
+        players: [...game.players, { userId }],
+      }
 
 const determineWordTypes = (words: string[]): BoardWord[] => {
   const numberOfWordsForTeams = Math.max(0, Math.floor((words.length - 1) / 3))
