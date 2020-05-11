@@ -37,7 +37,6 @@ const determineWordTypes = (words: string[]): BoardWord[] => {
 }
 
 export const create: Action<CreateInput, CreateOutput> = input => {
-  console.log("=====>\n", input)
   const userId = input.userId
 
   return withEnv(env =>
@@ -45,7 +44,7 @@ export const create: Action<CreateInput, CreateOutput> = input => {
       env.wordsRepository.getByLanguage(input.language),
       chain(allWords =>
         allWords
-          ? actionOf(allWords.words.slice(0, env.config.numberOfWords))
+          ? actionOf(shuffle(allWords.words).slice(0, env.config.numberOfWords))
           : actionErrorOf<string[]>(new ServiceError("Language not found", ErrorCodes.NOT_FOUND)),
       ),
       map(determineWordTypes),
@@ -57,7 +56,7 @@ export const create: Action<CreateInput, CreateOutput> = input => {
           players: [{ userId }],
           state: GameStates.idle,
           turn: Teams.red,
-          board,
+          board: board,
         }),
       ),
     ),
@@ -76,8 +75,12 @@ export const join: Action<JoinInput, JoinOutput> = input => {
           ? actionOf(addPlayer(userId)(game))
           : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
       ),
-      chain(env.gamesRepository.update),
-      map(_ => ({ gameId, userId })),
+      chain(game =>
+        pipe(
+          env.gamesRepository.update(game),
+          map(_ => game),
+        ),
+      ),
     ),
   )
 }

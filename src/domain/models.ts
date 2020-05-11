@@ -10,9 +10,7 @@ export interface JoinInput {
   userId: string
 }
 
-export interface JoinOutput {
-  gameId: string
-}
+export type JoinOutput = CodeNamesGame
 
 export enum Teams {
   red = "red",
@@ -38,6 +36,8 @@ export interface BoardWord {
   revealed: boolean
 }
 
+export type WordsBoard = BoardWord[]
+
 export interface CodeNamesGame {
   gameId: string
   timestamp: string
@@ -45,7 +45,7 @@ export interface CodeNamesGame {
   players: Player[]
   state: GameStates
   turn: Teams
-  board: BoardWord[]
+  board: WordsBoard
 }
 
 interface Player {

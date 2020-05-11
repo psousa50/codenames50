@@ -6,6 +6,8 @@ import { expressApp } from "../../../src/app/main"
 import { GameStates, Teams, CodeNamesGame, WordType } from "../../../src/domain/models"
 import moment from "moment"
 
+const sortStrings = (s1: string, s2: string) => s1.localeCompare(s2)
+
 describe("games/create", () => {
   it("create a game in idle state with one player and an empty board", async () => {
     const gameId = "some-game-id"
@@ -69,8 +71,16 @@ describe("games/create", () => {
 
       await request(app).post("/api/v1/games/create").send({ userId: "some-user-id" }).expect(200)
       await request(app).post("/api/v1/games/create").send({ userId: "some-user-id" }).expect(200)
-      expect(insert.mock.calls[1][0].board.length).toBe(environment.config.numberOfWords)
-      expect(insert.mock.calls[1][0].board.map(b => b.word)).not.toEqual(insert.mock.calls[0][0].board.map(b => b.word))
+      const firstBoard = insert.mock.calls[0][0].board
+      const secondBoard = insert.mock.calls[1][0].board
+      expect(firstBoard.length).toBe(environment.config.numberOfWords)
+      expect(
+        R.sort(
+          sortStrings,
+          firstBoard.map(b => b.word),
+        ),
+      ).not.toEqual(R.sort(sortStrings, allWords.words.slice(0, 25)))
+      expect(firstBoard.map(b => b.word)).not.toEqual(secondBoard.map(b => b.word))
     })
 
     it("with words for all teams, inocents and one assassin", async () => {
@@ -152,13 +162,8 @@ describe("games/join", () => {
         update: jest.fn(() => actionOf(game)),
       },
     })
-    const app = expressApp(environment)
 
     const secondUserId = "second-user-id"
-    await request(app)
-      .post("/api/v1/games/join")
-      .send({ gameId, userId: secondUserId })
-      .expect(200, { gameId, userId: secondUserId })
 
     const player2 = {
       userId: secondUserId,
@@ -166,10 +171,14 @@ describe("games/join", () => {
 
     const gameToUpdate = { gameId, userId, players: [player1, player2] }
 
+    const app = expressApp(environment)
+
+    await request(app).post("/api/v1/games/join").send({ gameId, userId: secondUserId }).expect(200, gameToUpdate)
+
     expect(environment.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
   })
 
-  it("does not add user if it has already joiened the game", async () => {
+  it("does not add user if it has already joined the game", async () => {
     const gameId = "some-game-id"
     const userId = "user-id"
     const player1 = {
@@ -187,11 +196,12 @@ describe("games/join", () => {
         update: jest.fn(() => actionOf(game)),
       },
     })
-    const app = expressApp(environment)
-
-    await request(app).post("/api/v1/games/join").send({ gameId, userId }).expect(200, { gameId, userId })
 
     const gameToUpdate = { gameId, userId, players: [player1] }
+
+    const app = expressApp(environment)
+
+    await request(app).post("/api/v1/games/join").send({ gameId, userId }).expect(200, gameToUpdate)
 
     expect(environment.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
   })
