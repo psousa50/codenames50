@@ -132,37 +132,53 @@ describe("games/create", () => {
   })
 })
 
-it("games/join", async () => {
-  const gameId = "some-game-id"
-  const userId = "user-id"
-  const player1 = {
-    userId,
-  }
-  const game = {
-    gameId,
-    userId,
-    players: [player1],
-  } as any
+describe("games/join", () => {
+  it("joins a user to a game", async () => {
+    const gameId = "some-game-id"
+    const userId = "user-id"
+    const player1 = {
+      userId,
+    }
+    const game = {
+      gameId,
+      userId,
+      players: [player1],
+    } as any
 
-  const environment = buildTestEnvironment({
-    gamesRepository: {
-      getById: jest.fn(() => actionOf(game)),
-      update: jest.fn(() => actionOf(undefined)),
-    },
+    const environment = buildTestEnvironment({
+      gamesRepository: {
+        getById: jest.fn(() => actionOf(game)),
+        update: jest.fn(() => actionOf(undefined)),
+      },
+    })
+    const app = expressApp(environment)
+
+    const secondUserId = "second-user-id"
+    await request(app)
+      .post("/api/v1/games/join")
+      .send({ gameId, userId: secondUserId })
+      .expect(200, { gameId, userId: secondUserId })
+
+    const player2 = {
+      userId: secondUserId,
+    }
+
+    const gameToUpdate = { gameId, userId, players: [player1, player2] }
+
+    expect(environment.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
   })
-  const app = expressApp(environment)
 
-  const secondUserId = "second-user-id"
-  await request(app)
-    .post("/api/v1/games/join")
-    .send({ gameId, userId: secondUserId })
-    .expect(200, { gameId, userId: secondUserId })
+  it("gives a 404 if game does not exist", async () => {
+    const gameId = "some-unexistant-id"
+    const userId = "user-id"
 
-  const player2 = {
-    userId: secondUserId,
-  }
+    const environment = buildTestEnvironment({
+      gamesRepository: {
+        getById: jest.fn(() => actionOf(null)),
+      },
+    })
+    const app = expressApp(environment)
 
-  const gameToUpdate = { gameId, userId, players: [player1, player2] }
-
-  expect(environment.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
+    await request(app).post("/api/v1/games/join").send({ gameId, userId }).expect(404)
+  })
 })

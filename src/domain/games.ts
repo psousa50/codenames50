@@ -42,12 +42,12 @@ const determineWordTypes = (words: string[]): BoardWord[] => {
   return shuffle(words.map((word, i) => ({ word, type: types[i], revealed: false })))
 }
 
-export const create: Action<CreateInput, CreateOutput> = req => {
-  const userId = req.userId
+export const create: Action<CreateInput, CreateOutput> = input => {
+  const userId = input.userId
 
   return withEnv(env =>
     pipe(
-      env.wordsRepository.getByLanguage(req.language),
+      env.wordsRepository.getByLanguage(input.language),
       chain(allWords =>
         allWords
           ? actionOf(allWords.words.slice(0, env.config.numberOfWords))
@@ -70,14 +70,18 @@ export const create: Action<CreateInput, CreateOutput> = req => {
   )
 }
 
-export const join: Action<JoinInput, JoinOutput> = req => {
-  const gameId = req.gameId
-  const userId = req.userId
+export const join: Action<JoinInput, JoinOutput> = input => {
+  const gameId = input.gameId
+  const userId = input.userId
 
   return withEnv(env =>
     pipe(
       env.gamesRepository.getById(gameId),
-      chain(game => actionOf(addPlayer(userId)(game!))),
+      chain(game =>
+        game
+          ? actionOf(addPlayer(userId)(game))
+          : actionErrorOf<CodeNameGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+      ),
       chain(env.gamesRepository.update),
       map(_ => ({ gameId, userId })),
     ),
