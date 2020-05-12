@@ -1,4 +1,5 @@
 import express, { Express } from "express"
+import socketIo from "socket.io"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, fromTaskEither, map } from "fp-ts/lib/ReaderTaskEither"
 import { tryCatch } from "fp-ts/lib/TaskEither"
@@ -10,8 +11,8 @@ import { Environment } from "../environment"
 import { root } from "./routes/root"
 import { games } from "./routes/games"
 import cors from "cors"
-
 import bodyParser from "body-parser"
+import { socketHandler } from "./sockets/handler"
 
 export const expressApp = (environment: Environment) => {
   const app: Express = express()
@@ -43,10 +44,15 @@ export const runServer: Action<Express, Server> = app =>
                   logDebug(`Server started, listening at ${port}...`)
                   return resolve(server)
                 })
+
+                const io = socketIo(server, {})
+                io.on("connection", socketHandler)
+
                 server.on("checkContinue", (__, res) => {
                   res.writeContinue()
                 })
                 server.once("error", (err: Error) => {
+                  io.close()
                   return reject(err)
                 })
               } catch (err) {
