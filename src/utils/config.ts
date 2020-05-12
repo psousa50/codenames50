@@ -8,11 +8,11 @@ export const productionApi = {
   irnUrl: "https://xxx.herokuapp.com",
 }
 
-const developmentConfig = {
+export const developmentConfig = {
   ...localApi,
 }
 
-const productionConfig = {
+export const productionConfig = {
   ...productionApi,
 }
 

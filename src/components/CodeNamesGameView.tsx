@@ -1,13 +1,13 @@
 import React from "react"
 import { makeStyles } from "@material-ui/core/styles"
-import { task } from "fp-ts/lib/Task"
-import * as GamesApi from "../api/games"
-import { pipe } from "fp-ts/lib/pipeable"
-import { CodeNamesGame } from "../api/models"
-import { fold } from "fp-ts/lib/TaskEither"
-import { WordsBoardView } from "./WordsBoardView"
+import { CodeNamesGame, RevealWordInput } from "../api/models"
+import { WordsBoardView, OnWordClick } from "./WordsBoardView"
+import { useSocket } from "../utils/hooks"
+import { emitMessage, addMessageHandler } from "../api/sockets/handler"
+import { revealWordMessage, createGameMessage, joinGameMessage } from "../api/sockets/messages"
+import { update2dCell } from "../utils/collections"
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   container: {
     display: "flex",
     flexGrow: 1,
@@ -23,41 +23,92 @@ export interface CodeNamesViewProps {
 export const CodeNamesView: React.FC = () => {
   const classes = useStyles()
 
-  const [error, setError] = React.useState<string>("")
-  const [gameId, setGameId] = React.useState<string>("")
+  const [socket] = useSocket("http://127.0.0.1:3000", { autoConnect: false })
+  const [error] = React.useState("")
+  const [userId] = React.useState("pedronsousa@gmail.com")
+  const [gameId, setGameId] = React.useState("")
   const [game, setGame] = React.useState<CodeNamesGame>()
 
-  const createGame = async () => {
-    await pipe(
-      GamesApi.create({ userId: "pedronsousa@gmail.com", language: "en" }),
-      fold(
-        e => {
-          setError(e.message)
-          return task.of(undefined)
-        },
-        g => {
-          setGameId(g.gameId)
-          setGame(g)
-          return task.of(undefined)
-        },
+  React.useEffect(() => {
+    socket.connect()
+    console.log("CONNECT")
+
+    addMessageHandler(socket, "gameCreated", gameCreatedHandler)
+    addMessageHandler(socket, "joinedGame", joinedGameHandler)
+    addMessageHandler(socket, "revealWord", revealWordHandler)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const revealWordHandler = ({ row, col }: RevealWordInput) => {
+    setGame(g => ({
+      ...g!,
+      board: update2dCell(g!.board)(
+        w => ({
+          ...w,
+          revealed: true,
+        }),
+        row,
+        col,
       ),
-    )()
+    }))
   }
 
-  const joinGame = async () => {
-    await pipe(
-      GamesApi.join({ gameId, userId: "pedronsousa@gmail.com" }),
-      fold(
-        e => {
-          setError(e.message)
-          return task.of(undefined)
-        },
-        g => {
-          setGame(g)
-          return task.of(undefined)
-        },
-      ),
-    )()
+  // const createGame = async () => {
+  //   await pipe(
+  //     GamesApi.create({ userId, language: "en" }),
+  //     fold(
+  //       e => {
+  //         setError(e.message)
+  //         return task.of(undefined)
+  //       },
+  //       g => {
+  //         setGameId(g.gameId)
+  //         setGame(g)
+  //         return task.of(undefined)
+  //       },
+  //     ),
+  //   )()
+  // }
+
+  const createGame = () => {
+    emitMessage(socket, createGameMessage({ userId, language: "en" }))
+  }
+
+  const joinGame = () => {
+    emitMessage(socket, joinGameMessage({ gameId, userId }))
+  }
+
+  const gameCreatedHandler = (game: CodeNamesGame) => {
+    console.log("gameCreatedHandler=====>", game)
+    setGameId(game.gameId)
+    setGame(game)
+  }
+
+  const joinedGameHandler = (game: CodeNamesGame) => {
+    console.log("joinedGameHandler=====>", game)
+    setGameId(game.gameId)
+    setGame(game)
+  }
+
+  // const joinGame = async () => {
+  //   await pipe(
+  //     GamesApi.join({ gameId, userId: "pedronsousa@gmail.com" }),
+  //     fold(
+  //       e => {
+  //         setError(e.message)
+  //         return task.of(undefined)
+  //       },
+  //       g => {
+  //         setGame(g)
+  //         return task.of(undefined)
+  //       },
+  //     ),
+  //   )()
+  // }
+
+  const onWordClick: OnWordClick = (_, row, col) => {
+    emitMessage(socket, revealWordMessage({ gameId, userId, row, col }))
   }
 
   return (
@@ -66,7 +117,7 @@ export const CodeNamesView: React.FC = () => {
       <button onClick={createGame}>CREATE</button>
       <input value={gameId} onChange={event => setGameId(event.target.value)} />
       <button onClick={joinGame}>JOIN</button>
-      {game && <WordsBoardView board={game.board} />}
+      {game && <WordsBoardView board={game.board} onWordClick={onWordClick} />}
     </div>
   )
 }
