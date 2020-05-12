@@ -244,3 +244,26 @@ describe("revealWord", () => {
     expect(newGame.board[row][col].revealed).toBeTruthy()
   })
 })
+
+describe("changeTurn", () => {
+  it("changes the teams turn", async () => {
+    const gameId = "game-id"
+    const userId = "user-id"
+
+    const game = {
+      gameId,
+      userId,
+      turn: Teams.blue,
+    } as any
+
+    const environment = buildTestEnvironment({
+      gamesRepository: {
+        getById: jest.fn(() => actionOf(game)),
+        update: jest.fn(() => actionOf(game)),
+      },
+    })
+
+    const newGame = await getRightAction(Games.changeTurn({ gameId, userId }), environment)
+    expect(newGame.turn).toBe(Teams.red)
+  })
+})

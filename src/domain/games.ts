@@ -14,6 +14,8 @@ import {
   JoinGameOutput,
   RevealWordInput,
   RevealWordOutput,
+  ChangeTurnInput,
+  ChangeTurnOutput,
 } from "./models"
 import { ServiceError, ErrorCodes } from "../utils/audit"
 import { shuffle } from "../utils/random"
@@ -86,7 +88,7 @@ export const join: Action<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) 
     ),
   )
 
-const revealOnBoard = (row: number, col: number) => (game: CodeNamesGame) => ({
+const revealWordAction = (row: number, col: number) => (game: CodeNamesGame) => ({
   ...game,
   board: update2dCell(game.board)(
     w => ({
@@ -104,7 +106,30 @@ export const revealWord: Action<RevealWordInput, RevealWordOutput> = ({ gameId, 
       gamesRepository.getById(gameId),
       chain(game =>
         game
-          ? actionOf(revealOnBoard(row, col)(game))
+          ? actionOf(revealWordAction(row, col)(game))
+          : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+      ),
+      chain(game =>
+        pipe(
+          gamesRepository.update(game),
+          map(_ => game),
+        ),
+      ),
+    ),
+  )
+
+const changeTurnAction = (game: CodeNamesGame) => ({
+  ...game,
+  turn: game.turn === Teams.red ? Teams.blue : Teams.red,
+})
+
+export const changeTurn: Action<ChangeTurnInput, ChangeTurnOutput> = ({ gameId }) =>
+  withEnv(({ gamesRepository }) =>
+    pipe(
+      gamesRepository.getById(gameId),
+      chain(game =>
+        game
+          ? actionOf(changeTurnAction(game))
           : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
       ),
       chain(game =>
@@ -120,6 +145,7 @@ export const gamesDomain = {
   create,
   join,
   revealWord,
+  changeTurn,
 }
 
 export type GamesDomain = typeof gamesDomain

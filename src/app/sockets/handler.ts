@@ -1,11 +1,19 @@
 import { SocketMessage, SocketMessageType } from "./messagesTypes"
 import { Action, withEnv } from "../../utils/actions"
-import { RevealWordInput, CreateGameInput, CreateGameOutput, JoinGameInput, JoinGameOutput } from "../../domain/models"
+import {
+  RevealWordInput,
+  CreateGameInput,
+  CreateGameOutput,
+  JoinGameInput,
+  JoinGameOutput,
+  ChangeTurnOutput,
+  ChangeTurnInput,
+} from "../../domain/models"
 import { pipe } from "fp-ts/lib/pipeable"
 import { map, run } from "fp-ts/lib/ReaderTaskEither"
 import { Environment } from "../../environment"
 import { task } from "fp-ts/lib/Task"
-import { gameCreated, joinedGame, revealWord } from "./messages"
+import { gameCreated, joinedGame, revealWord, changeTurn } from "./messages"
 
 type SocketHandler<T> = (io: SocketIO.Server, socket: SocketIO.Socket) => Action<T, void>
 
@@ -67,8 +75,20 @@ export const revealWordHandler: SocketHandler<RevealWordInput> = io => input =>
     ),
   )
 
+export const changeTurnHandler: SocketHandler<ChangeTurnInput> = io => input =>
+  withEnv(({ gamesDomain }) =>
+    pipe(
+      gamesDomain.changeTurn(input),
+      map(game => {
+        broadcastMessage(io, game.gameId, changeTurn(input))
+        return undefined
+      }),
+    ),
+  )
+
 export const socketHandler = (env: Environment, io: SocketIO.Server) => (socket: SocketIO.Socket) => {
   addMessageHandler(env, io)(socket, "createGame", createGameHandler)
   addMessageHandler(env, io)(socket, "joinGame", joinGameHandler)
   addMessageHandler(env, io)(socket, "revealWord", revealWordHandler)
+  addMessageHandler(env, io)(socket, "changeTurn", changeTurnHandler)
 }
