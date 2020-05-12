@@ -12,6 +12,15 @@ export interface JoinInput {
 
 export type JoinOutput = CodeNamesGame
 
+export type RevealWordInput = {
+  gameId: string
+  userId: string
+  row: number
+  col: number
+}
+
+export type RevealWordOutput = CodeNamesGame
+
 export enum Teams {
   red = "red",
   blue = "blue",
@@ -36,7 +45,7 @@ export interface BoardWord {
   revealed: boolean
 }
 
-export type WordsBoard = BoardWord[]
+export type WordsBoard = BoardWord[][]
 
 export interface CodeNamesGame {
   gameId: string

@@ -1,3 +1,4 @@
+import * as R from "ramda"
 import { Action, withEnv, actionOf, actionErrorOf } from "../utils/actions"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, map } from "fp-ts/lib/ReaderTaskEither"
@@ -11,9 +12,12 @@ import {
   CreateOutput,
   JoinInput,
   JoinOutput,
+  RevealWordInput,
+  RevealWordOutput,
 } from "./models"
 import { ServiceError, ErrorCodes } from "../utils/audit"
 import { shuffle } from "../utils/random"
+import { update2dCell } from "../utils/collections"
 
 const addPlayer = (userId: string) => (game: CodeNamesGame) =>
   game.players.find(p => p.userId === userId)
@@ -36,40 +40,38 @@ const determineWordTypes = (words: string[]): BoardWord[] => {
   return shuffle(words.map((word, i) => ({ word, type: types[i], revealed: false })))
 }
 
-export const create: Action<CreateInput, CreateOutput> = input => {
-  const userId = input.userId
+const buildBoard = (boardWidth: number, boardHeight: number) => (words: BoardWord[]): BoardWord[][] =>
+  R.range(0, boardHeight).map(r => words.slice(r * boardWidth, r * boardWidth + boardWidth))
 
-  return withEnv(env =>
+export const create: Action<CreateInput, CreateOutput> = ({ userId, language }) =>
+  withEnv(({ gamesRepository, wordsRepository, uuid, currentUtcDateTime, config: { boardWidth, boardHeight } }) =>
     pipe(
-      env.wordsRepository.getByLanguage(input.language),
+      wordsRepository.getByLanguage(language),
       chain(allWords =>
         allWords
-          ? actionOf(shuffle(allWords.words).slice(0, env.config.numberOfWords))
+          ? actionOf(shuffle(allWords.words).slice(0, boardWidth * boardHeight))
           : actionErrorOf<string[]>(new ServiceError("Language not found", ErrorCodes.NOT_FOUND)),
       ),
       map(determineWordTypes),
+      map(buildBoard(boardWidth, boardHeight)),
       chain(board =>
-        env.gamesRepository.insert({
-          gameId: env.uuid(),
-          timestamp: env.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+        gamesRepository.insert({
+          gameId: uuid(),
+          timestamp: currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
           userId,
           players: [{ userId }],
           state: GameStates.idle,
           turn: Teams.red,
-          board: board,
+          board,
         }),
       ),
     ),
   )
-}
 
-export const join: Action<JoinInput, JoinOutput> = input => {
-  const gameId = input.gameId
-  const userId = input.userId
-
-  return withEnv(env =>
+export const join: Action<JoinInput, JoinOutput> = ({ gameId, userId }) =>
+  withEnv(({ gamesRepository }) =>
     pipe(
-      env.gamesRepository.getById(gameId),
+      gamesRepository.getById(gameId),
       chain(game =>
         game
           ? actionOf(addPlayer(userId)(game))
@@ -77,13 +79,42 @@ export const join: Action<JoinInput, JoinOutput> = input => {
       ),
       chain(game =>
         pipe(
-          env.gamesRepository.update(game),
+          gamesRepository.update(game),
           map(_ => game),
         ),
       ),
     ),
   )
-}
+
+const revealOnBaord = (row: number, col: number) => (game: CodeNamesGame) => ({
+  ...game,
+  board: update2dCell(game.board)(
+    w => ({
+      ...w,
+      revealed: true,
+    }),
+    row,
+    col,
+  ),
+})
+
+export const revealWord: Action<RevealWordInput, RevealWordOutput> = ({ gameId, row, col }) =>
+  withEnv(({ gamesRepository }) =>
+    pipe(
+      gamesRepository.getById(gameId),
+      chain(game =>
+        game
+          ? actionOf(revealOnBaord(row, col)(game))
+          : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+      ),
+      chain(game =>
+        pipe(
+          gamesRepository.update(game),
+          map(_ => game),
+        ),
+      ),
+    ),
+  )
 
 export const gamesDomain = {
   create,

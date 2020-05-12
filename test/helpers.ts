@@ -15,6 +15,11 @@ export const createApp = async (environment: Environment) => getRight(await run(
 
 export const x = async () => await run(createApplication(), {} as any)
 
+const words = {
+  language: "en",
+  words: R.range(0, 50).map(i => `word-${i}`),
+}
+
 const defaultEnvironment: Environment = {
   config: {
     mongodb: {
@@ -22,16 +27,17 @@ const defaultEnvironment: Environment = {
     },
     nodeEnv: "DEV",
     port: 3000,
-    numberOfWords: 25,
+    boardWidth: 5,
+    boardHeight: 5,
   },
   gamesRepository: {
-    insert: () => actionOf({} as CodeNamesGame),
-    update: () => actionOf({} as CodeNamesGame),
+    insert: jest.fn((game: CodeNamesGame) => actionOf(game)),
+    update: jest.fn((game: CodeNamesGame) => actionOf(game)),
     getById: () => actionOf({} as CodeNamesGame),
   },
   wordsRepository: {
     insert: () => actionOf(undefined),
-    getByLanguage: () => actionOf({} as Words),
+    getByLanguage: () => actionOf(words),
   },
   gamesDomain: {
     create: () => actionOf({} as CodeNamesGame),

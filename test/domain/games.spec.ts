@@ -16,7 +16,8 @@ describe("create", () => {
     const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
     const environment = buildTestEnvironment({
       config: {
-        numberOfWords: 0,
+        boardWidth: 0,
+        boardHeight: 0,
       },
       gamesRepository: {
         insert,
@@ -57,7 +58,8 @@ describe("create", () => {
       const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
       const environment = buildTestEnvironment({
         config: {
-          numberOfWords: 25,
+          boardWidth: 5,
+          boardHeight: 5,
         },
         gamesRepository: {
           insert,
@@ -70,9 +72,9 @@ describe("create", () => {
       await getRightAction(Games.create({ userId: "some-user-id", language: "en" }), environment)
       await getRightAction(Games.create({ userId: "some-user-id", language: "en" }), environment)
 
-      const firstBoard = insert.mock.calls[0][0].board
-      const secondBoard = insert.mock.calls[1][0].board
-      expect(firstBoard.length).toBe(environment.config.numberOfWords)
+      const firstBoard = R.flatten(insert.mock.calls[0][0].board)
+      const secondBoard = R.flatten(insert.mock.calls[1][0].board)
+      expect(firstBoard.length).toBe(environment.config.boardWidth * environment.config.boardHeight)
       expect(
         R.sort(
           sortStrings,
@@ -89,7 +91,8 @@ describe("create", () => {
       const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
       const environment = buildTestEnvironment({
         config: {
-          numberOfWords: 25,
+          boardWidth: 5,
+          boardHeight: 5,
         },
         gamesRepository: {
           insert,
@@ -101,7 +104,7 @@ describe("create", () => {
 
       await getRightAction(Games.create({ userId: "some-user-id", language: "en" }), environment)
 
-      const board = insert.mock.calls[0][0].board
+      const board = R.flatten(insert.mock.calls[0][0].board)
 
       expect(board.filter(b => b.type === WordType.red).length).toBe(8)
       expect(board.filter(b => b.type === WordType.blue).length).toBe(8)
@@ -210,5 +213,34 @@ describe("join", () => {
     })
 
     await getLeftAction(Games.join({ gameId, userId }), environment)
+  })
+})
+
+describe("revealWord", () => {
+  it("reveals a word", async () => {
+    const gameId = "game-id"
+    const userId = "user-id"
+
+    const game = {
+      gameId,
+      userId,
+      board: [
+        [{ revealed: false }, { revealed: false }],
+        [{ revealed: false }, { revealed: false }],
+      ],
+    } as any
+
+    const environment = buildTestEnvironment({
+      gamesRepository: {
+        getById: jest.fn(() => actionOf(game)),
+        update: jest.fn(() => actionOf(game)),
+      },
+    })
+
+    const row = 0
+    const col = 1
+    const newGame = await getRightAction(Games.revealWord({ gameId, userId, row, col }), environment)
+
+    expect(newGame.board[row][col].revealed).toBeTruthy()
   })
 })

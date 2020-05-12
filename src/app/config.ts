@@ -6,7 +6,8 @@ export interface AppConfig {
   }
   nodeEnv: string
   port: number
-  numberOfWords: number
+  boardWidth: number
+  boardHeight: number
 }
 
 export const config = convict<AppConfig>({
@@ -29,7 +30,8 @@ export const config = convict<AppConfig>({
     env: "PORT",
     format: "port",
   },
-  numberOfWords: 25,
+  boardWidth: 5,
+  boardHeight: 5,
 })
 
 export const isDev = (c: AppConfig) => c.nodeEnv === "development"
