@@ -10,11 +10,13 @@ import { currentUtcDateTime } from "./utils/dates"
 import { gamesRepository, GamesRepository } from "./repositories/games"
 import { ServiceError } from "./utils/audit"
 import { WordsRepository, wordsRepository } from "./repositories/words"
+import { gamesDomain, GamesDomain } from "./domain/games"
 
 export type Environment = {
   config: AppConfig
   gamesRepository: GamesRepository
   wordsRepository: WordsRepository
+  gamesDomain: GamesDomain
   dbClient: MongoClient
   uuid: () => string
   currentUtcDateTime: () => moment.Moment
@@ -37,6 +39,7 @@ export const buildEnvironment = () => {
       config,
       gamesRepository,
       wordsRepository,
+      gamesDomain,
       dbClient: mongoClient,
       log: logDebug,
       uuid: uuidv4,

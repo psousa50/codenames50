@@ -33,6 +33,10 @@ const defaultEnvironment: Environment = {
     insert: () => actionOf(undefined),
     getByLanguage: () => actionOf({} as Words),
   },
+  gamesDomain: {
+    create: () => actionOf({} as CodeNamesGame),
+    join: () => actionOf({} as CodeNamesGame),
+  },
   dbClient: {} as MongoClient,
   uuid: () => "",
   currentUtcDateTime,
@@ -60,3 +64,6 @@ export const getLeft = <L, A>(fa: Either<L, A>) =>
 
 export const getRightAction = async <R>(result: ActionResult<R>, environment: Environment) =>
   getRight(await run(result, environment))
+
+export const getLeftAction = async <R>(result: ActionResult<R>, environment: Environment) =>
+  getLeft(await run(result, environment))

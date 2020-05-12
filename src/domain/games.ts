@@ -84,3 +84,10 @@ export const join: Action<JoinInput, JoinOutput> = input => {
     ),
   )
 }
+
+export const gamesDomain = {
+  create,
+  join,
+}
+
+export type GamesDomain = typeof gamesDomain

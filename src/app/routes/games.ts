@@ -17,5 +17,5 @@ const joinRequestTransformer = (params: Stringify<GamesModels.JoinInput>): Games
 
 export const games = (env: Environment) =>
   Router()
-    .post("/create", handler(env, Games.create, createRequestTransformer))
-    .post("/join", handler(env, Games.join, joinRequestTransformer))
+    .post("/create", handler(env, env.gamesDomain.create, createRequestTransformer))
+    .post("/join", handler(env, env.gamesDomain.join, joinRequestTransformer))
