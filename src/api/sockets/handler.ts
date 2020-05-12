@@ -5,7 +5,10 @@ export const addMessageHandler = <T>(
   type: SocketMessageType,
   handler: (data: T) => void,
 ) => {
-  socket.on(type, handler)
+  socket.on(type, (data: T) => {
+    console.log("RECEIVED=====>\n", type, data)
+    handler(data)
+  })
 }
 
 export const emitMessage = <T>(socket: SocketIOClient.Socket, message: SocketMessage<T>) => {

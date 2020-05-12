@@ -1,4 +1,11 @@
-export type SocketMessageType = "createGame" | "gameCreated" | "joinGame" | "joinedGame" | "iamSpyMaster" | "revealWord"
+export type SocketMessageType =
+  | "createGame"
+  | "gameCreated"
+  | "joinGame"
+  | "joinedGame"
+  | "iamSpyMaster"
+  | "revealWord"
+  | "changeTurn"
 
 export type SocketMessage<T> = {
   type: SocketMessageType

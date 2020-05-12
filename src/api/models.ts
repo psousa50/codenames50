@@ -21,6 +21,13 @@ export type RevealWordInput = {
 
 export type RevealWordOutput = CodeNamesGame
 
+export type ChangeTurnInput = {
+  gameId: string
+  userId: string
+}
+
+export type ChangeTurnOutput = CodeNamesGame
+
 export enum Teams {
   red = "red",
   blue = "blue",

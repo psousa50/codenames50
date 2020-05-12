@@ -1,11 +1,12 @@
 import React from "react"
 import { makeStyles } from "@material-ui/core/styles"
-import { CodeNamesGame, RevealWordInput } from "../api/models"
+import { CodeNamesGame, RevealWordInput, Teams } from "../api/models"
 import { WordsBoardView, OnWordClick } from "./WordsBoardView"
 import { useSocket } from "../utils/hooks"
 import { emitMessage, addMessageHandler } from "../api/sockets/handler"
-import { revealWordMessage, createGameMessage, joinGameMessage } from "../api/sockets/messages"
+import { revealWordMessage, createGameMessage, joinGameMessage, changeTurnMessage } from "../api/sockets/messages"
 import { update2dCell } from "../utils/collections"
+import { redColor, blueColor } from "../utils/ui"
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -16,11 +17,11 @@ const useStyles = makeStyles(() => ({
   },
 }))
 
-export interface CodeNamesViewProps {
+export interface CodeNamesGameViewProps {
   gameId: string
 }
 
-export const CodeNamesView: React.FC = () => {
+export const CodeNamesGameView: React.FC = () => {
   const classes = useStyles()
 
   const [socket] = useSocket("http://127.0.0.1:3000", { autoConnect: false })
@@ -36,40 +37,28 @@ export const CodeNamesView: React.FC = () => {
     addMessageHandler(socket, "gameCreated", gameCreatedHandler)
     addMessageHandler(socket, "joinedGame", joinedGameHandler)
     addMessageHandler(socket, "revealWord", revealWordHandler)
+    addMessageHandler(socket, "changeTurn", endTurnHandler)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const revealWordHandler = ({ row, col }: RevealWordInput) => {
-    setGame(g => ({
-      ...g!,
-      board: update2dCell(g!.board)(
-        w => ({
-          ...w,
-          revealed: true,
-        }),
-        row,
-        col,
-      ),
-    }))
+    setGame(g =>
+      g
+        ? {
+            ...g,
+            board: update2dCell(g.board)(
+              w => ({
+                ...w,
+                revealed: true,
+              }),
+              row,
+              col,
+            ),
+          }
+        : g,
+    )
   }
-
-  // const createGame = async () => {
-  //   await pipe(
-  //     GamesApi.create({ userId, language: "en" }),
-  //     fold(
-  //       e => {
-  //         setError(e.message)
-  //         return task.of(undefined)
-  //       },
-  //       g => {
-  //         setGameId(g.gameId)
-  //         setGame(g)
-  //         return task.of(undefined)
-  //       },
-  //     ),
-  //   )()
-  // }
 
   const createGame = () => {
     emitMessage(socket, createGameMessage({ userId, language: "en" }))
@@ -79,33 +68,30 @@ export const CodeNamesView: React.FC = () => {
     emitMessage(socket, joinGameMessage({ gameId, userId }))
   }
 
+  const endTurn = () => {
+    emitMessage(socket, changeTurnMessage({ gameId, userId }))
+  }
+
   const gameCreatedHandler = (game: CodeNamesGame) => {
-    console.log("gameCreatedHandler=====>", game)
     setGameId(game.gameId)
     setGame(game)
   }
 
   const joinedGameHandler = (game: CodeNamesGame) => {
-    console.log("joinedGameHandler=====>", game)
     setGameId(game.gameId)
     setGame(game)
   }
 
-  // const joinGame = async () => {
-  //   await pipe(
-  //     GamesApi.join({ gameId, userId: "pedronsousa@gmail.com" }),
-  //     fold(
-  //       e => {
-  //         setError(e.message)
-  //         return task.of(undefined)
-  //       },
-  //       g => {
-  //         setGame(g)
-  //         return task.of(undefined)
-  //       },
-  //     ),
-  //   )()
-  // }
+  const endTurnHandler = () => {
+    setGame(g =>
+      g
+        ? {
+            ...g,
+            turn: g.turn === Teams.red ? Teams.blue : Teams.red,
+          }
+        : g,
+    )
+  }
 
   const onWordClick: OnWordClick = (_, row, col) => {
     emitMessage(socket, revealWordMessage({ gameId, userId, row, col }))
@@ -117,7 +103,23 @@ export const CodeNamesView: React.FC = () => {
       <button onClick={createGame}>CREATE</button>
       <input value={gameId} onChange={event => setGameId(event.target.value)} />
       <button onClick={joinGame}>JOIN</button>
+      <button onClick={endTurn}>END TURN</button>
+      {game && <Header game={game} />}
       {game && <WordsBoardView board={game.board} onWordClick={onWordClick} />}
     </div>
   )
+}
+
+interface HeaderProps {
+  game: CodeNamesGame
+}
+
+const Header: React.FC<HeaderProps> = ({ game }) => {
+  const styles = {
+    turn: {
+      backgroundColor: game.turn === Teams.red ? redColor : blueColor,
+    },
+  }
+
+  return <div style={styles.turn}>TURN</div>
 }
