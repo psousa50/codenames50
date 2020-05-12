@@ -1,21 +1,23 @@
 type SocketMessageType = "iamSpyMaster" | "selectWord"
 
-const createSocketMessage = <T>(type: SocketMessageType, handler: (data: T) => void) => ({
-  type,
-  createMessage: (data: T) => ({
+const createSocketMessage = <T>(type: SocketMessageType, handler: (data: T) => void) => {
+  const message = (data: T) => ({
     type,
     data,
-  }),
-  handler,
-})
+  })
+  message.type = type
+  message.handler = handler
 
-export type SocketMessageTemplate<T> = {
+  return message
+}
+
+export interface SocketMessageTemplate<T> {
   type: SocketMessageType
-  createMessage: (data: T) => SocketMessage<T>
+  (data: T): SocketMessage<T>
   handler: (data: T) => void
 }
 
-type SocketMessage<T> = {
+export type SocketMessage<T> = {
   type: SocketMessageType
   data: T
 }
