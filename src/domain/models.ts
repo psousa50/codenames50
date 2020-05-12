@@ -1,16 +1,16 @@
-export interface CreateInput {
+export interface CreateGameInput {
   userId: string
   language: string
 }
 
-export type CreateOutput = CodeNamesGame
+export type CreateGameOutput = CodeNamesGame
 
-export interface JoinInput {
+export interface JoinGameInput {
   gameId: string
   userId: string
 }
 
-export type JoinOutput = CodeNamesGame
+export type JoinGameOutput = CodeNamesGame
 
 export type RevealWordInput = {
   gameId: string

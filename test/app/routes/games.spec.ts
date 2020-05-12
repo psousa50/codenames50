@@ -8,7 +8,7 @@ import { ServiceError, ErrorCodes } from "../../../src/utils/audit"
 describe("games/create", () => {
   it("creates a game", async () => {
     const createdGame = {} as GamesModels.CodeNamesGame
-    const create = jest.fn((_: GamesModels.CreateInput) => actionOf(createdGame))
+    const create = jest.fn((_: GamesModels.CreateGameInput) => actionOf(createdGame))
     const environment = buildTestEnvironment({
       gamesDomain: {
         create,
@@ -25,7 +25,7 @@ describe("games/create", () => {
   it("gives an error status if domains return an error", async () => {
     const environment = buildTestEnvironment({
       gamesDomain: {
-        create: jest.fn((_: GamesModels.CreateInput) =>
+        create: jest.fn((_: GamesModels.CreateGameInput) =>
           actionErrorOf<GamesModels.CodeNamesGame>(new ServiceError("error", ErrorCodes.NOT_FOUND)),
         ),
       },
@@ -41,7 +41,7 @@ describe("games/create", () => {
       const gameId = "some-game-id"
       const userId = "some-user-id"
       const game = {} as GamesModels.CodeNamesGame
-      const join = jest.fn((_: GamesModels.JoinInput) => actionOf(game))
+      const join = jest.fn((_: GamesModels.JoinGameInput) => actionOf(game))
       const environment = buildTestEnvironment({
         gamesDomain: {
           join,
@@ -57,7 +57,7 @@ describe("games/create", () => {
     it("gives an error status if domains return an error", async () => {
       const environment = buildTestEnvironment({
         gamesDomain: {
-          join: jest.fn((_: GamesModels.JoinInput) =>
+          join: jest.fn((_: GamesModels.JoinGameInput) =>
             actionErrorOf<GamesModels.CodeNamesGame>(new ServiceError("error", ErrorCodes.NOT_FOUND)),
           ),
         },

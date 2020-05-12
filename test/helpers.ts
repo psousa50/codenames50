@@ -42,6 +42,7 @@ const defaultEnvironment: Environment = {
   gamesDomain: {
     create: () => actionOf({} as CodeNamesGame),
     join: () => actionOf({} as CodeNamesGame),
+    revealWord: () => actionOf({} as CodeNamesGame),
   },
   dbClient: {} as MongoClient,
   uuid: () => "",

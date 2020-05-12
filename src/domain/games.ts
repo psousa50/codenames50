@@ -8,10 +8,10 @@ import {
   Teams,
   BoardWord,
   WordType,
-  CreateInput,
-  CreateOutput,
-  JoinInput,
-  JoinOutput,
+  CreateGameInput,
+  CreateGameOutput,
+  JoinGameInput,
+  JoinGameOutput,
   RevealWordInput,
   RevealWordOutput,
 } from "./models"
@@ -43,7 +43,7 @@ const determineWordTypes = (words: string[]): BoardWord[] => {
 const buildBoard = (boardWidth: number, boardHeight: number) => (words: BoardWord[]): BoardWord[][] =>
   R.range(0, boardHeight).map(r => words.slice(r * boardWidth, r * boardWidth + boardWidth))
 
-export const create: Action<CreateInput, CreateOutput> = ({ userId, language }) =>
+export const create: Action<CreateGameInput, CreateGameOutput> = ({ userId, language }) =>
   withEnv(({ gamesRepository, wordsRepository, uuid, currentUtcDateTime, config: { boardWidth, boardHeight } }) =>
     pipe(
       wordsRepository.getByLanguage(language),
@@ -68,7 +68,7 @@ export const create: Action<CreateInput, CreateOutput> = ({ userId, language }) 
     ),
   )
 
-export const join: Action<JoinInput, JoinOutput> = ({ gameId, userId }) =>
+export const join: Action<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) =>
   withEnv(({ gamesRepository }) =>
     pipe(
       gamesRepository.getById(gameId),
@@ -86,7 +86,7 @@ export const join: Action<JoinInput, JoinOutput> = ({ gameId, userId }) =>
     ),
   )
 
-const revealOnBaord = (row: number, col: number) => (game: CodeNamesGame) => ({
+const revealOnBoard = (row: number, col: number) => (game: CodeNamesGame) => ({
   ...game,
   board: update2dCell(game.board)(
     w => ({
@@ -104,7 +104,7 @@ export const revealWord: Action<RevealWordInput, RevealWordOutput> = ({ gameId, 
       gamesRepository.getById(gameId),
       chain(game =>
         game
-          ? actionOf(revealOnBaord(row, col)(game))
+          ? actionOf(revealOnBoard(row, col)(game))
           : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
       ),
       chain(game =>
@@ -119,6 +119,7 @@ export const revealWord: Action<RevealWordInput, RevealWordOutput> = ({ gameId, 
 export const gamesDomain = {
   create,
   join,
+  revealWord,
 }
 
 export type GamesDomain = typeof gamesDomain

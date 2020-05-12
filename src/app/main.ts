@@ -46,7 +46,7 @@ export const runServer: Action<Express, Server> = app =>
                 })
 
                 const io = socketIo(server, {})
-                io.on("connection", socketHandler)
+                io.on("connection", socketHandler(env, io))
 
                 server.on("checkContinue", (__, res) => {
                   res.writeContinue()
