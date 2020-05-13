@@ -6,6 +6,7 @@ export type SocketMessageType =
   | "iamSpyMaster"
   | "revealWord"
   | "changeTurn"
+  | "error"
 
 export type SocketMessage<T> = {
   type: SocketMessageType

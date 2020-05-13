@@ -7,3 +7,4 @@ export const joinGame = (data: JoinGameInput) => createSocketMessage("joinGame",
 export const joinedGame = (data: CodeNamesGame) => createSocketMessage("joinedGame", data)
 export const revealWord = (data: RevealWordInput) => createSocketMessage("revealWord", data)
 export const changeTurn = (data: ChangeTurnInput) => createSocketMessage("changeTurn", data)
+export const error = (data: string) => createSocketMessage("error", data)
