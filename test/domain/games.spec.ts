@@ -1,9 +1,10 @@
 import * as R from "ramda"
 import moment from "moment"
 import * as Games from "../../src/domain/games"
-import { getRightAction, buildTestEnvironment, getLeftAction } from "../helpers"
 import { CodeNamesGame, GameStates, Teams, WordType } from "../../src/domain/models"
+import { buildTestDomainAdapter, getRight, getLeft } from "../helpers"
 import { actionOf } from "../../src/utils/actions"
+import { ErrorCodes } from "../../src/utils/audit"
 
 const sortStrings = (s1: string, s2: string) => s1.localeCompare(s2)
 
@@ -14,19 +15,23 @@ describe("create", () => {
       words: ["w1", "w2", "w3", "w4"],
     } as any
     const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-    const environment = buildTestEnvironment({
+    const domainAdapter = buildTestDomainAdapter({
       config: {
         boardWidth: 0,
         boardHeight: 0,
       },
-      gamesRepository: {
-        insert,
+      adapters: {
+        repositories: {
+          gamesRepository: {
+            insert,
+          },
+          wordsRepository: {
+            getByLanguage: jest.fn(() => actionOf(allWords)),
+          },
+        },
+        uuid: () => gameId,
+        currentUtcDateTime: () => moment.utc("2000-01-01"),
       },
-      wordsRepository: {
-        getByLanguage: jest.fn(() => actionOf(allWords)),
-      },
-      uuid: () => gameId,
-      currentUtcDateTime: () => moment.utc("2000-01-01"),
     })
 
     const userId = "john@something.com"
@@ -42,10 +47,10 @@ describe("create", () => {
       state: GameStates.idle,
       turn: Teams.red,
       board: [],
-      timestamp: environment.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+      timestamp: domainAdapter.adapters.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
     }
 
-    await getRightAction(Games.create({ userId, language: "en" }), environment)
+    await getRight(Games.create({ userId, language: "en" })(domainAdapter))()
 
     expect(insert).toHaveBeenCalledWith(gameToInsert)
   })
@@ -56,25 +61,29 @@ describe("create", () => {
         words: R.range(0, 30).map(i => `word-${i}`),
       } as any
       const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-      const environment = buildTestEnvironment({
+      const domainAdapter = buildTestDomainAdapter({
         config: {
           boardWidth: 5,
           boardHeight: 5,
         },
-        gamesRepository: {
-          insert,
-        },
-        wordsRepository: {
-          getByLanguage: jest.fn(() => actionOf(allWords)),
+        adapters: {
+          repositories: {
+            gamesRepository: {
+              insert,
+            },
+            wordsRepository: {
+              getByLanguage: jest.fn(() => actionOf(allWords)),
+            },
+          },
         },
       })
 
-      await getRightAction(Games.create({ userId: "some-user-id", language: "en" }), environment)
-      await getRightAction(Games.create({ userId: "some-user-id", language: "en" }), environment)
+      await getRight(Games.create({ userId: "some-user-id", language: "en" })(domainAdapter))()
+      await getRight(Games.create({ userId: "some-user-id", language: "en" })(domainAdapter))()
 
       const firstBoard = R.flatten(insert.mock.calls[0][0].board)
       const secondBoard = R.flatten(insert.mock.calls[1][0].board)
-      expect(firstBoard.length).toBe(environment.config.boardWidth * environment.config.boardHeight)
+      expect(firstBoard.length).toBe(domainAdapter.config.boardWidth * domainAdapter.config.boardHeight)
       expect(
         R.sort(
           sortStrings,
@@ -89,20 +98,24 @@ describe("create", () => {
         words: R.range(0, 40).map(i => `word-${i}`),
       } as any
       const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-      const environment = buildTestEnvironment({
+      const domainAdapter = buildTestDomainAdapter({
         config: {
           boardWidth: 5,
           boardHeight: 5,
         },
-        gamesRepository: {
-          insert,
-        },
-        wordsRepository: {
-          getByLanguage: jest.fn(() => actionOf(allWords)),
+        adapters: {
+          repositories: {
+            gamesRepository: {
+              insert,
+            },
+            wordsRepository: {
+              getByLanguage: jest.fn(() => actionOf(allWords)),
+            },
+          },
         },
       })
 
-      await getRightAction(Games.create({ userId: "some-user-id", language: "en" }), environment)
+      await getRight(Games.create({ userId: "some-user-id", language: "en" })(domainAdapter))()
 
       const board = R.flatten(insert.mock.calls[0][0].board)
 
@@ -115,30 +128,41 @@ describe("create", () => {
 
     it("for the language chosen", async () => {
       const language = "pt"
-      const environment = buildTestEnvironment({
-        gamesRepository: {
-          insert: jest.fn(game => actionOf(game)),
-        },
-        wordsRepository: {
-          getByLanguage: jest.fn(() => actionOf({ words: [] } as any)),
+      const domainAdapter = buildTestDomainAdapter({
+        adapters: {
+          repositories: {
+            gamesRepository: {
+              insert: jest.fn(game => actionOf(game)),
+            },
+            wordsRepository: {
+              getByLanguage: jest.fn(() => actionOf({ words: [] } as any)),
+            },
+          },
         },
       })
-      await getRightAction(Games.create({ userId: "some-user-id", language }), environment)
 
-      expect(environment.wordsRepository.getByLanguage).toHaveBeenCalledWith(language)
+      await getRight(Games.create({ userId: "some-user-id", language })(domainAdapter))()
+
+      expect(domainAdapter.adapters.repositories.wordsRepository.getByLanguage).toHaveBeenCalledWith(language)
     })
 
     it("gives an error 404 if language does not exist", async () => {
-      const environment = buildTestEnvironment({
-        gamesRepository: {
-          insert: jest.fn(game => actionOf(game)),
-        },
-        wordsRepository: {
-          getByLanguage: jest.fn(() => actionOf(null)),
+      const domainAdapter = buildTestDomainAdapter({
+        adapters: {
+          repositories: {
+            gamesRepository: {
+              insert: jest.fn(game => actionOf(game)),
+            },
+            wordsRepository: {
+              getByLanguage: jest.fn(() => actionOf(null)),
+            },
+          },
         },
       })
 
-      await getLeftAction(Games.create({ userId: "some-user-id", language: "en" }), environment)
+      const r = await getLeft(Games.create({ userId: "some-user-id", language: "en" })(domainAdapter))()
+
+      expect(r.errorCode).toBe(ErrorCodes.NOT_FOUND)
     })
   })
 })
@@ -156,10 +180,14 @@ describe("join", () => {
       players: [player1],
     } as any
 
-    const environment = buildTestEnvironment({
-      gamesRepository: {
-        getById: jest.fn(() => actionOf(game)),
-        update: jest.fn(() => actionOf(game)),
+    const domainAdapter = buildTestDomainAdapter({
+      adapters: {
+        repositories: {
+          gamesRepository: {
+            getById: jest.fn(() => actionOf(game)),
+            update: jest.fn(() => actionOf(game)),
+          },
+        },
       },
     })
 
@@ -171,9 +199,9 @@ describe("join", () => {
 
     const gameToUpdate = { gameId, userId, players: [player1, player2] }
 
-    await getRightAction(Games.join({ gameId, userId: secondUserId }), environment)
+    await getRight(Games.join({ gameId, userId: secondUserId })(domainAdapter))()
 
-    expect(environment.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
+    expect(domainAdapter.adapters.repositories.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
   })
 
   it("does not add user if it has already joined the game", async () => {
@@ -188,31 +216,41 @@ describe("join", () => {
       players: [player1],
     } as any
 
-    const environment = buildTestEnvironment({
-      gamesRepository: {
-        getById: jest.fn(() => actionOf(game)),
-        update: jest.fn(() => actionOf(game)),
+    const domainAdapter = buildTestDomainAdapter({
+      adapters: {
+        repositories: {
+          gamesRepository: {
+            getById: jest.fn(() => actionOf(game)),
+            update: jest.fn(() => actionOf(game)),
+          },
+        },
       },
     })
 
     const gameToUpdate = { gameId, userId, players: [player1] }
 
-    await getRightAction(Games.join({ gameId, userId }), environment)
+    await getRight(Games.join({ gameId, userId })(domainAdapter))()
 
-    expect(environment.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
+    expect(domainAdapter.adapters.repositories.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
   })
 
   it("gives a 404 if game does not exist", async () => {
     const gameId = "some-unexistant-id"
     const userId = "user-id"
 
-    const environment = buildTestEnvironment({
-      gamesRepository: {
-        getById: jest.fn(() => actionOf(null)),
+    const domainAdapter = buildTestDomainAdapter({
+      adapters: {
+        repositories: {
+          gamesRepository: {
+            getById: jest.fn(() => actionOf(null)),
+          },
+        },
       },
     })
 
-    await getLeftAction(Games.join({ gameId, userId }), environment)
+    const r = await getLeft(Games.join({ gameId, userId })(domainAdapter))()
+
+    expect(r.errorCode).toBe(ErrorCodes.NOT_FOUND)
   })
 })
 
@@ -230,16 +268,20 @@ describe("revealWord", () => {
       ],
     } as any
 
-    const environment = buildTestEnvironment({
-      gamesRepository: {
-        getById: jest.fn(() => actionOf(game)),
-        update: jest.fn(() => actionOf(game)),
+    const domainAdapter = buildTestDomainAdapter({
+      adapters: {
+        repositories: {
+          gamesRepository: {
+            insert: jest.fn(() => actionOf(game)),
+            getById: () => actionOf(game),
+          },
+        },
       },
     })
 
     const row = 0
     const col = 1
-    const newGame = await getRightAction(Games.revealWord({ gameId, userId, row, col }), environment)
+    const newGame = await getRight(Games.revealWord({ gameId, userId, row, col })(domainAdapter))()
 
     expect(newGame.board[row][col].revealed).toBeTruthy()
   })
@@ -256,14 +298,9 @@ describe("changeTurn", () => {
       turn: Teams.blue,
     } as any
 
-    const environment = buildTestEnvironment({
-      gamesRepository: {
-        getById: jest.fn(() => actionOf(game)),
-        update: jest.fn(() => actionOf(game)),
-      },
-    })
+    const domainAdapter = buildTestDomainAdapter()
 
-    const newGame = await getRightAction(Games.changeTurn({ gameId, userId }), environment)
+    const newGame = await getRight(Games.changeTurn({ gameId, userId })(domainAdapter))()
     expect(newGame.turn).toBe(Teams.red)
   })
 })

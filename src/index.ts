@@ -1,39 +1,39 @@
 import * as dotenv from "dotenv"
-import { pipe } from "fp-ts/lib/pipeable"
-import { run } from "fp-ts/lib/ReaderTaskEither"
-import { task } from "fp-ts/lib/Task"
-import { fold } from "fp-ts/lib/TaskEither"
-import { application } from "./app/main"
-import { buildEnvironment } from "./environment"
-import { ServiceError } from "./utils/audit"
-import { isDev } from "./app/config"
+import socketIo from "socket.io"
+import { buildExpressAdapter } from "./environment"
 import { logDebug } from "./utils/debug"
+import { createExpressApp } from "./app/main"
+import { socketHandler } from "./app/sockets/handler"
 
 dotenv.config()
 
-const exitProcess = (error: ServiceError) => {
+const exitProcess = (error: Error) => {
   logDebug("Shutting down app", error.message)
   process.exit(1)
 }
 
 const startApplication = async () => {
-  const process = pipe(
-    buildEnvironment(),
-    fold(
-      e => task.of(exitProcess(e)),
-      environment => {
-        if (isDev(environment.config)) {
-          logDebug("App Config:\n", environment.config)
-        }
+  try {
+    const expressAdapter = await buildExpressAdapter()
 
-        run(application(), environment)
+    const app = createExpressApp(expressAdapter)
 
-        return task.of(undefined)
-      },
-    ),
-  )
+    const port = process.env.PORT || expressAdapter.config.port
+    const server = app.listen(port)
 
-  await process()
+    const io = socketIo(server, {})
+    io.on("connection", socketHandler(expressAdapter.adapters.domain, io))
+
+    server.on("checkContinue", (__, res) => {
+      res.writeContinue()
+    })
+    server.once("error", (error: Error) => {
+      io.close()
+      exitProcess(error)
+    })
+  } catch (error) {
+    exitProcess(error)
+  }
 }
 
 startApplication().then(

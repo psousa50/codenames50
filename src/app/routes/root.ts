@@ -1,8 +1,7 @@
 import { Router } from "express"
-import { Environment } from "../../environment"
 import { actionOf, Action } from "../../utils/actions"
-import { noRequestHandler } from "../handlers"
+import { simpleHandler } from "../handlers"
 
-const health: Action<void, { result: string }> = () => actionOf({ result: "Ok" })
+const health: Action<void, void, { result: string }> = () => actionOf({ result: "Ok" })
 
-export const root = (env: Environment) => Router().get("/health", noRequestHandler(env, health))
+export const root = Router().get("/health", simpleHandler(health))

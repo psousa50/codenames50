@@ -1,13 +1,20 @@
 import { UUID } from "../utils/types"
-import { Action, fromPromise } from "../utils/actions"
-import * as MongoGames from "../mongodb/games"
+import { fromPromise } from "../utils/actions"
 import { CodeNamesGame } from "../domain/models"
+import { RepositoriesAction } from "./adapters"
 
-const insert: Action<CodeNamesGame, CodeNamesGame> = game => fromPromise(env => MongoGames.insert(game)(env.dbClient))
+const insert: RepositoriesAction<CodeNamesGame, CodeNamesGame> = game =>
+  fromPromise(({ adapters: { mongoAdapter } }) =>
+    mongoAdapter.gamesMongoDb.insert(game)(mongoAdapter.adapters.dbClient),
+  )
 
-const update: Action<CodeNamesGame, CodeNamesGame> = game => fromPromise(env => MongoGames.update(game)(env.dbClient))
+const update: RepositoriesAction<CodeNamesGame, CodeNamesGame> = game =>
+  fromPromise(({ adapters: { mongoAdapter } }) =>
+    mongoAdapter.gamesMongoDb.update(game)(mongoAdapter.adapters.dbClient),
+  )
 
-const getById: Action<UUID, CodeNamesGame | null> = id => fromPromise(env => MongoGames.getById(id)(env.dbClient))
+const getById: RepositoriesAction<UUID, CodeNamesGame | null> = id =>
+  fromPromise(({ adapters: { mongoAdapter } }) => mongoAdapter.gamesMongoDb.getById(id)(mongoAdapter.adapters.dbClient))
 
 export const gamesRepository = {
   insert,

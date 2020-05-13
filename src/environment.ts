@@ -1,49 +1,61 @@
 import { v4 as uuidv4 } from "uuid"
-import moment from "moment"
-import { pipe } from "fp-ts/lib/pipeable"
-import { map, tryCatch } from "fp-ts/lib/TaskEither"
 import { MongoClient } from "mongodb"
 import { config as appConfig } from "./app/config"
-import { AppConfig } from "./app/config"
-import { logDebug } from "./utils/debug"
 import { currentUtcDateTime } from "./utils/dates"
-import { gamesRepository, GamesRepository } from "./repositories/games"
-import { ServiceError } from "./utils/audit"
-import { WordsRepository, wordsRepository } from "./repositories/words"
-import { gamesDomain, GamesDomain } from "./domain/games"
+import { gamesRepository } from "./repositories/games"
+import { wordsRepository } from "./repositories/words"
+import { gamesDomain } from "./domain/games"
+import { RepositoriesAdapter } from "./repositories/adapters"
+import { MongoAdapter } from "./mongodb/adapters"
+import { gamesMongoDb } from "./mongodb/games"
+import { wordsMongoDb } from "./mongodb/words"
+import { DomainAdapter } from "./domain/adapters"
+import { ExpressAdapter } from "./app/adapters"
 
-export type Environment = {
-  config: AppConfig
-  gamesRepository: GamesRepository
-  wordsRepository: WordsRepository
-  gamesDomain: GamesDomain
-  dbClient: MongoClient
-  uuid: () => string
-  currentUtcDateTime: () => moment.Moment
-  log: (message: string) => void
-}
-
-const connectDb = (mongoUri: string) =>
-  tryCatch(
-    () => MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true }),
-    error => new ServiceError((error as Error).message),
-  )
-
-export const buildEnvironment = () => {
+export const buildExpressAdapter = async () => {
   const config = appConfig.get()
 
   const mongoUri = process.env.MONGODB_URI || config.mongodb.uri || ""
-  return pipe(
-    connectDb(mongoUri),
-    map(mongoClient => ({
-      config,
-      gamesRepository,
-      wordsRepository,
-      gamesDomain,
-      dbClient: mongoClient,
-      log: logDebug,
+
+  const dbClient = await MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+
+  const mongoAdapter: MongoAdapter = {
+    gamesMongoDb,
+    wordsMongoDb,
+    adapters: {
+      dbClient,
+    },
+  }
+
+  const repositoriesAdapter: RepositoriesAdapter = {
+    gamesRepository,
+    wordsRepository,
+    adapters: {
+      mongoAdapter,
+    },
+  }
+
+  const domainAdapter: DomainAdapter = {
+    config: {
+      boardWidth: config.boardWidth,
+      boardHeight: config.boardHeight,
+    },
+    gamesDomain,
+    adapters: {
+      repositories: repositoriesAdapter,
       uuid: uuidv4,
       currentUtcDateTime,
-    })),
-  )
+    },
+  }
+
+  const expressAdapter: ExpressAdapter = {
+    config: {
+      port: config.port,
+    },
+    adapters: {
+      domain: domainAdapter,
+    },
+  }
+
+  return expressAdapter
 }

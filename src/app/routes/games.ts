@@ -1,8 +1,8 @@
 import { Router } from "express"
-import { Environment } from "../../environment"
 import * as GamesModels from "../../domain/models"
 import { handler } from "../handlers"
 import { Stringify } from "./transformers"
+import { ExpressAdapter } from "../adapters"
 
 const createRequestTransformer = (params: Stringify<GamesModels.CreateGameInput>): GamesModels.CreateGameInput => ({
   language: params.language!,
@@ -14,7 +14,7 @@ const joinRequestTransformer = (params: Stringify<GamesModels.JoinGameInput>): G
   userId: params.userId!,
 })
 
-export const games = (env: Environment) =>
+export const games = (env: ExpressAdapter) =>
   Router()
-    .post("/create", handler(env, env.gamesDomain.create, createRequestTransformer))
-    .post("/join", handler(env, env.gamesDomain.join, joinRequestTransformer))
+    .post("/create", handler(env.adapters.domain, env.adapters.domain.gamesDomain.create, createRequestTransformer))
+    .post("/join", handler(env.adapters.domain, env.adapters.domain.gamesDomain.join, joinRequestTransformer))

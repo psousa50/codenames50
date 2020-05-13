@@ -1,35 +1,38 @@
 import * as R from "ramda"
 import { currentUtcDateTime } from ".../../../src/utils/dates"
-import { Either, fold, getOrElse } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/pipeable"
 import { identity } from "fp-ts/lib/function"
-import { Environment } from "../src/environment"
-import { createApplication } from "../src/app/main"
-import { run } from "fp-ts/lib/ReaderTaskEither"
+import { fold, getOrElse } from "fp-ts/lib/TaskEither"
 import { DeepPartial } from "../src/utils/types"
-import { ActionResult, actionOf } from "../src/utils/actions"
+import { actionOf } from "../src/utils/actions"
 import { CodeNamesGame, Words } from "../src/domain/models"
-import { MongoClient } from "mongodb"
-
-export const createApp = async (environment: Environment) => getRight(await run(createApplication(), environment))
-
-export const x = async () => await run(createApplication(), {} as any)
+import { ExpressAdapter } from "../src/app/adapters"
+import { DomainAdapter } from "../src/domain/adapters"
+import { TaskEither } from "fp-ts/lib/TaskEither"
+import { RepositoriesAdapter } from "../src/repositories/adapters"
+import { task } from "fp-ts/lib/Task"
 
 const words = {
   language: "en",
   words: R.range(0, 50).map(i => `word-${i}`),
 }
 
-const defaultEnvironment: Environment = {
-  config: {
-    mongodb: {
-      uri: "",
-    },
-    nodeEnv: "DEV",
-    port: 3000,
-    boardWidth: 5,
-    boardHeight: 5,
+const defaultMongoAdapter = {
+  gamesMongoDb: {
+    insert: jest.fn(),
+    update: jest.fn(),
+    getById: jest.fn(),
   },
+  wordsMongoDb: {
+    insert: jest.fn(),
+    getByLanguage: jest.fn(),
+  },
+  adapters: {
+    dbClient: {},
+  },
+} as any
+
+const defaultRepositoriesAdapter = {
   gamesRepository: {
     insert: jest.fn((game: CodeNamesGame) => actionOf(game)),
     update: jest.fn((game: CodeNamesGame) => actionOf(game)),
@@ -39,21 +42,49 @@ const defaultEnvironment: Environment = {
     insert: () => actionOf(undefined),
     getByLanguage: () => actionOf(words),
   },
-  gamesDomain: {
-    create: () => actionOf({} as CodeNamesGame),
-    join: () => actionOf({} as CodeNamesGame),
-    revealWord: () => actionOf({} as CodeNamesGame),
+  adapters: {
+    mongoAdapter: defaultMongoAdapter,
   },
-  dbClient: {} as MongoClient,
-  uuid: () => "",
-  currentUtcDateTime,
-  log: () => undefined,
 }
 
-export const buildTestEnvironment = (environment: DeepPartial<Environment>): Environment =>
-  R.mergeDeepRight(defaultEnvironment, environment)
+export const buildTestRepositoriesAdapter = (
+  repositoriesAdapter: DeepPartial<RepositoriesAdapter>,
+): RepositoriesAdapter => R.mergeDeepRight(defaultRepositoriesAdapter, repositoriesAdapter)
 
-export const getRight = <L, A>(fa: Either<L, A>) =>
+const defaultDomainAdapter = {
+  config: {
+    boardWidth: 5,
+    boardHeight: 5,
+  },
+  gamesDomain: {
+    create: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
+    join: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
+    revealWord: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
+    changeTurn: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
+  },
+  adapters: {
+    repositories: defaultRepositoriesAdapter,
+    uuid: () => "",
+    currentUtcDateTime,
+  },
+}
+
+export const buildTestDomainAdapter = (domainAdapter: DeepPartial<DomainAdapter> = {}): DomainAdapter =>
+  R.mergeDeepRight(defaultDomainAdapter, domainAdapter)
+
+const defaultExpressAdapter: ExpressAdapter = {
+  config: {
+    port: 3000,
+  },
+  adapters: {
+    domain: defaultDomainAdapter,
+  },
+}
+
+export const buildTestExpressAdapter = (expressAdapter: DeepPartial<ExpressAdapter>): ExpressAdapter =>
+  R.mergeDeepRight(defaultExpressAdapter, expressAdapter)
+
+export const getRight = <L, A>(fa: TaskEither<L, A>) =>
   pipe(
     fa,
     getOrElse<L, A>(e => {
@@ -61,16 +92,13 @@ export const getRight = <L, A>(fa: Either<L, A>) =>
     }),
   )
 
-export const getLeft = <L, A>(fa: Either<L, A>) =>
+export const getLeft = <L, A>(fa: TaskEither<L, A>) =>
   pipe(
     fa,
-    fold(identity, r => {
-      throw new Error(`Should be Left => ${JSON.stringify(r)}`)
-    }),
+    fold(
+      e => task.of(e),
+      r => {
+        throw new Error(`Should be Left => ${JSON.stringify(r)}`)
+      },
+    ),
   )
-
-export const getRightAction = async <R>(result: ActionResult<R>, environment: Environment) =>
-  getRight(await run(result, environment))
-
-export const getLeftAction = async <R>(result: ActionResult<R>, environment: Environment) =>
-  getLeft(await run(result, environment))

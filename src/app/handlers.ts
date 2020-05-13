@@ -1,9 +1,9 @@
 import { ErrorCodes, ServiceError } from "../utils/audit"
 import { Response, ErrorRequestHandler, RequestHandler } from "express"
-import { Environment } from "../environment"
-import { Action } from "../utils/actions"
 import { pipe } from "fp-ts/lib/pipeable"
 import { bimap, run } from "fp-ts/lib/ReaderTaskEither"
+import { DomainAdapter, DomainAction } from "../domain/adapters"
+import { Action } from "../utils/actions"
 
 type Query = {
   [key: string]: string | string[] | Query | Query[]
@@ -31,13 +31,13 @@ export const okHandler = (res: Response) => (responseBody: any) => {
   res.json(responseBody)
 }
 
-export const noRequestHandler = <R>(env: Environment, action: Action<void, R>): RequestHandler => async (_, res) => {
-  await run(pipe(action(), bimap(errorHandler(res), okHandler(res))), env)
+export const simpleHandler = <R>(action: Action<void, void, R>): RequestHandler => async (_, res) => {
+  await run(pipe(action(), bimap(errorHandler(res), okHandler(res))), undefined)
 }
 
 export const handler = <A, R>(
-  env: Environment,
-  action: Action<A, R>,
+  env: DomainAdapter,
+  action: DomainAction<A, R>,
   inputTransformer: (query: Query) => A,
 ): RequestHandler => async (req, res) => {
   await run(pipe(action(inputTransformer(req.body)), bimap(errorHandler(res), okHandler(res))), env)
