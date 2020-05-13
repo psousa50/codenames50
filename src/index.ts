@@ -7,7 +7,7 @@ import { buildMongoAdapter } from "./mongodb/adapters"
 import { buildDomainAdapter } from "./domain/adapters"
 import { buildRepositoriesAdapter } from "./repositories/adapters"
 import { MongoClient } from "mongodb"
-import { createSocketApp } from "./app/sockets/main"
+import { createSocketApp } from "./sockets/main"
 
 dotenv.config()
 

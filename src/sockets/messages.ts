@@ -1,4 +1,4 @@
-import { RevealWordInput, CreateGameInput, JoinGameInput, CodeNamesGame, ChangeTurnInput } from "../../domain/models"
+import { RevealWordInput, CreateGameInput, JoinGameInput, CodeNamesGame, ChangeTurnInput } from "../domain/models"
 import { createSocketMessage } from "./messagesTypes"
 
 export const createGame = (data: CreateGameInput) => createSocketMessage("createGame", data)

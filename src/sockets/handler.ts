@@ -1,11 +1,11 @@
 import { SocketMessage, SocketMessageType } from "./messagesTypes"
-import { withEnv } from "../../utils/actions"
-import { RevealWordInput, CreateGameInput, JoinGameInput, ChangeTurnInput } from "../../domain/models"
+import { withEnv } from "../utils/actions"
+import { RevealWordInput, CreateGameInput, JoinGameInput, ChangeTurnInput } from "../domain/models"
 import { pipe } from "fp-ts/lib/pipeable"
 import { map, run } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
 import { gameCreated, joinedGame, revealWord, changeTurn } from "./messages"
-import { DomainAdapter, DomainAction } from "../../domain/adapters"
+import { DomainAdapter, DomainAction } from "../domain/adapters"
 
 type SocketHandler<T> = (io: SocketIO.Server, socket: SocketIO.Socket) => DomainAction<T, void>
 
