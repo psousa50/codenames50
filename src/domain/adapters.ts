@@ -8,6 +8,10 @@ import { ServiceError } from "../utils/audit"
 import { pipe } from "fp-ts/lib/pipeable"
 import { fromEither, chain, fromTaskEither } from "fp-ts/lib/ReaderTaskEither"
 import { TaskEither } from "fp-ts/lib/TaskEither"
+import { AppConfig } from "../config"
+import { v4 as uuidv4 } from "uuid"
+import { currentUtcDateTime } from "../utils/dates"
+import { gamesDomain } from "./games"
 
 export type DomainConfig = {
   boardWidth: number
@@ -39,3 +43,19 @@ export function actionErrorOf<R>(error: ServiceError): DomainActionResult<R> {
 }
 
 export const withEnv = <R>(f: (env: DomainAdapter) => DomainActionResult<R>) => pipe(ask(), chain(f))
+
+export const buildDomainAdapter = (
+  { boardWidth, boardHeight }: AppConfig,
+  repositoriesAdapter: RepositoriesAdapter,
+): DomainAdapter => ({
+  config: {
+    boardWidth,
+    boardHeight,
+  },
+  gamesDomain,
+  adapters: {
+    repositories: repositoriesAdapter,
+    uuid: uuidv4,
+    currentUtcDateTime,
+  },
+})

@@ -46,27 +46,27 @@ const buildBoard = (boardWidth: number, boardHeight: number) => (words: BoardWor
   R.range(0, boardHeight).map(r => words.slice(r * boardWidth, r * boardWidth + boardWidth))
 
 export const create: DomainAction<CreateGameInput, CreateGameOutput> = ({ userId, language }) =>
-  withEnv(env =>
+  withEnv(({ config: { boardWidth, boardHeight }, adapters: { repositories, uuid, currentUtcDateTime } }) =>
     pipe(
-      fromTaskEither(env.adapters.repositories.wordsRepository.getByLanguage(language)(env.adapters.repositories)),
+      fromTaskEither(repositories.wordsRepository.getByLanguage(language)(repositories)),
       chain(allWords =>
         allWords
-          ? actionOf(shuffle(allWords.words).slice(0, env.config.boardWidth * env.config.boardHeight))
+          ? actionOf(shuffle(allWords.words).slice(0, boardWidth * boardHeight))
           : actionErrorOf<string[]>(new ServiceError("Language not found", ErrorCodes.NOT_FOUND)),
       ),
       map(determineWordTypes),
-      map(buildBoard(env.config.boardWidth, env.config.boardHeight)),
+      map(buildBoard(boardWidth, boardHeight)),
       chain(board =>
         fromTaskEither(
-          env.adapters.repositories.gamesRepository.insert({
-            gameId: env.adapters.uuid(),
-            timestamp: env.adapters.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+          repositories.gamesRepository.insert({
+            gameId: uuid(),
+            timestamp: currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
             userId,
             players: [{ userId }],
             state: GameStates.idle,
             turn: Teams.red,
             board,
-          })(env.adapters.repositories),
+          })(repositories),
         ),
       ),
     ),

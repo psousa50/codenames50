@@ -1,9 +1,13 @@
 import * as dotenv from "dotenv"
-import socketIo from "socket.io"
-import { buildExpressAdapter } from "./environment"
 import { logDebug } from "./utils/debug"
 import { createExpressApp } from "./app/main"
-import { socketHandler } from "./app/sockets/handler"
+import { buildExpressAdapter } from "./app/adapters"
+import { config as appConfig } from "./config"
+import { buildMongoAdapter } from "./mongodb/adapters"
+import { buildDomainAdapter } from "./domain/adapters"
+import { buildRepositoriesAdapter } from "./repositories/adapters"
+import { MongoClient } from "mongodb"
+import { createSocketApp } from "./app/sockets/main"
 
 dotenv.config()
 
@@ -14,15 +18,23 @@ const exitProcess = (error: Error) => {
 
 const startApplication = async () => {
   try {
-    const expressAdapter = await buildExpressAdapter()
+    const config = appConfig.get()
+
+    const mongoUri = process.env.MONGODB_URI || config.mongodb.uri || ""
+
+    const dbClient = await MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+    const mongoAdapter = buildMongoAdapter(dbClient)
+    const repositoriesAdapter = buildRepositoriesAdapter(mongoAdapter)
+    const domainAdapter = buildDomainAdapter(config, repositoriesAdapter)
+    const expressAdapter = buildExpressAdapter(config, domainAdapter)
 
     const app = createExpressApp(expressAdapter)
 
-    const port = process.env.PORT || expressAdapter.config.port
+    const envPort = Number(process.env.PORT)
+    const port = isNaN(envPort) ? expressAdapter.config.port : envPort
     const server = app.listen(port)
 
-    const io = socketIo(server, {})
-    io.on("connection", socketHandler(expressAdapter.adapters.domain, io))
+    const io = createSocketApp(app, port + 1, domainAdapter)
 
     server.on("checkContinue", (__, res) => {
       res.writeContinue()
