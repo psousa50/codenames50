@@ -5,83 +5,56 @@ import { fold, getOrElse } from "fp-ts/lib/TaskEither"
 import { DeepPartial } from "../src/utils/types"
 import { actionOf } from "../src/utils/actions"
 import { CodeNamesGame } from "../src/domain/models"
-import { DomainAdapter } from "../src/domain/adapters"
+import { DomainEnvironment, buildDomainEnvironment } from "../src/domain/adapters"
 import { TaskEither } from "fp-ts/lib/TaskEither"
-import { RepositoriesAdapter } from "../src/repositories/adapters"
 import { task } from "fp-ts/lib/Task"
-import { ExpressAdapter } from "../src/app/adapters"
+import { ExpressEnvironment, buildExpressEnvironment } from "../src/app/adapters"
+import { buildMongoEnvironment } from "../src/mongodb/adapters"
+import { buildRepositoriesEnvironment } from "../src/repositories/adapters"
+import { config } from "dotenv/types"
+import { AppConfig } from "../src/config"
+import { MongoClient } from "mongodb"
 
 const words = {
   language: "en",
   words: R.range(0, 50).map(i => `word-${i}`),
 }
 
-const defaultMongoAdapter = {
-  gamesMongoDb: {
-    insert: jest.fn(),
-    update: jest.fn(),
-    getById: jest.fn(),
+const defaultConfig = {
+  mongodb: {
+    uri: "",
   },
-  wordsMongoDb: {
-    insert: jest.fn(),
-    getByLanguage: jest.fn(),
-  },
-  adapters: {
-    dbClient: {},
-  },
-} as any
-
-const defaultRepositoriesAdapter = {
-  adapters: {
-    mongoAdapter: defaultMongoAdapter,
-  },
+  nodeEnv: "",
+  port: 3000,
+  boardWidth: 5,
+  boardHeight: 5,
 }
 
-export const buildTestRepositoriesAdapter = (
-  repositoriesAdapter: DeepPartial<RepositoriesAdapter>,
-): RepositoriesAdapter => R.mergeDeepRight(defaultRepositoriesAdapter, repositoriesAdapter)
+export const buildDefaultTestDomainEnvironment = () => {
+  const dbClient = jest.fn(() => Promise.resolve(undefined)) as any
+  const mongoEnvironment = buildMongoEnvironment(dbClient)
+  const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
+  const domainEnvironment = buildDomainEnvironment(defaultConfig, repositoriesEnvironment)
 
-const defaultDomainAdapter = {
-  config: {
-    boardWidth: 5,
-    boardHeight: 5,
-  },
-  adapters: {
-    gamesRepository: {
-      insert: jest.fn((game: CodeNamesGame) => actionOf(game)),
-      update: jest.fn((game: CodeNamesGame) => actionOf(game)),
-      getById: () => actionOf({} as CodeNamesGame),
-    },
-    wordsRepository: {
-      insert: () => actionOf(undefined),
-      getByLanguage: () => actionOf(words),
-    },
-    repositories: defaultRepositoriesAdapter,
-    uuid: () => "",
-    currentUtcDateTime,
-  },
+  return domainEnvironment
 }
 
-export const buildTestDomainAdapter = (domainAdapter: DeepPartial<DomainAdapter> = {}): DomainAdapter =>
-  R.mergeDeepRight(defaultDomainAdapter, domainAdapter)
+export const buildDefaultTestExpressEnvironment = () =>
+  buildExpressEnvironment(defaultConfig, buildDefaultTestDomainEnvironment())
 
-const defaultExpressAdapter: ExpressAdapter = {
-  config: {
-    port: 3000,
-  },
-  adapters: {
-    gamesDomain: {
-      create: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
-      join: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
-      revealWord: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
-      changeTurn: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
-    },
-    domain: defaultDomainAdapter,
-  },
+export const buildTestRepositoriesEnvironment = (dbClient: MongoClient) => {
+  const mongoEnvironment = buildMongoEnvironment(dbClient)
+  const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
+
+  return repositoriesEnvironment
 }
 
-export const buildTestExpressAdapter = (expressAdapter: DeepPartial<ExpressAdapter>): ExpressAdapter =>
-  R.mergeDeepRight(defaultExpressAdapter, expressAdapter)
+export const buildTestDomainEnvironment = (domainEnvironment: DeepPartial<DomainEnvironment> = {}): DomainEnvironment =>
+  R.mergeDeepRight(buildDefaultTestDomainEnvironment(), domainEnvironment)
+
+export const buildTestExpressEnvironment = (
+  expressEnvironment: DeepPartial<ExpressEnvironment> = {},
+): ExpressEnvironment => R.mergeDeepRight(buildDefaultTestExpressEnvironment(), expressEnvironment)
 
 export const getRight = <L, A>(fa: TaskEither<L, A>) =>
   pipe(

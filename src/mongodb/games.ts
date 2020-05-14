@@ -4,27 +4,27 @@ import { UUID } from "../utils/types"
 
 const GAMES = "Games"
 
-const insert = (game: CodeNamesGame) => (client: MongoClient) =>
+const insert = (client: MongoClient) => (game: CodeNamesGame) =>
   client
     .db()
     .collection<CodeNamesGame>(GAMES)
     .insertOne(game)
     .then(_ => game)
 
-const update = (game: CodeNamesGame) => (client: MongoClient) =>
+const update = (client: MongoClient) => (game: CodeNamesGame) =>
   client
     .db()
     .collection<CodeNamesGame>(GAMES)
     .updateOne({ gameId: game.gameId }, { $set: game })
     .then(_ => game)
 
-const getById = (gameId: UUID) => (client: MongoClient) =>
+const getById = (client: MongoClient) => (gameId: UUID) =>
   client.db().collection<CodeNamesGame>(GAMES).findOne({ gameId: gameId })
 
-export const gamesMongoDb = {
+export const gamesMongoDbPorts = {
   insert,
   update,
   getById,
 }
 
-export type GamesMongoDb = typeof gamesMongoDb
+export type GamesMongoDbPorts = typeof gamesMongoDbPorts

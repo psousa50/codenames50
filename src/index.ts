@@ -1,13 +1,13 @@
 import * as dotenv from "dotenv"
 import { logDebug } from "./utils/debug"
 import { config as appConfig } from "./config"
-import { buildMongoAdapter } from "./mongodb/adapters"
-import { buildDomainAdapter } from "./domain/adapters"
-import { buildRepositoriesAdapter } from "./repositories/adapters"
+import { buildMongoEnvironment } from "./mongodb/adapters"
+import { buildDomainEnvironment } from "./domain/adapters"
+import { buildRepositoriesEnvironment } from "./repositories/adapters"
 import { MongoClient } from "mongodb"
 import { createSocketApp } from "./sockets/main"
 import { createExpressApp } from "./app/main"
-import { buildExpressAdapter } from "./app/adapters"
+import { buildExpressEnvironment } from "./app/adapters"
 
 dotenv.config()
 
@@ -23,18 +23,18 @@ const startApplication = async () => {
     const mongoUri = process.env.MONGODB_URI || config.mongodb.uri || ""
 
     const dbClient = await MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
-    const mongoAdapter = buildMongoAdapter(dbClient)
-    const repositoriesAdapter = buildRepositoriesAdapter(mongoAdapter)
-    const domainAdapter = buildDomainAdapter(config, repositoriesAdapter)
-    const expressAdapter = buildExpressAdapter(config, domainAdapter)
+    const mongoEnvironment = buildMongoEnvironment(dbClient)
+    const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
+    const domainEnvironment = buildDomainEnvironment(config, repositoriesEnvironment)
+    const expressEnvironment = buildExpressEnvironment(config, domainEnvironment)
 
-    const app = createExpressApp(expressAdapter)
+    const app = createExpressApp(expressEnvironment)
 
     const envPort = Number(process.env.PORT)
-    const port = isNaN(envPort) ? expressAdapter.config.port : envPort
+    const port = isNaN(envPort) ? expressEnvironment.config.port : envPort
     const server = app.listen(port)
 
-    const io = createSocketApp(app, port + 1, domainAdapter)
+    const io = createSocketApp(app, port + 1, domainEnvironment)
 
     server.on("checkContinue", (__, res) => {
       res.writeContinue()

@@ -2,9 +2,9 @@ import * as R from "ramda"
 import moment from "moment"
 import * as Games from "../../src/domain/games"
 import { CodeNamesGame, GameStates, Teams, WordType } from "../../src/domain/models"
-import { buildTestDomainAdapter, getRight, getLeft } from "../helpers"
-import { actionOf } from "../../src/utils/actions"
+import { getRight, getLeft, buildTestDomainEnvironment } from "../helpers"
 import { ErrorCodes } from "../../src/utils/audit"
+import { adapterOf } from "../../src/utils/adapters"
 
 const sortStrings = (s1: string, s2: string) => s1.localeCompare(s2)
 
@@ -14,8 +14,8 @@ describe("create", () => {
     const allWords = {
       words: ["w1", "w2", "w3", "w4"],
     } as any
-    const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-    const domainAdapter = buildTestDomainAdapter({
+    const insert = jest.fn((game: CodeNamesGame) => adapterOf(game))
+    const domainAdapter = buildTestDomainEnvironment({
       config: {
         boardWidth: 0,
         boardHeight: 0,
@@ -25,7 +25,7 @@ describe("create", () => {
           insert,
         },
         wordsRepository: {
-          getByLanguage: jest.fn(() => actionOf(allWords)),
+          getByLanguage: jest.fn(() => adapterOf(allWords)),
         },
         uuid: () => gameId,
         currentUtcDateTime: () => moment.utc("2000-01-01"),
@@ -58,8 +58,8 @@ describe("create", () => {
       const allWords = {
         words: R.range(0, 30).map(i => `word-${i}`),
       } as any
-      const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-      const domainAdapter = buildTestDomainAdapter({
+      const insert = jest.fn((game: CodeNamesGame) => adapterOf(game))
+      const domainAdapter = buildTestDomainEnvironment({
         config: {
           boardWidth: 5,
           boardHeight: 5,
@@ -69,7 +69,7 @@ describe("create", () => {
             insert,
           },
           wordsRepository: {
-            getByLanguage: jest.fn(() => actionOf(allWords)),
+            getByLanguage: jest.fn(() => adapterOf(allWords)),
           },
         },
       })
@@ -93,8 +93,8 @@ describe("create", () => {
       const allWords = {
         words: R.range(0, 40).map(i => `word-${i}`),
       } as any
-      const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-      const domainAdapter = buildTestDomainAdapter({
+      const insert = jest.fn((game: CodeNamesGame) => adapterOf(game))
+      const domainAdapter = buildTestDomainEnvironment({
         config: {
           boardWidth: 5,
           boardHeight: 5,
@@ -104,7 +104,7 @@ describe("create", () => {
             insert,
           },
           wordsRepository: {
-            getByLanguage: jest.fn(() => actionOf(allWords)),
+            getByLanguage: jest.fn(() => adapterOf(allWords)),
           },
         },
       })
@@ -122,13 +122,13 @@ describe("create", () => {
 
     it("for the language chosen", async () => {
       const language = "pt"
-      const domainAdapter = buildTestDomainAdapter({
+      const domainAdapter = buildTestDomainEnvironment({
         adapters: {
           gamesRepository: {
-            insert: jest.fn(game => actionOf(game)),
+            insert: jest.fn(game => adapterOf(game)),
           },
           wordsRepository: {
-            getByLanguage: jest.fn(() => actionOf({ words: [] } as any)),
+            getByLanguage: jest.fn(() => adapterOf({ words: [] } as any)),
           },
         },
       })
@@ -139,13 +139,13 @@ describe("create", () => {
     })
 
     it("gives an error 404 if language does not exist", async () => {
-      const domainAdapter = buildTestDomainAdapter({
+      const domainAdapter = buildTestDomainEnvironment({
         adapters: {
           gamesRepository: {
-            insert: jest.fn(game => actionOf(game)),
+            insert: jest.fn(game => adapterOf(game)),
           },
           wordsRepository: {
-            getByLanguage: jest.fn(() => actionOf(null)),
+            getByLanguage: jest.fn(() => adapterOf(null)),
           },
         },
       })
@@ -170,11 +170,11 @@ describe("join", () => {
       players: [player1],
     } as any
 
-    const domainAdapter = buildTestDomainAdapter({
+    const domainAdapter = buildTestDomainEnvironment({
       adapters: {
         gamesRepository: {
-          getById: jest.fn(() => actionOf(game)),
-          update: jest.fn(() => actionOf(game)),
+          getById: jest.fn(() => adapterOf(game)),
+          update: jest.fn(() => adapterOf(game)),
         },
       },
     })
@@ -204,11 +204,11 @@ describe("join", () => {
       players: [player1],
     } as any
 
-    const domainAdapter = buildTestDomainAdapter({
+    const domainAdapter = buildTestDomainEnvironment({
       adapters: {
         gamesRepository: {
-          getById: jest.fn(() => actionOf(game)),
-          update: jest.fn(() => actionOf(game)),
+          getById: jest.fn(() => adapterOf(game)),
+          update: jest.fn(() => adapterOf(game)),
         },
       },
     })
@@ -224,10 +224,10 @@ describe("join", () => {
     const gameId = "some-unexistant-id"
     const userId = "user-id"
 
-    const domainAdapter = buildTestDomainAdapter({
+    const domainAdapter = buildTestDomainEnvironment({
       adapters: {
         gamesRepository: {
-          getById: jest.fn(() => actionOf(null)),
+          getById: jest.fn(() => adapterOf(null)),
         },
       },
     })
@@ -252,11 +252,11 @@ describe("revealWord", () => {
       ],
     } as any
 
-    const domainAdapter = buildTestDomainAdapter({
+    const domainAdapter = buildTestDomainEnvironment({
       adapters: {
         gamesRepository: {
-          insert: jest.fn(() => actionOf(game)),
-          getById: () => actionOf(game),
+          update: jest.fn(g => adapterOf(g)),
+          getById: jest.fn(() => adapterOf(game)),
         },
       },
     })
@@ -280,7 +280,14 @@ describe("changeTurn", () => {
       turn: Teams.blue,
     } as any
 
-    const domainAdapter = buildTestDomainAdapter()
+    const domainAdapter = buildTestDomainEnvironment({
+      adapters: {
+        gamesRepository: {
+          update: jest.fn(g => adapterOf(g)),
+          getById: () => adapterOf(game),
+        },
+      },
+    })
 
     const newGame = await getRight(Games.changeTurn({ gameId, userId })(domainAdapter))()
     expect(newGame.turn).toBe(Teams.red)

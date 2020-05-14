@@ -1,38 +1,14 @@
 import { MongoMemoryServer } from "mongodb-memory-server"
 import { connect } from "../../src/mongodb/main"
-import { gamesRepository } from "../../src/repositories/games"
-import { wordsRepository } from "../../src/repositories/words"
-import { getRight } from "../helpers"
-import { MongoClient } from "mongodb"
-import { gamesMongoDb } from "../../src/mongodb/games"
-import { wordsMongoDb } from "../../src/mongodb/words"
-
-const buildRepositoriesAdapter = (dbClient: MongoClient) => {
-  const mongoAdapter = {
-    gamesMongoDb,
-    wordsMongoDb,
-    adapters: {
-      dbClient,
-    },
-  }
-
-  const repositoriesAdapter = {
-    gamesRepository,
-    wordsRepository,
-    adapters: {
-      mongoAdapter,
-    },
-  }
-
-  return repositoriesAdapter
-}
+import { gamesRepositoryPorts } from "../../src/repositories/games"
+import { getRight, buildTestRepositoriesEnvironment } from "../helpers"
 
 it("insert and getById", async () => {
   const mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getUri()
 
   const dbClient = await connect(mongoUri)
-  const repositoriesAdapter = buildRepositoriesAdapter(dbClient)
+  const repositoriesAdapter = buildTestRepositoriesEnvironment(dbClient)
 
   const gameToInsert = {
     gameId: "some-id",
@@ -41,9 +17,9 @@ it("insert and getById", async () => {
     something: "else",
   } as any
 
-  const game = await getRight(gamesRepository.insert(gameToInsert)(repositoriesAdapter))()
+  const game = await getRight(gamesRepositoryPorts.insert(gameToInsert)(repositoriesAdapter))()
 
-  const insertedGame = await getRight(gamesRepository.getById(game.gameId)(repositoriesAdapter))()
+  const insertedGame = await getRight(gamesRepositoryPorts.getById(game.gameId)(repositoriesAdapter))()
 
   mongoServer.stop()
 
@@ -55,7 +31,7 @@ it("update and getById", async () => {
   const mongoUri = await mongoServer.getUri()
 
   const dbClient = await connect(mongoUri)
-  const repositoriesAdapter = buildRepositoriesAdapter(dbClient)
+  const repositoriesAdapter = buildTestRepositoriesEnvironment(dbClient)
 
   const gameId = "some-game-id"
   const gameToInsert = {
@@ -64,7 +40,7 @@ it("update and getById", async () => {
     something: "else",
   } as any
 
-  await getRight(gamesRepository.insert(gameToInsert)(repositoriesAdapter))()
+  await getRight(gamesRepositoryPorts.insert(gameToInsert)(repositoriesAdapter))()
 
   const gameToUpdate = {
     gameId,
@@ -73,9 +49,9 @@ it("update and getById", async () => {
     andAlso: "this",
   } as any
 
-  await getRight(gamesRepository.update(gameToUpdate)(repositoriesAdapter))()
+  await getRight(gamesRepositoryPorts.update(gameToUpdate)(repositoriesAdapter))()
 
-  const updatedGame = await getRight(gamesRepository.getById(gameId)(repositoriesAdapter))()
+  const updatedGame = await getRight(gamesRepositoryPorts.getById(gameId)(repositoriesAdapter))()
 
   mongoServer.stop()
 
@@ -88,9 +64,9 @@ describe("getById", () => {
     const mongoUri = await mongoServer.getUri()
 
     const dbClient = await connect(mongoUri)
-    const repositoriesAdapter = buildRepositoriesAdapter(dbClient)
+    const repositoriesAdapter = buildTestRepositoriesEnvironment(dbClient)
 
-    const insertedGame = await getRight(gamesRepository.getById("some-id")(repositoriesAdapter))()
+    const insertedGame = await getRight(gamesRepositoryPorts.getById("some-id")(repositoriesAdapter))()
 
     mongoServer.stop()
 

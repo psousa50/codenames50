@@ -3,14 +3,19 @@ import { Words } from "../domain/models"
 
 const WORDS = "Words"
 
-const insert = (words: Words) => (client: MongoClient) => client.db().collection<Words>(WORDS).insertOne(words)
+const insert = (client: MongoClient) => (words: Words) =>
+  client
+    .db()
+    .collection<Words>(WORDS)
+    .insertOne(words)
+    .then(_ => undefined)
 
-const getByLanguage = (language: string) => (client: MongoClient) =>
+const getByLanguage = (client: MongoClient) => (language: string) =>
   client.db().collection<Words>(WORDS).findOne({ language })
 
-export const wordsMongoDb = {
+export const wordsMongoDbPorts = {
   insert,
   getByLanguage,
 }
 
-export type WordsMongoDb = typeof wordsMongoDb
+export type WordsMongoDbPorts = typeof wordsMongoDbPorts

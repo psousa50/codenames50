@@ -4,9 +4,9 @@ import { root } from "./routes/root"
 import { games } from "./routes/games"
 import cors from "cors"
 import bodyParser from "body-parser"
-import { ExpressAdapter } from "./adapters"
+import { ExpressEnvironment } from "./adapters"
 
-export const createExpressApp = (environment: ExpressAdapter) => {
+export const createExpressApp = (environment: ExpressEnvironment) => {
   const app: Express = express()
 
   app.use(cors())

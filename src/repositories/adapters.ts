@@ -1,28 +1,49 @@
 import * as Actions from "../utils/actions"
-import { MongoAdapter } from "../mongodb/adapters"
 import { ServiceError } from "../utils/audit"
+import { Port } from "../utils/adapters"
+import { gamesMongoDbPorts } from "../mongodb/games"
+import { wordsMongoDbPorts } from "../mongodb/words"
+import { MongoEnvironment } from "../mongodb/adapters"
+import { CodeNamesGame, Words } from "../domain/models"
+import { UUID } from "../utils/types"
 
-export type RepositoriesAdapter = {
+export type RepositoriesEnvironment = {
   adapters: {
-    mongoAdapter: MongoAdapter
+    gamesMongoDb: {
+      insert: (game: CodeNamesGame) => Promise<CodeNamesGame>
+      update: (game: CodeNamesGame) => Promise<CodeNamesGame>
+      getById: (gameId: UUID) => Promise<CodeNamesGame | null>
+    }
+    wordsMongoDb: {
+      insert: (words: Words) => Promise<void>
+      getByLanguage: (language: string) => Promise<Words | null>
+    }
   }
 }
 
-export type RepositoriesActionResult<R = void> = Actions.ActionResult<RepositoriesAdapter, R>
-export type RepositoriesAction<I = void, R = void> = Actions.Action<RepositoriesAdapter, I, R>
+export type RepositoriesActionResult<R = void> = Actions.ActionResult<RepositoriesEnvironment, R>
+export type RepositoriesPort<I = void, R = void> = Port<RepositoriesEnvironment, I, R>
 
 export function ask() {
-  return Actions.ask<RepositoriesAdapter>()
+  return Actions.ask<RepositoriesEnvironment>()
 }
 
-export const actionOf = <R>(v: R) => Actions.actionOf<RepositoriesAdapter, R>(v)
-export const actionErrorOf = <R>(error: ServiceError) => Actions.actionErrorOf<RepositoriesAdapter, R>(error)
+export const actionOf = <R>(v: R) => Actions.actionOf<RepositoriesEnvironment, R>(v)
+export const actionErrorOf = <R>(error: ServiceError) => Actions.actionErrorOf<RepositoriesEnvironment, R>(error)
 
-export const withEnv = <R>(f: (env: RepositoriesAdapter) => RepositoriesActionResult<R>) =>
-  Actions.withEnv<RepositoriesAdapter, R>(f)
+export const withEnv = <R>(f: (env: RepositoriesEnvironment) => RepositoriesActionResult<R>) =>
+  Actions.withEnv<RepositoriesEnvironment, R>(f)
 
-export const buildRepositoriesAdapter = (mongoAdapter: MongoAdapter): RepositoriesAdapter => ({
+export const buildRepositoriesEnvironment = (mongoEnvironment: MongoEnvironment): RepositoriesEnvironment => ({
   adapters: {
-    mongoAdapter,
+    gamesMongoDb: {
+      insert: gamesMongoDbPorts.insert(mongoEnvironment.adapters.dbClient),
+      update: gamesMongoDbPorts.update(mongoEnvironment.adapters.dbClient),
+      getById: gamesMongoDbPorts.getById(mongoEnvironment.adapters.dbClient),
+    },
+    wordsMongoDb: {
+      insert: wordsMongoDbPorts.insert(mongoEnvironment.adapters.dbClient),
+      getByLanguage: wordsMongoDbPorts.getByLanguage(mongoEnvironment.adapters.dbClient),
+    },
   },
 })

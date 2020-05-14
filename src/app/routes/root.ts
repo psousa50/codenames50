@@ -1,7 +1,9 @@
 import { Router } from "express"
-import { actionOf, Action } from "../../utils/actions"
-import { simpleHandler } from "../handlers"
+import { Adapter } from "../../utils/adapters"
+import { responseHandler } from "../handlers"
+import { fromEither } from "fp-ts/lib/TaskEither"
+import { right } from "fp-ts/lib/Either"
 
-const health: Action<void, void, { result: string }> = () => actionOf({ result: "Ok" })
+const health: Adapter<void, { result: string }> = () => fromEither(right({ result: "Ok" }))
 
-export const root = Router().get("/health", simpleHandler(health))
+export const root = Router().get("/health", responseHandler(health))

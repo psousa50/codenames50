@@ -19,7 +19,7 @@ import {
 import { ServiceError, ErrorCodes } from "../utils/audit"
 import { shuffle } from "../utils/random"
 import { update2dCell } from "../utils/collections"
-import { withEnv, DomainAction, actionOf, actionErrorOf, adapt } from "./adapters"
+import { withEnv, actionOf, actionErrorOf, adapt, DomainPort } from "./adapters"
 
 const addPlayer = (userId: string) => (game: CodeNamesGame) =>
   game.players.find(p => p.userId === userId)
@@ -45,14 +45,14 @@ const determineWordTypes = (words: string[]): BoardWord[] => {
 const buildBoard = (boardWidth: number, boardHeight: number) => (words: BoardWord[]): BoardWord[][] =>
   R.range(0, boardHeight).map(r => words.slice(r * boardWidth, r * boardWidth + boardWidth))
 
-export const create: DomainAction<CreateGameInput, CreateGameOutput> = ({ userId, language }) =>
+export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ userId, language }) =>
   withEnv(
     ({
       config: { boardWidth, boardHeight },
-      adapters: { gamesRepository, wordsRepository, repositories, uuid, currentUtcDateTime },
+      adapters: { gamesRepository, wordsRepository, uuid, currentUtcDateTime },
     }) =>
       pipe(
-        fromTaskEither(wordsRepository.getByLanguage(language)(repositories)),
+        fromTaskEither(wordsRepository.getByLanguage(language)),
         chain(allWords =>
           allWords
             ? actionOf(shuffle(allWords.words).slice(0, boardWidth * boardHeight))
@@ -70,22 +70,22 @@ export const create: DomainAction<CreateGameInput, CreateGameOutput> = ({ userId
               state: GameStates.idle,
               turn: Teams.red,
               board,
-            })(repositories),
+            }),
           ),
         ),
       ),
   )
 
-export const join: DomainAction<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) =>
-  withEnv(({ adapters: { gamesRepository, repositories } }) =>
+export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) =>
+  withEnv(({ adapters: { gamesRepository } }) =>
     pipe(
-      fromTaskEither(gamesRepository.getById(gameId)(repositories)),
+      fromTaskEither(gamesRepository.getById(gameId)),
       chain(game =>
         game
           ? actionOf(addPlayer(userId)(game))
           : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
       ),
-      chain(game => adapt(gamesRepository.update(game)(repositories))),
+      chain(game => adapt(gamesRepository.update(game))),
     ),
   )
 
@@ -101,16 +101,16 @@ const revealWordAction = (row: number, col: number) => (game: CodeNamesGame) => 
   ),
 })
 
-export const revealWord: DomainAction<RevealWordInput, RevealWordOutput> = ({ gameId, row, col }) =>
-  withEnv(({ adapters: { gamesRepository, repositories } }) =>
+export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, row, col }) =>
+  withEnv(({ adapters: { gamesRepository } }) =>
     pipe(
-      fromTaskEither(gamesRepository.getById(gameId)(repositories)),
+      fromTaskEither(gamesRepository.getById(gameId)),
       chain(game =>
         game
           ? actionOf(revealWordAction(row, col)(game))
           : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
       ),
-      chain(game => adapt(gamesRepository.update(game)(repositories))),
+      chain(game => adapt(gamesRepository.update(game))),
     ),
   )
 
@@ -119,24 +119,24 @@ const changeTurnAction = (game: CodeNamesGame) => ({
   turn: game.turn === Teams.red ? Teams.blue : Teams.red,
 })
 
-export const changeTurn: DomainAction<ChangeTurnInput, ChangeTurnOutput> = ({ gameId }) =>
-  withEnv(({ adapters: { gamesRepository, repositories } }) =>
+export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ gameId }) =>
+  withEnv(({ adapters: { gamesRepository } }) =>
     pipe(
-      fromTaskEither(gamesRepository.getById(gameId)(repositories)),
+      fromTaskEither(gamesRepository.getById(gameId)),
       chain(game =>
         game
           ? actionOf(changeTurnAction(game))
           : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
       ),
-      chain(game => adapt(gamesRepository.update(game)(repositories))),
+      chain(game => adapt(gamesRepository.update(game))),
     ),
   )
 
-export const gamesDomain = {
+export const gamesDomainPorts = {
   create,
   join,
   revealWord,
   changeTurn,
 }
 
-export type GamesDomain = typeof gamesDomain
+export type GamesDomainPorts = typeof gamesDomainPorts

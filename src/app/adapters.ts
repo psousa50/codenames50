@@ -1,33 +1,67 @@
-import { DomainAdapter } from "../domain/adapters"
+import { DomainEnvironment } from "../domain/adapters"
 import { ActionResult, Action, ask as askAction } from "../utils/actions"
 import { AppConfig } from "../config"
-import { gamesDomain, GamesDomain } from "../domain/games"
+import { gamesDomainPorts } from "../domain/games"
+import { buildAdapter, Adapter } from "../utils/adapters"
+import {
+  CreateGameOutput,
+  JoinGameInput,
+  JoinGameOutput,
+  RevealWordInput,
+  RevealWordOutput,
+  ChangeTurnInput,
+  ChangeTurnOutput,
+  CreateGameInput,
+} from "../domain/models"
+import { Stringify } from "./routes/transformers"
+import * as GamesModels from "../domain/models"
 
 export type ExpressConfig = {
   port: number
 }
 
-export type ExpressAdapter = {
+export type ExpressEnvironment = {
   config: ExpressConfig
   adapters: {
-    gamesDomain: GamesDomain
-    domain: DomainAdapter
+    gamesDomain: {
+      create: Adapter<CreateGameInput, CreateGameOutput>
+      join: Adapter<JoinGameInput, JoinGameOutput>
+      revealWord: Adapter<RevealWordInput, RevealWordOutput>
+      changeTurn: Adapter<ChangeTurnInput, ChangeTurnOutput>
+    }
   }
 }
 
-export type ExpressActionResult<R = void> = ActionResult<ExpressAdapter, R>
-export type ExpressAction<I = void, R = void> = Action<ExpressAdapter, I, R>
+export type ExpressActionResult<R = void> = ActionResult<ExpressEnvironment, R>
+export type ExpressAction<I = void, R = void> = Action<ExpressEnvironment, I, R>
 
 export function ask() {
-  return askAction<ExpressAdapter>()
+  return askAction<ExpressEnvironment>()
 }
 
-export const buildExpressAdapter = (config: AppConfig, domainAdapter: DomainAdapter): ExpressAdapter => ({
+const createRequestTransformer = (params: Stringify<GamesModels.CreateGameInput>): GamesModels.CreateGameInput => ({
+  language: params.language!,
+  userId: params.userId!,
+})
+
+const joinRequestTransformer = (params: Stringify<GamesModels.JoinGameInput>): GamesModels.JoinGameInput => ({
+  gameId: params.gameId!,
+  userId: params.userId!,
+})
+
+export const buildExpressEnvironment = (
+  config: AppConfig,
+  domainEnvironment: DomainEnvironment,
+): ExpressEnvironment => ({
   config: {
     port: config.port,
   },
   adapters: {
-    gamesDomain,
-    domain: domainAdapter,
+    gamesDomain: {
+      create: buildAdapter(domainEnvironment, gamesDomainPorts.create, createRequestTransformer),
+      join: buildAdapter(domainEnvironment, gamesDomainPorts.join, joinRequestTransformer),
+      revealWord: buildAdapter(domainEnvironment, gamesDomainPorts.revealWord),
+      changeTurn: buildAdapter(domainEnvironment, gamesDomainPorts.changeTurn),
+    },
   },
 })

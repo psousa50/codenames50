@@ -1,13 +1,13 @@
 import * as Actions from "../utils/actions"
 import socketIo from "socket.io"
 import { ServiceError } from "../utils/audit"
-import { DomainAdapter } from "../domain/adapters"
-import { GamesDomain, gamesDomain } from "../domain/games"
+import { DomainEnvironment } from "../domain/adapters"
+import { GamesDomainPorts, gamesDomainPorts } from "../domain/games"
 
 export type SocketsAdapter = {
   adapters: {
-    gamesDomain: GamesDomain
-    domain: DomainAdapter
+    gamesDomain: GamesDomainPorts
+    domain: DomainEnvironment
     io: socketIo.Server
   }
 }
@@ -24,9 +24,9 @@ export const actionErrorOf = <R>(error: ServiceError) => Actions.actionErrorOf<S
 
 export const withEnv = <R>(f: (env: SocketsAdapter) => SocketsActionResult<R>) => Actions.withEnv<SocketsAdapter, R>(f)
 
-export const buildSocketsAdapter = (io: socketIo.Server, domainAdapter: DomainAdapter): SocketsAdapter => ({
+export const buildSocketsAdapter = (io: socketIo.Server, domainAdapter: DomainEnvironment): SocketsAdapter => ({
   adapters: {
-    gamesDomain,
+    gamesDomain: gamesDomainPorts,
     domain: domainAdapter,
     io,
   },

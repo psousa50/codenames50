@@ -1,20 +1,16 @@
 import { fromPromise, fromVoidPromise } from "../utils/actions"
 import { Words } from "../domain/models"
-import { RepositoriesAction } from "./adapters"
+import { RepositoriesPort } from "./adapters"
 
-const insert: RepositoriesAction<Words> = words =>
-  fromVoidPromise(env =>
-    env.adapters.mongoAdapter.wordsMongoDb.insert(words)(env.adapters.mongoAdapter.adapters.dbClient),
-  )
+const insert: RepositoriesPort<Words> = words =>
+  fromVoidPromise(({ adapters: { wordsMongoDb } }) => wordsMongoDb.insert(words))
 
-const getByLanguage: RepositoriesAction<string, Words | null> = language =>
-  fromPromise(env =>
-    env.adapters.mongoAdapter.wordsMongoDb.getByLanguage(language)(env.adapters.mongoAdapter.adapters.dbClient),
-  )
+const getByLanguage: RepositoriesPort<string, Words | null> = language =>
+  fromPromise(({ adapters: { wordsMongoDb } }) => wordsMongoDb.getByLanguage(language))
 
-export const wordsRepository = {
+export const wordsRepositoryPorts = {
   insert,
   getByLanguage,
 }
 
-export type WordsRepository = typeof wordsRepository
+export type WordsRepositoryPorts = typeof wordsRepositoryPorts
