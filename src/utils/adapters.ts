@@ -2,7 +2,7 @@ import { Either, right, left } from "fp-ts/lib/Either"
 import { ServiceError } from "./audit"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, map, fromEither, TaskEither } from "fp-ts/lib/TaskEither"
-import { ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither"
+import { ReaderTaskEither, fromTaskEither } from "fp-ts/lib/ReaderTaskEither"
 
 export type Adapter<I = void, R = void> = (i: I) => TaskEither<ServiceError, R>
 export type Port<E, VI, R> = (i: VI) => ReaderTaskEither<E, ServiceError, R>
@@ -18,6 +18,8 @@ export const adapterOf = <R>(v: R): TaskEither<ServiceError, R> => fromEither(ri
 export const adapterErrorOf = <R>(e: ServiceError): TaskEither<ServiceError, R> => fromEither(left(e))
 
 export const portToAdapter = <E, VI, R>(port: Port<E, VI, R>) => (i: VI) => port(i)({} as any)
+
+export const adapt = <E, R>(a: TaskEither<ServiceError, R>) => fromTaskEither<E, ServiceError, R>(a)
 
 export const buildAdapter = <E = void, VI = void, I = VI, R = void>(
   environment: E,

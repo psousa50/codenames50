@@ -1,5 +1,3 @@
-import * as Actions from "../utils/actions"
-import { ServiceError } from "../utils/audit"
 import { Port } from "../utils/adapters"
 import { gamesMongoDbPorts } from "../mongodb/games"
 import { wordsMongoDbPorts } from "../mongodb/words"
@@ -21,18 +19,7 @@ export type RepositoriesEnvironment = {
   }
 }
 
-export type RepositoriesActionResult<R = void> = Actions.ActionResult<RepositoriesEnvironment, R>
 export type RepositoriesPort<I = void, R = void> = Port<RepositoriesEnvironment, I, R>
-
-export function ask() {
-  return Actions.ask<RepositoriesEnvironment>()
-}
-
-export const actionOf = <R>(v: R) => Actions.actionOf<RepositoriesEnvironment, R>(v)
-export const actionErrorOf = <R>(error: ServiceError) => Actions.actionErrorOf<RepositoriesEnvironment, R>(error)
-
-export const withEnv = <R>(f: (env: RepositoriesEnvironment) => RepositoriesActionResult<R>) =>
-  Actions.withEnv<RepositoriesEnvironment, R>(f)
 
 export const buildRepositoriesEnvironment = (mongoEnvironment: MongoEnvironment): RepositoriesEnvironment => ({
   adapters: {

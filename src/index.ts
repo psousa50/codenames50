@@ -23,6 +23,7 @@ const startApplication = async () => {
     const mongoUri = process.env.MONGODB_URI || config.mongodb.uri || ""
 
     const dbClient = await MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+
     const mongoEnvironment = buildMongoEnvironment(dbClient)
     const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
     const domainEnvironment = buildDomainEnvironment(config, repositoriesEnvironment)

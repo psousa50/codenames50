@@ -1,6 +1,6 @@
 import * as R from "ramda"
 import { pipe } from "fp-ts/lib/pipeable"
-import { chain, map, fromTaskEither } from "fp-ts/lib/ReaderTaskEither"
+import { chain, map } from "fp-ts/lib/ReaderTaskEither"
 import {
   CodeNamesGame,
   GameStates,
@@ -19,7 +19,9 @@ import {
 import { ServiceError, ErrorCodes } from "../utils/audit"
 import { shuffle } from "../utils/random"
 import { update2dCell } from "../utils/collections"
-import { withEnv, actionOf, actionErrorOf, adapt, DomainPort } from "./adapters"
+import { DomainPort, DomainEnvironment } from "./adapters"
+import { withEnv, actionOf, actionErrorOf } from "../utils/actions"
+import { adapt } from "../utils/adapters"
 
 const addPlayer = (userId: string) => (game: CodeNamesGame) =>
   game.players.find(p => p.userId === userId)
@@ -52,16 +54,16 @@ export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ userId, 
       adapters: { gamesRepository, wordsRepository, uuid, currentUtcDateTime },
     }) =>
       pipe(
-        fromTaskEither(wordsRepository.getByLanguage(language)),
+        adapt(wordsRepository.getByLanguage(language)),
         chain(allWords =>
           allWords
             ? actionOf(shuffle(allWords.words).slice(0, boardWidth * boardHeight))
-            : actionErrorOf<string[]>(new ServiceError("Language not found", ErrorCodes.NOT_FOUND)),
+            : actionErrorOf<DomainEnvironment, string[]>(new ServiceError("Language not found", ErrorCodes.NOT_FOUND)),
         ),
         map(determineWordTypes),
         map(buildBoard(boardWidth, boardHeight)),
         chain(board =>
-          fromTaskEither(
+          adapt(
             gamesRepository.insert({
               gameId: uuid(),
               timestamp: currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
@@ -79,11 +81,13 @@ export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ userId, 
 export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) =>
   withEnv(({ adapters: { gamesRepository } }) =>
     pipe(
-      fromTaskEither(gamesRepository.getById(gameId)),
+      adapt(gamesRepository.getById(gameId)),
       chain(game =>
         game
           ? actionOf(addPlayer(userId)(game))
-          : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+          : actionErrorOf<DomainEnvironment, CodeNamesGame>(
+              new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND),
+            ),
       ),
       chain(game => adapt(gamesRepository.update(game))),
     ),
@@ -104,11 +108,13 @@ const revealWordAction = (row: number, col: number) => (game: CodeNamesGame) => 
 export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, row, col }) =>
   withEnv(({ adapters: { gamesRepository } }) =>
     pipe(
-      fromTaskEither(gamesRepository.getById(gameId)),
+      adapt(gamesRepository.getById(gameId)),
       chain(game =>
         game
           ? actionOf(revealWordAction(row, col)(game))
-          : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+          : actionErrorOf<DomainEnvironment, CodeNamesGame>(
+              new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND),
+            ),
       ),
       chain(game => adapt(gamesRepository.update(game))),
     ),
@@ -122,11 +128,13 @@ const changeTurnAction = (game: CodeNamesGame) => ({
 export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ gameId }) =>
   withEnv(({ adapters: { gamesRepository } }) =>
     pipe(
-      fromTaskEither(gamesRepository.getById(gameId)),
+      adapt(gamesRepository.getById(gameId)),
       chain(game =>
         game
           ? actionOf(changeTurnAction(game))
-          : actionErrorOf<CodeNamesGame>(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+          : actionErrorOf<DomainEnvironment, CodeNamesGame>(
+              new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND),
+            ),
       ),
       chain(game => adapt(gamesRepository.update(game))),
     ),
