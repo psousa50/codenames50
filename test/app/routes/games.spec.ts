@@ -1,9 +1,9 @@
 import request from "supertest"
 import { buildTestExpressAdapter } from "../../helpers"
-import { createExpressApp } from "../../../src/app/main"
 import * as GamesModels from "../../../src/domain/models"
 import { actionOf, actionErrorOf } from "../../../src/domain/adapters"
 import { ServiceError, ErrorCodes } from "../../../src/utils/audit"
+import { createExpressApp } from "../../../src/app/main"
 
 describe("games/create", () => {
   it("creates a game", async () => {
@@ -11,10 +11,8 @@ describe("games/create", () => {
     const create = jest.fn((_: GamesModels.CreateGameInput) => actionOf(createdGame))
     const expressAdapter = buildTestExpressAdapter({
       adapters: {
-        domain: {
-          gamesDomain: {
-            create,
-          },
+        gamesDomain: {
+          create,
         },
       },
     })
@@ -30,12 +28,10 @@ describe("games/create", () => {
   it("gives an error status if domains return an error", async () => {
     const expressAdapter = buildTestExpressAdapter({
       adapters: {
-        domain: {
-          gamesDomain: {
-            create: jest.fn((_: GamesModels.CreateGameInput) =>
-              actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
-            ),
-          },
+        gamesDomain: {
+          create: jest.fn((_: GamesModels.CreateGameInput) =>
+            actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
+          ),
         },
       },
     })
@@ -53,10 +49,8 @@ describe("games/create", () => {
       const join = jest.fn((_: GamesModels.JoinGameInput) => actionOf(game))
       const expressAdapter = buildTestExpressAdapter({
         adapters: {
-          domain: {
-            gamesDomain: {
-              join,
-            },
+          gamesDomain: {
+            join,
           },
         },
       })
@@ -70,12 +64,10 @@ describe("games/create", () => {
     it("gives an error status if domains return an error", async () => {
       const expressAdapter = buildTestExpressAdapter({
         adapters: {
-          domain: {
-            gamesDomain: {
-              join: jest.fn((_: GamesModels.JoinGameInput) =>
-                actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
-              ),
-            },
+          gamesDomain: {
+            join: jest.fn((_: GamesModels.JoinGameInput) =>
+              actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
+            ),
           },
         },
       })

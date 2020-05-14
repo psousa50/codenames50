@@ -2,21 +2,21 @@ import { SocketMessage, SocketMessageType } from "./messagesTypes"
 import { withEnv } from "../utils/actions"
 import { RevealWordInput, CreateGameInput, JoinGameInput, ChangeTurnInput } from "../domain/models"
 import { pipe } from "fp-ts/lib/pipeable"
-import { map, run } from "fp-ts/lib/ReaderTaskEither"
+import { map, run, fromTaskEither } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
 import { gameCreated, joinedGame, revealWord, changeTurn } from "./messages"
-import { DomainAdapter, DomainAction } from "../domain/adapters"
+import { SocketsAdapter, SocketsAction } from "./adapters"
 
-type SocketHandler<T> = (io: SocketIO.Server, socket: SocketIO.Socket) => DomainAction<T, void>
+type SocketHandler<T> = (socket: SocketIO.Socket) => SocketsAction<T, void>
 
-const addMessageHandler = (env: DomainAdapter, io: SocketIO.Server) => <T>(
+const addMessageHandler = (socketsAdapter: SocketsAdapter) => <T>(
   socket: SocketIO.Socket,
   type: SocketMessageType,
   handler: SocketHandler<T>,
 ) => {
   const h = (data: T) => {
     console.log("RECEIVED=====>\n", type, data)
-    run(handler(io, socket)(data), env)
+    run(handler(socket)(data), socketsAdapter)
   }
 
   socket.on(type, h)
@@ -32,10 +32,10 @@ export const broadcastMessage = <T>(io: SocketIO.Server, gameId: string, message
   io.to(gameId).emit(message.type, message.data)
 }
 
-export const createGameHandler: SocketHandler<CreateGameInput> = (io, socket) => input =>
-  withEnv(({ gamesDomain }) =>
+export const createGameHandler: SocketHandler<CreateGameInput> = socket => input =>
+  withEnv(({ adapters: { io, gamesDomain, domain } }) =>
     pipe(
-      gamesDomain.create(input),
+      fromTaskEither(gamesDomain.create(input)(domain)),
       map(game => {
         socket.join(game.gameId)
         broadcastMessage(io, game.gameId, gameCreated(game))
@@ -44,10 +44,10 @@ export const createGameHandler: SocketHandler<CreateGameInput> = (io, socket) =>
     ),
   )
 
-export const joinGameHandler: SocketHandler<JoinGameInput> = (io, socket) => input =>
-  withEnv(({ gamesDomain }) =>
+export const joinGameHandler: SocketHandler<JoinGameInput> = socket => input =>
+  withEnv(({ adapters: { io, gamesDomain, domain } }) =>
     pipe(
-      gamesDomain.join(input),
+      fromTaskEither(gamesDomain.join(input)(domain)),
       map(game => {
         socket.join(game.gameId)
         broadcastMessage(io, game.gameId, joinedGame(game))
@@ -56,10 +56,10 @@ export const joinGameHandler: SocketHandler<JoinGameInput> = (io, socket) => inp
     ),
   )
 
-export const revealWordHandler: SocketHandler<RevealWordInput> = io => input =>
-  withEnv(({ gamesDomain }) =>
+export const revealWordHandler: SocketHandler<RevealWordInput> = _ => input =>
+  withEnv(({ adapters: { io, gamesDomain, domain } }) =>
     pipe(
-      gamesDomain.revealWord(input),
+      fromTaskEither(gamesDomain.revealWord(input)(domain)),
       map(game => {
         broadcastMessage(io, game.gameId, revealWord(input))
         return undefined
@@ -67,10 +67,10 @@ export const revealWordHandler: SocketHandler<RevealWordInput> = io => input =>
     ),
   )
 
-export const changeTurnHandler: SocketHandler<ChangeTurnInput> = io => input =>
-  withEnv(({ gamesDomain }) =>
+export const changeTurnHandler: SocketHandler<ChangeTurnInput> = _ => input =>
+  withEnv(({ adapters: { io, gamesDomain, domain } }) =>
     pipe(
-      gamesDomain.changeTurn(input),
+      fromTaskEither(gamesDomain.changeTurn(input)(domain)),
       map(game => {
         broadcastMessage(io, game.gameId, changeTurn(input))
         return undefined
@@ -78,9 +78,9 @@ export const changeTurnHandler: SocketHandler<ChangeTurnInput> = io => input =>
     ),
   )
 
-export const socketHandler = (env: DomainAdapter, io: SocketIO.Server) => (socket: SocketIO.Socket) => {
-  addMessageHandler(env, io)(socket, "createGame", createGameHandler)
-  addMessageHandler(env, io)(socket, "joinGame", joinGameHandler)
-  addMessageHandler(env, io)(socket, "revealWord", revealWordHandler)
-  addMessageHandler(env, io)(socket, "changeTurn", changeTurnHandler)
+export const socketHandler = (env: SocketsAdapter) => (socket: SocketIO.Socket) => {
+  addMessageHandler(env)(socket, "createGame", createGameHandler)
+  addMessageHandler(env)(socket, "joinGame", joinGameHandler)
+  addMessageHandler(env)(socket, "revealWord", revealWordHandler)
+  addMessageHandler(env)(socket, "changeTurn", changeTurnHandler)
 }

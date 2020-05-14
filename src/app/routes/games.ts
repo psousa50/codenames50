@@ -14,7 +14,7 @@ const joinRequestTransformer = (params: Stringify<GamesModels.JoinGameInput>): G
   userId: params.userId!,
 })
 
-export const games = (env: ExpressAdapter) =>
+export const games = ({ adapters: { domain, gamesDomain } }: ExpressAdapter) =>
   Router()
-    .post("/create", handler(env.adapters.domain, env.adapters.domain.gamesDomain.create, createRequestTransformer))
-    .post("/join", handler(env.adapters.domain, env.adapters.domain.gamesDomain.join, joinRequestTransformer))
+    .post("/create", handler(domain, gamesDomain.create, createRequestTransformer))
+    .post("/join", handler(domain, gamesDomain.join, joinRequestTransformer))

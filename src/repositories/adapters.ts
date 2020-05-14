@@ -1,14 +1,8 @@
 import * as Actions from "../utils/actions"
 import { MongoAdapter } from "../mongodb/adapters"
-import { GamesRepository } from "./games"
-import { WordsRepository } from "./words"
 import { ServiceError } from "../utils/audit"
-import { gamesRepository } from "./games"
-import { wordsRepository } from "./words"
 
 export type RepositoriesAdapter = {
-  gamesRepository: GamesRepository
-  wordsRepository: WordsRepository
   adapters: {
     mongoAdapter: MongoAdapter
   }
@@ -28,8 +22,6 @@ export const withEnv = <R>(f: (env: RepositoriesAdapter) => RepositoriesActionRe
   Actions.withEnv<RepositoriesAdapter, R>(f)
 
 export const buildRepositoriesAdapter = (mongoAdapter: MongoAdapter): RepositoriesAdapter => ({
-  gamesRepository,
-  wordsRepository,
   adapters: {
     mongoAdapter,
   },

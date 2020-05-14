@@ -1,7 +1,6 @@
 import moment from "moment"
 
 import { RepositoriesAdapter } from "../repositories/adapters"
-import { GamesDomain } from "./games"
 import { ActionResult, Action, ask as askAction } from "../utils/actions"
 import { right, left } from "fp-ts/lib/Either"
 import { ServiceError } from "../utils/audit"
@@ -11,7 +10,8 @@ import { TaskEither } from "fp-ts/lib/TaskEither"
 import { AppConfig } from "../config"
 import { v4 as uuidv4 } from "uuid"
 import { currentUtcDateTime } from "../utils/dates"
-import { gamesDomain } from "./games"
+import { gamesRepository, GamesRepository } from "../repositories/games"
+import { wordsRepository, WordsRepository } from "../repositories/words"
 
 export type DomainConfig = {
   boardWidth: number
@@ -20,8 +20,9 @@ export type DomainConfig = {
 
 export type DomainAdapter = {
   config: DomainConfig
-  gamesDomain: GamesDomain
   adapters: {
+    gamesRepository: GamesRepository
+    wordsRepository: WordsRepository
     repositories: RepositoriesAdapter
     uuid: () => string
     currentUtcDateTime: () => moment.Moment
@@ -52,8 +53,9 @@ export const buildDomainAdapter = (
     boardWidth,
     boardHeight,
   },
-  gamesDomain,
   adapters: {
+    gamesRepository,
+    wordsRepository,
     repositories: repositoriesAdapter,
     uuid: uuidv4,
     currentUtcDateTime,

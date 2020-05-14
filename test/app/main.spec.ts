@@ -1,6 +1,6 @@
 import request from "supertest"
-import { createExpressApp } from "../../src/app/main"
 import { buildTestExpressAdapter } from "../helpers"
+import { createExpressApp } from "../../src/app/main"
 
 it("/health", async () => {
   const app = createExpressApp(buildTestExpressAdapter({}))

@@ -1,16 +1,15 @@
 import * as R from "ramda"
 import { currentUtcDateTime } from ".../../../src/utils/dates"
 import { pipe } from "fp-ts/lib/pipeable"
-import { identity } from "fp-ts/lib/function"
 import { fold, getOrElse } from "fp-ts/lib/TaskEither"
 import { DeepPartial } from "../src/utils/types"
 import { actionOf } from "../src/utils/actions"
-import { CodeNamesGame, Words } from "../src/domain/models"
-import { ExpressAdapter } from "../src/app/adapters"
+import { CodeNamesGame } from "../src/domain/models"
 import { DomainAdapter } from "../src/domain/adapters"
 import { TaskEither } from "fp-ts/lib/TaskEither"
 import { RepositoriesAdapter } from "../src/repositories/adapters"
 import { task } from "fp-ts/lib/Task"
+import { ExpressAdapter } from "../src/app/adapters"
 
 const words = {
   language: "en",
@@ -33,15 +32,6 @@ const defaultMongoAdapter = {
 } as any
 
 const defaultRepositoriesAdapter = {
-  gamesRepository: {
-    insert: jest.fn((game: CodeNamesGame) => actionOf(game)),
-    update: jest.fn((game: CodeNamesGame) => actionOf(game)),
-    getById: () => actionOf({} as CodeNamesGame),
-  },
-  wordsRepository: {
-    insert: () => actionOf(undefined),
-    getByLanguage: () => actionOf(words),
-  },
   adapters: {
     mongoAdapter: defaultMongoAdapter,
   },
@@ -56,13 +46,16 @@ const defaultDomainAdapter = {
     boardWidth: 5,
     boardHeight: 5,
   },
-  gamesDomain: {
-    create: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
-    join: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
-    revealWord: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
-    changeTurn: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
-  },
   adapters: {
+    gamesRepository: {
+      insert: jest.fn((game: CodeNamesGame) => actionOf(game)),
+      update: jest.fn((game: CodeNamesGame) => actionOf(game)),
+      getById: () => actionOf({} as CodeNamesGame),
+    },
+    wordsRepository: {
+      insert: () => actionOf(undefined),
+      getByLanguage: () => actionOf(words),
+    },
     repositories: defaultRepositoriesAdapter,
     uuid: () => "",
     currentUtcDateTime,
@@ -77,6 +70,12 @@ const defaultExpressAdapter: ExpressAdapter = {
     port: 3000,
   },
   adapters: {
+    gamesDomain: {
+      create: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
+      join: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
+      revealWord: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
+      changeTurn: () => actionOf<DomainAdapter, CodeNamesGame>({} as CodeNamesGame),
+    },
     domain: defaultDomainAdapter,
   },
 }

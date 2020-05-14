@@ -21,13 +21,11 @@ describe("create", () => {
         boardHeight: 0,
       },
       adapters: {
-        repositories: {
-          gamesRepository: {
-            insert,
-          },
-          wordsRepository: {
-            getByLanguage: jest.fn(() => actionOf(allWords)),
-          },
+        gamesRepository: {
+          insert,
+        },
+        wordsRepository: {
+          getByLanguage: jest.fn(() => actionOf(allWords)),
         },
         uuid: () => gameId,
         currentUtcDateTime: () => moment.utc("2000-01-01"),
@@ -67,13 +65,11 @@ describe("create", () => {
           boardHeight: 5,
         },
         adapters: {
-          repositories: {
-            gamesRepository: {
-              insert,
-            },
-            wordsRepository: {
-              getByLanguage: jest.fn(() => actionOf(allWords)),
-            },
+          gamesRepository: {
+            insert,
+          },
+          wordsRepository: {
+            getByLanguage: jest.fn(() => actionOf(allWords)),
           },
         },
       })
@@ -104,13 +100,11 @@ describe("create", () => {
           boardHeight: 5,
         },
         adapters: {
-          repositories: {
-            gamesRepository: {
-              insert,
-            },
-            wordsRepository: {
-              getByLanguage: jest.fn(() => actionOf(allWords)),
-            },
+          gamesRepository: {
+            insert,
+          },
+          wordsRepository: {
+            getByLanguage: jest.fn(() => actionOf(allWords)),
           },
         },
       })
@@ -130,32 +124,28 @@ describe("create", () => {
       const language = "pt"
       const domainAdapter = buildTestDomainAdapter({
         adapters: {
-          repositories: {
-            gamesRepository: {
-              insert: jest.fn(game => actionOf(game)),
-            },
-            wordsRepository: {
-              getByLanguage: jest.fn(() => actionOf({ words: [] } as any)),
-            },
+          gamesRepository: {
+            insert: jest.fn(game => actionOf(game)),
+          },
+          wordsRepository: {
+            getByLanguage: jest.fn(() => actionOf({ words: [] } as any)),
           },
         },
       })
 
       await getRight(Games.create({ userId: "some-user-id", language })(domainAdapter))()
 
-      expect(domainAdapter.adapters.repositories.wordsRepository.getByLanguage).toHaveBeenCalledWith(language)
+      expect(domainAdapter.adapters.wordsRepository.getByLanguage).toHaveBeenCalledWith(language)
     })
 
     it("gives an error 404 if language does not exist", async () => {
       const domainAdapter = buildTestDomainAdapter({
         adapters: {
-          repositories: {
-            gamesRepository: {
-              insert: jest.fn(game => actionOf(game)),
-            },
-            wordsRepository: {
-              getByLanguage: jest.fn(() => actionOf(null)),
-            },
+          gamesRepository: {
+            insert: jest.fn(game => actionOf(game)),
+          },
+          wordsRepository: {
+            getByLanguage: jest.fn(() => actionOf(null)),
           },
         },
       })
@@ -182,11 +172,9 @@ describe("join", () => {
 
     const domainAdapter = buildTestDomainAdapter({
       adapters: {
-        repositories: {
-          gamesRepository: {
-            getById: jest.fn(() => actionOf(game)),
-            update: jest.fn(() => actionOf(game)),
-          },
+        gamesRepository: {
+          getById: jest.fn(() => actionOf(game)),
+          update: jest.fn(() => actionOf(game)),
         },
       },
     })
@@ -201,7 +189,7 @@ describe("join", () => {
 
     await getRight(Games.join({ gameId, userId: secondUserId })(domainAdapter))()
 
-    expect(domainAdapter.adapters.repositories.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
+    expect(domainAdapter.adapters.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
   })
 
   it("does not add user if it has already joined the game", async () => {
@@ -218,11 +206,9 @@ describe("join", () => {
 
     const domainAdapter = buildTestDomainAdapter({
       adapters: {
-        repositories: {
-          gamesRepository: {
-            getById: jest.fn(() => actionOf(game)),
-            update: jest.fn(() => actionOf(game)),
-          },
+        gamesRepository: {
+          getById: jest.fn(() => actionOf(game)),
+          update: jest.fn(() => actionOf(game)),
         },
       },
     })
@@ -231,7 +217,7 @@ describe("join", () => {
 
     await getRight(Games.join({ gameId, userId })(domainAdapter))()
 
-    expect(domainAdapter.adapters.repositories.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
+    expect(domainAdapter.adapters.gamesRepository.update).toHaveBeenCalledWith(gameToUpdate)
   })
 
   it("gives a 404 if game does not exist", async () => {
@@ -240,10 +226,8 @@ describe("join", () => {
 
     const domainAdapter = buildTestDomainAdapter({
       adapters: {
-        repositories: {
-          gamesRepository: {
-            getById: jest.fn(() => actionOf(null)),
-          },
+        gamesRepository: {
+          getById: jest.fn(() => actionOf(null)),
         },
       },
     })
@@ -270,11 +254,9 @@ describe("revealWord", () => {
 
     const domainAdapter = buildTestDomainAdapter({
       adapters: {
-        repositories: {
-          gamesRepository: {
-            insert: jest.fn(() => actionOf(game)),
-            getById: () => actionOf(game),
-          },
+        gamesRepository: {
+          insert: jest.fn(() => actionOf(game)),
+          getById: () => actionOf(game),
         },
       },
     })

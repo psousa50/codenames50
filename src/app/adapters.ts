@@ -1,6 +1,7 @@
 import { DomainAdapter } from "../domain/adapters"
 import { ActionResult, Action, ask as askAction } from "../utils/actions"
 import { AppConfig } from "../config"
+import { gamesDomain, GamesDomain } from "../domain/games"
 
 export type ExpressConfig = {
   port: number
@@ -9,6 +10,7 @@ export type ExpressConfig = {
 export type ExpressAdapter = {
   config: ExpressConfig
   adapters: {
+    gamesDomain: GamesDomain
     domain: DomainAdapter
   }
 }
@@ -25,6 +27,7 @@ export const buildExpressAdapter = (config: AppConfig, domainAdapter: DomainAdap
     port: config.port,
   },
   adapters: {
+    gamesDomain,
     domain: domainAdapter,
   },
 })

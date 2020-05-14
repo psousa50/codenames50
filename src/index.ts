@@ -1,13 +1,13 @@
 import * as dotenv from "dotenv"
 import { logDebug } from "./utils/debug"
-import { createExpressApp } from "./app/main"
-import { buildExpressAdapter } from "./app/adapters"
 import { config as appConfig } from "./config"
 import { buildMongoAdapter } from "./mongodb/adapters"
 import { buildDomainAdapter } from "./domain/adapters"
 import { buildRepositoriesAdapter } from "./repositories/adapters"
 import { MongoClient } from "mongodb"
 import { createSocketApp } from "./sockets/main"
+import { createExpressApp } from "./app/main"
+import { buildExpressAdapter } from "./app/adapters"
 
 dotenv.config()
 
