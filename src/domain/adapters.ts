@@ -1,25 +1,24 @@
 import moment from "moment"
-
-import { RepositoriesEnvironment } from "../repositories/adapters"
-import { AppConfig } from "../config"
 import { v4 as uuidv4 } from "uuid"
-import { currentUtcDateTime } from "../utils/dates"
+import { Stringify } from "../app/routes/transformers"
+import { AppConfig } from "../config"
+import * as GamesModels from "../domain/models"
+import { RepositoriesEnvironment } from "../repositories/adapters"
 import { gamesRepositoryPorts } from "../repositories/games"
 import { wordsRepositoryPorts } from "../repositories/words"
-import { buildAdapter, Port, Adapter, portToAdapter } from "../utils/adapters"
+import { Adapter, buildAdapter, Port, portToAdapter } from "../utils/adapters"
+import { currentUtcDateTime } from "../utils/dates"
+import { gamesDomainPorts } from "./games"
 import {
+  ChangeTurnInput,
+  ChangeTurnOutput,
   CreateGameInput,
   CreateGameOutput,
   JoinGameInput,
   JoinGameOutput,
   RevealWordInput,
   RevealWordOutput,
-  ChangeTurnInput,
-  ChangeTurnOutput,
 } from "./models"
-import { gamesDomainPorts } from "./games"
-import { Stringify } from "../app/routes/transformers"
-import * as GamesModels from "../domain/models"
 
 export type DomainConfig = {
   boardWidth: number

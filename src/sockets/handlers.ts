@@ -1,17 +1,16 @@
-import { SocketMessage, SocketMessageType } from "./messagesTypes"
-import { withEnv } from "../utils/actions"
-import { RevealWordInput, CreateGameInput, JoinGameInput, ChangeTurnInput } from "../domain/models"
 import { pipe } from "fp-ts/lib/pipeable"
-import { map, run, fromTaskEither } from "fp-ts/lib/ReaderTaskEither"
+import { fromTaskEither, map, run } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
-import { gameCreated, joinedGame, revealWord, changeTurn } from "./messages"
+import { ChangeTurnInput, CreateGameInput, JoinGameInput, RevealWordInput } from "../domain/models"
+import { GameMessage, GameMessageType } from "../messaging/models"
+import { withEnv } from "../utils/actions"
 import { SocketsEnvironment, SocketsPort } from "./adapters"
 
 type SocketHandler<T> = (socket: SocketIO.Socket) => SocketsPort<T, void>
 
 const addMessageHandler = (socketsAdapter: SocketsEnvironment) => <T>(
   socket: SocketIO.Socket,
-  type: SocketMessageType,
+  type: GameMessageType,
   handler: SocketHandler<T>,
 ) => {
   const h = (data: T) => {
@@ -24,57 +23,49 @@ const addMessageHandler = (socketsAdapter: SocketsEnvironment) => <T>(
   return task.of(undefined)
 }
 
-export const emitMessage = <T>(socket: SocketIO.Socket, message: SocketMessage<T>) => {
+export const emitMessage = <T>(socket: SocketIO.Socket, message: GameMessage<T>) => {
   socket.emit(message.type, message.data)
 }
 
-export const broadcastMessage = <T>(io: SocketIO.Server, gameId: string, message: SocketMessage<T>) => {
+export const broadcastMessage = <T>(io: SocketIO.Server, gameId: string, message: GameMessage<T>) => {
   io.to(gameId).emit(message.type, message.data)
 }
 
 export const createGameHandler: SocketHandler<CreateGameInput> = socket => input =>
-  withEnv(({ adapters: { io, gamesDomain } }) =>
+  withEnv(({ adapters: { gamesDomain } }) =>
     pipe(
       fromTaskEither(gamesDomain.create(input)),
       map(game => {
         socket.join(game.gameId)
-        broadcastMessage(io, game.gameId, gameCreated(game))
         return undefined
       }),
     ),
   )
 
 export const joinGameHandler: SocketHandler<JoinGameInput> = socket => input =>
-  withEnv(({ adapters: { io, gamesDomain } }) =>
+  withEnv(({ adapters: { gamesDomain } }) =>
     pipe(
       fromTaskEither(gamesDomain.join(input)),
       map(game => {
         socket.join(game.gameId)
-        broadcastMessage(io, game.gameId, joinedGame(game))
         return undefined
       }),
     ),
   )
 
 export const revealWordHandler: SocketHandler<RevealWordInput> = _ => input =>
-  withEnv(({ adapters: { io, gamesDomain } }) =>
+  withEnv(({ adapters: { gamesDomain } }) =>
     pipe(
       fromTaskEither(gamesDomain.revealWord(input)),
-      map(game => {
-        broadcastMessage(io, game.gameId, revealWord(input))
-        return undefined
-      }),
+      map(_ => undefined),
     ),
   )
 
 export const changeTurnHandler: SocketHandler<ChangeTurnInput> = _ => input =>
-  withEnv(({ adapters: { io, gamesDomain } }) =>
+  withEnv(({ adapters: { gamesDomain } }) =>
     pipe(
       fromTaskEither(gamesDomain.changeTurn(input)),
-      map(game => {
-        broadcastMessage(io, game.gameId, changeTurn(input))
-        return undefined
-      }),
+      map(_ => undefined),
     ),
   )
 

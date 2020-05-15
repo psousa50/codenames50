@@ -1,27 +1,27 @@
-import * as R from "ramda"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, map } from "fp-ts/lib/ReaderTaskEither"
+import * as R from "ramda"
+import { actionErrorOf, actionOf, withEnv } from "../utils/actions"
+import { adapt } from "../utils/adapters"
+import { ErrorCodes, ServiceError } from "../utils/audit"
+import { update2dCell } from "../utils/collections"
+import { shuffle } from "../utils/random"
+import { DomainPort } from "./adapters"
 import {
-  CodeNamesGame,
-  GameStates,
-  Teams,
   BoardWord,
-  WordType,
+  ChangeTurnInput,
+  ChangeTurnOutput,
+  CodeNamesGame,
   CreateGameInput,
   CreateGameOutput,
+  GameStates,
   JoinGameInput,
   JoinGameOutput,
   RevealWordInput,
   RevealWordOutput,
-  ChangeTurnInput,
-  ChangeTurnOutput,
+  Teams,
+  WordType,
 } from "./models"
-import { ServiceError, ErrorCodes } from "../utils/audit"
-import { shuffle } from "../utils/random"
-import { update2dCell } from "../utils/collections"
-import { DomainPort, DomainEnvironment } from "./adapters"
-import { withEnv, actionOf, actionErrorOf } from "../utils/actions"
-import { adapt } from "../utils/adapters"
 
 const addPlayer = (userId: string) => (game: CodeNamesGame) =>
   game.players.find(p => p.userId === userId)

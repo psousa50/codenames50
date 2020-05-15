@@ -1,5 +1,5 @@
 import socketIo from "socket.io"
-import { DomainEnvironment, GamesDomainAdapters, buildGamesDomainAdapters } from "../domain/adapters"
+import { buildGamesDomainAdapters, DomainEnvironment, GamesDomainAdapters } from "../domain/adapters"
 import { Port } from "../utils/adapters"
 
 export type SocketsEnvironment = {

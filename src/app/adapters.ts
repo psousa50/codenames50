@@ -1,6 +1,6 @@
-import { DomainEnvironment, GamesDomainAdapters, buildGamesDomainAdapters } from "../domain/adapters"
-import { ask as askAction } from "../utils/actions"
 import { AppConfig } from "../config"
+import { buildGamesDomainAdapters, DomainEnvironment, GamesDomainAdapters } from "../domain/adapters"
+import { ask as askAction } from "../utils/actions"
 
 export type ExpressConfig = {
   port: number
