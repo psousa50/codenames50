@@ -4,18 +4,18 @@ import { UUID } from "../utils/types"
 import { RepositoriesPort } from "./adapters"
 
 const insert: RepositoriesPort<CodeNamesGame, CodeNamesGame> = game =>
-  fromPromise(({ adapters: { gamesMongoDbPorts, mongoEnvironment: { adapters: { dbClient } } } }) =>
-    gamesMongoDbPorts.insert(dbClient)(game),
+  fromPromise(({ mongoAdapter: { gamesMongoDbPorts, mongoEnvironment } }) =>
+    gamesMongoDbPorts.insert(mongoEnvironment)(game),
   )
 
 const update: RepositoriesPort<CodeNamesGame, CodeNamesGame> = game =>
-  fromPromise(({ adapters: { gamesMongoDbPorts, mongoEnvironment: { adapters: { dbClient } } } }) =>
-    gamesMongoDbPorts.update(dbClient)(game),
+  fromPromise(({ mongoAdapter: { gamesMongoDbPorts, mongoEnvironment } }) =>
+    gamesMongoDbPorts.update(mongoEnvironment)(game),
   )
 
 const getById: RepositoriesPort<UUID, CodeNamesGame | null> = id =>
-  fromPromise(({ adapters: { gamesMongoDbPorts, mongoEnvironment: { adapters: { dbClient } } } }) =>
-    gamesMongoDbPorts.getById(dbClient)(id),
+  fromPromise(({ mongoAdapter: { gamesMongoDbPorts, mongoEnvironment } }) =>
+    gamesMongoDbPorts.getById(mongoEnvironment)(id),
   )
 
 export const gamesRepositoryPorts = {

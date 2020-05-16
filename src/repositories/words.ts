@@ -3,13 +3,13 @@ import { fromPromise, fromVoidPromise } from "../utils/actions"
 import { RepositoriesPort } from "./adapters"
 
 const insert: RepositoriesPort<Words> = words =>
-  fromVoidPromise(({ adapters: { wordsMongoDbPorts, mongoEnvironment: { adapters: { dbClient } } } }) =>
-    wordsMongoDbPorts.insert(dbClient)(words),
+  fromVoidPromise(({ mongoAdapter: { wordsMongoDbPorts, mongoEnvironment } }) =>
+    wordsMongoDbPorts.insert(mongoEnvironment)(words),
   )
 
 const getByLanguage: RepositoriesPort<string, Words | null> = language =>
-  fromPromise(({ adapters: { wordsMongoDbPorts, mongoEnvironment: { adapters: { dbClient } } } }) =>
-    wordsMongoDbPorts.getByLanguage(dbClient)(language),
+  fromPromise(({ mongoAdapter: { wordsMongoDbPorts, mongoEnvironment } }) =>
+    wordsMongoDbPorts.getByLanguage(mongoEnvironment)(language),
   )
 
 export const wordsRepositoryPorts = {

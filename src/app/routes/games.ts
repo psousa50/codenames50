@@ -3,7 +3,7 @@ import { ExpressEnvironment } from "../adapters"
 import { responseHandler } from "../handlers"
 
 export const games = ({
-  adapters: {
+  domainAdapter: {
     gamesDomainPorts: { create, join },
     domainEnvironment,
   },

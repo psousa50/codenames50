@@ -10,7 +10,7 @@ describe("games/create", () => {
     const createdGame = {} as GamesModels.CodeNamesGame
     const create = jest.fn((_: GamesModels.CreateGameInput) => actionOf(createdGame))
     const expressAdapter = buildTestExpressEnvironment({
-      adapters: {
+      domainAdapter: {
         gamesDomainPorts: {
           create,
         },
@@ -27,7 +27,7 @@ describe("games/create", () => {
 
   it("gives an error status if domains return an error", async () => {
     const expressAdapter = buildTestExpressEnvironment({
-      adapters: {
+      domainAdapter: {
         gamesDomainPorts: {
           create: jest.fn((_: GamesModels.CreateGameInput) =>
             actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
@@ -48,7 +48,7 @@ describe("games/create", () => {
       const game = {} as GamesModels.CodeNamesGame
       const join = jest.fn((_: GamesModels.JoinGameInput) => actionOf(game))
       const expressAdapter = buildTestExpressEnvironment({
-        adapters: {
+        domainAdapter: {
           gamesDomainPorts: {
             join,
           },
@@ -63,7 +63,7 @@ describe("games/create", () => {
 
     it("gives an error status if domains return an error", async () => {
       const expressAdapter = buildTestExpressEnvironment({
-        adapters: {
+        domainAdapter: {
           gamesDomainPorts: {
             join: jest.fn((_: GamesModels.JoinGameInput) =>
               actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),

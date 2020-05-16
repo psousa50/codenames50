@@ -10,7 +10,7 @@ const sortStrings = (s1: string, s2: string) => s1.localeCompare(s2)
 const gameId = "some-game-id"
 
 describe("create", () => {
-  it.only("create a game in idle state with one player and an empty board", async () => {
+  it("create a game in idle state with one player and an empty board", async () => {
     const userId = "john@something.com"
     const allWords = {
       words: ["w1", "w2", "w3", "w4"],
@@ -22,18 +22,20 @@ describe("create", () => {
         boardWidth: 0,
         boardHeight: 0,
       },
-      adapters: {
+      repositoriesAdapter: {
         gamesRepositoryPorts: {
           insert,
         },
         wordsRepositoryPorts: {
           getByLanguage: jest.fn(() => actionOf(allWords)),
         },
+      },
+      gameMessagingAdapter: {
         gameMessagingPorts: {
           emitMessage,
         },
-        currentUtcDateTime: () => moment.utc("2000-01-01"),
       },
+      currentUtcDateTime: () => moment.utc("2000-01-01"),
     })
 
     const player1 = {
@@ -47,7 +49,7 @@ describe("create", () => {
       state: GameStates.idle,
       turn: Teams.red,
       board: [],
-      timestamp: domainAdapter.adapters.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+      timestamp: domainAdapter.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
     }
 
     await getRight(Games.create({ gameId, userId, language: "en" })(domainAdapter))()
@@ -68,7 +70,7 @@ describe("create", () => {
           boardWidth: 5,
           boardHeight: 5,
         },
-        adapters: {
+        repositoriesAdapter: {
           gamesRepositoryPorts: {
             insert,
           },
@@ -103,7 +105,7 @@ describe("create", () => {
           boardWidth: 5,
           boardHeight: 5,
         },
-        adapters: {
+        repositoriesAdapter: {
           gamesRepositoryPorts: {
             insert,
           },
@@ -127,7 +129,7 @@ describe("create", () => {
     it("for the language chosen", async () => {
       const language = "pt"
       const domainAdapter = buildTestDomainEnvironment({
-        adapters: {
+        repositoriesAdapter: {
           gamesRepositoryPorts: {
             insert: jest.fn(game => actionOf(game)),
           },
@@ -139,12 +141,12 @@ describe("create", () => {
 
       await getRight(Games.create({ gameId, userId: "some-user-id", language })(domainAdapter))()
 
-      expect(domainAdapter.adapters.wordsRepositoryPorts.getByLanguage).toHaveBeenCalledWith(language)
+      expect(domainAdapter.repositoriesAdapter.wordsRepositoryPorts.getByLanguage).toHaveBeenCalledWith(language)
     })
 
     it("gives an error 404 if language does not exist", async () => {
       const domainAdapter = buildTestDomainEnvironment({
-        adapters: {
+        repositoriesAdapter: {
           gamesRepositoryPorts: {
             insert: jest.fn(game => actionOf(game)),
           },
@@ -175,7 +177,7 @@ describe("join", () => {
     } as any
 
     const domainAdapter = buildTestDomainEnvironment({
-      adapters: {
+      repositoriesAdapter: {
         gamesRepositoryPorts: {
           getById: jest.fn(() => actionOf(game)),
           update: jest.fn(() => actionOf(game)),
@@ -193,7 +195,7 @@ describe("join", () => {
 
     await getRight(Games.join({ gameId, userId: secondUserId })(domainAdapter))()
 
-    expect(domainAdapter.adapters.gamesRepositoryPorts.update).toHaveBeenCalledWith(gameToUpdate)
+    expect(domainAdapter.repositoriesAdapter.gamesRepositoryPorts.update).toHaveBeenCalledWith(gameToUpdate)
   })
 
   it("does not add user if it has already joined the game", async () => {
@@ -209,7 +211,7 @@ describe("join", () => {
     } as any
 
     const domainAdapter = buildTestDomainEnvironment({
-      adapters: {
+      repositoriesAdapter: {
         gamesRepositoryPorts: {
           getById: jest.fn(() => actionOf(game)),
           update: jest.fn(() => actionOf(game)),
@@ -221,7 +223,7 @@ describe("join", () => {
 
     await getRight(Games.join({ gameId, userId })(domainAdapter))()
 
-    expect(domainAdapter.adapters.gamesRepositoryPorts.update).toHaveBeenCalledWith(gameToUpdate)
+    expect(domainAdapter.repositoriesAdapter.gamesRepositoryPorts.update).toHaveBeenCalledWith(gameToUpdate)
   })
 
   it("gives a 404 if game does not exist", async () => {
@@ -229,7 +231,7 @@ describe("join", () => {
     const userId = "user-id"
 
     const domainAdapter = buildTestDomainEnvironment({
-      adapters: {
+      repositoriesAdapter: {
         gamesRepositoryPorts: {
           getById: jest.fn(() => actionOf(null)),
         },
@@ -257,7 +259,7 @@ describe("revealWord", () => {
     } as any
 
     const domainAdapter = buildTestDomainEnvironment({
-      adapters: {
+      repositoriesAdapter: {
         gamesRepositoryPorts: {
           update: jest.fn(g => actionOf(g)),
           getById: jest.fn(() => actionOf(game)),
@@ -285,7 +287,7 @@ describe("changeTurn", () => {
     } as any
 
     const domainAdapter = buildTestDomainEnvironment({
-      adapters: {
+      repositoriesAdapter: {
         gamesRepositoryPorts: {
           update: jest.fn(g => actionOf(g)),
           getById: () => actionOf(game),

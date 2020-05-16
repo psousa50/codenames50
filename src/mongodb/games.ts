@@ -1,25 +1,25 @@
-import { MongoClient } from "mongodb"
 import { CodeNamesGame } from "../domain/models"
 import { UUID } from "../utils/types"
+import { MongoEnvironment } from "./adapters"
 
 const GAMES = "Games"
 
-const insert = (client: MongoClient) => (game: CodeNamesGame) =>
-  client
+const insert = ({ dbClient }: MongoEnvironment) => (game: CodeNamesGame) =>
+  dbClient
     .db()
     .collection<CodeNamesGame>(GAMES)
     .insertOne(game)
     .then(_ => game)
 
-const update = (client: MongoClient) => (game: CodeNamesGame) =>
-  client
+const update = ({ dbClient }: MongoEnvironment) => (game: CodeNamesGame) =>
+  dbClient
     .db()
     .collection<CodeNamesGame>(GAMES)
     .updateOne({ gameId: game.gameId }, { $set: game })
     .then(_ => game)
 
-const getById = (client: MongoClient) => (gameId: UUID) =>
-  client.db().collection<CodeNamesGame>(GAMES).findOne({ gameId: gameId })
+const getById = ({ dbClient }: MongoEnvironment) => (gameId: UUID) =>
+  dbClient.db().collection<CodeNamesGame>(GAMES).findOne({ gameId: gameId })
 
 export const gamesMongoDbPorts = {
   insert,

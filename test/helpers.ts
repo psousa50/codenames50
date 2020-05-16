@@ -29,7 +29,11 @@ const defaultConfig = {
 export const buildDefaultTestDomainEnvironment = () => {
   const dbClient = jest.fn(() => Promise.resolve(undefined)) as any
   const mongoEnvironment = buildMongoEnvironment(dbClient)
-  const io = jest.fn(() => Promise.resolve(undefined)) as any
+  const io = {
+    sockets: {
+      sockets: [],
+    },
+  } as any
   const messengerEnvironment = buildMessengerEnvironment(io)
   const gameMessagingEnvironment = buildGameMessagingEnvironment(messengerEnvironment)
   const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)

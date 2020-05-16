@@ -58,7 +58,7 @@ const exists = <E, T, R>(v: T | undefined, f: (v: NonNullable<T>) => R, errMsg: 
   v ? actionOf(f(v!)) : actionErrorOf<E, R>(new ServiceError(errMsg, ErrorCodes.NOT_FOUND))
 
 const insertGame = (gameId: string, userId: string): DomainPort<BoardWord[][], CodeNamesGame> => board =>
-  withEnv(({ adapters: { gamesRepositoryPorts, repositoriesEnvironment, currentUtcDateTime } }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, currentUtcDateTime }) =>
     adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
       gamesRepositoryPorts.insert({
         gameId,
@@ -74,7 +74,7 @@ const insertGame = (gameId: string, userId: string): DomainPort<BoardWord[][], C
   )
 
 const sendMessage = (userId: string, message: GameMessage): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
-  withEnv(({ adapters: { gameMessagingPorts, gameMessagingEnvironment } }) =>
+  withEnv(({ gameMessagingAdapter: { gameMessagingPorts, gameMessagingEnvironment } }) =>
     pipe(
       adapt<GameMessagingEnvironment, DomainEnvironment, void>(
         gameMessagingPorts.emitMessage({ userId, roomId: game.gameId, message }),
@@ -85,23 +85,28 @@ const sendMessage = (userId: string, message: GameMessage): DomainPort<CodeNames
   )
 
 export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ gameId, userId, language }) =>
-  withEnv(({ config: { boardWidth, boardHeight }, adapters: { wordsRepositoryPorts, repositoriesEnvironment } }) =>
-    pipe(
-      adapt<RepositoriesEnvironment, DomainEnvironment, Words | null>(
-        wordsRepositoryPorts.getByLanguage(language),
-        repositoriesEnvironment,
+  withEnv(
+    ({ config: { boardWidth, boardHeight }, repositoriesAdapter: { wordsRepositoryPorts, repositoriesEnvironment } }) =>
+      pipe(
+        adapt<RepositoriesEnvironment, DomainEnvironment, Words | null>(
+          wordsRepositoryPorts.getByLanguage(language),
+          repositoriesEnvironment,
+        ),
+        chain(allWords =>
+          exists(
+            allWords,
+            a => shuffle(a.words).slice(0, boardWidth * boardHeight),
+            `Language '${language}' not found`,
+          ),
+        ),
+        map(buildBoard(boardWidth, boardHeight)),
+        chain(insertGame(gameId, userId)),
+        chain(game => sendMessage(userId, messages.gameCreated(game))(game)),
       ),
-      chain(allWords =>
-        exists(allWords, a => shuffle(a.words).slice(0, boardWidth * boardHeight), `Language '${language}' not found`),
-      ),
-      map(buildBoard(boardWidth, boardHeight)),
-      chain(insertGame(gameId, userId)),
-      chain(game => sendMessage(userId, messages.gameCreated(game))(game)),
-    ),
   )
 
 export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) =>
-  withEnv(({ adapters: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
       adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
         gamesRepositoryPorts.getById(gameId),
@@ -124,7 +129,7 @@ const revealWordAction = (row: number, col: number) => (game: CodeNamesGame) => 
 })
 
 export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, row, col }) =>
-  withEnv(({ adapters: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
       adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
         gamesRepositoryPorts.getById(gameId),
@@ -146,7 +151,7 @@ const changeTurnAction = (game: CodeNamesGame) => ({
 })
 
 export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ gameId }) =>
-  withEnv(({ adapters: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
       adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
         gamesRepositoryPorts.getById(gameId),
