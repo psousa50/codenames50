@@ -1,9 +1,13 @@
 import { Router } from "express"
-import { responseHandler } from "../handlers"
 import { ExpressEnvironment } from "../adapters"
+import { responseHandler } from "../handlers"
 
 export const games = ({
   adapters: {
-    gamesDomain: { create, join },
+    gamesDomainPorts: { create, join },
+    domainEnvironment,
   },
-}: ExpressEnvironment) => Router().post("/create", responseHandler(create)).post("/join", responseHandler(join))
+}: ExpressEnvironment) =>
+  Router()
+    .post("/create", responseHandler(domainEnvironment, create))
+    .post("/join", responseHandler(domainEnvironment, join))

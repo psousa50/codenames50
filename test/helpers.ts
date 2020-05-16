@@ -1,19 +1,15 @@
-import * as R from "ramda"
-import { currentUtcDateTime } from ".../../../src/utils/dates"
 import { pipe } from "fp-ts/lib/pipeable"
-import { fold, getOrElse } from "fp-ts/lib/TaskEither"
-import { DeepPartial } from "../src/utils/types"
-import { actionOf } from "../src/utils/actions"
-import { CodeNamesGame } from "../src/domain/models"
-import { DomainEnvironment, buildDomainEnvironment } from "../src/domain/adapters"
-import { TaskEither } from "fp-ts/lib/TaskEither"
 import { task } from "fp-ts/lib/Task"
-import { ExpressEnvironment, buildExpressEnvironment } from "../src/app/adapters"
+import { fold, getOrElse, TaskEither } from "fp-ts/lib/TaskEither"
+import { MongoClient } from "mongodb"
+import * as R from "ramda"
+import { buildExpressEnvironment, ExpressEnvironment } from "../src/app/adapters"
+import { buildDomainEnvironment, DomainEnvironment } from "../src/domain/adapters"
+import { buildGameMessagingEnvironment } from "../src/messaging/adapters"
+import { buildMessengerEnvironment } from "../src/messaging/messenger"
 import { buildMongoEnvironment } from "../src/mongodb/adapters"
 import { buildRepositoriesEnvironment } from "../src/repositories/adapters"
-import { config } from "dotenv/types"
-import { AppConfig } from "../src/config"
-import { MongoClient } from "mongodb"
+import { DeepPartial } from "../src/utils/types"
 
 const words = {
   language: "en",
@@ -33,8 +29,11 @@ const defaultConfig = {
 export const buildDefaultTestDomainEnvironment = () => {
   const dbClient = jest.fn(() => Promise.resolve(undefined)) as any
   const mongoEnvironment = buildMongoEnvironment(dbClient)
+  const io = jest.fn(() => Promise.resolve(undefined)) as any
+  const messengerEnvironment = buildMessengerEnvironment(io)
+  const gameMessagingEnvironment = buildGameMessagingEnvironment(messengerEnvironment)
   const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
-  const domainEnvironment = buildDomainEnvironment(defaultConfig, repositoriesEnvironment)
+  const domainEnvironment = buildDomainEnvironment(defaultConfig, repositoriesEnvironment, gameMessagingEnvironment)
 
   return domainEnvironment
 }

@@ -3,25 +3,31 @@ import { getRight } from "../helpers"
 
 describe("messaging", () => {
   it("emits a message to the specified user socket", async () => {
-    const emit = jest.fn() as any
-    const environment = {
-      adapters: {
-        messenger: {
-          emit,
-          broadcast: () => undefined,
-        },
-      },
-    }
-
     const userId = "some-user-id"
     const roomId = "some-room-id"
     const socketId = "some-socketId-id"
     const data = { some: "data" }
     const message = { type: "some-type" as any, data }
+    const emit = jest.fn()
+    const getSocketIdsForRoomId = jest.fn(() => [
+      {
+        socketId,
+      },
+    ]) as any
 
-    GameMessaging.register({ userId, roomId: "another-room-id", socketId: "another-socket-id" })
-    GameMessaging.register({ userId, roomId, socketId })
-    GameMessaging.register({ userId: "another-user", roomId, socketId: "another-socket-id" })
+    const environment = {
+      adapters: {
+        messengerPorts: {
+          emit: jest.fn(_ => emit) as any,
+          broadcast: () => undefined as any,
+          getSocketIdsForRoomId: jest.fn(_ => getSocketIdsForRoomId),
+        },
+        messengerEnvironment: { io: jest.fn() as any },
+      },
+    }
+
+    GameMessaging.registerUser({ userId, socketId })
+    GameMessaging.registerUser({ userId: "another-user", socketId: "another-socket-id" })
 
     await getRight(GameMessaging.emitMessage({ userId, roomId, message })(environment))()
 
@@ -30,13 +36,20 @@ describe("messaging", () => {
   })
 
   it("broadcasts a message to the all the users", async () => {
-    const broadcast = jest.fn() as any
+    const broadcast = jest.fn()
+    const getSocketIdsForRoomId = jest.fn(() => [
+      {
+        socketId: "",
+      },
+    ]) as any
     const environment = {
       adapters: {
-        messenger: {
-          emit: () => undefined,
-          broadcast,
+        messengerPorts: {
+          emit: () => undefined as any,
+          broadcast: jest.fn(_ => broadcast),
+          getSocketIdsForRoomId: jest.fn(_ => getSocketIdsForRoomId),
         },
+        messengerEnvironment: { io: jest.fn() as any },
       },
     }
 
@@ -46,8 +59,8 @@ describe("messaging", () => {
     const data = { some: "data" }
     const message = { type: "some-type" as any, data }
 
-    GameMessaging.register({ userId, roomId, socketId })
-    GameMessaging.register({ userId: "another-user", roomId, socketId: "another-socket-id" })
+    GameMessaging.registerUser({ userId, socketId })
+    GameMessaging.registerUser({ userId: "another-user", socketId: "another-socket-id" })
 
     await getRight(GameMessaging.broadcastMessage({ roomId, message })(environment))()
 
@@ -56,13 +69,20 @@ describe("messaging", () => {
   })
 
   it("unregisters a user", async () => {
-    const emit = jest.fn() as any
+    const emit = jest.fn()
+    const getSocketIdsForRoomId = jest.fn(() => [
+      {
+        socketId: "",
+      },
+    ]) as any
     const environment = {
       adapters: {
-        messenger: {
-          emit,
-          broadcast: () => undefined,
+        messengerPorts: {
+          emit: jest.fn(_ => emit) as any,
+          broadcast: () => undefined as any,
+          getSocketIdsForRoomId: jest.fn(_ => getSocketIdsForRoomId),
         },
+        messengerEnvironment: { io: jest.fn() as any },
       },
     }
 
@@ -72,9 +92,9 @@ describe("messaging", () => {
     const data = { some: "data" }
     const message = { type: "some-type" as any, data }
 
-    GameMessaging.register({ userId, roomId, socketId })
-    GameMessaging.register({ userId: "another-user", roomId, socketId: "another-socket-id" })
-    GameMessaging.unregister({ userId, roomId, socketId })
+    GameMessaging.registerUser({ userId, socketId })
+    GameMessaging.registerUser({ userId: "another-user", socketId: "another-socket-id" })
+    GameMessaging.unregisterSocket({ socketId })
 
     await getRight(GameMessaging.emitMessage({ userId, roomId, message })(environment))()
 

@@ -1,5 +1,6 @@
 import { AppConfig } from "../config"
-import { buildGamesDomainAdapters, DomainEnvironment, GamesDomainAdapters } from "../domain/adapters"
+import { DomainEnvironment } from "../domain/adapters"
+import { GamesDomainPorts, gamesDomainPorts } from "../domain/games"
 import { ask as askAction } from "../utils/actions"
 
 export type ExpressConfig = {
@@ -9,7 +10,8 @@ export type ExpressConfig = {
 export type ExpressEnvironment = {
   config: ExpressConfig
   adapters: {
-    gamesDomain: GamesDomainAdapters
+    gamesDomainPorts: GamesDomainPorts
+    domainEnvironment: DomainEnvironment
   }
 }
 
@@ -25,6 +27,7 @@ export const buildExpressEnvironment = (
     port: config.port,
   },
   adapters: {
-    gamesDomain: buildGamesDomainAdapters(domainEnvironment),
+    gamesDomainPorts,
+    domainEnvironment,
   },
 })

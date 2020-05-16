@@ -1,13 +1,18 @@
 import * as dotenv from "dotenv"
-import { logDebug } from "./utils/debug"
-import { config as appConfig } from "./config"
-import { buildMongoEnvironment } from "./mongodb/adapters"
-import { buildDomainEnvironment } from "./domain/adapters"
-import { buildRepositoriesEnvironment } from "./repositories/adapters"
+import express from "express"
 import { MongoClient } from "mongodb"
-import { createSocketApp } from "./sockets/main"
-import { createExpressApp } from "./app/main"
+import socketIo from "socket.io"
 import { buildExpressEnvironment } from "./app/adapters"
+import { createExpressApp } from "./app/main"
+import { config as appConfig } from "./config"
+import { buildDomainEnvironment } from "./domain/adapters"
+import { buildGameMessagingEnvironment } from "./messaging/adapters"
+import { buildMessengerEnvironment } from "./messaging/messenger"
+import { buildMongoEnvironment } from "./mongodb/adapters"
+import { buildRepositoriesEnvironment } from "./repositories/adapters"
+import { buildSocketsEnvironment } from "./sockets/adapters"
+import { socketHandler } from "./sockets/handlers"
+import { logDebug } from "./utils/debug"
 
 dotenv.config()
 
@@ -22,20 +27,28 @@ const startApplication = async () => {
 
     const mongoUri = process.env.MONGODB_URI || config.mongodb.uri || ""
 
+    const envPort = Number(process.env.PORT)
+    const appPort = isNaN(envPort) ? config.port : envPort
+
     const dbClient = await MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+    const socketsPort = appPort + 1
+    const appSocket = express()
+    const server2 = appSocket.listen(socketsPort)
+    const io = socketIo(server2, {})
 
     const mongoEnvironment = buildMongoEnvironment(dbClient)
     const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
-    const domainEnvironment = buildDomainEnvironment(config, repositoriesEnvironment)
+    const messengerEnvironment = buildMessengerEnvironment(io)
+    const gameMessagingEnvironment = buildGameMessagingEnvironment(messengerEnvironment)
+    const domainEnvironment = buildDomainEnvironment(config, repositoriesEnvironment, gameMessagingEnvironment)
     const expressEnvironment = buildExpressEnvironment(config, domainEnvironment)
 
     const app = createExpressApp(expressEnvironment)
 
-    const envPort = Number(process.env.PORT)
-    const port = isNaN(envPort) ? expressEnvironment.config.port : envPort
-    const server = app.listen(port)
+    const server = app.listen(appPort)
 
-    const io = createSocketApp(app, port + 1, domainEnvironment)
+    const socketsEnvironment = buildSocketsEnvironment(io, domainEnvironment, gameMessagingEnvironment)
+    io.on("connection", socketHandler(socketsEnvironment))
 
     server.on("checkContinue", (__, res) => {
       res.writeContinue()

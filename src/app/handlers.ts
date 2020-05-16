@@ -1,8 +1,8 @@
-import { ErrorCodes, ServiceError } from "../utils/audit"
-import { Response, ErrorRequestHandler, RequestHandler } from "express"
+import { ErrorRequestHandler, RequestHandler, Response } from "express"
 import { pipe } from "fp-ts/lib/pipeable"
 import { bimap } from "fp-ts/lib/TaskEither"
-import { Adapter } from "../utils/adapters"
+import { Port } from "../utils/adapters"
+import { ErrorCodes, ServiceError } from "../utils/audit"
 
 export function createErrorHandler(): ErrorRequestHandler {
   return (_, __, res) => {
@@ -26,6 +26,6 @@ export const okHandler = (res: Response) => (responseBody: any) => {
   res.json(responseBody)
 }
 
-export const responseHandler = <A, R>(action: Adapter<A, R>): RequestHandler => async (req, res) => {
-  await pipe(action(req.body), bimap(errorHandler(res), okHandler(res)))()
+export const responseHandler = <E, A, R>(environment: E, action: Port<E, A, R>): RequestHandler => async (req, res) => {
+  await pipe(action(req.body)(environment), bimap(errorHandler(res), okHandler(res)))()
 }

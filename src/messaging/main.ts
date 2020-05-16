@@ -1,24 +1,26 @@
 import { actionOf, withEnv } from "../utils/actions"
 import { GameMessagingPort } from "./adapters"
-import { GameMessage } from "./models"
+import { GameMessage } from "./messages"
 
 interface UserSocketLink {
   userId: string
-  roomId: string
   socketId: string
 }
 
 let userSocketLinks: UserSocketLink[] = []
 
-type RegisterInput = {
+export type RegisterUserInput = {
   userId: string
-  roomId: string
   socketId: string
 }
 
-type SendMessageInput = {
-  userId: string
+export type UnregisterSocket = {
+  socketId: string
+}
+
+type EmitMessageInput = {
   roomId: string
+  userId: string
   message: GameMessage
 }
 
@@ -27,34 +29,39 @@ type BrodcastMessageInput = {
   message: GameMessage
 }
 
-export const register: GameMessagingPort<RegisterInput> = input => {
+export const registerUser: GameMessagingPort<RegisterUserInput> = input => {
   userSocketLinks = [...userSocketLinks, input]
   return actionOf(undefined)
 }
 
-export const unregister: GameMessagingPort<RegisterInput> = ({ userId, roomId, socketId }) => {
-  userSocketLinks = userSocketLinks.filter(u => u.roomId !== roomId || u.socketId !== socketId || u.userId !== userId)
+export const unregisterSocket: GameMessagingPort<UnregisterSocket> = ({ socketId }) => {
+  userSocketLinks = userSocketLinks.filter(u => u.socketId !== socketId)
   return actionOf(undefined)
 }
 
-export const emitMessage: GameMessagingPort<SendMessageInput> = ({ userId, roomId, message }) =>
-  withEnv(env => {
-    const userLink = userSocketLinks.find(u => u.userId === userId && u.roomId === roomId)
-    if (userLink) {
-      env.adapters.messenger.emit(userLink.socketId, message)
+export const emitMessage: GameMessagingPort<EmitMessageInput> = ({ userId, roomId, message }) =>
+  withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
+    const socketIds = messengerPorts
+      .getSocketIdsForRoomId(messengerEnvironment)(roomId)
+      .map(s => s.socketId)
+    const userLink = userSocketLinks.filter(u => u.userId === userId && socketIds.includes(u.socketId))
+    if (userLink.length > 0) {
+      messengerPorts.emit(messengerEnvironment)(userLink[0].socketId, message)
     }
     return actionOf(undefined)
   })
 
 export const broadcastMessage: GameMessagingPort<BrodcastMessageInput> = ({ roomId, message }) =>
-  withEnv(env => {
-    env.adapters.messenger.broadcast(roomId, message)
+  withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
+    messengerPorts.broadcast(messengerEnvironment)(roomId, message)
     return actionOf(undefined)
   })
 
 export const gameMessagingPorts = {
   emitMessage,
-  register,
-  unregister,
+  registerUser,
+  unregisterSocket,
   broadcastMessage,
 }
+
+export type GameMessagingPorts = typeof gameMessagingPorts

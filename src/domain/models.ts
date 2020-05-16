@@ -1,4 +1,5 @@
 export interface CreateGameInput {
+  gameId: string
   userId: string
   language: string
 }

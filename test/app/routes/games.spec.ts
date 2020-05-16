@@ -1,17 +1,17 @@
 import request from "supertest"
-import { buildTestExpressEnvironment } from "../../helpers"
-import * as GamesModels from "../../../src/domain/models"
-import { ServiceError, ErrorCodes } from "../../../src/utils/audit"
 import { createExpressApp } from "../../../src/app/main"
-import { adapterOf, adapterErrorOf } from "../../../src/utils/adapters"
+import * as GamesModels from "../../../src/domain/models"
+import { actionErrorOf, actionOf } from "../../../src/utils/actions"
+import { ErrorCodes, ServiceError } from "../../../src/utils/audit"
+import { buildTestExpressEnvironment } from "../../helpers"
 
 describe("games/create", () => {
   it("creates a game", async () => {
     const createdGame = {} as GamesModels.CodeNamesGame
-    const create = jest.fn((_: GamesModels.CreateGameInput) => adapterOf(createdGame))
+    const create = jest.fn((_: GamesModels.CreateGameInput) => actionOf(createdGame))
     const expressAdapter = buildTestExpressEnvironment({
       adapters: {
-        gamesDomain: {
+        gamesDomainPorts: {
           create,
         },
       },
@@ -28,9 +28,9 @@ describe("games/create", () => {
   it("gives an error status if domains return an error", async () => {
     const expressAdapter = buildTestExpressEnvironment({
       adapters: {
-        gamesDomain: {
+        gamesDomainPorts: {
           create: jest.fn((_: GamesModels.CreateGameInput) =>
-            adapterErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
+            actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
           ),
         },
       },
@@ -46,10 +46,10 @@ describe("games/create", () => {
       const gameId = "some-game-id"
       const userId = "some-user-id"
       const game = {} as GamesModels.CodeNamesGame
-      const join = jest.fn((_: GamesModels.JoinGameInput) => adapterOf(game))
+      const join = jest.fn((_: GamesModels.JoinGameInput) => actionOf(game))
       const expressAdapter = buildTestExpressEnvironment({
         adapters: {
-          gamesDomain: {
+          gamesDomainPorts: {
             join,
           },
         },
@@ -64,9 +64,9 @@ describe("games/create", () => {
     it("gives an error status if domains return an error", async () => {
       const expressAdapter = buildTestExpressEnvironment({
         adapters: {
-          gamesDomain: {
+          gamesDomainPorts: {
             join: jest.fn((_: GamesModels.JoinGameInput) =>
-              adapterErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
+              actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
             ),
           },
         },

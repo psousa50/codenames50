@@ -1,12 +1,16 @@
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, map } from "fp-ts/lib/ReaderTaskEither"
 import * as R from "ramda"
+import { GameMessagingEnvironment } from "../messaging/adapters"
+import * as messages from "../messaging/messages"
+import { GameMessage } from "../messaging/messages"
+import { RepositoriesEnvironment } from "../repositories/adapters"
 import { actionErrorOf, actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
 import { ErrorCodes, ServiceError } from "../utils/audit"
 import { update2dCell } from "../utils/collections"
 import { shuffle } from "../utils/random"
-import { DomainPort } from "./adapters"
+import { DomainEnvironment, DomainPort } from "./adapters"
 import {
   BoardWord,
   ChangeTurnInput,
@@ -20,6 +24,7 @@ import {
   RevealWordInput,
   RevealWordOutput,
   Teams,
+  Words,
   WordType,
 } from "./models"
 
@@ -52,11 +57,11 @@ const buildBoard = (boardWidth: number, boardHeight: number) => (words: string[]
 const exists = <E, T, R>(v: T | undefined, f: (v: NonNullable<T>) => R, errMsg: string) =>
   v ? actionOf(f(v!)) : actionErrorOf<E, R>(new ServiceError(errMsg, ErrorCodes.NOT_FOUND))
 
-const insertGame = (userId: string): DomainPort<BoardWord[][], CodeNamesGame> => board =>
-  withEnv(({ adapters: { gamesRepository, uuid, currentUtcDateTime } }) =>
-    adapt(
-      gamesRepository.insert({
-        gameId: uuid(),
+const insertGame = (gameId: string, userId: string): DomainPort<BoardWord[][], CodeNamesGame> => board =>
+  withEnv(({ adapters: { gamesRepositoryPorts, repositoriesEnvironment, currentUtcDateTime } }) =>
+    adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+      gamesRepositoryPorts.insert({
+        gameId,
         timestamp: currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
         userId,
         players: [{ userId }],
@@ -64,27 +69,51 @@ const insertGame = (userId: string): DomainPort<BoardWord[][], CodeNamesGame> =>
         turn: Teams.red,
         board,
       }),
+      repositoriesEnvironment,
     ),
   )
 
-export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ userId, language }) =>
-  withEnv(({ config: { boardWidth, boardHeight }, adapters: { wordsRepository } }) =>
+const sendMessage = (userId: string, message: GameMessage): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
+  withEnv(({ adapters: { gameMessagingPorts, gameMessagingEnvironment } }) =>
     pipe(
-      adapt(wordsRepository.getByLanguage(language)),
+      adapt<GameMessagingEnvironment, DomainEnvironment, void>(
+        gameMessagingPorts.emitMessage({ userId, roomId: game.gameId, message }),
+        gameMessagingEnvironment,
+      ),
+      map(_ => game),
+    ),
+  )
+
+export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ gameId, userId, language }) =>
+  withEnv(({ config: { boardWidth, boardHeight }, adapters: { wordsRepositoryPorts, repositoriesEnvironment } }) =>
+    pipe(
+      adapt<RepositoriesEnvironment, DomainEnvironment, Words | null>(
+        wordsRepositoryPorts.getByLanguage(language),
+        repositoriesEnvironment,
+      ),
       chain(allWords =>
         exists(allWords, a => shuffle(a.words).slice(0, boardWidth * boardHeight), `Language '${language}' not found`),
       ),
       map(buildBoard(boardWidth, boardHeight)),
-      chain(insertGame(userId)),
+      chain(insertGame(gameId, userId)),
+      chain(game => sendMessage(userId, messages.gameCreated(game))(game)),
     ),
   )
 
 export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) =>
-  withEnv(({ adapters: { gamesRepository } }) =>
+  withEnv(({ adapters: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
-      adapt(gamesRepository.getById(gameId)),
+      adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
+        gamesRepositoryPorts.getById(gameId),
+        repositoriesEnvironment,
+      ),
       chain(game => exists(game, addPlayer(userId), `Game '${gameId}' does not exist`)),
-      chain(game => adapt(gamesRepository.update(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
     ),
   )
 
@@ -95,11 +124,19 @@ const revealWordAction = (row: number, col: number) => (game: CodeNamesGame) => 
 })
 
 export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, row, col }) =>
-  withEnv(({ adapters: { gamesRepository } }) =>
+  withEnv(({ adapters: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
-      adapt(gamesRepository.getById(gameId)),
+      adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
+        gamesRepositoryPorts.getById(gameId),
+        repositoriesEnvironment,
+      ),
       chain(game => exists(game, revealWordAction(row, col), `Game '${gameId}' does not exist`)),
-      chain(game => adapt(gamesRepository.update(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
     ),
   )
 
@@ -109,11 +146,19 @@ const changeTurnAction = (game: CodeNamesGame) => ({
 })
 
 export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ gameId }) =>
-  withEnv(({ adapters: { gamesRepository } }) =>
+  withEnv(({ adapters: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
-      adapt(gamesRepository.getById(gameId)),
+      adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
+        gamesRepositoryPorts.getById(gameId),
+        repositoriesEnvironment,
+      ),
       chain(game => exists(game, changeTurnAction, `Game '${gameId}' does not exist`)),
-      chain(game => adapt(gamesRepository.update(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
     ),
   )
 
