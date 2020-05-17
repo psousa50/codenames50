@@ -1,7 +1,8 @@
-import { ChangeTurnInput, CodeNamesGame, CreateGameInput, JoinGameInput, RevealWordInput } from "../domain/models"
+import { ChangeTurnInput, CodeNamesGame, JoinGameInput, RevealWordInput } from "../domain/models"
 
 export type GameMessageType =
   | "connect"
+  | "reconnect"
   | "disconnect"
   | "registerUserSocket"
   | "createGame"
@@ -25,6 +26,11 @@ export const createGameMessage = <T>(type: GameMessageType, data: T) => ({
 
 export type RegisterUserSocketInput = {
   userId: string
+}
+
+export interface CreateGameInput {
+  userId: string
+  language: string
 }
 
 export const registerUserSocket = (userId: RegisterUserSocketInput) => createGameMessage("registerUserSocket", userId)

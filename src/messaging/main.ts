@@ -31,32 +31,34 @@ type BrodcastMessageInput = {
 
 export const registerUser: GameMessagingPort<RegisterUserInput> = input => {
   userSocketLinks = [...userSocketLinks, input]
+  console.log("registerUser=====>\n", userSocketLinks)
   return actionOf(undefined)
 }
 
 export const unregisterSocket: GameMessagingPort<UnregisterSocket> = ({ socketId }) => {
   userSocketLinks = userSocketLinks.filter(u => u.socketId !== socketId)
+  console.log("unregisterSocket=====>\n", userSocketLinks)
   return actionOf(undefined)
 }
 
 export const emitMessage: GameMessagingPort<EmitMessageInput> = ({ userId, roomId, message }) =>
   withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
-    const socketIds = messengerPorts
-      .getSocketIdsForRoomId(messengerEnvironment)(roomId)
-      .map(s => s.socketId)
-    const userLink = userSocketLinks.filter(u => u.userId === userId && socketIds.includes(u.socketId))
-    if (userLink.length > 0) {
-      messengerPorts.emit(messengerEnvironment)(userLink[0].socketId, message)
-    }
+    const socketIds = messengerPorts.getSocketIdsForRoomId(messengerEnvironment)(roomId)
+    const userLinks = userSocketLinks.filter(u => u.userId === userId && socketIds.includes(u.socketId))
+
+    console.log("userLinks=====>\n", userLinks)
+    userLinks.forEach(ul => messengerPorts.emit(messengerEnvironment)(ul.socketId, message))
+
     return actionOf(undefined)
   })
 
-export const broadcastMessage: GameMessagingPort<BrodcastMessageInput> = ({ roomId, message }) =>
-  withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
+export const broadcastMessage: GameMessagingPort<BrodcastMessageInput> = ({ roomId, message }) => {
+  console.log("broadcastMessage=====>\n", roomId, message.type)
+  return withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
     messengerPorts.broadcast(messengerEnvironment)(roomId, message)
     return actionOf(undefined)
   })
-
+}
 export const gameMessagingPorts = {
   emitMessage,
   registerUser,

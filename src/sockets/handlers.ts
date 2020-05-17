@@ -3,7 +3,7 @@ import { map, run } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
 import { ChangeTurnInput, JoinGameInput, RevealWordInput } from "../domain/models"
 import { GameMessage, GameMessageType, RegisterUserSocketInput } from "../messaging/messages"
-import { withEnv } from "../utils/actions"
+import { actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
 import { SocketsEnvironment, SocketsPort } from "./adapters"
 
@@ -38,40 +38,35 @@ export const broadcastMessage = <T>(io: SocketIO.Server, gameId: string, message
 }
 
 export const registerUserHandler: SocketHandler<RegisterUserSocketInput> = socket => ({ userId }) =>
-  withEnv(({ adapters: { gameMessagingPorts, gameMessagingEnvironment } }) =>
+  withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
     pipe(adapt(gameMessagingPorts.registerUser({ userId, socketId: socket.id }), gameMessagingEnvironment)),
   )
 
 export const disconnectHandler: SocketHandler = socket => () => {
-  console.log("disconnectHandler=====>\n")
-  return withEnv(({ adapters: { gameMessagingPorts, gameMessagingEnvironment } }) =>
+  console.log("DISCONNECT=====>\n", socket.id)
+  return withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
     pipe(adapt(gameMessagingPorts.unregisterSocket({ socketId: socket.id }), gameMessagingEnvironment)),
   )
 }
-
 export const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ userId, language }) =>
-  withEnv(({ adapters: { gamesDomainPorts, domainEnvironment, uuid } }) => {
+  withEnv(({ gamesDomainPorts, domainEnvironment, uuid }) => {
     const gameId = uuid()
-    socket.join(gameId)
-    return pipe(
-      adapt(gamesDomainPorts.create({ gameId, userId, language }), domainEnvironment),
-      map(_ => undefined),
-    )
+    socket.join(gameId, async (_: any) => {
+      await gamesDomainPorts.create({ gameId, userId, language })(domainEnvironment)()
+    })
+    return actionOf(undefined)
   })
 
-export const joinGameHandler: SocketHandler<JoinGameInput> = socket => input =>
-  withEnv(({ adapters: { gamesDomainPorts, domainEnvironment } }) =>
-    pipe(
-      adapt(gamesDomainPorts.join(input), domainEnvironment),
-      map(game => {
-        socket.join(game.gameId)
-        return undefined
-      }),
-    ),
-  )
-
+export const joinGameHandler: SocketHandler<JoinGameInput> = socket => input => {
+  return withEnv(({ gamesDomainPorts, domainEnvironment }) => {
+    socket.join(input.gameId, async (_: any) => {
+      await gamesDomainPorts.join(input)(domainEnvironment)()
+    })
+    return actionOf(undefined)
+  })
+}
 export const revealWordHandler: SocketHandler<RevealWordInput> = _ => input =>
-  withEnv(({ adapters: { gamesDomainPorts, domainEnvironment } }) =>
+  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
       adapt(gamesDomainPorts.revealWord(input), domainEnvironment),
       map(_ => undefined),
@@ -79,7 +74,7 @@ export const revealWordHandler: SocketHandler<RevealWordInput> = _ => input =>
   )
 
 export const changeTurnHandler: SocketHandler<ChangeTurnInput> = _ => input =>
-  withEnv(({ adapters: { gamesDomainPorts, domainEnvironment } }) =>
+  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
       adapt(gamesDomainPorts.changeTurn(input), domainEnvironment),
       map(_ => undefined),

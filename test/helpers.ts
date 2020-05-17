@@ -9,6 +9,7 @@ import { buildGameMessagingEnvironment } from "../src/messaging/adapters"
 import { buildMessengerEnvironment } from "../src/messaging/messenger"
 import { buildMongoEnvironment } from "../src/mongodb/adapters"
 import { buildRepositoriesEnvironment } from "../src/repositories/adapters"
+import { actionOf } from "../src/utils/actions"
 import { DeepPartial } from "../src/utils/types"
 
 const words = {
@@ -26,6 +27,43 @@ const defaultConfig = {
   boardHeight: 5,
 }
 
+const voidAction = jest.fn(() => actionOf(undefined))
+
+const gamesMongoDbPorts = {
+  insert: jest.fn(),
+  update: jest.fn(),
+  getById: jest.fn(),
+}
+
+const wordsMongoDbPorts = {
+  insert: jest.fn(),
+  getByLanguage: jest.fn(),
+}
+
+const gamesRepositoryPorts = {
+  insert: jest.fn(),
+  update: jest.fn(),
+  getById: jest.fn(),
+}
+
+const wordsRepositoryPorts = {
+  insert: jest.fn(),
+  getByLanguage: jest.fn(),
+}
+
+export const messengerPorts = {
+  emit: jest.fn(),
+  broadcast: jest.fn(),
+  getSocketIdsForRoomId: jest.fn(),
+}
+
+export const gameMessagingPorts = {
+  emitMessage: voidAction,
+  registerUser: jest.fn(),
+  unregisterSocket: jest.fn(),
+  broadcastMessage: voidAction,
+}
+
 export const buildDefaultTestDomainEnvironment = () => {
   const dbClient = jest.fn(() => Promise.resolve(undefined)) as any
   const mongoEnvironment = buildMongoEnvironment(dbClient)
@@ -35,19 +73,26 @@ export const buildDefaultTestDomainEnvironment = () => {
     },
   } as any
   const messengerEnvironment = buildMessengerEnvironment(io)
-  const gameMessagingEnvironment = buildGameMessagingEnvironment(messengerEnvironment)
-  const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
-  const domainEnvironment = buildDomainEnvironment(defaultConfig, repositoriesEnvironment, gameMessagingEnvironment)
+  const gameMessagingEnvironment = buildGameMessagingEnvironment(messengerEnvironment, messengerPorts)
+  const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment, gamesMongoDbPorts, wordsMongoDbPorts)
+  const domainEnvironment = buildDomainEnvironment(
+    defaultConfig,
+    repositoriesEnvironment,
+    gamesRepositoryPorts,
+    wordsRepositoryPorts,
+    gameMessagingEnvironment,
+    gameMessagingPorts,
+  )
 
   return domainEnvironment
 }
 
 export const buildDefaultTestExpressEnvironment = () =>
-  buildExpressEnvironment(defaultConfig, buildDefaultTestDomainEnvironment())
+  buildExpressEnvironment(defaultConfig, buildDefaultTestDomainEnvironment(), {} as any)
 
 export const buildTestRepositoriesEnvironment = (dbClient: MongoClient) => {
   const mongoEnvironment = buildMongoEnvironment(dbClient)
-  const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
+  const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment, gamesMongoDbPorts, wordsMongoDbPorts)
 
   return repositoriesEnvironment
 }

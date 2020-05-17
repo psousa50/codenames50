@@ -1,14 +1,16 @@
-// import { Express } from "express"
-// import socketIo from "socket.io"
-// import { DomainEnvironment } from "../domain/adapters"
-// import { buildSocketsEnvironment } from "./adapters"
-// import { socketHandler } from "./handlers"
+import express from "express"
+import socketIo from "socket.io"
+import { SocketsEnvironment } from "./adapters"
+import { socketHandler } from "./handlers"
 
-// export const createSocketApp = (app: Express, port: number, domainAdapter: DomainEnvironment) => {
-//   const server = app.listen(port)
-//   const io = socketIo(server, {})
-//   const socketsAdapter = buildSocketsEnvironment(io, domainAdapter)
-//   io.on("connection", socketHandler(socketsAdapter))
+export const createSocketsApplication = (port: number) => {
+  const app = express()
+  const server = app.listen(port)
+  const io = socketIo(server, {})
 
-//   return io
-// }
+  return io
+}
+
+export const startSocketsApplication = (io: socketIo.Server, socketsEnvironment: SocketsEnvironment) => {
+  io.on("connection", socketHandler(socketsEnvironment))
+}

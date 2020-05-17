@@ -1,5 +1,5 @@
 import { Port } from "../utils/adapters"
-import { MessengerEnvironment, messengerPorts, MessengerPorts } from "./messenger"
+import { MessengerEnvironment, MessengerPorts } from "./messenger"
 
 export type GameMessagingEnvironment = {
   adapters: {
@@ -12,6 +12,7 @@ export type GameMessagingPort<I = void, R = void> = Port<GameMessagingEnvironmen
 
 export const buildGameMessagingEnvironment = (
   messengerEnvironment: MessengerEnvironment,
+  messengerPorts: MessengerPorts,
 ): GameMessagingEnvironment => ({
   adapters: {
     messengerPorts,

@@ -1,14 +1,19 @@
 import { MongoMemoryServer } from "mongodb-memory-server"
+import { buildMongoEnvironment } from "../../src/mongodb/adapters"
+import { gamesMongoDbPorts } from "../../src/mongodb/games"
 import { connect } from "../../src/mongodb/main"
+import { wordsMongoDbPorts } from "../../src/mongodb/words"
+import { buildRepositoriesEnvironment } from "../../src/repositories/adapters"
 import { gamesRepositoryPorts } from "../../src/repositories/games"
-import { getRight, buildTestRepositoriesEnvironment } from "../helpers"
+import { getRight } from "../helpers"
 
 it("insert and getById", async () => {
   const mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getUri()
 
   const dbClient = await connect(mongoUri)
-  const repositoriesAdapter = buildTestRepositoriesEnvironment(dbClient)
+  const mongoEnviroment = buildMongoEnvironment(dbClient)
+  const repositoriesAdapter = buildRepositoriesEnvironment(mongoEnviroment, gamesMongoDbPorts, wordsMongoDbPorts)
 
   const gameToInsert = {
     gameId: "some-id",
@@ -31,7 +36,8 @@ it("update and getById", async () => {
   const mongoUri = await mongoServer.getUri()
 
   const dbClient = await connect(mongoUri)
-  const repositoriesAdapter = buildTestRepositoriesEnvironment(dbClient)
+  const mongoEnviroment = buildMongoEnvironment(dbClient)
+  const repositoriesAdapter = buildRepositoriesEnvironment(mongoEnviroment, gamesMongoDbPorts, wordsMongoDbPorts)
 
   const gameId = "some-game-id"
   const gameToInsert = {
@@ -64,7 +70,8 @@ describe("getById", () => {
     const mongoUri = await mongoServer.getUri()
 
     const dbClient = await connect(mongoUri)
-    const repositoriesAdapter = buildTestRepositoriesEnvironment(dbClient)
+    const mongoEnviroment = buildMongoEnvironment(dbClient)
+    const repositoriesAdapter = buildRepositoriesEnvironment(mongoEnviroment, gamesMongoDbPorts, wordsMongoDbPorts)
 
     const insertedGame = await getRight(gamesRepositoryPorts.getById("some-id")(repositoriesAdapter))()
 

@@ -84,6 +84,17 @@ const sendMessage = (userId: string, message: GameMessage): DomainPort<CodeNames
     ),
   )
 
+const broadcastMessage = (message: GameMessage): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
+  withEnv(({ gameMessagingAdapter: { gameMessagingPorts, gameMessagingEnvironment } }) =>
+    pipe(
+      adapt<GameMessagingEnvironment, DomainEnvironment, void>(
+        gameMessagingPorts.broadcastMessage({ roomId: game.gameId, message }),
+        gameMessagingEnvironment,
+      ),
+      map(_ => game),
+    ),
+  )
+
 export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ gameId, userId, language }) =>
   withEnv(
     ({ config: { boardWidth, boardHeight }, repositoriesAdapter: { wordsRepositoryPorts, repositoriesEnvironment } }) =>
@@ -119,6 +130,7 @@ export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId
           repositoriesEnvironment,
         ),
       ),
+      chain(game => sendMessage(userId, messages.joinedGame(game))(game)),
     ),
   )
 
@@ -128,7 +140,7 @@ const revealWordAction = (row: number, col: number) => (game: CodeNamesGame) => 
   board: update2dCell(game.board)(reveal, row, col),
 })
 
-export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, row, col }) =>
+export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, userId, row, col }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
       adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
@@ -142,6 +154,7 @@ export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ game
           repositoriesEnvironment,
         ),
       ),
+      chain(broadcastMessage(messages.revealWord({ gameId, userId, row, col }))),
     ),
   )
 
@@ -150,7 +163,7 @@ const changeTurnAction = (game: CodeNamesGame) => ({
   turn: game.turn === Teams.red ? Teams.blue : Teams.red,
 })
 
-export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ gameId }) =>
+export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
       adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
@@ -164,6 +177,7 @@ export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ game
           repositoriesEnvironment,
         ),
       ),
+      chain(broadcastMessage(messages.changeTurn({ gameId, userId }))),
     ),
   )
 

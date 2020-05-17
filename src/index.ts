@@ -1,17 +1,13 @@
 import * as dotenv from "dotenv"
-import express from "express"
 import { MongoClient } from "mongodb"
-import socketIo from "socket.io"
 import { buildExpressEnvironment } from "./app/adapters"
 import { createExpressApp } from "./app/main"
 import { config as appConfig } from "./config"
-import { buildDomainEnvironment } from "./domain/adapters"
-import { buildGameMessagingEnvironment } from "./messaging/adapters"
-import { buildMessengerEnvironment } from "./messaging/messenger"
-import { buildMongoEnvironment } from "./mongodb/adapters"
-import { buildRepositoriesEnvironment } from "./repositories/adapters"
+import { gamesDomainPorts } from "./domain/games"
+import { buildDomainEnvironmentWithRealPorts } from "./environment"
+import { gameMessagingPorts } from "./messaging/main"
 import { buildSocketsEnvironment } from "./sockets/adapters"
-import { socketHandler } from "./sockets/handlers"
+import { createSocketsApplication, startSocketsApplication } from "./sockets/main"
 import { logDebug } from "./utils/debug"
 
 dotenv.config()
@@ -30,25 +26,26 @@ const startApplication = async () => {
     const envPort = Number(process.env.PORT)
     const appPort = isNaN(envPort) ? config.port : envPort
 
-    const dbClient = await MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
     const socketsPort = appPort + 1
-    const appSocket = express()
-    const server2 = appSocket.listen(socketsPort)
-    const io = socketIo(server2, {})
+    const io = createSocketsApplication(socketsPort)
 
-    const mongoEnvironment = buildMongoEnvironment(dbClient)
-    const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment)
-    const messengerEnvironment = buildMessengerEnvironment(io)
-    const gameMessagingEnvironment = buildGameMessagingEnvironment(messengerEnvironment)
-    const domainEnvironment = buildDomainEnvironment(config, repositoriesEnvironment, gameMessagingEnvironment)
-    const expressEnvironment = buildExpressEnvironment(config, domainEnvironment)
+    const dbClient = await MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+
+    const domainEnvironment = buildDomainEnvironmentWithRealPorts(config, dbClient, io)
+    const expressEnvironment = buildExpressEnvironment(config, domainEnvironment, gamesDomainPorts)
 
     const app = createExpressApp(expressEnvironment)
 
     const server = app.listen(appPort)
 
-    const socketsEnvironment = buildSocketsEnvironment(io, domainEnvironment, gameMessagingEnvironment)
-    io.on("connection", socketHandler(socketsEnvironment))
+    const socketsEnvironment = buildSocketsEnvironment(
+      io,
+      domainEnvironment,
+      gamesDomainPorts,
+      domainEnvironment.gameMessagingAdapter.gameMessagingEnvironment,
+      gameMessagingPorts,
+    )
+    startSocketsApplication(io, socketsEnvironment)
 
     server.on("checkContinue", (__, res) => {
       res.writeContinue()

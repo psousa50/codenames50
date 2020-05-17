@@ -1,8 +1,12 @@
 import { AppConfig } from "../config"
 import { DomainEnvironment } from "../domain/adapters"
-import { gamesDomainPorts } from "../domain/games"
+import { GamesDomainPorts } from "../domain/games"
 
-export const buildExpressEnvironment = (config: AppConfig, domainEnvironment: DomainEnvironment) => ({
+export const buildExpressEnvironment = (
+  config: AppConfig,
+  domainEnvironment: DomainEnvironment,
+  gamesDomainPorts: GamesDomainPorts,
+) => ({
   config: {
     port: config.port,
   },

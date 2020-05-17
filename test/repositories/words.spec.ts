@@ -1,14 +1,19 @@
 import { MongoMemoryServer } from "mongodb-memory-server"
+import { buildMongoEnvironment } from "../../src/mongodb/adapters"
+import { gamesMongoDbPorts } from "../../src/mongodb/games"
 import { connect } from "../../src/mongodb/main"
+import { wordsMongoDbPorts } from "../../src/mongodb/words"
+import { buildRepositoriesEnvironment } from "../../src/repositories/adapters"
 import { wordsRepositoryPorts } from "../../src/repositories/words"
-import { getRight, buildTestRepositoriesEnvironment } from "../helpers"
+import { getRight } from "../helpers"
 
 it("getByLanguage", async () => {
   const mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getUri()
 
   const dbClient = await connect(mongoUri)
-  const repositoriesAdapter = buildTestRepositoriesEnvironment(dbClient)
+  const mongoEnviroment = buildMongoEnvironment(dbClient)
+  const repositoriesAdapter = buildRepositoriesEnvironment(mongoEnviroment, gamesMongoDbPorts, wordsMongoDbPorts)
 
   const wordsEn = {
     language: "en",
