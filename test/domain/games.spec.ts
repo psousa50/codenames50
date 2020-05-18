@@ -1,11 +1,11 @@
 import moment from "moment"
 import * as R from "ramda"
 import { DomainEnvironment } from "../../src/domain/adapters"
+import { ErrorCodes } from "../../src/domain/errors"
 import * as Games from "../../src/domain/games"
 import { CodeNamesGame, GameStates, Teams, Words, WordType } from "../../src/domain/models"
 import * as messages from "../../src/messaging/messages"
 import { actionOf } from "../../src/utils/actions"
-import { ErrorCodes } from "../../src/utils/audit"
 import { DeepPartial } from "../../src/utils/types"
 import { buildTestDomainEnvironment, getLeft, getRight } from "../helpers"
 
@@ -157,7 +157,7 @@ describe("create", () => {
 
       const r = await getLeft(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainEnvironment))()
 
-      expect(r.errorCode).toBe(ErrorCodes.NOT_FOUND)
+      expect(r.errorCode).toBe(ErrorCodes.LANGUAGE_NOT_FOUND)
     })
   })
 })
@@ -225,7 +225,7 @@ describe("join", () => {
 
     const r = await getLeft(Games.join({ gameId, userId })(domainEnvironment))()
 
-    expect(r.errorCode).toBe(ErrorCodes.NOT_FOUND)
+    expect(r.errorCode).toBe(ErrorCodes.GAME_NOT_FOUND)
 
     expect(emitMessage).not.toHaveBeenCalled()
   })

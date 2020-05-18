@@ -7,11 +7,12 @@ import { GameMessage } from "../messaging/messages"
 import { RepositoriesEnvironment } from "../repositories/adapters"
 import { actionErrorOf, actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
-import { ErrorCodes, ServiceError } from "../utils/audit"
+import { ServiceError } from "../utils/audit"
 import { update2dCell } from "../utils/collections"
 import { shuffle } from "../utils/random"
 import { UUID } from "../utils/types"
 import { DomainEnvironment, DomainPort } from "./adapters"
+import { ErrorCodes } from "./errors"
 import {
   BoardWord,
   ChangeTurnInput,
@@ -50,7 +51,7 @@ const buildBoard = (boardWidth: number, boardHeight: number) => (words: string[]
 }
 
 const exists = <E, T, R>(v: T | undefined, f: (v: NonNullable<T>) => R, errMsg: string) =>
-  v ? actionOf(f(v!)) : actionErrorOf<E, R>(new ServiceError(errMsg, ErrorCodes.NOT_FOUND))
+  v ? actionOf(f(v!)) : actionErrorOf<E, R>(new ServiceError(errMsg, ErrorCodes.LANGUAGE_NOT_FOUND))
 
 const insertGame = (gameId: string, userId: string): DomainPort<BoardWord[][], CodeNamesGame> => board =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, currentUtcDateTime }) =>
@@ -103,7 +104,7 @@ const getGame: DomainPort<UUID, CodeNamesGame> = gameId =>
       chain(game =>
         game
           ? actionOf(game)
-          : actionErrorOf(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+          : actionErrorOf(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.GAME_NOT_FOUND)),
       ),
     ),
   )
