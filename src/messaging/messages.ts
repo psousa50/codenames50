@@ -1,4 +1,4 @@
-import { ChangeTurnInput, CodeNamesGame, JoinGameInput, RevealWordInput } from "../domain/models"
+import { ChangeTurnInput, CodeNamesGame, JoinGameInput, RevealWordInput, SetSpyMasterInput } from "../domain/models"
 
 export type GameMessageType =
   | "connect"
@@ -9,7 +9,7 @@ export type GameMessageType =
   | "gameCreated"
   | "joinGame"
   | "joinedGame"
-  | "iamSpyMaster"
+  | "setSpyMaster"
   | "revealWord"
   | "changeTurn"
   | "error"
@@ -33,6 +33,13 @@ export interface CreateGameInput {
   language: string
 }
 
+type ErrorCode = "SpyMasterAlreadySet"
+
+export interface ErrorInput {
+  code: ErrorCode
+  text: string
+}
+
 export const registerUserSocket = (userId: RegisterUserSocketInput) => createGameMessage("registerUserSocket", userId)
 export const createGame = (data: CreateGameInput) => createGameMessage("createGame", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)
@@ -40,4 +47,5 @@ export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", d
 export const joinedGame = (data: CodeNamesGame) => createGameMessage("joinedGame", data)
 export const revealWord = (data: RevealWordInput) => createGameMessage("revealWord", data)
 export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTurn", data)
-export const error = (data: string) => createGameMessage("error", data)
+export const setSpyMaster = (data: SetSpyMasterInput) => createGameMessage("setSpyMaster", data)
+export const error = (data: ErrorInput) => createGameMessage("error", data)

@@ -4,6 +4,7 @@ export enum ErrorCodes {
   VALIDATION = "VALIDATION",
   NOT_FOUND = "NOT_FOUND",
   TIMEOUT = "TIMEOUT",
+  SPY_MASTER_ALREADY_SET = "SPY_MASTER_ALREADY_SET",
 }
 
 export class ServiceError {

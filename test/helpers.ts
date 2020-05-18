@@ -97,7 +97,7 @@ export const buildTestRepositoriesEnvironment = (dbClient: MongoClient) => {
   return repositoriesEnvironment
 }
 
-export const buildTestDomainEnvironment = (domainEnvironment: DeepPartial<DomainEnvironment> = {}): DomainEnvironment =>
+export const buildTestDomainEnvironment = (domainEnvironment: DeepPartial<DomainEnvironment> = {}) =>
   R.mergeDeepRight(buildDefaultTestDomainEnvironment(), domainEnvironment)
 
 export const buildTestExpressEnvironment = (

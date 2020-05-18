@@ -10,6 +10,7 @@ import { adapt } from "../utils/adapters"
 import { ErrorCodes, ServiceError } from "../utils/audit"
 import { update2dCell } from "../utils/collections"
 import { shuffle } from "../utils/random"
+import { UUID } from "../utils/types"
 import { DomainEnvironment, DomainPort } from "./adapters"
 import {
   BoardWord,
@@ -23,18 +24,12 @@ import {
   JoinGameOutput,
   RevealWordInput,
   RevealWordOutput,
+  SetSpyMasterInput,
+  SetSpyMasterOutput,
   Teams,
   Words,
   WordType,
 } from "./models"
-
-const addPlayer = (userId: string) => (game: CodeNamesGame) =>
-  game.players.find(p => p.userId === userId)
-    ? game
-    : {
-        ...game,
-        players: [...game.players, { userId }],
-      }
 
 const determineWordTypes = (words: string[]): BoardWord[] => {
   const numberOfWordsForTeams = Math.max(0, Math.floor((words.length - 1) / 3))
@@ -65,6 +60,9 @@ const insertGame = (gameId: string, userId: string): DomainPort<BoardWord[][], C
         timestamp: currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
         userId,
         players: [{ userId }],
+        spyMaster: undefined,
+        hintWord: undefined,
+        hintWordCount: undefined,
         state: GameStates.idle,
         turn: Teams.red,
         board,
@@ -73,7 +71,7 @@ const insertGame = (gameId: string, userId: string): DomainPort<BoardWord[][], C
     ),
   )
 
-const sendMessage = (userId: string, message: GameMessage): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
+const emitMessage = (userId: string, message: GameMessage): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
   withEnv(({ gameMessagingAdapter: { gameMessagingPorts, gameMessagingEnvironment } }) =>
     pipe(
       adapt<GameMessagingEnvironment, DomainEnvironment, void>(
@@ -95,6 +93,21 @@ const broadcastMessage = (message: GameMessage): DomainPort<CodeNamesGame, CodeN
     ),
   )
 
+const getGame: DomainPort<UUID, CodeNamesGame> = gameId =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+    pipe(
+      adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
+        gamesRepositoryPorts.getById(gameId),
+        repositoriesEnvironment,
+      ),
+      chain(game =>
+        game
+          ? actionOf(game)
+          : actionErrorOf(new ServiceError(`Game '${gameId}' does not exist`, ErrorCodes.NOT_FOUND)),
+      ),
+    ),
+  )
+
 export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ gameId, userId, language }) =>
   withEnv(
     ({ config: { boardWidth, boardHeight }, repositoriesAdapter: { wordsRepositoryPorts, repositoriesEnvironment } }) =>
@@ -112,25 +125,30 @@ export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ gameId, 
         ),
         map(buildBoard(boardWidth, boardHeight)),
         chain(insertGame(gameId, userId)),
-        chain(game => sendMessage(userId, messages.gameCreated(game))(game)),
+        chain(game => emitMessage(userId, messages.gameCreated(game))(game)),
       ),
   )
+
+const addPlayer = (userId: string) => (game: CodeNamesGame) =>
+  game.players.find(p => p.userId === userId)
+    ? game
+    : {
+        ...game,
+        players: [...game.players, { userId }],
+      }
 
 export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
-      adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
-        gamesRepositoryPorts.getById(gameId),
-        repositoriesEnvironment,
-      ),
-      chain(game => exists(game, addPlayer(userId), `Game '${gameId}' does not exist`)),
+      getGame(gameId),
+      chain(game => actionOf(addPlayer(userId)(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
           repositoriesEnvironment,
         ),
       ),
-      chain(game => sendMessage(userId, messages.joinedGame(game))(game)),
+      chain(game => emitMessage(userId, messages.joinedGame(game))(game)),
     ),
   )
 
@@ -143,11 +161,8 @@ const revealWordAction = (row: number, col: number) => (game: CodeNamesGame) => 
 export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, userId, row, col }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
-      adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
-        gamesRepositoryPorts.getById(gameId),
-        repositoriesEnvironment,
-      ),
-      chain(game => exists(game, revealWordAction(row, col), `Game '${gameId}' does not exist`)),
+      getGame(gameId),
+      chain(game => actionOf(revealWordAction(row, col)(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
@@ -166,11 +181,8 @@ const changeTurnAction = (game: CodeNamesGame) => ({
 export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
-      adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame | null>(
-        gamesRepositoryPorts.getById(gameId),
-        repositoriesEnvironment,
-      ),
-      chain(game => exists(game, changeTurnAction, `Game '${gameId}' does not exist`)),
+      getGame(gameId),
+      chain(game => actionOf(changeTurnAction(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
@@ -181,11 +193,38 @@ export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ game
     ),
   )
 
+const setSpyMasterAction = (userId: string) => (game: CodeNamesGame) => ({
+  ...game,
+  spyMaster: userId,
+})
+
+const checkSpyMaster: DomainPort<CodeNamesGame, CodeNamesGame> = game =>
+  game.spyMaster === undefined
+    ? actionOf(game)
+    : actionErrorOf(new ServiceError("SpyMaster already set", ErrorCodes.SPY_MASTER_ALREADY_SET))
+
+export const setSpyMaster: DomainPort<SetSpyMasterInput, SetSpyMasterOutput> = ({ gameId, userId }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+    pipe(
+      getGame(gameId),
+      chain(checkSpyMaster),
+      chain(game => actionOf(setSpyMasterAction(userId)(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
+      chain(broadcastMessage(messages.setSpyMaster({ gameId, userId }))),
+    ),
+  )
+
 export const gamesDomainPorts = {
   create,
   join,
   revealWord,
   changeTurn,
+  setSpyMaster,
 }
 
 export type GamesDomainPorts = typeof gamesDomainPorts

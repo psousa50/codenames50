@@ -1,42 +1,80 @@
 import moment from "moment"
 import * as R from "ramda"
+import { DomainEnvironment } from "../../src/domain/adapters"
 import * as Games from "../../src/domain/games"
-import { CodeNamesGame, GameStates, Teams, WordType } from "../../src/domain/models"
+import { CodeNamesGame, GameStates, Teams, Words, WordType } from "../../src/domain/models"
+import * as messages from "../../src/messaging/messages"
 import { actionOf } from "../../src/utils/actions"
 import { ErrorCodes } from "../../src/utils/audit"
+import { DeepPartial } from "../../src/utils/types"
 import { buildTestDomainEnvironment, getLeft, getRight } from "../helpers"
 
 const sortStrings = (s1: string, s2: string) => s1.localeCompare(s2)
 const gameId = "some-game-id"
 
+type EnvironmentOptions = {
+  game?: CodeNamesGame
+  words?: Words
+}
+
+const buildEnvironment = (partialEnv: DeepPartial<DomainEnvironment>, { game, words }: EnvironmentOptions = {}) => {
+  const insertGame = jest.fn(g => actionOf(g))
+  const updateGame = jest.fn(g => actionOf(g))
+  const getByLanguage = jest.fn(() => actionOf(words || { language: "some-language", words: [] }))
+  const emitMessage = jest.fn(() => actionOf(undefined)) as any
+  const broadcastMessage = jest.fn(() => actionOf(undefined)) as any
+
+  const defaultEnvironment = buildTestDomainEnvironment({
+    config: {
+      boardWidth: 5,
+      boardHeight: 5,
+    },
+    repositoriesAdapter: {
+      gamesRepositoryPorts: {
+        insert: insertGame,
+        update: updateGame,
+        getById: jest.fn(() => actionOf(game || ({} as any))),
+      },
+      wordsRepositoryPorts: {
+        getByLanguage,
+      },
+    },
+    gameMessagingAdapter: {
+      gameMessagingPorts: {
+        emitMessage,
+        broadcastMessage,
+      },
+    },
+    currentUtcDateTime: () => moment.utc("2000-01-01"),
+  })
+  const domainEnvironment = R.mergeDeepRight(defaultEnvironment, partialEnv)
+
+  return {
+    domainEnvironment,
+    insertGame,
+    updateGame,
+    getByLanguage,
+    emitMessage,
+    broadcastMessage,
+  }
+}
+
 describe("create", () => {
-  it("create a game in idle state with one player and an empty board", async () => {
+  it("creates a game in idle state with one player and an empty board", async () => {
     const userId = "john@something.com"
-    const allWords = {
+    const words = {
       words: ["w1", "w2", "w3", "w4"],
     } as any
-    const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-    const emitMessage = jest.fn(() => actionOf(undefined)) as any
-    const domainAdapter = buildTestDomainEnvironment({
-      config: {
-        boardWidth: 0,
-        boardHeight: 0,
-      },
-      repositoriesAdapter: {
-        gamesRepositoryPorts: {
-          insert,
-        },
-        wordsRepositoryPorts: {
-          getByLanguage: jest.fn(() => actionOf(allWords)),
+
+    const { domainEnvironment, insertGame, emitMessage } = buildEnvironment(
+      {
+        config: {
+          boardWidth: 0,
+          boardHeight: 0,
         },
       },
-      gameMessagingAdapter: {
-        gameMessagingPorts: {
-          emitMessage,
-        },
-      },
-      currentUtcDateTime: () => moment.utc("2000-01-01"),
-    })
+      { words },
+    )
 
     const player1 = {
       userId,
@@ -49,75 +87,47 @@ describe("create", () => {
       state: GameStates.idle,
       turn: Teams.red,
       board: [],
-      timestamp: domainAdapter.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+      timestamp: domainEnvironment.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
     }
 
-    await getRight(Games.create({ gameId, userId, language: "en" })(domainAdapter))()
+    await getRight(Games.create({ gameId, userId, language: "en" })(domainEnvironment))()
 
-    expect(insert).toHaveBeenCalledWith(gameToInsert)
+    expect(insertGame).toHaveBeenCalledWith(gameToInsert)
 
     expect(emitMessage).toHaveBeenCalledTimes(1)
   })
 
   describe("adds a board to the game", () => {
     it("with random words", async () => {
-      const allWords = {
+      const words = {
         words: R.range(0, 30).map(i => `word-${i}`),
       } as any
-      const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-      const domainAdapter = buildTestDomainEnvironment({
-        config: {
-          boardWidth: 5,
-          boardHeight: 5,
-        },
-        repositoriesAdapter: {
-          gamesRepositoryPorts: {
-            insert,
-          },
-          wordsRepositoryPorts: {
-            getByLanguage: jest.fn(() => actionOf(allWords)),
-          },
-        },
-      })
+      const { domainEnvironment, insertGame } = buildEnvironment({}, { words })
 
-      await getRight(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainAdapter))()
-      await getRight(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainAdapter))()
+      await getRight(Games.create({ gameId: "id1", userId: "some-user-id", language: "en" })(domainEnvironment))()
+      await getRight(Games.create({ gameId: "id2", userId: "some-user-id", language: "en" })(domainEnvironment))()
 
-      const firstBoard = R.flatten(insert.mock.calls[0][0].board)
-      const secondBoard = R.flatten(insert.mock.calls[1][0].board)
-      expect(firstBoard.length).toBe(domainAdapter.config.boardWidth * domainAdapter.config.boardHeight)
+      const firstBoard = R.flatten(insertGame.mock.calls[0][0].board)
+      const secondBoard = R.flatten(insertGame.mock.calls[1][0].board)
+      expect(firstBoard.length).toBe(domainEnvironment.config.boardWidth * domainEnvironment.config.boardHeight)
       expect(
         R.sort(
           sortStrings,
           firstBoard.map(b => b.word),
         ),
-      ).not.toEqual(R.sort(sortStrings, allWords.words.slice(0, 25)))
+      ).not.toEqual(R.sort(sortStrings, words.words.slice(0, 25)))
       expect(firstBoard.map(b => b.word)).not.toEqual(secondBoard.map(b => b.word))
     })
 
-    it("with words for all teams, inocents and one assassin", async () => {
-      const allWords = {
+    it("with words for both teams, inocents and one assassin", async () => {
+      const words = {
         words: R.range(0, 40).map(i => `word-${i}`),
       } as any
-      const insert = jest.fn((game: CodeNamesGame) => actionOf(game))
-      const domainAdapter = buildTestDomainEnvironment({
-        config: {
-          boardWidth: 5,
-          boardHeight: 5,
-        },
-        repositoriesAdapter: {
-          gamesRepositoryPorts: {
-            insert,
-          },
-          wordsRepositoryPorts: {
-            getByLanguage: jest.fn(() => actionOf(allWords)),
-          },
-        },
-      })
+      const { domainEnvironment, insertGame } = buildEnvironment({}, { words })
 
-      await getRight(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainAdapter))()
+      await getRight(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainEnvironment))()
 
-      const board = R.flatten(insert.mock.calls[0][0].board)
+      const board = R.flatten(insertGame.mock.calls[0][0].board)
 
       expect(board.filter(b => b.type === WordType.red).length).toBe(8)
       expect(board.filter(b => b.type === WordType.blue).length).toBe(8)
@@ -128,35 +138,24 @@ describe("create", () => {
 
     it("for the language chosen", async () => {
       const language = "pt"
-      const domainAdapter = buildTestDomainEnvironment({
-        repositoriesAdapter: {
-          gamesRepositoryPorts: {
-            insert: jest.fn(game => actionOf(game)),
-          },
-          wordsRepositoryPorts: {
-            getByLanguage: jest.fn(() => actionOf({ words: [] } as any)),
-          },
-        },
-      })
+      const { domainEnvironment, getByLanguage } = buildEnvironment({})
 
-      await getRight(Games.create({ gameId, userId: "some-user-id", language })(domainAdapter))()
+      await getRight(Games.create({ gameId, userId: "some-user-id", language })(domainEnvironment))()
 
-      expect(domainAdapter.repositoriesAdapter.wordsRepositoryPorts.getByLanguage).toHaveBeenCalledWith(language)
+      expect(getByLanguage).toHaveBeenCalledWith(language)
     })
 
     it("gives an error 404 if language does not exist", async () => {
-      const domainAdapter = buildTestDomainEnvironment({
+      const getByLanguage = jest.fn(() => actionOf(null))
+      const { domainEnvironment } = buildEnvironment({
         repositoriesAdapter: {
-          gamesRepositoryPorts: {
-            insert: jest.fn(game => actionOf(game)),
-          },
           wordsRepositoryPorts: {
-            getByLanguage: jest.fn(() => actionOf(null)),
+            getByLanguage,
           },
         },
       })
 
-      const r = await getLeft(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainAdapter))()
+      const r = await getLeft(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainEnvironment))()
 
       expect(r.errorCode).toBe(ErrorCodes.NOT_FOUND)
     })
@@ -176,14 +175,7 @@ describe("join", () => {
       players: [player1],
     } as any
 
-    const domainAdapter = buildTestDomainEnvironment({
-      repositoriesAdapter: {
-        gamesRepositoryPorts: {
-          getById: jest.fn(() => actionOf(game)),
-          update: jest.fn(() => actionOf(game)),
-        },
-      },
-    })
+    const { domainEnvironment, updateGame } = buildEnvironment({}, { game })
 
     const secondUserId = "second-user-id"
 
@@ -193,9 +185,9 @@ describe("join", () => {
 
     const gameToUpdate = { gameId, userId, players: [player1, player2] }
 
-    await getRight(Games.join({ gameId, userId: secondUserId })(domainAdapter))()
+    await getRight(Games.join({ gameId, userId: secondUserId })(domainEnvironment))()
 
-    expect(domainAdapter.repositoriesAdapter.gamesRepositoryPorts.update).toHaveBeenCalledWith(gameToUpdate)
+    expect(updateGame).toHaveBeenCalledWith(gameToUpdate)
   })
 
   it("does not add user if it has already joined the game", async () => {
@@ -210,27 +202,20 @@ describe("join", () => {
       players: [player1],
     } as any
 
-    const domainAdapter = buildTestDomainEnvironment({
-      repositoriesAdapter: {
-        gamesRepositoryPorts: {
-          getById: jest.fn(() => actionOf(game)),
-          update: jest.fn(() => actionOf(game)),
-        },
-      },
-    })
+    const { domainEnvironment, updateGame } = buildEnvironment({}, { game })
 
     const gameToUpdate = { gameId, userId, players: [player1] }
 
-    await getRight(Games.join({ gameId, userId })(domainAdapter))()
+    await getRight(Games.join({ gameId, userId })(domainEnvironment))()
 
-    expect(domainAdapter.repositoriesAdapter.gamesRepositoryPorts.update).toHaveBeenCalledWith(gameToUpdate)
+    expect(updateGame).toHaveBeenCalledWith(gameToUpdate)
   })
 
-  it("gives a 404 if game does not exist", async () => {
+  it("gives an error if the game does not exist", async () => {
     const gameId = "some-unexistant-id"
     const userId = "user-id"
 
-    const domainAdapter = buildTestDomainEnvironment({
+    const { domainEnvironment, emitMessage } = buildEnvironment({
       repositoriesAdapter: {
         gamesRepositoryPorts: {
           getById: jest.fn(() => actionOf(null)),
@@ -238,9 +223,11 @@ describe("join", () => {
       },
     })
 
-    const r = await getLeft(Games.join({ gameId, userId })(domainAdapter))()
+    const r = await getLeft(Games.join({ gameId, userId })(domainEnvironment))()
 
     expect(r.errorCode).toBe(ErrorCodes.NOT_FOUND)
+
+    expect(emitMessage).not.toHaveBeenCalled()
   })
 })
 
@@ -258,20 +245,18 @@ describe("revealWord", () => {
       ],
     } as any
 
-    const domainAdapter = buildTestDomainEnvironment({
-      repositoriesAdapter: {
-        gamesRepositoryPorts: {
-          update: jest.fn(g => actionOf(g)),
-          getById: jest.fn(() => actionOf(game)),
-        },
-      },
-    })
+    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
 
     const row = 0
     const col = 1
-    const newGame = await getRight(Games.revealWord({ gameId, userId, row, col })(domainAdapter))()
+    const newGame = await getRight(Games.revealWord({ gameId, userId, row, col })(domainEnvironment))()
 
     expect(newGame.board[row][col].revealed).toBeTruthy()
+
+    expect(broadcastMessage).toHaveBeenCalledWith({
+      roomId: gameId,
+      message: messages.revealWord({ gameId, userId, row, col }),
+    })
   })
 })
 
@@ -286,16 +271,54 @@ describe("changeTurn", () => {
       turn: Teams.blue,
     } as any
 
-    const domainAdapter = buildTestDomainEnvironment({
-      repositoriesAdapter: {
-        gamesRepositoryPorts: {
-          update: jest.fn(g => actionOf(g)),
-          getById: () => actionOf(game),
-        },
-      },
-    })
+    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
 
-    const newGame = await getRight(Games.changeTurn({ gameId, userId })(domainAdapter))()
+    const newGame = await getRight(Games.changeTurn({ gameId, userId })(domainEnvironment))()
     expect(newGame.turn).toBe(Teams.red)
+
+    expect(broadcastMessage).toHaveBeenCalledWith({ roomId: gameId, message: messages.changeTurn({ gameId, userId }) })
+  })
+})
+
+describe("setSpyMaster", () => {
+  it("set player as Spy Master", async () => {
+    const gameId = "game-id"
+    const userId = "user-id"
+
+    const game = {
+      gameId,
+      userId,
+      spyMaster: undefined,
+    } as any
+
+    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
+
+    const newGame = await getRight(Games.setSpyMaster({ gameId, userId })(domainEnvironment))()
+    expect(newGame.spyMaster).toBe(userId)
+
+    expect(broadcastMessage).toHaveBeenCalledWith({
+      roomId: gameId,
+      message: messages.setSpyMaster({ gameId, userId }),
+    })
+  })
+
+  it("does not allow if game already has a Spy Master", async () => {
+    const gameId = "game-id"
+    const userId = "user-id"
+    const otherUserId = "some-other-user-id"
+
+    const game = {
+      gameId,
+      userId,
+      spyMaster: otherUserId,
+    } as any
+
+    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
+
+    const r = await getLeft(Games.setSpyMaster({ gameId, userId })(domainEnvironment))()
+
+    expect(r.errorCode).toBe(ErrorCodes.SPY_MASTER_ALREADY_SET)
+
+    expect(broadcastMessage).not.toHaveBeenCalled()
   })
 })

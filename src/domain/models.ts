@@ -29,6 +29,13 @@ export type ChangeTurnInput = {
 
 export type ChangeTurnOutput = CodeNamesGame
 
+export type SetSpyMasterInput = {
+  gameId: string
+  userId: string
+}
+
+export type SetSpyMasterOutput = CodeNamesGame
+
 export enum Teams {
   red = "red",
   blue = "blue",
@@ -60,6 +67,9 @@ export interface CodeNamesGame {
   timestamp: string
   userId: string
   players: Player[]
+  spyMaster: string | undefined
+  hintWord: string | undefined
+  hintWordCount: number | undefined
   state: GameStates
   turn: Teams
   board: WordsBoard
