@@ -1,8 +1,8 @@
-import { SocketMessage, SocketMessageType } from "./messagesTypes"
+import { GameMessage, GameMessageType } from "../server/messaging/messages"
 
 export const addMessageHandler = <T>(
   socket: SocketIOClient.Socket,
-  type: SocketMessageType,
+  type: GameMessageType,
   handler: (data: T) => void,
 ) => {
   socket.on(type, (data: T) => {
@@ -11,7 +11,7 @@ export const addMessageHandler = <T>(
   })
 }
 
-export const emitMessage = <T>(socket: SocketIOClient.Socket, message: SocketMessage<T>) => {
+export const emitMessage = <T>(socket: SocketIOClient.Socket, message: GameMessage<T>) => {
   console.log("EMIT=====>\n", message)
   socket.emit(message.type, message.data)
 }

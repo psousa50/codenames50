@@ -1,9 +1,9 @@
+import { capitalize, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
+import { makeStyles } from "@material-ui/core/styles"
 import * as R from "ramda"
 import React from "react"
-import { makeStyles } from "@material-ui/core/styles"
-import { WordsBoard, BoardWord, WordType } from "../api/models"
-import { Paper, TableContainer, Table, TableBody, TableRow, TableCell, capitalize } from "@material-ui/core"
-import { redColor, blueColor } from "../utils/ui"
+import { BoardWord, WordsBoard, WordType } from "../api/server/game/models"
+import { blueColor, redColor } from "../utils/ui"
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
 
