@@ -1,5 +1,5 @@
 import { pipe } from "fp-ts/lib/pipeable"
-import { map, run } from "fp-ts/lib/ReaderTaskEither"
+import { map, mapLeft, run } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
 import { ChangeTurnInput, JoinGameInput, RevealWordInput } from "../domain/models"
 import { GameMessage, GameMessageType, RegisterUserSocketInput } from "../messaging/messages"
@@ -14,17 +14,28 @@ type CreateGameInput = {
 
 type SocketHandler<T = void> = (socket: SocketIO.Socket) => SocketsPort<T, void>
 
-const addMessageHandler = (socketsAdapter: SocketsEnvironment) => <T>(
+const addMessageHandler = (socketsEnvironment: SocketsEnvironment) => <T>(
   socket: SocketIO.Socket,
   type: GameMessageType,
-  handler: SocketHandler<T>,
+  messageHandler: SocketHandler<T>,
 ) => {
-  const h = (data: T) => {
+  const handler = async (data: T) => {
     console.log("RECEIVED=====>\n", type, data)
-    run(handler(socket)(data), socketsAdapter)
+    try {
+      await run(
+        pipe(
+          messageHandler(socket)(data),
+          mapLeft(e => {
+            console.log("SOCKET ERROR=====>\n", socket.id, e)
+            socket.emit("gameError", e)
+          }),
+        ),
+        socketsEnvironment,
+      )
+    } catch (_) {}
   }
 
-  socket.on(type, h)
+  socket.on(type, handler)
 
   return task.of(undefined)
 }

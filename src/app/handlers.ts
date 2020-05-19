@@ -2,7 +2,7 @@ import { ErrorRequestHandler, RequestHandler, Response } from "express"
 import { pipe } from "fp-ts/lib/pipeable"
 import { bimap } from "fp-ts/lib/TaskEither"
 import { Port } from "../utils/adapters"
-import { ServiceError } from "../utils/audit"
+import { ServiceError } from "../utils/errors"
 import { ErrorCodes } from "./errors"
 
 export function createErrorHandler(): ErrorRequestHandler {

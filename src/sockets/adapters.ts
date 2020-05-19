@@ -1,7 +1,7 @@
 import socketIo from "socket.io"
 import * as uuid from "uuid"
 import { DomainEnvironment } from "../domain/adapters"
-import { GamesDomainPorts } from "../domain/games"
+import { GamesDomainPorts } from "../domain/main"
 import { GameMessagingEnvironment } from "../messaging/adapters"
 import { GameMessagingPorts } from "../messaging/main"
 import { Port } from "../utils/adapters"

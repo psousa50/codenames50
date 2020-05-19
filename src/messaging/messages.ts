@@ -1,3 +1,4 @@
+import { ErrorCodes } from "../domain/errors"
 import { ChangeTurnInput, CodeNamesGame, JoinGameInput, RevealWordInput, SetSpyMasterInput } from "../domain/models"
 
 export type GameMessageType =
@@ -12,7 +13,7 @@ export type GameMessageType =
   | "setSpyMaster"
   | "revealWord"
   | "changeTurn"
-  | "error"
+  | "gameError"
 
 export type GameMessage<T = {}> = {
   type: GameMessageType
@@ -33,10 +34,8 @@ export interface CreateGameInput {
   language: string
 }
 
-type ErrorCode = "SpyMasterAlreadySet"
-
 export interface ErrorInput {
-  code: ErrorCode
+  code: ErrorCodes
   text: string
 }
 
@@ -48,4 +47,4 @@ export const joinedGame = (data: CodeNamesGame) => createGameMessage("joinedGame
 export const revealWord = (data: RevealWordInput) => createGameMessage("revealWord", data)
 export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTurn", data)
 export const setSpyMaster = (data: SetSpyMasterInput) => createGameMessage("setSpyMaster", data)
-export const error = (data: ErrorInput) => createGameMessage("error", data)
+export const error = (data: ErrorInput) => createGameMessage("gameError", data)

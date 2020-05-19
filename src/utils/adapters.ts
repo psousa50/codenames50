@@ -1,7 +1,7 @@
 import { Either, right } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, fromEither, fromTaskEither, map, ReaderTaskEither } from "fp-ts/lib/ReaderTaskEither"
-import { ServiceError } from "./audit"
+import { ServiceError } from "./errors"
 
 export type Port<E, VI, R> = (i: VI) => ReaderTaskEither<E, ServiceError, R>
 

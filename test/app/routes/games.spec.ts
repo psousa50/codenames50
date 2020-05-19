@@ -1,8 +1,9 @@
 import request from "supertest"
+import { ErrorCodes } from "../../../src/app/errors"
 import { createExpressApp } from "../../../src/app/main"
 import * as GamesModels from "../../../src/domain/models"
 import { actionErrorOf, actionOf } from "../../../src/utils/actions"
-import { ErrorCodes, ServiceError } from "../../../src/utils/audit"
+import { ServiceError } from "../../../src/utils/errors"
 import { buildTestExpressEnvironment } from "../../helpers"
 
 describe("games/create", () => {

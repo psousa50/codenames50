@@ -58,7 +58,7 @@ const buildBoard = (boardWidth: number, boardHeight: number) => (words: string[]
 }
 
 const exists = <E, T, R>(v: T | undefined, f: (v: NonNullable<T>) => R, errMsg: string) =>
-  v ? actionOf(f(v as any)) : actionErrorOf<E, R>(new ServiceError(errMsg, ErrorCodes.LANGUAGE_NOT_FOUND))
+  v ? actionOf(f(v!)) : actionErrorOf<E, R>(new ServiceError(errMsg, ErrorCodes.LANGUAGE_NOT_FOUND))
 
 const insertGame = (gameId: string, userId: string): DomainPort<BoardWord[][], CodeNamesGame> => board =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, currentUtcDateTime }) =>
@@ -185,6 +185,7 @@ export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ game
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
       getGame(gameId),
+      chain(checkRules(Rules.changeTurn(userId))),
       chain(doAction(Actions.changeTurn)),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(

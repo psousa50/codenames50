@@ -75,8 +75,9 @@ export interface CodeNamesGame {
   board: WordsBoard
 }
 
-interface Player {
+export interface Player {
   userId: string
+  team: Teams | undefined
 }
 
 export interface Words {

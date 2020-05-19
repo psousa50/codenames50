@@ -3,7 +3,7 @@ import { MongoClient } from "mongodb"
 import { buildExpressEnvironment } from "./app/adapters"
 import { createExpressApp } from "./app/main"
 import { config as appConfig } from "./config"
-import { gamesDomainPorts } from "./domain/games"
+import { gamesDomainPorts } from "./domain/main"
 import { buildDomainEnvironmentWithRealPorts } from "./environment"
 import { gameMessagingPorts } from "./messaging/main"
 import { buildSocketsEnvironment } from "./sockets/adapters"
@@ -51,7 +51,6 @@ const startApplication = async () => {
       res.writeContinue()
     })
     server.once("error", (error: Error) => {
-      io.close()
       exitProcess(error)
     })
   } catch (error) {

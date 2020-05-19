@@ -2,7 +2,7 @@ import moment from "moment"
 import * as R from "ramda"
 import { DomainEnvironment } from "../../src/domain/adapters"
 import { ErrorCodes } from "../../src/domain/errors"
-import * as Games from "../../src/domain/games"
+import * as Games from "../../src/domain/main"
 import { CodeNamesGame, GameStates, Teams, Words, WordType } from "../../src/domain/models"
 import * as messages from "../../src/messaging/messages"
 import { actionOf } from "../../src/utils/actions"
@@ -252,7 +252,6 @@ describe("revealWord", () => {
     const newGame = await getRight(Games.revealWord({ gameId, userId, row, col })(domainEnvironment))()
 
     expect(newGame.board[row][col].revealed).toBeTruthy()
-
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
       message: messages.revealWord({ gameId, userId, row, col }),
@@ -261,41 +260,61 @@ describe("revealWord", () => {
 })
 
 describe("changeTurn", () => {
-  it("changes the teams turn", async () => {
-    const gameId = "game-id"
-    const userId = "user-id"
+  const gameId = "game-id"
+  const userId = "user-id"
 
-    const game = {
+  const buildGame = (team: Teams) =>
+    ({
       gameId,
       userId,
+      players: [
+        {
+          userId,
+          team,
+        },
+      ],
       turn: Teams.blue,
-    } as any
+    } as any)
 
+  it("changes the teams turn", async () => {
+    const game = buildGame(Teams.blue)
     const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
 
     const newGame = await getRight(Games.changeTurn({ gameId, userId })(domainEnvironment))()
-    expect(newGame.turn).toBe(Teams.red)
 
+    expect(newGame.turn).toBe(Teams.red)
     expect(broadcastMessage).toHaveBeenCalledWith({ roomId: gameId, message: messages.changeTurn({ gameId, userId }) })
+  })
+
+  it("gives an error if players is not on the team", async () => {
+    const game = buildGame(Teams.red)
+    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
+
+    const r = await getLeft(Games.changeTurn({ gameId, userId })(domainEnvironment))()
+
+    expect(r.errorCode).toBe(ErrorCodes.NOT_PLAYERS_TURN)
+    expect(broadcastMessage).not.toHaveBeenCalled()
   })
 })
 
 describe("setSpyMaster", () => {
-  it("set player as Spy Master", async () => {
-    const gameId = "game-id"
-    const userId = "user-id"
+  const gameId = "game-id"
+  const userId = "user-id"
 
-    const game = {
+  const buildGame = (spyMaster: string | undefined) =>
+    ({
       gameId,
       userId,
-      spyMaster: undefined,
-    } as any
+      spyMaster,
+    } as any)
 
+  it("set player as Spy Master", async () => {
+    const game = buildGame(undefined)
     const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
 
     const newGame = await getRight(Games.setSpyMaster({ gameId, userId })(domainEnvironment))()
-    expect(newGame.spyMaster).toBe(userId)
 
+    expect(newGame.spyMaster).toBe(userId)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
       message: messages.setSpyMaster({ gameId, userId }),
@@ -303,22 +322,12 @@ describe("setSpyMaster", () => {
   })
 
   it("does not allow if game already has a Spy Master", async () => {
-    const gameId = "game-id"
-    const userId = "user-id"
-    const otherUserId = "some-other-user-id"
-
-    const game = {
-      gameId,
-      userId,
-      spyMaster: otherUserId,
-    } as any
-
+    const game = buildGame("some-other-user-id")
     const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
 
     const r = await getLeft(Games.setSpyMaster({ gameId, userId })(domainEnvironment))()
 
     expect(r.errorCode).toBe(ErrorCodes.SPY_MASTER_ALREADY_SET)
-
     expect(broadcastMessage).not.toHaveBeenCalled()
   })
 })

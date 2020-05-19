@@ -1,11 +1,10 @@
 import { fold, left, right } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/pipeable"
 import { ask as askReader } from "fp-ts/lib/Reader"
-
 import { chain, fromEither, fromTaskEither, map, ReaderTaskEither, rightReader } from "fp-ts/lib/ReaderTaskEither"
 import { tryCatch } from "fp-ts/lib/TaskEither"
-import { ServiceError } from "./audit"
 import { logDebug } from "./debug"
+import { ServiceError } from "./errors"
 
 export type ActionResult<E, R = void> = ReaderTaskEither<E, ServiceError, R>
 export type Action<E = void, I = void, R = void> = (i: I) => ActionResult<E, R>

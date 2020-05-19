@@ -1,10 +1,12 @@
 import ioClient from "socket.io-client"
-import { gamesDomainPorts } from "../../src/domain/games"
+import { gamesDomainPorts } from "../../src/domain/main"
 import { CodeNamesGame } from "../../src/domain/models"
 import { buildCompleteDomainEnvironment } from "../../src/environment"
 import { gameMessagingPorts } from "../../src/messaging/main"
 import * as messages from "../../src/messaging/messages"
 import { messengerPorts } from "../../src/messaging/messenger"
+import { gamesMongoDbPorts } from "../../src/mongodb/games"
+import { wordsMongoDbPorts } from "../../src/mongodb/words"
 import { buildSocketsEnvironment } from "../../src/sockets/adapters"
 import { createSocketsApplication, startSocketsApplication } from "../../src/sockets/main"
 import { actionOf } from "../../src/utils/actions"
@@ -58,6 +60,8 @@ const createSocketApp = () => {
     io,
     gamesRepositoryPorts,
     wordsRepositoryPorts,
+    gamesMongoDbPorts,
+    wordsMongoDbPorts,
     gameMessagingPorts,
     messengerPorts,
   )
