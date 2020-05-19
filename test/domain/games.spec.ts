@@ -3,7 +3,7 @@ import * as R from "ramda"
 import { DomainEnvironment } from "../../src/domain/adapters"
 import { ErrorCodes } from "../../src/domain/errors"
 import * as Games from "../../src/domain/main"
-import { CodeNamesGame, GameStates, Teams, Words, WordType } from "../../src/domain/models"
+import { CodeNamesGame, Words } from "../../src/game/models"
 import * as messages from "../../src/messaging/messages"
 import { actionOf } from "../../src/utils/actions"
 import { DeepPartial } from "../../src/utils/types"
@@ -17,12 +17,16 @@ type EnvironmentOptions = {
   words?: Words
 }
 
+const timestamp = moment.utc("2000-01-01")
 const buildEnvironment = (partialEnv: DeepPartial<DomainEnvironment>, { game, words }: EnvironmentOptions = {}) => {
   const insertGame = jest.fn(g => actionOf(g))
   const updateGame = jest.fn(g => actionOf(g))
   const getByLanguage = jest.fn(() => actionOf(words || { language: "some-language", words: [] }))
   const emitMessage = jest.fn(() => actionOf(undefined)) as any
   const broadcastMessage = jest.fn(() => actionOf(undefined)) as any
+  const gameActions = {
+    createGame: jest.fn(),
+  }
 
   const defaultEnvironment = buildTestDomainEnvironment({
     config: {
@@ -45,7 +49,7 @@ const buildEnvironment = (partialEnv: DeepPartial<DomainEnvironment>, { game, wo
         broadcastMessage,
       },
     },
-    currentUtcDateTime: () => moment.utc("2000-01-01"),
+    currentUtcDateTime: () => timestamp,
   })
   const domainEnvironment = R.mergeDeepRight(defaultEnvironment, partialEnv)
 
@@ -56,6 +60,7 @@ const buildEnvironment = (partialEnv: DeepPartial<DomainEnvironment>, { game, wo
     getByLanguage,
     emitMessage,
     broadcastMessage,
+    gameActions,
   }
 }
 
@@ -66,99 +71,30 @@ describe("create", () => {
       words: ["w1", "w2", "w3", "w4"],
     } as any
 
+    const newGame = { gameId } as any
+    const createGame = jest.fn(() => newGame)
+    const newBoard = { some: "board" } as any
+    const buildBoard = jest.fn(() => newBoard)
     const { domainEnvironment, insertGame, emitMessage } = buildEnvironment(
       {
         config: {
           boardWidth: 0,
           boardHeight: 0,
         },
+        gameActions: {
+          createGame,
+          buildBoard,
+        },
       },
       { words },
     )
 
-    const player1 = {
-      userId,
-    }
-
-    const gameToInsert = {
-      gameId,
-      userId,
-      players: [player1],
-      state: GameStates.idle,
-      turn: Teams.red,
-      board: [],
-      timestamp: domainEnvironment.currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
-    }
-
     await getRight(Games.create({ gameId, userId, language: "en" })(domainEnvironment))()
 
-    expect(insertGame).toHaveBeenCalledWith(gameToInsert)
+    expect(createGame).toHaveBeenCalledWith(gameId, userId, timestamp.format("YYYY-MM-DD HH:mm:ss"), newBoard)
+    expect(insertGame).toHaveBeenCalledWith(newGame)
 
     expect(emitMessage).toHaveBeenCalledTimes(1)
-  })
-
-  describe("adds a board to the game", () => {
-    it("with random words", async () => {
-      const words = {
-        words: R.range(0, 30).map(i => `word-${i}`),
-      } as any
-      const { domainEnvironment, insertGame } = buildEnvironment({}, { words })
-
-      await getRight(Games.create({ gameId: "id1", userId: "some-user-id", language: "en" })(domainEnvironment))()
-      await getRight(Games.create({ gameId: "id2", userId: "some-user-id", language: "en" })(domainEnvironment))()
-
-      const firstBoard = R.flatten(insertGame.mock.calls[0][0].board)
-      const secondBoard = R.flatten(insertGame.mock.calls[1][0].board)
-      expect(firstBoard.length).toBe(domainEnvironment.config.boardWidth * domainEnvironment.config.boardHeight)
-      expect(
-        R.sort(
-          sortStrings,
-          firstBoard.map(b => b.word),
-        ),
-      ).not.toEqual(R.sort(sortStrings, words.words.slice(0, 25)))
-      expect(firstBoard.map(b => b.word)).not.toEqual(secondBoard.map(b => b.word))
-    })
-
-    it("with words for both teams, inocents and one assassin", async () => {
-      const words = {
-        words: R.range(0, 40).map(i => `word-${i}`),
-      } as any
-      const { domainEnvironment, insertGame } = buildEnvironment({}, { words })
-
-      await getRight(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainEnvironment))()
-
-      const board = R.flatten(insertGame.mock.calls[0][0].board)
-
-      expect(board.filter(b => b.type === WordType.red).length).toBe(8)
-      expect(board.filter(b => b.type === WordType.blue).length).toBe(8)
-      expect(board.filter(b => b.type === WordType.inocent).length).toBe(8)
-      expect(board.filter(b => b.type === WordType.assassin).length).toBe(1)
-      expect(board.filter(b => b.revealed).length).toBe(0)
-    })
-
-    it("for the language chosen", async () => {
-      const language = "pt"
-      const { domainEnvironment, getByLanguage } = buildEnvironment({})
-
-      await getRight(Games.create({ gameId, userId: "some-user-id", language })(domainEnvironment))()
-
-      expect(getByLanguage).toHaveBeenCalledWith(language)
-    })
-
-    it("gives an error 404 if language does not exist", async () => {
-      const getByLanguage = jest.fn(() => actionOf(null))
-      const { domainEnvironment } = buildEnvironment({
-        repositoriesAdapter: {
-          wordsRepositoryPorts: {
-            getByLanguage,
-          },
-        },
-      })
-
-      const r = await getLeft(Games.create({ gameId, userId: "some-user-id", language: "en" })(domainEnvironment))()
-
-      expect(r.errorCode).toBe(ErrorCodes.LANGUAGE_NOT_FOUND)
-    })
   })
 })
 
@@ -166,49 +102,29 @@ describe("join", () => {
   it("joins a user to a game", async () => {
     const gameId = "some-game-id"
     const userId = "user-id"
-    const player1 = {
-      userId,
-    }
-    const game = {
-      gameId,
-      userId,
-      players: [player1],
-    } as any
+    const someGame = { gameId } as any
+    const updatedGame = { gameId, some: "update" } as any
 
-    const { domainEnvironment, updateGame } = buildEnvironment({}, { game })
-
-    const secondUserId = "second-user-id"
-
-    const player2 = {
-      userId: secondUserId,
-    }
-
-    const gameToUpdate = { gameId, userId, players: [player1, player2] }
-
-    await getRight(Games.join({ gameId, userId: secondUserId })(domainEnvironment))()
-
-    expect(updateGame).toHaveBeenCalledWith(gameToUpdate)
-  })
-
-  it("does not add user if it has already joined the game", async () => {
-    const gameId = "some-game-id"
-    const userId = "user-id"
-    const player1 = {
-      userId,
-    }
-    const game = {
-      gameId,
-      userId,
-      players: [player1],
-    } as any
-
-    const { domainEnvironment, updateGame } = buildEnvironment({}, { game })
-
-    const gameToUpdate = { gameId, userId, players: [player1] }
+    const getById = jest.fn(() => actionOf(someGame))
+    const addPlayerAction = jest.fn(() => updatedGame)
+    const addPlayer = jest.fn(() => addPlayerAction) as any
+    const { domainEnvironment, emitMessage, updateGame } = buildEnvironment({
+      repositoriesAdapter: {
+        gamesRepositoryPorts: {
+          getById,
+        },
+      },
+      gameActions: {
+        addPlayer,
+      },
+    })
 
     await getRight(Games.join({ gameId, userId })(domainEnvironment))()
 
-    expect(updateGame).toHaveBeenCalledWith(gameToUpdate)
+    expect(addPlayer).toHaveBeenCalledWith(userId)
+    expect(addPlayerAction).toHaveBeenCalledWith(someGame)
+    expect(updateGame).toHaveBeenCalledWith(updatedGame)
+    expect(emitMessage).toHaveBeenCalledWith({ userId, roomId: gameId, message: messages.joinedGame(updatedGame) })
   })
 
   it("gives an error if the game does not exist", async () => {
@@ -236,22 +152,33 @@ describe("revealWord", () => {
     const gameId = "game-id"
     const userId = "user-id"
 
-    const game = {
-      gameId,
-      userId,
-      board: [
-        [{ revealed: false }, { revealed: false }],
-        [{ revealed: false }, { revealed: false }],
-      ],
-    } as any
+    const someGame = { gameId } as any
+    const updatedGame = { gameId, some: "update" } as any
 
-    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
+    const getById = jest.fn(() => actionOf(someGame))
+    const revealWordAction = jest.fn(() => updatedGame)
+    const revealWord = jest.fn(() => revealWordAction) as any
+    const { domainEnvironment, updateGame, broadcastMessage } = buildEnvironment({
+      repositoriesAdapter: {
+        gamesRepositoryPorts: {
+          getById,
+        },
+      },
+      gameActions: {
+        revealWord,
+      },
+      gameRules: {
+        revealWord: () => () => true,
+      },
+    })
 
     const row = 0
     const col = 1
-    const newGame = await getRight(Games.revealWord({ gameId, userId, row, col })(domainEnvironment))()
+    await getRight(Games.revealWord({ gameId, userId, row, col })(domainEnvironment))()
 
-    expect(newGame.board[row][col].revealed).toBeTruthy()
+    expect(revealWord).toHaveBeenCalledWith(row, col)
+    expect(revealWordAction).toHaveBeenCalledWith(someGame)
+    expect(updateGame).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
       message: messages.revealWord({ gameId, userId, row, col }),
@@ -260,74 +187,38 @@ describe("revealWord", () => {
 })
 
 describe("changeTurn", () => {
-  const gameId = "game-id"
-  const userId = "user-id"
+  it("changes the team turn", async () => {
+    const gameId = "game-id"
+    const userId = "user-id"
 
-  const buildGame = (team: Teams) =>
-    ({
-      gameId,
-      userId,
-      players: [
-        {
-          userId,
-          team,
+    const someGame = { gameId } as any
+    const updatedGame = { gameId, some: "update" } as any
+
+    const getById = jest.fn(() => actionOf(someGame))
+    const changeTurn = jest.fn(() => updatedGame)
+    const { domainEnvironment, updateGame, broadcastMessage } = buildEnvironment({
+      repositoriesAdapter: {
+        gamesRepositoryPorts: {
+          getById,
         },
-      ],
-      turn: Teams.blue,
-    } as any)
+      },
+      gameActions: {
+        changeTurn,
+      },
+      gameRules: {
+        changeTurn: () => () => true,
+      },
+    })
 
-  it("changes the teams turn", async () => {
-    const game = buildGame(Teams.blue)
-    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
+    const row = 0
+    const col = 1
+    await getRight(Games.changeTurn({ gameId, userId })(domainEnvironment))()
 
-    const newGame = await getRight(Games.changeTurn({ gameId, userId })(domainEnvironment))()
-
-    expect(newGame.turn).toBe(Teams.red)
-    expect(broadcastMessage).toHaveBeenCalledWith({ roomId: gameId, message: messages.changeTurn({ gameId, userId }) })
-  })
-
-  it("gives an error if players is not on the team", async () => {
-    const game = buildGame(Teams.red)
-    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
-
-    const r = await getLeft(Games.changeTurn({ gameId, userId })(domainEnvironment))()
-
-    expect(r.errorCode).toBe(ErrorCodes.NOT_PLAYERS_TURN)
-    expect(broadcastMessage).not.toHaveBeenCalled()
-  })
-})
-
-describe("setSpyMaster", () => {
-  const gameId = "game-id"
-  const userId = "user-id"
-
-  const buildGame = (spyMaster: string | undefined) =>
-    ({
-      gameId,
-      userId,
-      spyMaster,
-    } as any)
-
-  it("set player as Spy Master", async () => {
-    const game = buildGame(undefined)
-    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
-
-    const newGame = await getRight(Games.setSpyMaster({ gameId, userId })(domainEnvironment))()
-
-    expect(newGame.spyMaster).toBe(userId)
+    expect(changeTurn).toHaveBeenCalledWith(someGame)
+    expect(updateGame).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
-      message: messages.setSpyMaster({ gameId, userId }),
+      message: messages.changeTurn({ gameId, userId }),
     })
-  })
-
-  it("does not allow if game already has a Spy Master", async () => {
-    const game = buildGame("some-other-user-id")
-    const { domainEnvironment, broadcastMessage } = buildEnvironment({}, { game })
-
-    const r = await getLeft(Games.setSpyMaster({ gameId, userId })(domainEnvironment))()
-
-    expect(r.errorCode).toBe(ErrorCodes.SPY_MASTER_ALREADY_SET)
-    expect(broadcastMessage).not.toHaveBeenCalled()
   })
 })

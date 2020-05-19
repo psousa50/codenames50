@@ -1,4 +1,4 @@
-import { Words } from "../domain/models"
+import { Words } from "../game/models"
 import { MongoEnvironment } from "./adapters"
 
 const WORDS = "Words"

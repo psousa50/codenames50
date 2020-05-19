@@ -2,6 +2,8 @@ import { MongoClient } from "mongodb"
 import socketIo from "socket.io"
 import { AppConfig } from "./config"
 import { buildDomainEnvironment } from "./domain/adapters"
+import { GameActions, gameActions } from "./game/main"
+import { GameRules, gameRules } from "./game/rules"
 import { buildGameMessagingEnvironment } from "./messaging/adapters"
 import { GameMessagingPorts, gameMessagingPorts } from "./messaging/main"
 import { buildMessengerEnvironment, MessengerPorts, messengerPorts } from "./messaging/messenger"
@@ -22,6 +24,8 @@ export const buildCompleteDomainEnvironment = (
   wordsMongoDbPorts: WordsMongoDbPorts,
   gameMessagingPorts: GameMessagingPorts,
   messengerPorts: MessengerPorts,
+  gameActions: GameActions,
+  gameRules: GameRules,
 ) => {
   const mongoEnvironment = buildMongoEnvironment(dbClient)
   const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment, gamesMongoDbPorts, wordsMongoDbPorts)
@@ -34,6 +38,8 @@ export const buildCompleteDomainEnvironment = (
     wordsRepositoryPorts,
     gameMessagingEnvironment,
     gameMessagingPorts,
+    gameActions,
+    gameRules,
   )
 
   return domainEnvironment
@@ -50,4 +56,6 @@ export const buildDomainEnvironmentWithRealPorts = (config: AppConfig, dbClient:
     wordsMongoDbPorts,
     gameMessagingPorts,
     messengerPorts,
+    gameActions,
+    gameRules,
   )

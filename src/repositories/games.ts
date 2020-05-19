@@ -1,4 +1,4 @@
-import { CodeNamesGame } from "../domain/models"
+import { CodeNamesGame } from "../game/models"
 import { fromPromise } from "../utils/actions"
 import { UUID } from "../utils/types"
 import { RepositoriesPort } from "./adapters"

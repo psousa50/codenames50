@@ -1,4 +1,4 @@
-import { CodeNamesGame } from "../domain/models"
+import { CodeNamesGame } from "../game/models"
 import { UUID } from "../utils/types"
 import { MongoEnvironment } from "./adapters"
 

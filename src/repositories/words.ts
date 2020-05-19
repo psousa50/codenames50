@@ -1,4 +1,4 @@
-import { Words } from "../domain/models"
+import { Words } from "../game/models"
 import { fromPromise, fromVoidPromise } from "../utils/actions"
 import { RepositoriesPort } from "./adapters"
 

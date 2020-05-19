@@ -1,82 +1,61 @@
-import { right } from "fp-ts/lib/Either"
+import { left, right } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, fromEither, map } from "fp-ts/lib/ReaderTaskEither"
-import * as R from "ramda"
+import * as GameActions from "../game/main"
+import { CodeNamesGame, Words } from "../game/models"
+import * as GameRules from "../game/rules"
 import { GameMessagingEnvironment } from "../messaging/adapters"
 import * as messages from "../messaging/messages"
 import { GameMessage } from "../messaging/messages"
 import { RepositoriesEnvironment } from "../repositories/adapters"
 import { actionErrorOf, actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
-import { update2dCell } from "../utils/collections"
 import { ServiceError } from "../utils/errors"
-import { shuffle } from "../utils/random"
 import { UUID } from "../utils/types"
-import * as Actions from "./actions"
 import { DomainEnvironment, DomainPort } from "./adapters"
 import { ErrorCodes } from "./errors"
 import {
-  BoardWord,
   ChangeTurnInput,
   ChangeTurnOutput,
-  CodeNamesGame,
   CreateGameInput,
   CreateGameOutput,
-  GameStates,
   JoinGameInput,
   JoinGameOutput,
+  JoinTeamInput,
+  JoinTeamOutput,
   RevealWordInput,
   RevealWordOutput,
   SetSpyMasterInput,
   SetSpyMasterOutput,
-  Teams,
-  Words,
-  WordType,
+  StartGameInput,
+  StartGameOutput,
 } from "./models"
-import * as Rules from "./rules"
 
-const checkRules = (rule: Rules.GameRule): DomainPort<CodeNamesGame, CodeNamesGame> => game => fromEither(rule(game))
-const doAction = (action: Actions.GameAction): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
+const checkRules = (rule: GameRules.GameRule): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
+  fromEither(rule(game) ? right(game) : left(new ServiceError(ErrorCodes.GAME_IS_NOT_RUNNING, "error from game")))
+
+const doAction = (action: GameActions.GameAction): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
   fromEither(right(action(game)))
 
-const determineWordTypes = (words: string[]): BoardWord[] => {
-  const numberOfWordsForTeams = Math.max(0, Math.floor((words.length - 1) / 3))
-  const numberOfWordsForInocents = Math.max(words.length - 1 - numberOfWordsForTeams * 2, 0)
-  const types = [
-    ...new Array(numberOfWordsForTeams).fill(WordType.red),
-    ...new Array(numberOfWordsForTeams).fill(WordType.blue),
-    ...new Array(numberOfWordsForInocents).fill(WordType.inocent),
-    WordType.assassin,
-  ]
-
-  return shuffle(words.map((word, i) => ({ word, type: types[i], revealed: false })))
-}
-
-const buildBoard = (boardWidth: number, boardHeight: number) => (words: string[]): BoardWord[][] => {
-  const wordTypes = determineWordTypes(words)
-  return R.range(0, boardHeight).map(r => wordTypes.slice(r * boardWidth, r * boardWidth + boardWidth))
-}
-
-const exists = <E, T, R>(v: T | undefined, f: (v: NonNullable<T>) => R, errMsg: string) =>
-  v ? actionOf(f(v!)) : actionErrorOf<E, R>(new ServiceError(errMsg, ErrorCodes.LANGUAGE_NOT_FOUND))
-
-const insertGame = (gameId: string, userId: string): DomainPort<BoardWord[][], CodeNamesGame> => board =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, currentUtcDateTime }) =>
-    adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
-      gamesRepositoryPorts.insert({
-        gameId,
-        timestamp: currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
-        userId,
-        players: [{ userId, team: undefined }],
-        spyMaster: undefined,
-        hintWord: undefined,
-        hintWordCount: undefined,
-        state: GameStates.idle,
-        turn: Teams.red,
-        board,
-      }),
-      repositoriesEnvironment,
-    ),
+const insertGame = (gameId: string, userId: string): DomainPort<Words, CodeNamesGame> => words =>
+  withEnv(
+    ({
+      config: { boardWidth, boardHeight },
+      repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment },
+      currentUtcDateTime,
+      gameActions,
+    }) =>
+      adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+        gamesRepositoryPorts.insert(
+          gameActions.createGame(
+            gameId,
+            userId,
+            currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
+            gameActions.buildBoard(boardWidth, boardHeight, words.words),
+          ),
+        ),
+        repositoriesEnvironment,
+      ),
   )
 
 const emitMessage = (userId: string, message: GameMessage): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
@@ -117,39 +96,29 @@ const getGame: DomainPort<UUID, CodeNamesGame> = gameId =>
   )
 
 export const create: DomainPort<CreateGameInput, CreateGameOutput> = ({ gameId, userId, language }) =>
-  withEnv(
-    ({ config: { boardWidth, boardHeight }, repositoriesAdapter: { wordsRepositoryPorts, repositoriesEnvironment } }) =>
-      pipe(
-        adapt<RepositoriesEnvironment, DomainEnvironment, Words | null>(
-          wordsRepositoryPorts.getByLanguage(language),
-          repositoriesEnvironment,
-        ),
-        chain(allWords =>
-          exists(
-            allWords,
-            a => shuffle(a.words).slice(0, boardWidth * boardHeight),
-            `Language '${language}' not found`,
-          ),
-        ),
-        map(buildBoard(boardWidth, boardHeight)),
-        chain(insertGame(gameId, userId)),
-        chain(game => emitMessage(userId, messages.gameCreated(game))(game)),
+  withEnv(({ repositoriesAdapter: { wordsRepositoryPorts, repositoriesEnvironment } }) =>
+    pipe(
+      adapt<RepositoriesEnvironment, DomainEnvironment, Words | null>(
+        wordsRepositoryPorts.getByLanguage(language),
+        repositoriesEnvironment,
       ),
+      chain(allWords =>
+        allWords
+          ? actionOf(allWords)
+          : actionErrorOf<DomainEnvironment, Words>(
+              new ServiceError(`Language '${language}' not found`, ErrorCodes.LANGUAGE_NOT_FOUND),
+            ),
+      ),
+      chain(insertGame(gameId, userId)),
+      chain(game => emitMessage(userId, messages.gameCreated(game))(game)),
+    ),
   )
 
-const addPlayer = (userId: string) => (game: CodeNamesGame) =>
-  game.players.find(p => p.userId === userId)
-    ? game
-    : {
-        ...game,
-        players: [...game.players, { userId, team: undefined }],
-      }
-
 export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
       getGame(gameId),
-      chain(game => actionOf(addPlayer(userId)(game))),
+      chain(game => actionOf(gameActions.addPlayer(userId)(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
@@ -160,17 +129,44 @@ export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId
     ),
   )
 
-const reveal = (w: BoardWord) => ({ ...w, revealed: true })
-const revealWordAction = (row: number, col: number) => (game: CodeNamesGame) => ({
-  ...game,
-  board: update2dCell(game.board)(reveal, row, col),
-})
-
-export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, userId, row, col }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+export const joinTeam: DomainPort<JoinTeamInput, JoinTeamOutput> = ({ gameId, userId, team }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
-      chain(game => actionOf(revealWordAction(row, col)(game))),
+      chain(checkRules(gameRules.joinTeam)),
+      chain(game => actionOf(gameActions.joinTeam(userId, team)(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
+      chain(game => emitMessage(userId, messages.joinTeam({ gameId, userId, team }))(game)),
+    ),
+  )
+
+export const startGame: DomainPort<StartGameInput, StartGameOutput> = ({ gameId, userId }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
+    pipe(
+      getGame(gameId),
+      chain(checkRules(gameRules.startGame)),
+      chain(game => actionOf(gameActions.startGame(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
+      chain(game => emitMessage(userId, messages.startGame(game))(game)),
+    ),
+  )
+
+export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, userId, row, col }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
+    pipe(
+      getGame(gameId),
+      chain(checkRules(gameRules.revealWord(row, col, userId))),
+      chain(game => actionOf(gameActions.revealWord(row, col)(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
@@ -182,11 +178,11 @@ export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ game
   )
 
 export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ gameId, userId }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
-      chain(checkRules(Rules.changeTurn(userId))),
-      chain(doAction(Actions.changeTurn)),
+      chain(checkRules(gameRules.changeTurn(userId))),
+      chain(doAction(gameActions.changeTurn)),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
@@ -198,11 +194,11 @@ export const changeTurn: DomainPort<ChangeTurnInput, ChangeTurnOutput> = ({ game
   )
 
 export const setSpyMaster: DomainPort<SetSpyMasterInput, SetSpyMasterOutput> = ({ gameId, userId }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
-      chain(checkRules(Rules.setSpyMaster)),
-      chain(doAction(Actions.setSpyMaster(userId))),
+      chain(checkRules(gameRules.setSpyMaster(userId))),
+      chain(doAction(gameActions.setSpyMaster(userId))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
@@ -219,6 +215,7 @@ export const gamesDomainPorts = {
   revealWord,
   changeTurn,
   setSpyMaster,
+  startGame,
 }
 
 export type GamesDomainPorts = typeof gamesDomainPorts

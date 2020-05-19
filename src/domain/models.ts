@@ -1,3 +1,5 @@
+import { CodeNamesGame } from "../game/models"
+
 export interface CreateGameInput {
   gameId: string
   userId: string
@@ -12,6 +14,21 @@ export interface JoinGameInput {
 }
 
 export type JoinGameOutput = CodeNamesGame
+
+export interface JoinTeamInput {
+  gameId: string
+  userId: string
+  team: Teams
+}
+
+export type JoinTeamOutput = CodeNamesGame
+
+export interface StartGameInput {
+  gameId: string
+  userId: string
+}
+
+export type StartGameOutput = CodeNamesGame
 
 export type RevealWordInput = {
   gameId: string
@@ -39,48 +56,4 @@ export type SetSpyMasterOutput = CodeNamesGame
 export enum Teams {
   red = "red",
   blue = "blue",
-}
-
-export enum GameStates {
-  idle = "idle",
-  running = "running",
-  ended = "ended",
-}
-
-export enum WordType {
-  red = "red",
-  blue = "blue",
-  inocent = "inocent",
-  assassin = "assassin",
-}
-
-export interface BoardWord {
-  word: string
-  type: WordType
-  revealed: boolean
-}
-
-export type WordsBoard = BoardWord[][]
-
-export interface CodeNamesGame {
-  gameId: string
-  timestamp: string
-  userId: string
-  players: Player[]
-  spyMaster: string | undefined
-  hintWord: string | undefined
-  hintWordCount: number | undefined
-  state: GameStates
-  turn: Teams
-  board: WordsBoard
-}
-
-export interface Player {
-  userId: string
-  team: Teams | undefined
-}
-
-export interface Words {
-  language: string
-  words: string[]
 }

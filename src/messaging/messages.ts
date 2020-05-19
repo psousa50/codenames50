@@ -1,5 +1,13 @@
 import { ErrorCodes } from "../domain/errors"
-import { ChangeTurnInput, CodeNamesGame, JoinGameInput, RevealWordInput, SetSpyMasterInput } from "../domain/models"
+import {
+  ChangeTurnInput,
+  JoinGameInput,
+  JoinTeamInput,
+  RevealWordInput,
+  SetSpyMasterInput,
+  StartGameInput,
+} from "../domain/models"
+import { CodeNamesGame } from "../game/models"
 
 export type GameMessageType =
   | "connect"
@@ -10,6 +18,8 @@ export type GameMessageType =
   | "gameCreated"
   | "joinGame"
   | "joinedGame"
+  | "joinTeam"
+  | "startGame"
   | "setSpyMaster"
   | "revealWord"
   | "changeTurn"
@@ -44,6 +54,8 @@ export const createGame = (data: CreateGameInput) => createGameMessage("createGa
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
 export const joinedGame = (data: CodeNamesGame) => createGameMessage("joinedGame", data)
+export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)
+export const startGame = (data: StartGameInput) => createGameMessage("startGame", data)
 export const revealWord = (data: RevealWordInput) => createGameMessage("revealWord", data)
 export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTurn", data)
 export const setSpyMaster = (data: SetSpyMasterInput) => createGameMessage("setSpyMaster", data)
