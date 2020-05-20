@@ -29,6 +29,19 @@ describe("buildBoards", () => {
 
     expect(flattenBoard1).not.toEqual(flattenBoard2)
   })
+
+  it("distributes word types randomlly", () => {
+    const board = GameActions.buildBoard(5, 5, words)
+
+    const flattenBoard = R.flatten(board)
+    const redTypesIndexes = flattenBoard
+      .map((w, i) => ({ w, i }))
+      .filter(wi => wi.w.type === WordType.red)
+      .map(wi => wi.i)
+    const redDiffSum = redTypesIndexes.reduce((acc, sum, i) => acc + sum - (i === 0 ? 0 : redTypesIndexes[i - 1]), 0)
+
+    expect(redDiffSum).toBeGreaterThan(redTypesIndexes.length - 1)
+  })
 })
 
 describe("addPlayer", () => {
@@ -87,14 +100,22 @@ describe("setSpyMaster", () => {
     const p1 = { userId, team: Teams.red }
     const game = {
       players: [p1],
-      blueSpyMaster: "some-blue-user",
-      redSpyMaster: "some-red-user",
+      blueTeam: {
+        spyMaster: "some-blue-user",
+      },
+      redTeam: {
+        spyMaster: "some-red-user",
+      },
     }
 
     const expectedGame = {
       players: [p1],
-      blueSpyMaster: "some-blue-user",
-      redSpyMaster: userId,
+      blueTeam: {
+        spyMaster: "some-blue-user",
+      },
+      redTeam: {
+        spyMaster: userId,
+      },
     }
 
     expect(GameActions.setSpyMaster(userId)(game as any)).toEqual(expectedGame)
@@ -105,14 +126,22 @@ describe("setSpyMaster", () => {
     const p1 = { userId, team: Teams.blue }
     const game = {
       players: [p1],
-      blueSpyMaster: "some-blue-user",
-      redSpyMaster: "some-red-user",
+      blueTeam: {
+        spyMaster: "some-blue-user",
+      },
+      redTeam: {
+        spyMaster: "some-red-user",
+      },
     }
 
     const expectedGame = {
       players: [p1],
-      blueSpyMaster: userId,
-      redSpyMaster: "some-red-user",
+      blueTeam: {
+        spyMaster: userId,
+      },
+      redTeam: {
+        spyMaster: "some-red-user",
+      },
     }
 
     expect(GameActions.setSpyMaster(userId)(game as any)).toEqual(expectedGame)

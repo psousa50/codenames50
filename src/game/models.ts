@@ -24,18 +24,21 @@ export enum Teams {
   blue = "blue",
 }
 
+export interface TeamConfig {
+  spyMaster: string | undefined
+  score: number | undefined
+}
+
 export interface CodeNamesGame {
   gameId: string
   timestamp: string
   userId: string
   players: Player[]
-  blueSpyMaster: string | undefined
-  redSpyMaster: string | undefined
+  blueTeam: TeamConfig
+  redTeam: TeamConfig
   hintWord: string
   hintWordCount: number
   wordsRevealedCount: number
-  blueScore: number
-  redScore: number
   state: GameStates
   turn: Teams | undefined
   board: WordsBoard

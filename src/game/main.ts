@@ -12,13 +12,17 @@ export const createGame = (gameId: string, userId: string, timestamp: string, bo
   timestamp,
   userId,
   players: [{ userId, team: undefined }],
-  blueSpyMaster: undefined,
-  redSpyMaster: undefined,
+  redTeam: {
+    spyMaster: undefined,
+    score: undefined,
+  },
+  blueTeam: {
+    spyMaster: undefined,
+    score: undefined,
+  },
   hintWord: "",
   hintWordCount: 0,
   wordsRevealedCount: 0,
-  blueScore: 0,
-  redScore: 0,
   state: GameStates.idle,
   turn: undefined,
   board,
@@ -28,12 +32,13 @@ export const buildBoard = (boardWidth: number, boardHeight: number, words: strin
   const numberOfWords = boardWidth * boardHeight
   const numberOfWordsForTeams = Math.max(0, Math.floor((numberOfWords - 1) / 3))
   const numberOfWordsForInocents = Math.max(numberOfWords - 1 - numberOfWordsForTeams * 2, 0)
-  const types = [
+  const types = shuffle([
     ...new Array(numberOfWordsForTeams).fill(WordType.red),
     ...new Array(numberOfWordsForTeams).fill(WordType.blue),
     ...new Array(numberOfWordsForInocents).fill(WordType.inocent),
     WordType.assassin,
-  ]
+  ])
+
   const wordTypes = shuffle(words).map((word, i) => ({ word, type: types[i], revealed: false }))
 
   return R.range(0, boardHeight).map(r => wordTypes.slice(r * boardWidth, r * boardWidth + boardWidth))
@@ -62,8 +67,14 @@ export const setSpyMaster = (userId: string): GameAction => game => {
   return p && p.team
     ? {
         ...game,
-        redSpyMaster: p.team === Teams.red ? p.userId : game.redSpyMaster,
-        blueSpyMaster: p.team === Teams.blue ? p.userId : game.blueSpyMaster,
+        redTeam: {
+          ...game.redTeam,
+          spyMaster: p.team === Teams.red ? p.userId : game.redTeam.spyMaster,
+        },
+        blueTeam: {
+          ...game.blueTeam,
+          spyMaster: p.team === Teams.blue ? p.userId : game.blueTeam.spyMaster,
+        },
       }
     : game
 }

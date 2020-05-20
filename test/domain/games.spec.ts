@@ -176,7 +176,7 @@ describe("revealWord", () => {
     const col = 1
     await getRight(Games.revealWord({ gameId, userId, row, col })(domainEnvironment))()
 
-    expect(revealWord).toHaveBeenCalledWith(row, col)
+    expect(revealWord).toHaveBeenCalledWith(userId, row, col)
     expect(revealWordAction).toHaveBeenCalledWith(someGame)
     expect(updateGame).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({

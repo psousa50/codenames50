@@ -187,7 +187,7 @@ export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ game
     pipe(
       getGame(gameId),
       chain(checkRules(gameRules.revealWord(row, col, userId))),
-      chain(game => actionOf(gameActions.revealWord(row, col)(game))),
+      chain(game => actionOf(gameActions.revealWord(userId, row, col)(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
