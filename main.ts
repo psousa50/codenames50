@@ -80,15 +80,32 @@ export const sendHint = (hintWord: string, hintWordCount: number): GameAction =>
 })
 
 const reveal = (w: BoardWord) => ({ ...w, revealed: true })
-export const revealWord = (row: number, col: number) => (game: CodeNamesGame) => ({
-  ...game,
-  board: update2dCell(game.board)(reveal, row, col),
-  wordsRevealedCount: game.wordsRevealedCount + 1,
-})
+export const revealWord = (userId: string, row: number, col: number) => (game: CodeNamesGame) => {
+  const revealedWord = game.board[row][col]
+  const team = getPlayer(game, userId)?.team
+  const newGame =
+    (revealedWord.type === WordType.blue && team === Teams.red) ||
+    (revealedWord.type === WordType.red && team === Teams.blue) ||
+    revealedWord.type === WordType.inocent
+      ? changeTurn(game)
+      : revealedWord.type === WordType.assassin
+      ? endGame(game)
+      : game
+  return {
+    ...newGame,
+    board: update2dCell(game.board)(reveal, row, col),
+    wordsRevealedCount: game.wordsRevealedCount + 1,
+  }
+}
 
 export const changeTurn = (game: CodeNamesGame) => ({
   ...game,
   turn: game.turn === Teams.blue ? Teams.red : Teams.blue,
+})
+
+export const endGame = (game: CodeNamesGame) => ({
+  ...game,
+  state: GameStates.ended,
 })
 
 export const gameActions = {
@@ -101,6 +118,7 @@ export const gameActions = {
   sendHint,
   revealWord,
   changeTurn,
+  endGame,
 }
 
 export type GameActions = typeof gameActions
