@@ -229,6 +229,7 @@ describe("revealWord", () => {
       board,
       players: [p1],
       turn: Teams.red,
+      hintWordCount: 2,
     }
 
     return GameActions.revealWord(userId, 0, 0)(game as any)
@@ -245,11 +246,29 @@ describe("revealWord", () => {
     it("if revealed word is an inocent", () => {
       expect(revealWord(WordType.inocent, Teams.blue).turn).toBe(Teams.blue)
     })
+
+    it("if guesses limit reached", () => {
+      const userId = "some-user-id"
+      const w00 = { word: "w00", type: Teams.blue, revealed: false }
+      const board = [[w00]] as any
+      const p1 = { userId, team: Teams.blue }
+      const game = {
+        board,
+        players: [p1],
+        hintWordCount: 2,
+        wordsRevealedCount: 2,
+        turn: Teams.blue,
+      }
+
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+
+      expect(updatedGame.turn).toBe(Teams.red)
+    })
   })
 
   describe("end the game", () => {
     it("if revealed word is the assassin", () => {
-      expect(revealWord(WordType.assassin, Teams.blue).state).toBe(GameStates.ended)
+      expect(revealWord(WordType.assassin, Teams.red).state).toBe(GameStates.ended)
     })
   })
 })
@@ -262,6 +281,9 @@ describe("changeTurn", () => {
 
     const expectedGame = {
       turn: Teams.blue,
+      hintWord: "",
+      hintWordCount: 0,
+      wordsRevealedCount: 0,
     }
 
     expect(GameActions.changeTurn(game as any)).toEqual(expectedGame)
@@ -274,6 +296,9 @@ describe("changeTurn", () => {
 
     const expectedGame = {
       turn: Teams.red,
+      hintWord: "",
+      hintWordCount: 0,
+      wordsRevealedCount: 0,
     }
 
     expect(GameActions.changeTurn(game as any)).toEqual(expectedGame)
