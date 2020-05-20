@@ -10,12 +10,13 @@ import {
   SetSpyMasterInput,
   StartGameInput,
 } from "../domain/models"
-import { GameMessage, GameMessageType, RegisterUserSocketInput } from "../messaging/messages"
+import { GameMessageType, RegisterUserSocketInput } from "../messaging/messages"
 import { actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
 import { SocketsEnvironment, SocketsPort } from "./adapters"
 
 type CreateGameInput = {
+  gameId?: string
   userId: string
   language: string
 }
@@ -47,14 +48,6 @@ const addMessageHandler = (socketsEnvironment: SocketsEnvironment) => <T>(
   return task.of(undefined)
 }
 
-export const emitMessage = <T>(socket: SocketIO.Socket, message: GameMessage<T>) => {
-  socket.emit(message.type, message.data)
-}
-
-export const broadcastMessage = <T>(io: SocketIO.Server, gameId: string, message: GameMessage<T>) => {
-  io.to(gameId).emit(message.type, message.data)
-}
-
 export const registerUserHandler: SocketHandler<RegisterUserSocketInput> = socket => ({ userId }) =>
   withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
     pipe(adapt(gameMessagingPorts.registerUser({ userId, socketId: socket.id }), gameMessagingEnvironment)),
@@ -66,11 +59,11 @@ export const disconnectHandler: SocketHandler = socket => () => {
     pipe(adapt(gameMessagingPorts.unregisterSocket({ socketId: socket.id }), gameMessagingEnvironment)),
   )
 }
-export const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ userId, language }) =>
+export const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ gameId, userId, language }) =>
   withEnv(({ gamesDomainPorts, domainEnvironment, uuid }) => {
-    const gameId = uuid()
-    socket.join(gameId, async (_: any) => {
-      await gamesDomainPorts.create({ gameId, userId, language })(domainEnvironment)()
+    const newGameId = gameId || uuid()
+    socket.join(newGameId, async (_: any) => {
+      await gamesDomainPorts.create({ gameId: newGameId, userId, language })(domainEnvironment)()
     })
     return actionOf(undefined)
   })

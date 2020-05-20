@@ -1,6 +1,7 @@
 import { ErrorCodes } from "../domain/errors"
 import {
   ChangeTurnInput,
+  CreateGameInput,
   JoinGameInput,
   JoinTeamInput,
   RevealWordInput,
@@ -39,11 +40,6 @@ export const createGameMessage = <T>(type: GameMessageType, data: T) => ({
 
 export type RegisterUserSocketInput = {
   userId: string
-}
-
-export interface CreateGameInput {
-  userId: string
-  language: string
 }
 
 export interface ErrorInput {
