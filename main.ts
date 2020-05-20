@@ -17,6 +17,8 @@ export const createGame = (gameId: string, userId: string, timestamp: string, bo
   hintWord: "",
   hintWordCount: 0,
   wordsRevealedCount: 0,
+  blueScore: 0,
+  redScore: 0,
   state: GameStates.idle,
   turn: undefined,
   board,
@@ -66,10 +68,13 @@ export const setSpyMaster = (userId: string): GameAction => game => {
     : game
 }
 
+const countTypes = (board: WordsBoard, type: WordType) => R.flatten(board).filter(w => w.type === type).length
 export const startGame: GameAction = game => ({
   ...game,
   state: GameStates.running,
-  turn: Teams.red,
+  turn: Teams.blue,
+  blueScore: countTypes(game.board, WordType.blue),
+  redScore: countTypes(game.board, WordType.red),
 })
 
 export const sendHint = (hintWord: string, hintWordCount: number): GameAction => game => ({
