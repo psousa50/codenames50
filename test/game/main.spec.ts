@@ -162,6 +162,7 @@ describe("revealWord", () => {
     ] as any
     const game = {
       board,
+      players: [],
       wordsRevealedCount: 3,
     }
 
@@ -171,10 +172,44 @@ describe("revealWord", () => {
     ] as any
     const expectedGame = {
       board: expectedBoard,
+      players: [],
       wordsRevealedCount: 4,
     }
 
-    expect(GameActions.revealWord(0, 1)(game as any)).toEqual(expectedGame)
+    expect(GameActions.revealWord("some-user-id", 0, 1)(game as any)).toEqual(expectedGame)
+  })
+
+  const revealWord = (type: WordType, team: Teams) => {
+    const userId = "some-user-id"
+    const w00 = { word: "w00", type, revealed: false }
+    const board = [[w00]] as any
+    const p1 = { userId, team }
+    const game = {
+      board,
+      players: [p1],
+      turn: Teams.red,
+    }
+
+    return GameActions.revealWord(userId, 0, 0)(game as any)
+  }
+  describe("ends the turn", () => {
+    it("if revealed word is from a different team", () => {
+      expect(revealWord(WordType.blue, Teams.red).turn).toBe(Teams.blue)
+    })
+
+    it("if revealed word is from a different team", () => {
+      expect(revealWord(WordType.red, Teams.blue).turn).toBe(Teams.blue)
+    })
+
+    it("if revealed word is an inocent", () => {
+      expect(revealWord(WordType.inocent, Teams.blue).turn).toBe(Teams.blue)
+    })
+  })
+
+  describe("end the game", () => {
+    it("if revealed word is the assassin", () => {
+      expect(revealWord(WordType.assassin, Teams.blue).state).toBe(GameStates.ended)
+    })
   })
 })
 
