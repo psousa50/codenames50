@@ -18,6 +18,8 @@ export type GameRule = (game: CodeNamesGame) => ValidationError | undefined
 
 export const message = (e: ValidationError) => e
 
+const exists = (v: any) => v !== undefined && v !== null
+
 const v = (valid: boolean, error: ValidationError) => (valid ? undefined : error)
 
 const validate = (rules: GameRule[]): GameRule => game =>
@@ -37,7 +39,7 @@ const isPlayersTurn = (userId: string): GameRule => game =>
   v(game.turn === getPlayer(game, userId)?.team, "notPlayersTurn")
 
 const playerHasTeam = (userId: string): GameRule => game =>
-  v(getPlayer(game, userId)?.team !== undefined, "playerMustHaveTeam")
+  v(exists(getPlayer(game, userId)?.team), "playerMustHaveTeam")
 
 const playerIsSpyMaster = (userId: string): GameRule => game =>
   v(game.redTeam.spyMaster === userId || game.blueTeam.spyMaster === userId, "mustBeSpyMaster")
@@ -46,7 +48,7 @@ const playerIsNotSpyMaster = (userId: string): GameRule => game =>
   v(game.redTeam.spyMaster !== userId && game.blueTeam.spyMaster !== userId, "cantBeSpyMaster")
 
 const hasBothSpyMasters: GameRule = game =>
-  v(game.redTeam.spyMaster !== undefined && game.blueTeam.spyMaster !== undefined, "mustHaveSpyMasters")
+  v(exists(game.redTeam.spyMaster) && exists(game.blueTeam.spyMaster), "mustHaveSpyMasters")
 
 const hasAtLeastOneGuess: GameRule = game => v(game.wordsRevealedCount > 0, "mustGuessOnce")
 
