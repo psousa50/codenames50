@@ -1,11 +1,13 @@
 import { Button } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 import React from "react"
-import { JoinTeamInput, RevealWordInput } from "../api/server/domain/models"
+import * as uuid from "uuid"
+import { JoinTeamInput, RevealWordInput, SendHintInput, SetSpyMasterInput } from "../api/server/domain/models"
 import * as GameActions from "../api/server/game/main"
 import { CodeNamesGame, Teams } from "../api/server/game/models"
 import * as messages from "../api/server/messaging/messages"
-import { addMessageHandler, emitMessage } from "../api/sockets/handler"
+import { GameMessageType } from "../api/server/messaging/messages"
+import { emitMessage } from "../api/sockets/handler"
 import { useSocket } from "../utils/hooks"
 import { blueColor, redColor } from "../utils/ui"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
@@ -13,6 +15,20 @@ import { OnWordClick, WordsBoardView } from "./WordsBoardView"
 const useStyles = makeStyles(() => ({
   container: {
     display: "flex",
+    flexGrow: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  game: {
+    display: "flex",
+    flex: 8,
+    flexGrow: 1,
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  messages: {
+    display: "flex",
+    flex: 1,
     flexGrow: 1,
     flexDirection: "column",
     alignItems: "center",
@@ -24,18 +40,36 @@ const useStyles = makeStyles(() => ({
 
 export interface CodeNamesGameViewProps {
   gameId?: string | null
+  userId?: string | null
 }
 
-export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: initialGameId }) => {
+export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
+  gameId: initialGameId,
+  userId: initialUserId,
+}) => {
   const classes = useStyles()
 
   const [socket] = useSocket("http://192.168.1.67:3001", { autoConnect: false })
+  const [socketMessages, setSocketMessages] = React.useState<string[]>([])
   const [error, setError] = React.useState("")
-  const [userId] = React.useState("pedronsousa@gmail.com")
-  const [gameId, setGameId] = React.useState(initialGameId || "")
+  const [hintWord, setHintWord] = React.useState("")
+  const [hintWordCount, setHintWordCount] = React.useState("")
+  const [userId, setUserId] = React.useState(initialUserId || `player ${Math.floor(Math.random() * 10) + 10}`)
+  const [gameId, setGameId] = React.useState(initialGameId || uuid.v4)
   const [game, setGame] = React.useState<CodeNamesGame>(
     GameActions.createGame("", "", "", GameActions.buildBoard(5, 5, [])),
   )
+
+  const addMessageHandler = <T extends {}>(
+    socket: SocketIOClient.Socket,
+    type: GameMessageType,
+    handler: (data: T) => void,
+  ) => {
+    socket.on(type, (data: T) => {
+      setSocketMessages(sm => [...sm, type].slice(0, 10))
+      handler(data)
+    })
+  }
 
   React.useEffect(() => {
     socket.connect()
@@ -47,6 +81,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: in
     addMessageHandler(socket, "joinTeam", joinTeamHandler)
     addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
     addMessageHandler(socket, "startGame", startGameHandler)
+    addMessageHandler(socket, "sendHint", sendHintHandler)
     addMessageHandler(socket, "revealWord", revealWordHandler)
     addMessageHandler(socket, "changeTurn", endTurnHandler)
     addMessageHandler(socket, "gameError", errorHandler)
@@ -55,7 +90,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: in
   }, [])
 
   const createGame = () => {
-    emitMessage(socket, messages.createGame({ userId, language: "en" }))
+    emitMessage(socket, messages.createGame({ gameId, userId, language: "en" }))
   }
 
   const joinGame = () => {
@@ -78,17 +113,23 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: in
     emitMessage(socket, messages.setSpyMaster({ gameId, userId }))
   }
 
+  const sendHint = () => {
+    emitMessage(socket, messages.sendHint({ gameId, userId, hintWord, hintWordCount: Number.parseInt(hintWordCount) }))
+  }
+
+  const revealWord = (row: number, col: number) => {
+    emitMessage(socket, messages.revealWord({ gameId, userId, row, col }))
+  }
+
   const endTurn = () => {
     emitMessage(socket, messages.changeTurn({ gameId, userId }))
   }
 
   const connectHandler = () => {
-    console.log("connected=====>")
     emitMessage(socket, messages.registerUserSocket({ userId }))
   }
 
   const gameCreatedHandler = (game: CodeNamesGame) => {
-    console.log("gameCreatedHandler=====>", game)
     setGameId(game.gameId)
     setGame(game)
   }
@@ -98,7 +139,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: in
     setGame(game)
   }
 
-  const joinTeamHandler = ({ team }: JoinTeamInput) => {
+  const joinTeamHandler = ({ userId, team }: JoinTeamInput) => {
     setGame(GameActions.joinTeam(userId, team))
   }
 
@@ -106,8 +147,12 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: in
     setGame(GameActions.startGame)
   }
 
-  const setSpyMasterHandler = () => {
+  const setSpyMasterHandler = ({ userId }: SetSpyMasterInput) => {
     setGame(GameActions.setSpyMaster(userId))
+  }
+
+  const sendHintHandler = ({ hintWord, hintWordCount }: SendHintInput) => {
+    setGame(GameActions.sendHint(hintWord, hintWordCount))
   }
 
   const revealWordHandler = ({ row, col }: RevealWordInput) => {
@@ -119,12 +164,11 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: in
   }
 
   const errorHandler = (e: { message: string }) => {
-    console.log("ERROR=====>", e)
     setError(e.message)
   }
 
   const onWordClick: OnWordClick = (_, row, col) => {
-    emitMessage(socket, messages.revealWord({ gameId, userId, row, col }))
+    revealWord(row, col)
   }
 
   const showGame = (game: CodeNamesGame) => (
@@ -139,12 +183,36 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: in
           <td>{game.userId}</td>
         </tr>
         <tr>
+          <td>State</td>
+          <td>{game.state}</td>
+        </tr>
+        <tr>
+          <td>Turn</td>
+          <td>{game.turn}</td>
+        </tr>
+        <tr>
+          <td>Players</td>
+          <td>{JSON.stringify(game.players, null, 2)}</td>
+        </tr>
+        <tr>
           <td>Red SpyMaster</td>
           <td>{game.redSpyMaster}</td>
         </tr>
         <tr>
           <td>Blue SpyMaster</td>
           <td>{game.blueSpyMaster}</td>
+        </tr>
+        <tr>
+          <td>Hint word</td>
+          <td>{game.hintWord}</td>
+        </tr>
+        <tr>
+          <td>Hint word count</td>
+          <td>{game.hintWordCount}</td>
+        </tr>
+        <tr>
+          <td>Words Revealed</td>
+          <td>{game.wordsRevealedCount}</td>
         </tr>
       </tbody>
     </table>
@@ -154,46 +222,80 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId: in
 
   return (
     <div className={classes.container}>
-      <div className={classes.pad}>{error}</div>
-      <input
-        style={{ width: 300, textAlign: "center" }}
-        className={classes.pad}
-        value={gameId}
-        onChange={event => setGameId(event.target.value)}
-      />
-      <div
-        onClick={() => {
-          navigator.clipboard.writeText(url)
-        }}
-      >
-        {url}
-      </div>
-      <div>
-        <Button variant="contained" color="primary" className={classes.pad} onClick={createGame}>
-          CREATE
+      <div className={classes.game}>
+        <div className={classes.pad}>{error}</div>
+        <input
+          style={{ width: 300, textAlign: "center" }}
+          className={classes.pad}
+          value={gameId}
+          onChange={event => setGameId(event.target.value)}
+        />
+        <input
+          style={{ width: 300, textAlign: "center" }}
+          className={classes.pad}
+          value={userId}
+          onChange={event => setUserId(event.target.value)}
+        />
+        <div
+          onClick={() => {
+            navigator.clipboard.writeText(url)
+          }}
+        >
+          {url}
+        </div>
+        <div>
+          <Button variant="contained" color="primary" className={classes.pad} onClick={createGame}>
+            CREATE
+          </Button>
+          <Button variant="contained" color="secondary" className={classes.pad} onClick={joinGame}>
+            JOIN
+          </Button>
+        </div>
+        {game && <Header game={game} />}
+        {game && <div>{`Hint Word: ${game.hintWord}`}</div>}
+        {game && <div>{`Hint Word Count: ${game.hintWordCount}`}</div>}
+        {game && <WordsBoardView board={game.board} onWordClick={onWordClick} />}
+        <div>Hint Word</div>
+        <input
+          style={{ width: 300, textAlign: "center" }}
+          className={classes.pad}
+          value={hintWord}
+          onChange={event => setHintWord(event.target.value)}
+        />
+        <div>Hint Word Count</div>
+        <input
+          style={{ width: 300, textAlign: "center" }}
+          className={classes.pad}
+          value={hintWordCount}
+          onChange={event => setHintWordCount(event.target.value)}
+        />
+        <Button variant="contained" className={classes.pad} onClick={sendHint}>
+          SEND HINT
         </Button>
-        <Button variant="contained" color="secondary" className={classes.pad} onClick={joinGame}>
-          JOIN
-        </Button>
+        <div>
+          <Button variant="contained" className={classes.pad} onClick={joinTeamBlue}>
+            JOIN TEAM BLUE
+          </Button>
+          <Button variant="contained" className={classes.pad} onClick={joinTeamRed}>
+            JOIN TEAM RED
+          </Button>
+          <Button variant="contained" className={classes.pad} onClick={setSpyMaster}>
+            SPY MASTER
+          </Button>
+          <Button variant="contained" className={classes.pad} onClick={startGame}>
+            START
+          </Button>
+          <Button variant="contained" className={classes.pad} onClick={endTurn}>
+            END TURN
+          </Button>
+        </div>
+        {game ? showGame(game) : null}
       </div>
-      {game && <Header game={game} />}
-      {game && <WordsBoardView board={game.board} onWordClick={onWordClick} />}
-      <Button variant="contained" className={classes.pad} onClick={joinTeamBlue}>
-        JOIN TEAM BLUE
-      </Button>
-      <Button variant="contained" className={classes.pad} onClick={joinTeamRed}>
-        JOIN TEAM RED
-      </Button>
-      <Button variant="contained" className={classes.pad} onClick={setSpyMaster}>
-        SPY MASTER
-      </Button>
-      <Button variant="contained" className={classes.pad} onClick={startGame}>
-        START
-      </Button>
-      <Button variant="contained" className={classes.pad} onClick={endTurn}>
-        END TURN
-      </Button>
-      {game ? showGame(game) : null}
+      <div className={classes.messages}>
+        {socketMessages.map((s, i) => (
+          <ul key={i}>{JSON.stringify(s)}</ul>
+        ))}
+      </div>
     </div>
   )
 }
