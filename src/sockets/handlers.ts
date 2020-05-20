@@ -1,7 +1,14 @@
 import { pipe } from "fp-ts/lib/pipeable"
 import { map, mapLeft, run } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
-import { ChangeTurnInput, JoinGameInput, RevealWordInput, SetSpyMasterInput, StartGameInput } from "../domain/models"
+import {
+  ChangeTurnInput,
+  JoinGameInput,
+  JoinTeamInput,
+  RevealWordInput,
+  SetSpyMasterInput,
+  StartGameInput,
+} from "../domain/models"
 import { GameMessage, GameMessageType, RegisterUserSocketInput } from "../messaging/messages"
 import { actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
@@ -77,6 +84,14 @@ export const joinGameHandler: SocketHandler<JoinGameInput> = socket => input => 
   })
 }
 
+export const joinTeamHandler: SocketHandler<JoinTeamInput> = _ => input =>
+  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
+    pipe(
+      adapt(gamesDomainPorts.joinTeam(input), domainEnvironment),
+      map(_ => undefined),
+    ),
+  )
+
 export const setSpyMasterHandler: SocketHandler<SetSpyMasterInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
@@ -114,6 +129,7 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   addMessageHandler(env)(socket, "registerUserSocket", registerUserHandler)
   addMessageHandler(env)(socket, "createGame", createGameHandler)
   addMessageHandler(env)(socket, "joinGame", joinGameHandler)
+  addMessageHandler(env)(socket, "joinTeam", joinTeamHandler)
   addMessageHandler(env)(socket, "setSpyMaster", setSpyMasterHandler)
   addMessageHandler(env)(socket, "startGame", startGameHandler)
   addMessageHandler(env)(socket, "revealWord", revealWordHandler)

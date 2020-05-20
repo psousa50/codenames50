@@ -108,7 +108,7 @@ describe("join", () => {
     const getById = jest.fn(() => actionOf(someGame))
     const addPlayerAction = jest.fn(() => updatedGame)
     const addPlayer = jest.fn(() => addPlayerAction) as any
-    const { domainEnvironment, emitMessage, updateGame } = buildEnvironment({
+    const { domainEnvironment, broadcastMessage, updateGame } = buildEnvironment({
       repositoriesAdapter: {
         gamesRepositoryPorts: {
           getById,
@@ -124,7 +124,7 @@ describe("join", () => {
     expect(addPlayer).toHaveBeenCalledWith(userId)
     expect(addPlayerAction).toHaveBeenCalledWith(someGame)
     expect(updateGame).toHaveBeenCalledWith(updatedGame)
-    expect(emitMessage).toHaveBeenCalledWith({ userId, roomId: gameId, message: messages.joinedGame(updatedGame) })
+    expect(broadcastMessage).toHaveBeenCalledWith({ roomId: gameId, message: messages.joinedGame(updatedGame) })
   })
 
   it("gives an error if the game does not exist", async () => {
@@ -168,7 +168,7 @@ describe("revealWord", () => {
         revealWord,
       },
       gameRules: {
-        revealWord: () => () => true,
+        revealWord: () => () => undefined,
       },
     })
 
@@ -206,7 +206,7 @@ describe("changeTurn", () => {
         changeTurn,
       },
       gameRules: {
-        changeTurn: () => () => true,
+        changeTurn: () => () => undefined,
       },
     })
 

@@ -127,6 +127,7 @@ describe("startGame", () => {
 
     const expectedGame = {
       state: GameStates.running,
+      turn: Teams.red,
     }
 
     expect(GameActions.startGame(game as any)).toEqual(expectedGame)

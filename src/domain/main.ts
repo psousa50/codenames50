@@ -31,8 +31,11 @@ import {
   StartGameOutput,
 } from "./models"
 
+const e = (game: CodeNamesGame) => (v: GameRules.ValidationError | undefined) =>
+  v === undefined ? right(game) : left(new ServiceError(v, v))
+
 const checkRules = (rule: GameRules.GameRule): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
-  fromEither(rule(game) ? right(game) : left(new ServiceError(ErrorCodes.GAME_IS_NOT_RUNNING, "error from game")))
+  fromEither(e(game)(rule(game)))
 
 const doAction = (action: GameActions.GameAction): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
   fromEither(right(action(game)))
@@ -125,7 +128,7 @@ export const join: DomainPort<JoinGameInput, JoinGameOutput> = ({ gameId, userId
           repositoriesEnvironment,
         ),
       ),
-      chain(game => emitMessage(userId, messages.joinedGame(game))(game)),
+      chain(game => broadcastMessage(messages.joinedGame(game))(game)),
     ),
   )
 
@@ -141,11 +144,11 @@ export const joinTeam: DomainPort<JoinTeamInput, JoinTeamOutput> = ({ gameId, us
           repositoriesEnvironment,
         ),
       ),
-      chain(game => emitMessage(userId, messages.joinTeam({ gameId, userId, team }))(game)),
+      chain(game => broadcastMessage(messages.joinTeam({ gameId, userId, team }))(game)),
     ),
   )
 
-export const startGame: DomainPort<StartGameInput, StartGameOutput> = ({ gameId, userId }) =>
+export const startGame: DomainPort<StartGameInput, StartGameOutput> = ({ gameId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
@@ -157,7 +160,7 @@ export const startGame: DomainPort<StartGameInput, StartGameOutput> = ({ gameId,
           repositoriesEnvironment,
         ),
       ),
-      chain(game => emitMessage(userId, messages.startGame(game))(game)),
+      chain(game => broadcastMessage(messages.startGame(game))(game)),
     ),
   )
 
@@ -212,10 +215,11 @@ export const setSpyMaster: DomainPort<SetSpyMasterInput, SetSpyMasterOutput> = (
 export const gamesDomainPorts = {
   create,
   join,
-  revealWord,
-  changeTurn,
+  joinTeam,
   setSpyMaster,
   startGame,
+  changeTurn,
+  revealWord,
 }
 
 export type GamesDomainPorts = typeof gamesDomainPorts

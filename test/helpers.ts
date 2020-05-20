@@ -5,6 +5,8 @@ import { MongoClient } from "mongodb"
 import * as R from "ramda"
 import { buildExpressEnvironment, ExpressEnvironment } from "../src/app/adapters"
 import { buildDomainEnvironment, DomainEnvironment } from "../src/domain/adapters"
+import { gameActions } from "../src/game/main"
+import { gameRules } from "../src/game/rules"
 import { buildGameMessagingEnvironment } from "../src/messaging/adapters"
 import { buildMessengerEnvironment } from "../src/messaging/messenger"
 import { buildMongoEnvironment } from "../src/mongodb/adapters"
@@ -82,6 +84,8 @@ export const buildDefaultTestDomainEnvironment = () => {
     wordsRepositoryPorts,
     gameMessagingEnvironment,
     gameMessagingPorts,
+    gameActions,
+    gameRules,
   )
 
   return domainEnvironment

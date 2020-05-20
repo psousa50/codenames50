@@ -1,7 +1,8 @@
 import request from "supertest"
 import { ErrorCodes } from "../../../src/app/errors"
 import { createExpressApp } from "../../../src/app/main"
-import * as GamesModels from "../../../src/domain/models"
+import { CreateGameInput, JoinGameInput } from "../../../src/domain/models"
+import * as GamesModels from "../../../src/game/models"
 import { actionErrorOf, actionOf } from "../../../src/utils/actions"
 import { ServiceError } from "../../../src/utils/errors"
 import { buildTestExpressEnvironment } from "../../helpers"
@@ -9,7 +10,7 @@ import { buildTestExpressEnvironment } from "../../helpers"
 describe("games/create", () => {
   it("creates a game", async () => {
     const createdGame = {} as GamesModels.CodeNamesGame
-    const create = jest.fn((_: GamesModels.CreateGameInput) => actionOf(createdGame))
+    const create = jest.fn((_: CreateGameInput) => actionOf(createdGame))
     const expressAdapter = buildTestExpressEnvironment({
       domainAdapter: {
         gamesDomainPorts: {
@@ -30,9 +31,7 @@ describe("games/create", () => {
     const expressAdapter = buildTestExpressEnvironment({
       domainAdapter: {
         gamesDomainPorts: {
-          create: jest.fn((_: GamesModels.CreateGameInput) =>
-            actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
-          ),
+          create: jest.fn((_: CreateGameInput) => actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND))),
         },
       },
     })
@@ -47,7 +46,7 @@ describe("games/create", () => {
       const gameId = "some-game-id"
       const userId = "some-user-id"
       const game = {} as GamesModels.CodeNamesGame
-      const join = jest.fn((_: GamesModels.JoinGameInput) => actionOf(game))
+      const join = jest.fn((_: JoinGameInput) => actionOf(game))
       const expressAdapter = buildTestExpressEnvironment({
         domainAdapter: {
           gamesDomainPorts: {
@@ -66,9 +65,7 @@ describe("games/create", () => {
       const expressAdapter = buildTestExpressEnvironment({
         domainAdapter: {
           gamesDomainPorts: {
-            join: jest.fn((_: GamesModels.JoinGameInput) =>
-              actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
-            ),
+            join: jest.fn((_: JoinGameInput) => actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND))),
           },
         },
       })

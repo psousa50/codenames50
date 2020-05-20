@@ -14,7 +14,7 @@ describe("joinTeam", () => {
   }
 
   it("is valid for a valid game", () => {
-    expect(GameRules.joinTeam(validGame as any)).toBeTruthy()
+    expect(GameRules.joinTeam(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -24,7 +24,7 @@ describe("joinTeam", () => {
         state: GameStates.running,
       }
 
-      expect(GameRules.joinTeam(game as any)).toBeFalsy()
+      expect(GameRules.joinTeam(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
     })
   })
 })
@@ -41,7 +41,7 @@ describe("setSpyMaster", () => {
   }
 
   it("is valid for a valid game", () => {
-    expect(GameRules.setSpyMaster(userId)(validGame as any)).toBeTruthy()
+    expect(GameRules.setSpyMaster(userId)(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -51,7 +51,7 @@ describe("setSpyMaster", () => {
         state: GameStates.running,
       }
 
-      expect(GameRules.setSpyMaster(userId)(game as any)).toBeFalsy()
+      expect(GameRules.setSpyMaster(userId)(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
     })
 
     it("if player does not have team", () => {
@@ -65,7 +65,7 @@ describe("setSpyMaster", () => {
         ],
       })
 
-      expect(GameRules.setSpyMaster(userId)(game as any)).toBeFalsy()
+      expect(GameRules.setSpyMaster(userId)(game as any)).toBe(GameRules.message("playerMustHaveTeam"))
     })
   })
 })
@@ -77,7 +77,7 @@ describe("startGame", () => {
     blueSpyMaster: "some-user-2",
   }
   it("is valid for a valid game", () => {
-    expect(GameRules.startGame(validGame as any)).toBeTruthy()
+    expect(GameRules.startGame(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -87,7 +87,7 @@ describe("startGame", () => {
         state: GameStates.running,
       }
 
-      expect(GameRules.startGame(game as any)).toBeFalsy()
+      expect(GameRules.startGame(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
     })
 
     it("if red spyMasters is not defined", () => {
@@ -96,7 +96,7 @@ describe("startGame", () => {
         redSpyMaster: undefined,
       }
 
-      expect(GameRules.startGame(game as any)).toBeFalsy()
+      expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
     })
 
     it("if blue spyMasters is not defined", () => {
@@ -105,7 +105,7 @@ describe("startGame", () => {
         blueSpyMaster: undefined,
       }
 
-      expect(GameRules.startGame(game as any)).toBeFalsy()
+      expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
     })
   })
 })
@@ -126,7 +126,7 @@ describe("sendHint", () => {
   }
 
   it("is valid for a valid game", () => {
-    expect(GameRules.sendHint(userId)(validGame as any)).toBeTruthy()
+    expect(GameRules.sendHint(userId)(validGame as any)).toBeUndefined()
   })
 
   it("is valid for a valid game when user is redSpyMaster", () => {
@@ -134,7 +134,7 @@ describe("sendHint", () => {
       redSpyMaster: userId,
       blueSpyMaster: "some-blue-user",
     })
-    expect(GameRules.sendHint(userId)(game as any)).toBeTruthy()
+    expect(GameRules.sendHint(userId)(game as any)).toBeUndefined()
   })
 
   it("is valid for a valid game when user is blueSpyMaster", () => {
@@ -142,7 +142,7 @@ describe("sendHint", () => {
       redSpyMaster: "some-red-user",
       blueSpyMaster: userId,
     })
-    expect(GameRules.sendHint(userId)(game as any)).toBeTruthy()
+    expect(GameRules.sendHint(userId)(game as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -152,7 +152,7 @@ describe("sendHint", () => {
         state: GameStates.idle,
       }
 
-      expect(GameRules.sendHint(userId)(game as any)).toBeFalsy()
+      expect(GameRules.sendHint(userId)(game as any)).toBe(GameRules.message("gameIsNotRunning"))
     })
 
     it("if it's not player's team turn", () => {
@@ -166,7 +166,7 @@ describe("sendHint", () => {
         turn: Teams.red,
       })
 
-      expect(GameRules.sendHint(userId)(game as any)).toBeFalsy()
+      expect(GameRules.sendHint(userId)(game as any)).toBe(GameRules.message("notPlayersTurn"))
     })
 
     it("if player is not spyMaster", () => {
@@ -175,7 +175,7 @@ describe("sendHint", () => {
         blueSpyMaster: "some-blue-player",
       })
 
-      expect(GameRules.sendHint(userId)(game as any)).toBeFalsy()
+      expect(GameRules.sendHint(userId)(game as any)).toBe(GameRules.message("mustBeSpyMaster"))
     })
 
     it("if there is already a hint running", () => {
@@ -183,7 +183,7 @@ describe("sendHint", () => {
         hintWordCount: 1,
       })
 
-      expect(GameRules.sendHint(userId)(game as any)).toBeFalsy()
+      expect(GameRules.sendHint(userId)(game as any)).toBe(GameRules.message("alreadyHasHint"))
     })
   })
 })
@@ -203,7 +203,7 @@ describe("changeTurn", () => {
   }
 
   it("is valid for a valid game", () => {
-    expect(GameRules.changeTurn(userId)(validGame as any)).toBeTruthy()
+    expect(GameRules.changeTurn(userId)(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -213,7 +213,7 @@ describe("changeTurn", () => {
         state: GameStates.idle,
       }
 
-      expect(GameRules.changeTurn(userId)(game as any)).toBeFalsy()
+      expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("gameIsNotRunning"))
     })
 
     it("if it's not player's team turn", () => {
@@ -228,7 +228,7 @@ describe("changeTurn", () => {
         turn: Teams.red,
       })
 
-      expect(GameRules.changeTurn(userId)(game as any)).toBeFalsy()
+      expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("notPlayersTurn"))
     })
 
     it("if game has no hint running", () => {
@@ -237,7 +237,7 @@ describe("changeTurn", () => {
         hintWordCount: 0,
       })
 
-      expect(GameRules.changeTurn(userId)(game as any)).toBeFalsy()
+      expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("noHint"))
     })
 
     it("if player is red SpyMaster", () => {
@@ -246,7 +246,7 @@ describe("changeTurn", () => {
         redSpyMaster: userId,
       })
 
-      expect(GameRules.changeTurn(userId)(game as any)).toBeFalsy()
+      expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
     })
 
     it("if player is blue SpyMaster", () => {
@@ -255,7 +255,7 @@ describe("changeTurn", () => {
         blueSpyMaster: userId,
       })
 
-      expect(GameRules.changeTurn(userId)(game as any)).toBeFalsy()
+      expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
     })
 
     it("if turn has no revealed word", () => {
@@ -264,7 +264,7 @@ describe("changeTurn", () => {
         wordsRevealedCount: 0,
       })
 
-      expect(GameRules.changeTurn(userId)(game as any)).toBeFalsy()
+      expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("mustGuessOnce"))
     })
   })
 })
@@ -285,7 +285,7 @@ describe("revealWord", () => {
   }
 
   it("is valid for a valid game", () => {
-    expect(GameRules.revealWord(0, 0, userId)(validGame as any)).toBeTruthy()
+    expect(GameRules.revealWord(0, 0, userId)(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -295,7 +295,7 @@ describe("revealWord", () => {
         state: GameStates.idle,
       }
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBeFalsy()
+      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("gameIsNotRunning"))
     })
 
     it("if it's not player's team turn", () => {
@@ -310,7 +310,7 @@ describe("revealWord", () => {
         turn: Teams.red,
       })
 
-      expect(GameRules.changeTurn(userId)(game as any)).toBeFalsy()
+      expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("notPlayersTurn"))
     })
 
     it("if player is red SpyMaster", () => {
@@ -319,7 +319,7 @@ describe("revealWord", () => {
         redSpyMaster: userId,
       })
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBeFalsy()
+      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
     })
 
     it("if player is blue SpyMaster", () => {
@@ -328,7 +328,7 @@ describe("revealWord", () => {
         blueSpyMaster: userId,
       })
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBeFalsy()
+      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
     })
 
     it("if word is already revealed", () => {
@@ -337,17 +337,17 @@ describe("revealWord", () => {
         board: [[{ revealed: true }]],
       })
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBeFalsy()
+      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("alreadyRevealed"))
     })
 
-    it("if revealedWords is less than hintWordCount + 1", () => {
+    it("if revealedWords is higher than hintWordCount + 1", () => {
       const game = buildGame(validGame, {
         ...validGame,
         hintWordCount: 2,
         wordsRevealedCount: 3,
       })
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBeFalsy()
+      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("tooMuchGuesses"))
     })
   })
 })
