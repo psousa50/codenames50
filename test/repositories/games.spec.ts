@@ -55,6 +55,10 @@ it("update and getById", async () => {
     andAlso: "this",
     someNullField: undefined,
     someUndefinedField: undefined,
+    someField: {
+      someNullField: undefined,
+      someUndefinedField: undefined,
+    },
   } as any
 
   await getRight(gamesRepositoryPorts.update(gameToUpdate)(repositoriesAdapter))()
@@ -67,6 +71,10 @@ it("update and getById", async () => {
     ...gameToUpdate,
     someNullField: undefined,
     someUndefinedField: undefined,
+    someField: {
+      someNullField: undefined,
+      someUndefinedField: undefined,
+    },
   }
 
   expect(updatedGame).toMatchObject(expectedGame)

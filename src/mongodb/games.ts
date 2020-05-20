@@ -5,8 +5,14 @@ import { MongoEnvironment } from "./adapters"
 
 const GAMES = "Games"
 
-const nullToUndefined = (game: CodeNamesGame) =>
-  R.keys(game).reduce((acc, k) => ({ ...acc, [k]: acc[k] === null ? undefined : acc[k] }), game)
+const nullToUndefined = <T extends { [K: string]: any }>(game: T): T =>
+  R.keys(game).reduce(
+    (acc, k) => ({
+      ...acc,
+      [k]: acc[k] === null ? undefined : typeof acc[k] === "object" ? nullToUndefined(acc[k]) : acc[k],
+    }),
+    game,
+  )
 
 const insert = ({ dbClient }: MongoEnvironment) => (game: CodeNamesGame) =>
   dbClient
