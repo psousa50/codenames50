@@ -34,6 +34,8 @@ export interface CodeNamesGame {
   hintWord: string
   hintWordCount: number
   wordsRevealedCount: number
+  blueScore: number
+  redScore: number
   state: GameStates
   turn: Teams | undefined
   board: WordsBoard

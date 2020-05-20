@@ -121,13 +121,25 @@ describe("setSpyMaster", () => {
 
 describe("startGame", () => {
   it("sets the rame running", () => {
+    const w00 = { word: "w00", type: WordType.blue }
+    const w01 = { word: "w01", type: WordType.red }
+    const w10 = { word: "w10", type: WordType.blue }
+    const w11 = { word: "w11", type: WordType.assassin }
+    const board = [
+      [w00, w01],
+      [w10, w11],
+    ] as any
     const game = {
+      board,
       state: GameStates.idle,
     }
 
     const expectedGame = {
+      board,
       state: GameStates.running,
-      turn: Teams.red,
+      turn: Teams.blue,
+      blueScore: 2,
+      redScore: 1,
     }
 
     expect(GameActions.startGame(game as any)).toEqual(expectedGame)
