@@ -68,7 +68,14 @@ export const changeTurn = (userId: string) =>
   validate([running, hasHint, isPlayersTurn(userId), playerIsNotSpyMaster(userId), hasAtLeastOneGuess])
 
 export const revealWord = (row: number, col: number, userId: string) =>
-  validate([running, isPlayersTurn(userId), playerIsNotSpyMaster(userId), hasMoreGuesses, wordIsNotRevealed(row, col)])
+  validate([
+    running,
+    isPlayersTurn(userId),
+    playerIsNotSpyMaster(userId),
+    hasHint,
+    hasMoreGuesses,
+    wordIsNotRevealed(row, col),
+  ])
 
 export const gameRules = {
   joinTeam,

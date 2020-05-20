@@ -53,6 +53,8 @@ it("update and getById", async () => {
     userId: "id2",
     something: "different",
     andAlso: "this",
+    someNullField: undefined,
+    someUndefinedField: undefined,
   } as any
 
   await getRight(gamesRepositoryPorts.update(gameToUpdate)(repositoriesAdapter))()
@@ -61,7 +63,13 @@ it("update and getById", async () => {
 
   mongoServer.stop()
 
-  expect(updatedGame).toMatchObject(gameToUpdate)
+  const expectedGame = {
+    ...gameToUpdate,
+    someNullField: undefined,
+    someUndefinedField: undefined,
+  }
+
+  expect(updatedGame).toMatchObject(expectedGame)
 })
 
 describe("getById", () => {

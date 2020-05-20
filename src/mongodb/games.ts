@@ -1,25 +1,33 @@
+import * as R from "ramda"
 import { CodeNamesGame } from "../game/models"
 import { UUID } from "../utils/types"
 import { MongoEnvironment } from "./adapters"
 
 const GAMES = "Games"
 
+const nullToUndefined = (game: CodeNamesGame) =>
+  R.keys(game).reduce((acc, k) => ({ ...acc, [k]: acc[k] === null ? undefined : acc[k] }), game)
+
 const insert = ({ dbClient }: MongoEnvironment) => (game: CodeNamesGame) =>
   dbClient
     .db()
     .collection<CodeNamesGame>(GAMES)
     .insertOne(game)
-    .then(_ => game)
+    .then(r => r.ops[0])
 
 const update = ({ dbClient }: MongoEnvironment) => (game: CodeNamesGame) =>
   dbClient
     .db()
     .collection<CodeNamesGame>(GAMES)
-    .updateOne({ gameId: game.gameId }, { $set: game })
-    .then(_ => game)
+    .findOneAndUpdate({ gameId: game.gameId }, { $set: game })
+    .then(r => (r.value ? nullToUndefined(r.value) : game))
 
 const getById = ({ dbClient }: MongoEnvironment) => (gameId: UUID) =>
-  dbClient.db().collection<CodeNamesGame>(GAMES).findOne({ gameId: gameId })
+  dbClient
+    .db()
+    .collection<CodeNamesGame>(GAMES)
+    .findOne({ gameId: gameId })
+    .then(g => (g ? nullToUndefined(g) : g))
 
 export const gamesMongoDbPorts = {
   insert,
