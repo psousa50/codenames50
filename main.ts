@@ -69,6 +69,7 @@ export const setSpyMaster = (userId: string): GameAction => game => {
 export const startGame: GameAction = game => ({
   ...game,
   state: GameStates.running,
+  turn: Teams.red,
 })
 
 export const sendHint = (hintWord: string, hintWordCount: number): GameAction => game => ({
