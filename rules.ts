@@ -40,13 +40,13 @@ const playerHasTeam = (userId: string): GameRule => game =>
   v(getPlayer(game, userId)?.team !== undefined, "playerMustHaveTeam")
 
 const playerIsSpyMaster = (userId: string): GameRule => game =>
-  v(game.redSpyMaster === userId || game.blueSpyMaster === userId, "mustBeSpyMaster")
+  v(game.redTeam.spyMaster === userId || game.blueTeam.spyMaster === userId, "mustBeSpyMaster")
 
 const playerIsNotSpyMaster = (userId: string): GameRule => game =>
-  v(game.redSpyMaster !== userId && game.blueSpyMaster !== userId, "cantBeSpyMaster")
+  v(game.redTeam.spyMaster !== userId && game.blueTeam.spyMaster !== userId, "cantBeSpyMaster")
 
 const hasBothSpyMasters: GameRule = game =>
-  v(game.redSpyMaster !== undefined && game.blueSpyMaster !== undefined, "mustHaveSpyMasters")
+  v(game.redTeam.spyMaster !== undefined && game.blueTeam.spyMaster !== undefined, "mustHaveSpyMasters")
 
 const hasAtLeastOneGuess: GameRule = game => v(game.wordsRevealedCount > 0, "mustGuessOnce")
 
