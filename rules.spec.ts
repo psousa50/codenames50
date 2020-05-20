@@ -73,8 +73,12 @@ describe("setSpyMaster", () => {
 describe("startGame", () => {
   const validGame: DeepPartial<CodeNamesGame> = {
     state: GameStates.idle,
-    redSpyMaster: "some-user-1",
-    blueSpyMaster: "some-user-2",
+    blueTeam: {
+      spyMaster: "some-blue-user",
+    },
+    redTeam: {
+      spyMaster: "some-red-user",
+    },
   }
   it("is valid for a valid game", () => {
     expect(GameRules.startGame(validGame as any)).toBeUndefined()
@@ -93,7 +97,9 @@ describe("startGame", () => {
     it("if red spyMasters is not defined", () => {
       const game = {
         ...validGame,
-        redSpyMaster: undefined,
+        redTeam: {
+          spyMaster: undefined,
+        },
       }
 
       expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
@@ -102,7 +108,9 @@ describe("startGame", () => {
     it("if blue spyMasters is not defined", () => {
       const game = {
         ...validGame,
-        blueSpyMaster: undefined,
+        blueTeam: {
+          spyMaster: undefined,
+        },
       }
 
       expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
@@ -121,8 +129,12 @@ describe("sendHint", () => {
     ],
     hintWordCount: 0,
     turn: Teams.red,
-    redSpyMaster: userId,
-    blueSpyMaster: "some-blue-player",
+    blueTeam: {
+      spyMaster: "some-blue-user",
+    },
+    redTeam: {
+      spyMaster: userId,
+    },
   }
 
   it("is valid for a valid game", () => {
@@ -131,16 +143,24 @@ describe("sendHint", () => {
 
   it("is valid for a valid game when user is redSpyMaster", () => {
     const game = buildGame(validGame, {
-      redSpyMaster: userId,
-      blueSpyMaster: "some-blue-user",
+      blueTeam: {
+        spyMaster: "some-blue-user",
+      },
+      redTeam: {
+        spyMaster: userId,
+      },
     })
     expect(GameRules.sendHint(userId)(game as any)).toBeUndefined()
   })
 
   it("is valid for a valid game when user is blueSpyMaster", () => {
     const game = buildGame(validGame, {
-      redSpyMaster: "some-red-user",
-      blueSpyMaster: userId,
+      blueTeam: {
+        spyMaster: userId,
+      },
+      redTeam: {
+        spyMaster: "some-red-user",
+      },
     })
     expect(GameRules.sendHint(userId)(game as any)).toBeUndefined()
   })
@@ -171,8 +191,12 @@ describe("sendHint", () => {
 
     it("if player is not spyMaster", () => {
       const game = buildGame(validGame, {
-        redSpyMaster: "some-red-player",
-        blueSpyMaster: "some-blue-player",
+        blueTeam: {
+          spyMaster: "some-blue-user",
+        },
+        redTeam: {
+          spyMaster: "some-red-user",
+        },
       })
 
       expect(GameRules.sendHint(userId)(game as any)).toBe(GameRules.message("mustBeSpyMaster"))
@@ -197,6 +221,8 @@ describe("changeTurn", () => {
         team: Teams.blue,
       },
     ],
+    blueTeam: {},
+    redTeam: {},
     hintWordCount: 1,
     wordsRevealedCount: 1,
     turn: Teams.blue,
@@ -243,7 +269,9 @@ describe("changeTurn", () => {
     it("if player is red SpyMaster", () => {
       const game = buildGame(validGame, {
         ...validGame,
-        redSpyMaster: userId,
+        redTeam: {
+          spyMaster: userId,
+        },
       })
 
       expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
@@ -252,7 +280,9 @@ describe("changeTurn", () => {
     it("if player is blue SpyMaster", () => {
       const game = buildGame(validGame, {
         ...validGame,
-        blueSpyMaster: userId,
+        blueTeam: {
+          spyMaster: userId,
+        },
       })
 
       expect(GameRules.changeTurn(userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
@@ -278,6 +308,8 @@ describe("revealWord", () => {
         team: Teams.blue,
       },
     ],
+    blueTeam: {},
+    redTeam: {},
     turn: Teams.blue,
     hintWordCount: 2,
     wordsRevealedCount: 2,
@@ -316,7 +348,9 @@ describe("revealWord", () => {
     it("if player is red SpyMaster", () => {
       const game = buildGame(validGame, {
         ...validGame,
-        redSpyMaster: userId,
+        redTeam: {
+          spyMaster: userId,
+        },
       })
 
       expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
@@ -325,7 +359,9 @@ describe("revealWord", () => {
     it("if player is blue SpyMaster", () => {
       const game = buildGame(validGame, {
         ...validGame,
-        blueSpyMaster: userId,
+        blueTeam: {
+          spyMaster: userId,
+        },
       })
 
       expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
@@ -343,6 +379,8 @@ describe("revealWord", () => {
     it("if revealedWords is higher than hintWordCount + 1", () => {
       const game = buildGame(validGame, {
         ...validGame,
+        redTeam: {},
+        blueTeam: {},
         hintWordCount: 2,
         wordsRevealedCount: 3,
       })
