@@ -162,6 +162,7 @@ describe("revealWord", () => {
     ] as any
     const game = {
       board,
+      wordsRevealedCount: 3,
     }
 
     const expectedBoard = [
@@ -170,6 +171,7 @@ describe("revealWord", () => {
     ] as any
     const expectedGame = {
       board: expectedBoard,
+      wordsRevealedCount: 4,
     }
 
     expect(GameActions.revealWord(0, 1)(game as any)).toEqual(expectedGame)

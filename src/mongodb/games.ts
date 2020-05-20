@@ -19,7 +19,7 @@ const update = ({ dbClient }: MongoEnvironment) => (game: CodeNamesGame) =>
   dbClient
     .db()
     .collection<CodeNamesGame>(GAMES)
-    .findOneAndUpdate({ gameId: game.gameId }, { $set: game })
+    .findOneAndUpdate({ gameId: game.gameId }, { $set: game }, { returnOriginal: false })
     .then(r => (r.value ? nullToUndefined(r.value) : game))
 
 const getById = ({ dbClient }: MongoEnvironment) => (gameId: UUID) =>

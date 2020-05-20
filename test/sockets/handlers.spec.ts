@@ -31,17 +31,6 @@ export const createClient = (userId: string) => {
   })
 }
 
-const createClient2 = (userId: string) => {
-  const client = ioClient(`http://localhost:${port}`, { autoConnect: true })
-
-  client.on("connect", () => {
-    console.log("CONNECT=====>\n", client.id, userId)
-    emitClientMessage(client, messages.registerUserSocket({ userId }))
-  })
-
-  return client
-}
-
 const createSocketApp = () => {
   const io = createSocketsApplication(port)
   const config = { boardWidth: 2, boardHeight: 2 } as any

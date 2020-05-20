@@ -52,13 +52,12 @@ export const emitMessage: GameMessagingPort<EmitMessageInput> = ({ userId, roomI
     return actionOf(undefined)
   })
 
-export const broadcastMessage: GameMessagingPort<BrodcastMessageInput> = ({ roomId, message }) => {
-  console.log("broadcastMessage=====>\n", roomId, message.type)
-  return withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
+export const broadcastMessage: GameMessagingPort<BrodcastMessageInput> = ({ roomId, message }) =>
+  withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
     messengerPorts.broadcast(messengerEnvironment)(roomId, message)
     return actionOf(undefined)
   })
-}
+
 export const gameMessagingPorts = {
   emitMessage,
   registerUser,

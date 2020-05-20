@@ -83,6 +83,7 @@ const reveal = (w: BoardWord) => ({ ...w, revealed: true })
 export const revealWord = (row: number, col: number) => (game: CodeNamesGame) => ({
   ...game,
   board: update2dCell(game.board)(reveal, row, col),
+  wordsRevealedCount: game.wordsRevealedCount + 1,
 })
 
 export const changeTurn = (game: CodeNamesGame) => ({

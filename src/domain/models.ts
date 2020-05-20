@@ -30,6 +30,15 @@ export interface StartGameInput {
 
 export type StartGameOutput = CodeNamesGame
 
+export type SendHintInput = {
+  gameId: string
+  userId: string
+  hintWord: string
+  hintWordCount: number
+}
+
+export type SendHintOutput = CodeNamesGame
+
 export type RevealWordInput = {
   gameId: string
   userId: string

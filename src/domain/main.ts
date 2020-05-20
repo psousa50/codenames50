@@ -25,6 +25,8 @@ import {
   JoinTeamOutput,
   RevealWordInput,
   RevealWordOutput,
+  SendHintInput,
+  SendHintOutput,
   SetSpyMasterInput,
   SetSpyMasterOutput,
   StartGameInput,
@@ -164,6 +166,22 @@ export const startGame: DomainPort<StartGameInput, StartGameOutput> = ({ gameId 
     ),
   )
 
+export const sendHint: DomainPort<SendHintInput, SendHintOutput> = ({ gameId, userId, hintWord, hintWordCount }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
+    pipe(
+      getGame(gameId),
+      chain(checkRules(gameRules.sendHint(userId))),
+      chain(game => actionOf(gameActions.sendHint(hintWord, hintWordCount)(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
+      chain(broadcastMessage(messages.sendHint({ gameId, userId, hintWord, hintWordCount }))),
+    ),
+  )
+
 export const revealWord: DomainPort<RevealWordInput, RevealWordOutput> = ({ gameId, userId, row, col }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
@@ -219,6 +237,7 @@ export const gamesDomainPorts = {
   setSpyMaster,
   startGame,
   changeTurn,
+  sendHint,
   revealWord,
 }
 

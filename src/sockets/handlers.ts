@@ -6,6 +6,7 @@ import {
   JoinGameInput,
   JoinTeamInput,
   RevealWordInput,
+  SendHintInput,
   SetSpyMasterInput,
   StartGameInput,
 } from "../domain/models"
@@ -33,7 +34,6 @@ const addMessageHandler = (socketsEnvironment: SocketsEnvironment) => <T>(
         pipe(
           messageHandler(socket)(data),
           mapLeft(e => {
-            console.log("SOCKET ERROR=====>\n", socket.id, e)
             socket.emit("gameError", e)
           }),
         ),
@@ -108,6 +108,14 @@ export const startGameHandler: SocketHandler<StartGameInput> = _ => input =>
     ),
   )
 
+export const sendHintHandler: SocketHandler<SendHintInput> = _ => input =>
+  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
+    pipe(
+      adapt(gamesDomainPorts.sendHint(input), domainEnvironment),
+      map(_ => undefined),
+    ),
+  )
+
 export const revealWordHandler: SocketHandler<RevealWordInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
@@ -132,6 +140,7 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   addMessageHandler(env)(socket, "joinTeam", joinTeamHandler)
   addMessageHandler(env)(socket, "setSpyMaster", setSpyMasterHandler)
   addMessageHandler(env)(socket, "startGame", startGameHandler)
+  addMessageHandler(env)(socket, "sendHint", sendHintHandler)
   addMessageHandler(env)(socket, "revealWord", revealWordHandler)
   addMessageHandler(env)(socket, "changeTurn", changeTurnHandler)
 }

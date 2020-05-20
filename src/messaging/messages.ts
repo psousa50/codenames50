@@ -4,6 +4,7 @@ import {
   JoinGameInput,
   JoinTeamInput,
   RevealWordInput,
+  SendHintInput,
   SetSpyMasterInput,
   StartGameInput,
 } from "../domain/models"
@@ -19,8 +20,9 @@ export type GameMessageType =
   | "joinGame"
   | "joinedGame"
   | "joinTeam"
-  | "startGame"
   | "setSpyMaster"
+  | "startGame"
+  | "sendHint"
   | "revealWord"
   | "changeTurn"
   | "gameError"
@@ -56,6 +58,7 @@ export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", d
 export const joinedGame = (data: CodeNamesGame) => createGameMessage("joinedGame", data)
 export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)
 export const startGame = (data: StartGameInput) => createGameMessage("startGame", data)
+export const sendHint = (data: SendHintInput) => createGameMessage("sendHint", data)
 export const revealWord = (data: RevealWordInput) => createGameMessage("revealWord", data)
 export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTurn", data)
 export const setSpyMaster = (data: SetSpyMasterInput) => createGameMessage("setSpyMaster", data)
