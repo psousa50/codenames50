@@ -99,16 +99,17 @@ const reveal = (w: BoardWord) => ({ ...w, revealed: true })
 export const revealWord = (userId: string, row: number, col: number) => (game: CodeNamesGame) => {
   const revealedWord = game.board[row][col]
   const team = getPlayer(game, userId)?.team
-  const newGame =
+  const updatedGame =
     (revealedWord.type === WordType.blue && team === Teams.red) ||
     (revealedWord.type === WordType.red && team === Teams.blue) ||
-    revealedWord.type === WordType.inocent
+    revealedWord.type === WordType.inocent ||
+    game.wordsRevealedCount === game.hintWordCount
       ? changeTurn(game)
       : revealedWord.type === WordType.assassin
       ? endGame(game)
       : game
   return {
-    ...newGame,
+    ...updatedGame,
     board: update2dCell(game.board)(reveal, row, col),
     wordsRevealedCount: game.wordsRevealedCount + 1,
   }
@@ -117,6 +118,9 @@ export const revealWord = (userId: string, row: number, col: number) => (game: C
 export const changeTurn = (game: CodeNamesGame) => ({
   ...game,
   turn: game.turn === Teams.blue ? Teams.red : Teams.blue,
+  hintWord: "",
+  hintWordCount: 0,
+  wordsRevealedCount: 0,
 })
 
 export const endGame = (game: CodeNamesGame) => ({
