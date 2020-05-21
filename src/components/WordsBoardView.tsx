@@ -24,8 +24,8 @@ const useStyles = makeStyles({
   cell: {
     border: "10px solid white",
     backgroundColor: "lightgray",
-    padding: 20,
-    margin: 30,
+    padding: 15,
+    margin: 15,
     cursor: "pointer",
   },
   word: {

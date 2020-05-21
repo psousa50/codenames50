@@ -9,26 +9,27 @@ interface TeamViewProps {
 }
 
 const styles = (color: string) => ({
-  container: {},
   table: {
     border: `2px solid ${color}`,
     backgroundColor: "yellow",
   },
   wordsLeft: {
-    fontSize: "30px",
+    fontSize: "50px",
     padding: "20px",
     color,
   },
   spyMaster: {
-    fontSize: "16px",
-    color,
-    border: `1px solid ${color}`,
+    fontSize: "22px",
+    backgroundColor: color,
+    color: "white",
+    padding: "10px",
   },
   other: {
-    fontSize: "12px",
+    fontSize: "16px",
     color,
   },
   button: {
+    color: "white",
     backgroundColor: color,
   },
 })
@@ -44,11 +45,9 @@ export const TeamsView: React.FC<TeamViewProps> = ({ game, joinTeam }) => {
     const others = members.filter(m => m.userId !== teamInfo.spyMaster)
 
     return others.map((o, i) => (
-      <Table>
-        <TableRow key={i}>
-          <TableCell style={style.other}>{o.userId}</TableCell>
-        </TableRow>
-      </Table>
+      <div key={i} style={style.other}>
+        {o.userId}
+      </div>
     ))
   }
 
@@ -63,20 +62,28 @@ export const TeamsView: React.FC<TeamViewProps> = ({ game, joinTeam }) => {
       <Table>
         <TableBody>
           <TableRow>
-            <TableCell style={redStyles.wordsLeft}>{game.redTeam.wordsLeft}</TableCell>
-            <TableCell style={blueStyles.wordsLeft}>{game.blueTeam.wordsLeft}</TableCell>
+            <TableCell align="center" style={redStyles.wordsLeft}>
+              {game.redTeam.wordsLeft}
+            </TableCell>
+            <TableCell align="center" style={blueStyles.wordsLeft}>
+              {game.blueTeam.wordsLeft}
+            </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell style={redStyles.spyMaster}>{game.redTeam.spyMaster}</TableCell>
-            <TableCell style={blueStyles.spyMaster}>{game.blueTeam.spyMaster}</TableCell>
+            <TableCell align="center">
+              <span style={redStyles.spyMaster}>{game.redTeam.spyMaster}</span>
+            </TableCell>
+            <TableCell align="center">
+              <span style={blueStyles.spyMaster}>{game.blueTeam.spyMaster}</span>
+            </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>{members(Teams.red, game.redTeam, redStyles)}</TableCell>
-            <TableCell>{members(Teams.blue, game.blueTeam, blueStyles)}</TableCell>
+            <TableCell align="center">{members(Teams.red, game.redTeam, redStyles)}</TableCell>
+            <TableCell align="center">{members(Teams.blue, game.blueTeam, blueStyles)}</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>{joinButton(Teams.red, redStyles)}</TableCell>
-            <TableCell>{joinButton(Teams.blue, blueStyles)}</TableCell>
+            <TableCell align="center">{joinButton(Teams.red, redStyles)}</TableCell>
+            <TableCell align="center">{joinButton(Teams.blue, blueStyles)}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
