@@ -4,12 +4,11 @@ import { CodeNamesGame, Words } from "../../src/codenames-core/models"
 import { DomainEnvironment } from "../../src/domain/adapters"
 import { ErrorCodes } from "../../src/domain/errors"
 import * as Games from "../../src/domain/main"
-import * as messages from "../../src/messaging/messages"
+import * as Messages from "../../src/messaging/messages"
 import { actionOf } from "../../src/utils/actions"
 import { DeepPartial } from "../../src/utils/types"
 import { buildTestDomainEnvironment, getLeft, getRight } from "../helpers"
 
-const sortStrings = (s1: string, s2: string) => s1.localeCompare(s2)
 const gameId = "some-game-id"
 
 type EnvironmentOptions = {
@@ -124,7 +123,7 @@ describe("join", () => {
     expect(addPlayer).toHaveBeenCalledWith(userId)
     expect(addPlayerAction).toHaveBeenCalledWith(someGame)
     expect(updateGame).toHaveBeenCalledWith(updatedGame)
-    expect(broadcastMessage).toHaveBeenCalledWith({ roomId: gameId, message: messages.joinedGame(updatedGame) })
+    expect(broadcastMessage).toHaveBeenCalledWith({ roomId: gameId, message: Messages.joinedGame(updatedGame) })
   })
 
   it("gives an error if the game does not exist", async () => {
@@ -181,7 +180,7 @@ describe("revealWord", () => {
     expect(updateGame).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
-      message: messages.revealWord({ gameId, userId, row, col }),
+      message: Messages.revealWord({ gameId, userId, row, col }),
     })
   })
 })
@@ -218,7 +217,7 @@ describe("changeTurn", () => {
     expect(updateGame).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
-      message: messages.changeTurn({ gameId, userId }),
+      message: Messages.changeTurn({ gameId, userId }),
     })
   })
 })

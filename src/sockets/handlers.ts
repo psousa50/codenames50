@@ -1,16 +1,7 @@
 import { pipe } from "fp-ts/lib/pipeable"
 import { map, mapLeft, run } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
-import {
-  ChangeTurnInput,
-  JoinGameInput,
-  JoinTeamInput,
-  RevealWordInput,
-  SendHintInput,
-  SetSpyMasterInput,
-  StartGameInput,
-} from "../domain/models"
-import { GameMessageType, RegisterUserSocketInput } from "../messaging/messages"
+import * as Messages from "../messaging/messages"
 import { actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
 import { SocketsEnvironment, SocketsPort } from "./adapters"
@@ -25,7 +16,7 @@ type SocketHandler<T = void> = (socket: SocketIO.Socket) => SocketsPort<T, void>
 
 const addMessageHandler = (socketsEnvironment: SocketsEnvironment) => <T>(
   socket: SocketIO.Socket,
-  type: GameMessageType,
+  type: Messages.GameMessageType,
   messageHandler: SocketHandler<T>,
 ) => {
   const handler = async (data: T) => {
@@ -48,7 +39,7 @@ const addMessageHandler = (socketsEnvironment: SocketsEnvironment) => <T>(
   return task.of(undefined)
 }
 
-export const registerUserHandler: SocketHandler<RegisterUserSocketInput> = socket => ({ userId }) =>
+export const registerUserHandler: SocketHandler<Messages.RegisterUserSocketInput> = socket => ({ userId }) =>
   withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
     pipe(adapt(gameMessagingPorts.registerUser({ userId, socketId: socket.id }), gameMessagingEnvironment)),
   )
@@ -68,7 +59,7 @@ export const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ ga
     return actionOf(undefined)
   })
 
-export const joinGameHandler: SocketHandler<JoinGameInput> = socket => input => {
+export const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => input => {
   return withEnv(({ gamesDomainPorts, domainEnvironment }) => {
     socket.join(input.gameId, async (_: any) => {
       await gamesDomainPorts.join(input)(domainEnvironment)()
@@ -77,7 +68,7 @@ export const joinGameHandler: SocketHandler<JoinGameInput> = socket => input => 
   })
 }
 
-export const joinTeamHandler: SocketHandler<JoinTeamInput> = _ => input =>
+export const joinTeamHandler: SocketHandler<Messages.JoinTeamInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
       adapt(gamesDomainPorts.joinTeam(input), domainEnvironment),
@@ -85,7 +76,7 @@ export const joinTeamHandler: SocketHandler<JoinTeamInput> = _ => input =>
     ),
   )
 
-export const setSpyMasterHandler: SocketHandler<SetSpyMasterInput> = _ => input =>
+export const setSpyMasterHandler: SocketHandler<Messages.SetSpyMasterInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
       adapt(gamesDomainPorts.setSpyMaster(input), domainEnvironment),
@@ -93,7 +84,7 @@ export const setSpyMasterHandler: SocketHandler<SetSpyMasterInput> = _ => input 
     ),
   )
 
-export const startGameHandler: SocketHandler<StartGameInput> = _ => input =>
+export const startGameHandler: SocketHandler<Messages.StartGameInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
       adapt(gamesDomainPorts.startGame(input), domainEnvironment),
@@ -101,7 +92,7 @@ export const startGameHandler: SocketHandler<StartGameInput> = _ => input =>
     ),
   )
 
-export const sendHintHandler: SocketHandler<SendHintInput> = _ => input =>
+export const sendHintHandler: SocketHandler<Messages.SendHintInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
       adapt(gamesDomainPorts.sendHint(input), domainEnvironment),
@@ -109,7 +100,7 @@ export const sendHintHandler: SocketHandler<SendHintInput> = _ => input =>
     ),
   )
 
-export const revealWordHandler: SocketHandler<RevealWordInput> = _ => input =>
+export const revealWordHandler: SocketHandler<Messages.RevealWordInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
       adapt(gamesDomainPorts.revealWord(input), domainEnvironment),
@@ -117,7 +108,7 @@ export const revealWordHandler: SocketHandler<RevealWordInput> = _ => input =>
     ),
   )
 
-export const changeTurnHandler: SocketHandler<ChangeTurnInput> = _ => input =>
+export const changeTurnHandler: SocketHandler<Messages.ChangeTurnInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
       adapt(gamesDomainPorts.changeTurn(input), domainEnvironment),
