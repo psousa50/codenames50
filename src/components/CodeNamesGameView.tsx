@@ -6,7 +6,8 @@ import * as GameActions from "../codenames-core/main"
 import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/hooks"
-import { blueColor, redColor } from "../utils/ui"
+import { buttons } from "../utils/styles"
+import { TeamsView } from "./TeamsView"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
 
 const useStyles = makeStyles(() => ({
@@ -23,6 +24,13 @@ const useStyles = makeStyles(() => ({
     flexDirection: "column",
     alignItems: "center",
   },
+  teams: {
+    display: "flex",
+    flex: 1,
+    flexGrow: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   messages: {
     display: "flex",
     flex: 1,
@@ -34,6 +42,30 @@ const useStyles = makeStyles(() => ({
     margin: 20,
   },
 }))
+
+const addSampleGame = (game: CodeNamesGame) => {
+  const players = [
+    { userId: "Pedro", team: Teams.blue },
+    { userId: "Carla", team: Teams.blue },
+    { userId: "Beatriz", team: Teams.blue },
+    { userId: "Vasco", team: Teams.red },
+    { userId: "Guiga", team: Teams.red },
+    { userId: "Filipe", team: Teams.red },
+    { userId: "Rozito", team: Teams.red },
+  ]
+  return GameActions.startGame({
+    ...game,
+    players,
+    blueTeam: {
+      spyMaster: "Pedro",
+      wordsLeft: undefined,
+    },
+    redTeam: {
+      spyMaster: "Vasco",
+      wordsLeft: undefined,
+    },
+  })
+}
 
 export interface CodeNamesGameViewProps {
   gameId?: string | null
@@ -100,12 +132,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
     emitMessage(socket, Messages.joinGame({ gameId, userId }))
   }
 
-  const joinTeamBlue = () => {
-    emitMessage(socket, Messages.joinTeam({ gameId, userId, team: Teams.blue }))
-  }
-
-  const joinTeamRed = () => {
-    emitMessage(socket, Messages.joinTeam({ gameId, userId, team: Teams.red }))
+  const joinTeam = (team: Teams) => {
+    emitMessage(socket, Messages.joinTeam({ gameId, userId, team }))
   }
 
   const startGame = () => {
@@ -134,7 +162,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
 
   const gameCreatedHandler = (game: CodeNamesGame) => {
     setGameId(game.gameId)
-    setGame(game)
+    setGame(addSampleGame(game))
   }
 
   const joinedGameHandler = (game: CodeNamesGame) => {
@@ -174,61 +202,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
     revealWord(row, col)
   }
 
-  const showGame = (game: CodeNamesGame) => (
-    <table>
-      <tbody>
-        <tr>
-          <td>Game Id</td>
-          <td>{game.gameId}</td>
-        </tr>
-        <tr>
-          <td>User Id</td>
-          <td>{game.userId}</td>
-        </tr>
-        <tr>
-          <td>State</td>
-          <td>{game.state}</td>
-        </tr>
-        <tr>
-          <td>Turn</td>
-          <td>{game.turn}</td>
-        </tr>
-        <tr>
-          <td>Players</td>
-          <td>{JSON.stringify(game.players, null, 2)}</td>
-        </tr>
-        <tr>
-          <td>Red SpyMaster</td>
-          <td>{game.redTeam.spyMaster}</td>
-        </tr>
-        <tr>
-          <td>Blue SpyMaster</td>
-          <td>{game.blueTeam.spyMaster}</td>
-        </tr>
-        <tr>
-          <td>Red Words Left</td>
-          <td>{game.redTeam.wordsLeft}</td>
-        </tr>
-        <tr>
-          <td>Blue Words Left</td>
-          <td>{game.blueTeam.wordsLeft}</td>
-        </tr>
-        <tr>
-          <td>Hint word</td>
-          <td>{game.hintWord}</td>
-        </tr>
-        <tr>
-          <td>Hint word count</td>
-          <td>{game.hintWordCount}</td>
-        </tr>
-        <tr>
-          <td>Words Revealed</td>
-          <td>{game.wordsRevealedCount}</td>
-        </tr>
-      </tbody>
-    </table>
-  )
-
   const url = `http://192.168.1.67:4000/?gameId=${gameId}`
 
   return (
@@ -255,16 +228,14 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
           {url}
         </div>
         <div>
-          <Button variant="contained" color="primary" className={classes.pad} onClick={createGame}>
+          <Button variant="contained" color="primary" style={buttons.actionButton} onClick={createGame}>
             CREATE
           </Button>
           <Button variant="contained" color="secondary" className={classes.pad} onClick={joinGame}>
             JOIN
           </Button>
         </div>
-        {game && <Header game={game} />}
-        {game && <div>{`Hint Word: ${game.hintWord}`}</div>}
-        {game && <div>{`Hint Word Count: ${game.hintWordCount}`}</div>}
+        <TeamsView game={game} joinTeam={joinTeam} />
         {game && (
           <WordsBoardView
             board={game.board}
@@ -293,12 +264,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
           SEND HINT
         </Button>
         <div>
-          <Button variant="contained" className={classes.pad} onClick={joinTeamBlue}>
-            JOIN TEAM BLUE
-          </Button>
-          <Button variant="contained" className={classes.pad} onClick={joinTeamRed}>
-            JOIN TEAM RED
-          </Button>
           <Button variant="contained" className={classes.pad} onClick={setSpyMaster}>
             SPY MASTER
           </Button>
@@ -309,7 +274,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
             END TURN
           </Button>
         </div>
-        {game ? showGame(game) : null}
       </div>
       <div className={classes.messages}>
         {socketMessages.map((s, i) => (
@@ -318,18 +282,4 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
       </div>
     </div>
   )
-}
-
-interface HeaderProps {
-  game: CodeNamesGame
-}
-
-const Header: React.FC<HeaderProps> = ({ game }) => {
-  const styles = {
-    turn: {
-      backgroundColor: game.turn === Teams.red ? redColor : blueColor,
-    },
-  }
-
-  return <div style={styles.turn}>TURN</div>
 }

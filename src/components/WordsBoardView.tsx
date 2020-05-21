@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles"
 import * as R from "ramda"
 import React from "react"
 import { BoardWord, WordsBoard, WordType } from "../codenames-core/models"
-import { blueColor, redColor } from "../utils/ui"
+import { blueColor, redColor } from "../utils/styles"
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
 
