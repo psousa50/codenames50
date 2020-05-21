@@ -2,11 +2,9 @@ import { Button } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 import React from "react"
 import * as uuid from "uuid"
-import { JoinTeamInput, RevealWordInput, SendHintInput, SetSpyMasterInput } from "../api/server/domain/models"
-import * as GameActions from "../api/server/game/main"
-import { CodeNamesGame, GameStates, Teams } from "../api/server/game/models"
-import * as messages from "../api/server/messaging/messages"
-import { GameMessageType } from "../api/server/messaging/messages"
+import * as GameActions from "../codenames-core/main"
+import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
+import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/hooks"
 import { blueColor, redColor } from "../utils/ui"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
@@ -59,7 +57,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
     GameActions.createGame("", "", "", GameActions.buildBoard(5, 5, [])),
   )
 
-  const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: messages.GameMessage<T>) => {
+  const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: Messages.GameMessage<T>) => {
     setError("")
     console.log("EMIT=====>\n", message)
     socket.emit(message.type, message.data)
@@ -67,7 +65,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
 
   const addMessageHandler = <T extends {}>(
     socket: SocketIOClient.Socket,
-    type: GameMessageType,
+    type: Messages.GameMessageType,
     handler: (data: T) => void,
   ) => {
     socket.on(type, (data: T) => {
@@ -95,43 +93,43 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
   }, [])
 
   const createGame = () => {
-    emitMessage(socket, messages.createGame({ gameId, userId, language: "en" }))
+    emitMessage(socket, Messages.createGame({ gameId, userId, language: "en" }))
   }
 
   const joinGame = () => {
-    emitMessage(socket, messages.joinGame({ gameId, userId }))
+    emitMessage(socket, Messages.joinGame({ gameId, userId }))
   }
 
   const joinTeamBlue = () => {
-    emitMessage(socket, messages.joinTeam({ gameId, userId, team: Teams.blue }))
+    emitMessage(socket, Messages.joinTeam({ gameId, userId, team: Teams.blue }))
   }
 
   const joinTeamRed = () => {
-    emitMessage(socket, messages.joinTeam({ gameId, userId, team: Teams.red }))
+    emitMessage(socket, Messages.joinTeam({ gameId, userId, team: Teams.red }))
   }
 
   const startGame = () => {
-    emitMessage(socket, messages.startGame({ gameId, userId }))
+    emitMessage(socket, Messages.startGame({ gameId, userId }))
   }
 
   const setSpyMaster = () => {
-    emitMessage(socket, messages.setSpyMaster({ gameId, userId }))
+    emitMessage(socket, Messages.setSpyMaster({ gameId, userId }))
   }
 
   const sendHint = () => {
-    emitMessage(socket, messages.sendHint({ gameId, userId, hintWord, hintWordCount: Number.parseInt(hintWordCount) }))
+    emitMessage(socket, Messages.sendHint({ gameId, userId, hintWord, hintWordCount: Number.parseInt(hintWordCount) }))
   }
 
   const revealWord = (row: number, col: number) => {
-    emitMessage(socket, messages.revealWord({ gameId, userId, row, col }))
+    emitMessage(socket, Messages.revealWord({ gameId, userId, row, col }))
   }
 
   const endTurn = () => {
-    emitMessage(socket, messages.changeTurn({ gameId, userId }))
+    emitMessage(socket, Messages.changeTurn({ gameId, userId }))
   }
 
   const connectHandler = () => {
-    emitMessage(socket, messages.registerUserSocket({ userId }))
+    emitMessage(socket, Messages.registerUserSocket({ userId }))
   }
 
   const gameCreatedHandler = (game: CodeNamesGame) => {
@@ -144,7 +142,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
     setGame(game)
   }
 
-  const joinTeamHandler = ({ userId, team }: JoinTeamInput) => {
+  const joinTeamHandler = ({ userId, team }: Messages.JoinTeamInput) => {
     setGame(GameActions.joinTeam(userId, team))
   }
 
@@ -152,15 +150,15 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
     setGame(GameActions.startGame)
   }
 
-  const setSpyMasterHandler = ({ userId }: SetSpyMasterInput) => {
+  const setSpyMasterHandler = ({ userId }: Messages.SetSpyMasterInput) => {
     setGame(GameActions.setSpyMaster(userId))
   }
 
-  const sendHintHandler = ({ hintWord, hintWordCount }: SendHintInput) => {
+  const sendHintHandler = ({ hintWord, hintWordCount }: Messages.SendHintInput) => {
     setGame(GameActions.sendHint(hintWord, hintWordCount))
   }
 
-  const revealWordHandler = ({ row, col }: RevealWordInput) => {
+  const revealWordHandler = ({ row, col }: Messages.RevealWordInput) => {
     setGame(GameActions.revealWord(userId, row, col))
   }
 
@@ -206,6 +204,14 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
         <tr>
           <td>Blue SpyMaster</td>
           <td>{game.blueTeam.spyMaster}</td>
+        </tr>
+        <tr>
+          <td>Red Words Left</td>
+          <td>{game.redTeam.wordsLeft}</td>
+        </tr>
+        <tr>
+          <td>Blue Words Left</td>
+          <td>{game.blueTeam.wordsLeft}</td>
         </tr>
         <tr>
           <td>Hint word</td>

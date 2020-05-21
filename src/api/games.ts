@@ -1,10 +1,10 @@
+import { CodeNamesGame } from "../codenames-core/models"
+import * as Messages from "../messaging/messages"
 import { postJson } from "../utils/fetch"
 import { apiUrl } from "./config"
-import { CreateGameInput, JoinGameInput } from "./server/domain/models"
-import { CodeNamesGame } from "./server/game/models"
 
-export const create = (input: CreateGameInput) =>
+export const create = (input: Messages.CreateGameInput) =>
   postJson<CodeNamesGame>(`${apiUrl}/games/create`, { body: JSON.stringify(input) })
 
-export const join = (input: JoinGameInput) =>
+export const join = (input: Messages.JoinGameInput) =>
   postJson<CodeNamesGame>(`${apiUrl}/games/join`, { body: JSON.stringify(input) })
