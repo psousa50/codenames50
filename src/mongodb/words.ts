@@ -1,4 +1,4 @@
-import { Words } from "../game/models"
+import { Words } from "../codenames-core/models"
 import { MongoEnvironment } from "./adapters"
 
 const WORDS = "Words"

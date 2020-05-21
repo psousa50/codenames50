@@ -1,3 +1,4 @@
+import { CodeNamesGame } from "../codenames-core/models"
 import { ErrorCodes } from "../domain/errors"
 import {
   ChangeTurnInput,
@@ -9,7 +10,6 @@ import {
   SetSpyMasterInput,
   StartGameInput,
 } from "../domain/models"
-import { CodeNamesGame } from "../game/models"
 
 export type GameMessageType =
   | "connect"

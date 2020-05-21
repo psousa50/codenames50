@@ -4,20 +4,15 @@ import { fold, getOrElse, TaskEither } from "fp-ts/lib/TaskEither"
 import { MongoClient } from "mongodb"
 import * as R from "ramda"
 import { buildExpressEnvironment, ExpressEnvironment } from "../src/app/adapters"
+import { gameActions } from "../src/codenames-core/main"
+import { gameRules } from "../src/codenames-core/rules"
 import { buildDomainEnvironment, DomainEnvironment } from "../src/domain/adapters"
-import { gameActions } from "../src/game/main"
-import { gameRules } from "../src/game/rules"
 import { buildGameMessagingEnvironment } from "../src/messaging/adapters"
 import { buildMessengerEnvironment } from "../src/messaging/messenger"
 import { buildMongoEnvironment } from "../src/mongodb/adapters"
 import { buildRepositoriesEnvironment } from "../src/repositories/adapters"
 import { actionOf } from "../src/utils/actions"
 import { DeepPartial } from "../src/utils/types"
-
-const words = {
-  language: "en",
-  words: R.range(0, 50).map(i => `word-${i}`),
-}
 
 const defaultConfig = {
   mongodb: {
