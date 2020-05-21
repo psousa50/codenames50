@@ -192,6 +192,27 @@ describe("sendHint", () => {
 })
 
 describe("revealWord", () => {
+  const revealWord = (type: WordType, team: Teams) => {
+    const userId = "some-user-id"
+    const w00 = { word: "w00", type, revealed: false }
+    const board = [[w00]] as any
+    const p1 = { userId, team }
+    const game = {
+      board,
+      players: [p1],
+      turn: Teams.red,
+      hintWordCount: 2,
+      redTeam: {
+        score: 0,
+      },
+      blueTeam: {
+        score: 0,
+      },
+    }
+
+    return GameActions.revealWord(userId, 0, 0)(game as any)
+  }
+
   it("reveals a word", () => {
     const w00 = { word: "w00" }
     const w01 = { word: "w01" }
@@ -203,37 +224,42 @@ describe("revealWord", () => {
     ] as any
     const game = {
       board,
+      blueTeam: {},
+      redTeam: {},
       players: [],
-      wordsRevealedCount: 3,
     }
 
-    const expectedBoard = [
-      [w00, { ...w01, revealed: true }],
-      [w10, w11],
-    ] as any
-    const expectedGame = {
-      board: expectedBoard,
-      players: [],
-      wordsRevealedCount: 4,
-    }
-
-    expect(GameActions.revealWord("some-user-id", 0, 1)(game as any)).toEqual(expectedGame)
+    expect(GameActions.revealWord("some-user-id", 0, 1)(game as any).board[0][1].revealed).toBeTruthy()
   })
 
-  const revealWord = (type: WordType, team: Teams) => {
+  it("increases words revealed", () => {
     const userId = "some-user-id"
-    const w00 = { word: "w00", type, revealed: false }
+    const w00 = { word: "w00", type: Teams.blue, revealed: false }
     const board = [[w00]] as any
-    const p1 = { userId, team }
+    const p1 = { userId, team: Teams.blue }
     const game = {
       board,
-      players: [p1],
-      turn: Teams.red,
-      hintWordCount: 2,
+      players: [],
+      blueTeam: {},
+      redTeam: {},
+      wordsRevealedCount: 2,
     }
 
-    return GameActions.revealWord(userId, 0, 0)(game as any)
-  }
+    const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.wordsRevealedCount).toBe(3)
+  })
+
+  describe("increases the score", () => {
+    it("if word is from the players team", () => {
+      expect(revealWord(WordType.blue, Teams.blue).blueTeam.score).toBe(1)
+    })
+
+    it("if word is from the players team", () => {
+      expect(revealWord(WordType.red, Teams.red).redTeam.score).toBe(1)
+    })
+  })
+
   describe("ends the turn", () => {
     it("if revealed word is from a different team", () => {
       expect(revealWord(WordType.blue, Teams.red).turn).toBe(Teams.blue)
