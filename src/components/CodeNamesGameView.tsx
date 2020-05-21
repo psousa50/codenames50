@@ -4,10 +4,9 @@ import React from "react"
 import * as uuid from "uuid"
 import { JoinTeamInput, RevealWordInput, SendHintInput, SetSpyMasterInput } from "../api/server/domain/models"
 import * as GameActions from "../api/server/game/main"
-import { CodeNamesGame, Teams } from "../api/server/game/models"
+import { CodeNamesGame, GameStates, Teams } from "../api/server/game/models"
 import * as messages from "../api/server/messaging/messages"
 import { GameMessageType } from "../api/server/messaging/messages"
-import { emitMessage } from "../api/sockets/handler"
 import { useSocket } from "../utils/hooks"
 import { blueColor, redColor } from "../utils/ui"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
@@ -59,6 +58,12 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
   const [game, setGame] = React.useState<CodeNamesGame>(
     GameActions.createGame("", "", "", GameActions.buildBoard(5, 5, [])),
   )
+
+  const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: messages.GameMessage<T>) => {
+    setError("")
+    console.log("EMIT=====>\n", message)
+    socket.emit(message.type, message.data)
+  }
 
   const addMessageHandler = <T extends {}>(
     socket: SocketIOClient.Socket,
@@ -156,7 +161,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
   }
 
   const revealWordHandler = ({ row, col }: RevealWordInput) => {
-    setGame(GameActions.revealWord(row, col))
+    setGame(GameActions.revealWord(userId, row, col))
   }
 
   const endTurnHandler = () => {
@@ -196,11 +201,11 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
         </tr>
         <tr>
           <td>Red SpyMaster</td>
-          <td>{game.redSpyMaster}</td>
+          <td>{game.redTeam.spyMaster}</td>
         </tr>
         <tr>
           <td>Blue SpyMaster</td>
-          <td>{game.blueSpyMaster}</td>
+          <td>{game.blueTeam.spyMaster}</td>
         </tr>
         <tr>
           <td>Hint word</td>
@@ -254,7 +259,16 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
         {game && <Header game={game} />}
         {game && <div>{`Hint Word: ${game.hintWord}`}</div>}
         {game && <div>{`Hint Word Count: ${game.hintWordCount}`}</div>}
-        {game && <WordsBoardView board={game.board} onWordClick={onWordClick} />}
+        {game && (
+          <WordsBoardView
+            board={game.board}
+            onWordClick={onWordClick}
+            revealWords={
+              game.state === GameStates.running &&
+              (userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster)
+            }
+          />
+        )}
         <div>Hint Word</div>
         <input
           style={{ width: 300, textAlign: "center" }}

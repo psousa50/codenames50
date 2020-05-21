@@ -35,10 +35,11 @@ const useStyles = makeStyles({
 
 interface WordsBoardViewProps {
   board: WordsBoard
+  revealWords: boolean
   onWordClick: OnWordClick
 }
 
-export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordClick }) => {
+export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordClick, revealWords }) => {
   const classes = useStyles()
   const s = 5
 
@@ -63,7 +64,7 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordCli
                     component="th"
                     scope="row"
                     className={classes.cell}
-                    style={word.revealed ? styles(word.type).revealed : undefined}
+                    style={word.revealed || revealWords ? styles(word.type).revealed : undefined}
                     onClick={() => onWordClick(word, row, col)}
                   >
                     <WordView key={col} word={word} />
