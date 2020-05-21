@@ -160,6 +160,12 @@ describe("startGame", () => {
     ] as any
     const game = {
       board,
+      redTeam: {
+        spyMaster: "some-red-user",
+      },
+      blueTeam: {
+        spyMaster: "some-blue-user",
+      },
       state: GameStates.idle,
     }
 
@@ -167,8 +173,14 @@ describe("startGame", () => {
       board,
       state: GameStates.running,
       turn: Teams.blue,
-      blueScore: 2,
-      redScore: 1,
+      redTeam: {
+        spyMaster: "some-red-user",
+        wordsLeft: 1,
+      },
+      blueTeam: {
+        spyMaster: "some-blue-user",
+        wordsLeft: 2,
+      },
     }
 
     expect(GameActions.startGame(game as any)).toEqual(expectedGame)
@@ -202,11 +214,11 @@ describe("revealWord", () => {
       players: [p1],
       turn: Teams.red,
       hintWordCount: 2,
-      redTeam: {
-        score: 0,
-      },
       blueTeam: {
-        score: 0,
+        wordsLeft: 3,
+      },
+      redTeam: {
+        wordsLeft: 2,
       },
     }
 
@@ -250,13 +262,13 @@ describe("revealWord", () => {
     expect(updatedGame.wordsRevealedCount).toBe(3)
   })
 
-  describe("increases the score", () => {
+  describe("decreases words left", () => {
     it("if word is from the players team", () => {
-      expect(revealWord(WordType.blue, Teams.blue).blueTeam.score).toBe(1)
+      expect(revealWord(WordType.blue, Teams.blue).blueTeam.wordsLeft).toBe(2)
     })
 
     it("if word is from the players team", () => {
-      expect(revealWord(WordType.red, Teams.red).redTeam.score).toBe(1)
+      expect(revealWord(WordType.red, Teams.red).redTeam.wordsLeft).toBe(1)
     })
   })
 

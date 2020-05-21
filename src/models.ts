@@ -26,7 +26,7 @@ export enum Teams {
 
 export interface TeamConfig {
   spyMaster: string | undefined
-  score: number | undefined
+  wordsLeft: number | undefined
 }
 
 export interface CodeNamesGame {

@@ -14,11 +14,11 @@ export const createGame = (gameId: string, userId: string, timestamp: string, bo
   players: [{ userId, team: undefined }],
   redTeam: {
     spyMaster: undefined,
-    score: undefined,
+    wordsLeft: undefined,
   },
   blueTeam: {
     spyMaster: undefined,
-    score: undefined,
+    wordsLeft: undefined,
   },
   hintWord: "",
   hintWordCount: 0,
@@ -84,8 +84,14 @@ export const startGame: GameAction = game => ({
   ...game,
   state: GameStates.running,
   turn: Teams.blue,
-  blueScore: countTypes(game.board, WordType.blue),
-  redScore: countTypes(game.board, WordType.red),
+  redTeam: {
+    ...game.redTeam,
+    wordsLeft: countTypes(game.board, WordType.red),
+  },
+  blueTeam: {
+    ...game.blueTeam,
+    wordsLeft: countTypes(game.board, WordType.blue),
+  },
 })
 
 export const sendHint = (hintWord: string, hintWordCount: number): GameAction => game => ({
@@ -95,17 +101,17 @@ export const sendHint = (hintWord: string, hintWordCount: number): GameAction =>
   wordsRevealedCount: 0,
 })
 
-const increaseScore = (userId: string): GameAction => game => {
+const decreaseWordsLeft = (userId: string): GameAction => game => {
   const team = getPlayer(game, userId)?.team
   return {
     ...game,
     blueTeam: {
       ...game.blueTeam,
-      score: (game.blueTeam.score || 0) + (team === Teams.blue ? 1 : 0),
+      wordsLeft: (game.blueTeam.wordsLeft || 0) - (team === Teams.blue ? 1 : 0),
     },
     redTeam: {
       ...game.redTeam,
-      score: (game.redTeam.score || 0) + (team === Teams.red ? 1 : 0),
+      wordsLeft: (game.redTeam.wordsLeft || 0) - (team === Teams.red ? 1 : 0),
     },
   }
 }
@@ -125,7 +131,7 @@ export const revealWord = (userId: string, row: number, col: number) => (game: C
       ? endGame(game)
       : failedGuess
       ? game
-      : increaseScore(userId)(game)
+      : decreaseWordsLeft(userId)(game)
   return {
     ...updatedGame,
     board: update2dCell(game.board)(reveal, row, col),

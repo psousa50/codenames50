@@ -1,5 +1,3 @@
-export type UUID = string
-
 // tslint:disable-next-line: ban-types
 export type DeepPartial<T> = T extends Function
   ? T
@@ -10,5 +8,5 @@ export type DeepPartial<T> = T extends Function
   : T | undefined
 
 // tslint:disable-next-line:class-name
-export interface _DeepPartialArray<T> extends Array<DeepPartial<T>> {}
-export type _DeepPartialObject<T> = { [P in keyof T]?: DeepPartial<T[P]> }
+interface _DeepPartialArray<T> extends Array<DeepPartial<T>> {}
+type _DeepPartialObject<T> = { [P in keyof T]?: DeepPartial<T[P]> }
