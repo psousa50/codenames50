@@ -1,7 +1,7 @@
 import * as R from "ramda"
-import { CodeNamesGame, GameStates, Teams } from "../../src/game/models"
-import * as GameRules from "../../src/game/rules"
-import { DeepPartial } from "../../src/utils/types"
+import { CodeNamesGame, GameStates, Teams } from "../src/models"
+import * as GameRules from "../src/rules"
+import { DeepPartial } from "../src/utils/types"
 
 const userId = "some-user-id"
 

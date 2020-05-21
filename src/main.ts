@@ -1,7 +1,7 @@
 import * as R from "ramda"
-import { update2dCell } from "../utils/collections"
-import { shuffle } from "../utils/random"
 import { BoardWord, CodeNamesGame, GameStates, Teams, WordsBoard, WordType } from "./models"
+import { update2dCell } from "./utils/collections"
+import { shuffle } from "./utils/random"
 
 export type GameAction = (game: CodeNamesGame) => CodeNamesGame
 

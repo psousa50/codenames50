@@ -1,6 +1,6 @@
 import * as R from "ramda"
-import * as GameActions from "../../src/game/main"
-import { GameStates, Teams, WordType } from "../../src/game/models"
+import * as GameActions from "../src/main"
+import { GameStates, Teams, WordType } from "../src/models"
 
 describe("buildBoards", () => {
   const words = R.range(0, 80).map(i => `word-${i}`)
