@@ -11,6 +11,8 @@ import { SetupGameView } from "./SetupGameView"
 import { UserView } from "./UserView"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
 
+const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
+
 const useStyles = makeStyles(() => ({
   container: {
     display: "flex",
@@ -190,7 +192,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         </Alert>
       </Snackbar>
 
-      <UserView userId={userId} />
+      <UserView userId={userId} team={getPlayer(game, userId)?.team} spyMaster />
       <SetupGameView game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} startGame={startGame} />
       <WordsBoardView
         board={game.board}

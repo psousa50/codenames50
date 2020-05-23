@@ -17,7 +17,7 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({ game, joinTeam, se
         I'm Spy Master!
       </Button>
       <TeamsView game={game} joinTeam={joinTeam} />
-      <Button size="small" variant="contained" color="primary" onClick={() => startGame()}>
+      <Button size="small" color="primary" onClick={() => startGame()}>
         start Game
       </Button>
     </Grid>

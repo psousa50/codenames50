@@ -18,7 +18,7 @@ const teamStyle = (color: string) =>
       backgroundColor: common.white,
     },
     icon: {
-      color: grey[200],
+      color: grey[600],
     },
   })
 

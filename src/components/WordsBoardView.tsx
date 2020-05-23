@@ -1,4 +1,5 @@
-import { capitalize, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
+import { Paper, Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
+import { grey } from "@material-ui/core/colors"
 import { makeStyles } from "@material-ui/core/styles"
 import * as R from "ramda"
 import React from "react"
@@ -10,8 +11,8 @@ export type OnWordClick = (word: BoardWord, row: number, col: number) => void
 const wordColors = {
   [WordType.red]: redColor,
   [WordType.blue]: blueColor,
-  [WordType.inocent]: "gray",
-  [WordType.assassin]: "black",
+  [WordType.inocent]: grey[400],
+  [WordType.assassin]: grey[700],
 }
 
 const useStyles = makeStyles({
@@ -22,14 +23,17 @@ const useStyles = makeStyles({
     border: "1px solid black",
   },
   cell: {
-    border: "10px solid white",
+    border: "5px solid white",
+    textAlign: "center",
+    borderRadius: "5px",
+    boxShadow: "inset 0 0 10px #000000",
     backgroundColor: "lightgray",
-    padding: 15,
-    margin: 15,
     cursor: "pointer",
   },
   word: {
     textAlign: "center",
+    fontSize: 9,
+    padding: "20px 5px 20px 5px",
   },
 })
 
@@ -53,7 +57,7 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordCli
 
   return (
     <div className={classes.container}>
-      <TableContainer component={Paper}>
+      <TableContainer>
         <Table className={classes.table}>
           <TableBody>
             {R.range(0, s).map(row => (
@@ -61,9 +65,10 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordCli
                 {board[row].map((word, col) => (
                   <TableCell
                     key={col}
-                    component="th"
+                    component={Paper}
                     scope="row"
                     className={classes.cell}
+                    padding="none"
                     style={word.revealed || revealWords ? styles(word.type).revealed : undefined}
                     onClick={() => onWordClick(word, row, col)}
                   >
@@ -86,5 +91,5 @@ interface WordViewProps {
 const WordView: React.FC<WordViewProps> = ({ word }) => {
   const classes = useStyles()
 
-  return <div className={classes.word}>{capitalize(word.word)}</div>
+  return <div className={classes.word}>{word.word.toUpperCase()}</div>
 }

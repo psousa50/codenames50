@@ -30,11 +30,11 @@ interface HintViewProps {
 
 export const HintView: React.FC<HintViewProps> = ({ hintWord, hintWordCount, onChange, sendHint }) => {
   return (
-    <Table style={{ backgroundColor: "yellow" }}>
+    <Table>
       <colgroup>
         <col style={{ width: "5%" }} />
-        <col style={{ width: "60%" }} />
-        <col style={{ width: "35%" }} />
+        <col style={{ width: "50%" }} />
+        <col style={{ width: "45%" }} />
       </colgroup>
       <TableBody>
         <TableRow>
@@ -44,10 +44,7 @@ export const HintView: React.FC<HintViewProps> = ({ hintWord, hintWordCount, onC
           </TableCell>
           <TableCell>
             {sendHint && (
-              <Button
-                variant="contained"
-                onClick={() => hintWordCount && sendHint && sendHint(hintWord, hintWordCount)}
-              >
+              <Button color="secondary" onClick={() => hintWordCount && sendHint && sendHint(hintWord, hintWordCount)}>
                 Send Hint
               </Button>
             )}

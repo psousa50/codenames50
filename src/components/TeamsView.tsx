@@ -1,8 +1,6 @@
 import { Button, createStyles, Grid, makeStyles, Theme } from "@material-ui/core"
-import { common } from "@material-ui/core/colors"
 import React from "react"
 import { CodeNamesGame, Player, TeamConfig, Teams } from "../codenames-core/models"
-import { teamColor } from "../utils/styles"
 import { teamName } from "../utils/ui"
 import { UserView } from "./UserView"
 
@@ -27,12 +25,7 @@ interface TeamViewProps {
 const TeamView: React.FC<TeamViewProps> = ({ team, teamConfig, players, joinTeam }) => {
   const classes = useStyles()
   const members = players.filter(p => p.team === team && p.userId !== teamConfig.spyMaster)
-  const styles = {
-    button: {
-      color: teamColor(team),
-      backgroundColor: common.white,
-    },
-  }
+
   return (
     <Grid container spacing={0} direction="column" alignItems="center" justify="center">
       <div>
@@ -45,7 +38,7 @@ const TeamView: React.FC<TeamViewProps> = ({ team, teamConfig, players, joinTeam
       </div>
       {members.map((m, i) => (
         <div className={classes.member}>
-          <UserView key={i} userId={m.userId} />
+          <UserView key={i} userId={m.userId} team={team} />
         </div>
       ))}
     </Grid>
