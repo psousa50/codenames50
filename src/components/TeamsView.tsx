@@ -1,92 +1,71 @@
-import { Button, Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
+import { Button, createStyles, Grid, makeStyles, Theme } from "@material-ui/core"
+import { common } from "@material-ui/core/colors"
 import React from "react"
-import { CodeNamesGame, TeamConfig, Teams } from "../codenames-core/models"
-import { blueColor, redColor } from "../utils/styles"
+import { CodeNamesGame, Player, TeamConfig, Teams } from "../codenames-core/models"
+import { teamColor } from "../utils/styles"
+import { teamName } from "../utils/ui"
+import { UserView } from "./UserView"
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    spyMaster: {
+      padding: theme.spacing(3),
+    },
+    member: {
+      padding: theme.spacing(1),
+    },
+  }),
+)
 
 interface TeamViewProps {
+  team: Teams
+  teamConfig: TeamConfig
+  players: Player[]
+  joinTeam: (team: Teams) => void
+}
+
+const TeamView: React.FC<TeamViewProps> = ({ team, teamConfig, players, joinTeam }) => {
+  const classes = useStyles()
+  const members = players.filter(p => p.team === team && p.userId !== teamConfig.spyMaster)
+  const styles = {
+    button: {
+      color: teamColor(team),
+      backgroundColor: common.white,
+    },
+  }
+  return (
+    <Grid container spacing={0} direction="column" alignItems="center" justify="center">
+      <div>
+        <Button size="small" color="secondary" onClick={() => joinTeam(team)}>
+          {`Join ${teamName(team)}`}
+        </Button>
+      </div>
+      <div className={classes.spyMaster}>
+        <UserView userId={teamConfig.spyMaster} team={team} spyMaster />
+      </div>
+      {members.map((m, i) => (
+        <div className={classes.member}>
+          <UserView key={i} userId={m.userId} />
+        </div>
+      ))}
+    </Grid>
+  )
+}
+
+interface TeamsViewProps {
   game: CodeNamesGame
   joinTeam: (team: Teams) => void
 }
 
-const styles = (color: string) => ({
-  table: {
-    border: `2px solid ${color}`,
-    backgroundColor: "yellow",
-  },
-  wordsLeft: {
-    fontSize: "50px",
-    padding: "20px",
-    color,
-  },
-  spyMaster: {
-    fontSize: "22px",
-    backgroundColor: color,
-    color: "white",
-    padding: "10px",
-  },
-  other: {
-    fontSize: "16px",
-    color,
-  },
-  button: {
-    color: "white",
-    backgroundColor: color,
-  },
-})
-
-type Styles = ReturnType<typeof styles>
-
-export const TeamsView: React.FC<TeamViewProps> = ({ game, joinTeam }) => {
-  const redStyles = styles(redColor)
-  const blueStyles = styles(blueColor)
-
-  const members = (team: Teams, teamInfo: TeamConfig, style: Styles) => {
-    const members = game.players.filter(p => p.team === team)
-    const others = members.filter(m => m.userId !== teamInfo.spyMaster)
-
-    return others.map((o, i) => (
-      <div key={i} style={style.other}>
-        {o.userId}
-      </div>
-    ))
-  }
-
-  const joinButton = (team: Teams, style: Styles) => (
-    <Button style={style.button} onClick={() => joinTeam(team)}>
-      Join Team
-    </Button>
-  )
-
+export const TeamsView: React.FC<TeamsViewProps> = ({ game, joinTeam }) => {
   return (
-    <TableContainer>
-      <Table>
-        <TableBody>
-          <TableRow>
-            <TableCell align="center" style={redStyles.wordsLeft}>
-              {game.redTeam.wordsLeft}
-            </TableCell>
-            <TableCell align="center" style={blueStyles.wordsLeft}>
-              {game.blueTeam.wordsLeft}
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell align="center">
-              <span style={redStyles.spyMaster}>{game.redTeam.spyMaster}</span>
-            </TableCell>
-            <TableCell align="center">
-              <span style={blueStyles.spyMaster}>{game.blueTeam.spyMaster}</span>
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell align="center">{members(Teams.red, game.redTeam, redStyles)}</TableCell>
-            <TableCell align="center">{members(Teams.blue, game.blueTeam, blueStyles)}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell align="center">{joinButton(Teams.red, redStyles)}</TableCell>
-            <TableCell align="center">{joinButton(Teams.blue, blueStyles)}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Grid container spacing={3}>
+      <Grid item xs={6}>
+        <TeamView team={Teams.red} teamConfig={game.redTeam} players={game.players} joinTeam={joinTeam} />
+      </Grid>
+      <Grid item xs={6}>
+        <TeamView team={Teams.blue} teamConfig={game.blueTeam} players={game.players} joinTeam={joinTeam} />
+      </Grid>
+    </Grid>
   )
 }

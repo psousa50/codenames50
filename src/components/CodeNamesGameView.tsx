@@ -1,4 +1,4 @@
-import { Button, Snackbar } from "@material-ui/core"
+import { Snackbar } from "@material-ui/core"
 import { makeStyles } from "@material-ui/core/styles"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
@@ -7,7 +7,8 @@ import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/hooks"
 import { HintView } from "./HintView"
-import { TeamsView } from "./TeamsView"
+import { SetupGameView } from "./SetupGameView"
+import { UserView } from "./UserView"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
 
 const useStyles = makeStyles(() => ({
@@ -69,8 +70,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   const [game, setGame] = React.useState<CodeNamesGame>(
     GameActions.createGame("", "", "", GameActions.buildBoard(5, 5, [])),
   )
-
-  console.log("CodeNamesGameView=====>")
 
   const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: Messages.GameMessage<T>) => {
     setError("")
@@ -138,8 +137,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   }
 
   const joinedGameHandler = (game: CodeNamesGame) => {
-    console.log("joinedGameHandler=====>", game)
-    setGame(game)
+    setGame(addSampleGame(game))
   }
 
   const joinTeamHandler = ({ userId, team }: Messages.JoinTeamInput) => {
@@ -192,17 +190,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         </Alert>
       </Snackbar>
 
-      <div className={classes.user}>{userId}</div>
-      <TeamsView game={game} joinTeam={joinTeam} />
-      <Button variant="contained" color="secondary" onClick={setSpyMaster}>
-        I'm the Spy Master
-      </Button>
-      <Button variant="contained" color="primary" onClick={startGame}>
-        START
-      </Button>
-      <Button variant="contained" onClick={endTurn}>
-        END TURN
-      </Button>
+      <UserView userId={userId} />
+      <SetupGameView game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} startGame={startGame} />
       <WordsBoardView
         board={game.board}
         onWordClick={onWordClick}
