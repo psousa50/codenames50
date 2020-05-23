@@ -1,5 +1,5 @@
 import { Snackbar } from "@material-ui/core"
-import { makeStyles } from "@material-ui/core/styles"
+import { makeStyles, Theme } from "@material-ui/core/styles"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
 import * as GameActions from "../codenames-core/main"
@@ -14,23 +14,33 @@ import { WordsLeft } from "./WordsLeftView"
 
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
-    flexGrow: 1,
     flexDirection: "row",
-    alignItems: "center",
+    justifyContent: "center",
+    height: "100vh",
   },
   game: {
     display: "flex",
-    flex: 8,
-    flexGrow: 1,
     flexDirection: "column",
-    alignItems: "center",
+    maxWidth: theme.spacing(80),
   },
   user: {
     border: "1px solid black",
     fontSize: "20px",
+  },
+  wordsLeftContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  wordsLeft: {
+    paddingLeft: theme.spacing(10),
+    paddingRight: theme.spacing(10),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
   },
 }))
 
@@ -140,7 +150,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   }
 
   const joinedGameHandler = (game: CodeNamesGame) => {
-    setGame(addSampleGame(game))
+    setGame(game)
   }
 
   const joinTeamHandler = ({ userId, team }: Messages.JoinTeamInput) => {
@@ -185,30 +195,39 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   }
 
   return (
-    <div className={classes.game}>
-      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
-        <Alert severity="error">
-          <AlertTitle>Error</AlertTitle>
-          {error}
-        </Alert>
-      </Snackbar>
+    <div className={classes.container}>
+      <div className={classes.game}>
+        <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
+          <Alert severity="error">
+            <AlertTitle>Error</AlertTitle>
+            {error}
+          </Alert>
+        </Snackbar>
 
-      <UserView userId={userId} team={getPlayer(game, userId)?.team} spyMaster />
-      <SetupGameView game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} startGame={startGame} />
-      <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
-      <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />
-      <WordsBoardView
-        board={game.board}
-        onWordClick={onWordClick}
-        revealWords={
-          game.state === GameStates.running && (userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster)
-        }
-      />
-      {userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster ? (
-        <HintView hintWord={hintWord} hintWordCount={hintWordCount} onChange={setHint} sendHint={sendHint} />
-      ) : (
-        <HintView hintWord={game.hintWord} hintWordCount={game.hintWordCount} />
-      )}
+        <UserView userId={userId} team={getPlayer(game, userId)?.team} spyMaster />
+        <SetupGameView game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} startGame={startGame} />
+        <div className={classes.wordsLeftContainer}>
+          <div className={classes.wordsLeft}>
+            <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
+          </div>
+          <div className={classes.wordsLeft}>
+            <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />
+          </div>
+        </div>
+        <WordsBoardView
+          board={game.board}
+          onWordClick={onWordClick}
+          revealWords={
+            game.state === GameStates.running &&
+            (userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster)
+          }
+        />
+        {userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster ? (
+          <HintView hintWord={hintWord} hintWordCount={hintWordCount} onChange={setHint} sendHint={sendHint} />
+        ) : (
+          <HintView hintWord={game.hintWord} hintWordCount={game.hintWordCount} />
+        )}
+      </div>
     </div>
   )
 }

@@ -36,6 +36,7 @@ export interface CreateGameViewProps {
 }
 
 export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialUserId }) => {
+  const classes = useStyles()
   const history = useHistory()
   const [socket] = useSocket("http://192.168.1.67:3001", { autoConnect: false })
   const [error, setError] = React.useState("")
@@ -81,8 +82,6 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
   }
 
   function SignIn() {
-    const classes = useStyles()
-
     return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />

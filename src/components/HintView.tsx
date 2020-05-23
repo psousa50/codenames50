@@ -1,25 +1,35 @@
-import { Button, Table, TableBody, TableCell, TableRow } from "@material-ui/core"
+import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
+import { common, purple } from "@material-ui/core/colors"
 import * as R from "ramda"
 import React from "react"
 
-const styles = {
+const useStyles = makeStyles((theme: Theme) => ({
+  hint: {
+    display: "flex",
+    flexGrow: 1,
+    justifyContent: "space-between",
+    padding: "10px 10px",
+  },
+  hintWord: {
+    display: "flex",
+    fontSize: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   numbers: {
     display: "flex",
     flexGrow: 1,
-    flexDirection: "row" as "row",
+    flexDirection: "row",
     alignItems: "center",
   },
   number: {
-    display: "flex",
-    width: 24,
-    height: 24,
-    border: "1px solid black",
-    cursor: "pointer",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center" as "center",
+    maxWidth: theme.spacing(20),
+    maxHeight: theme.spacing(20),
+    margin: "5px",
+    fontSize: 14,
+    marginBottom: "30px",
   },
-}
+}))
 
 interface HintViewProps {
   hintWord: string
@@ -29,55 +39,73 @@ interface HintViewProps {
 }
 
 export const HintView: React.FC<HintViewProps> = ({ hintWord, hintWordCount, onChange, sendHint }) => {
+  const classes = useStyles()
+
   return (
-    <Table>
-      <colgroup>
-        <col style={{ width: "5%" }} />
-        <col style={{ width: "50%" }} />
-        <col style={{ width: "45%" }} />
-      </colgroup>
-      <TableBody>
-        <TableRow>
-          <TableCell>Hint:</TableCell>
-          <TableCell>
-            <input value={hintWord} onChange={event => onChange && onChange(event.target.value, hintWordCount)} />
-          </TableCell>
-          <TableCell>
-            {sendHint && (
-              <Button color="secondary" onClick={() => hintWordCount && sendHint && sendHint(hintWord, hintWordCount)}>
-                Send Hint
-              </Button>
-            )}
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>Count:</TableCell>
-          <TableCell colSpan={2}>
-            <div style={styles.numbers}>
-              {R.range(1, 10).map(c => (
-                <HintCount
-                  key={c}
-                  count={c}
-                  selected={c === hintWordCount}
-                  onChange={count => onChange && onChange(hintWord, count)}
-                />
-              ))}
-            </div>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+    <Paper elevation={3} variant="outlined" style={{ marginTop: "20px" }}>
+      {sendHint ? (
+        <div className={classes.hint}>
+          <TextField
+            id="hint-word"
+            label="Hint Word"
+            value={hintWord}
+            onChange={event => onChange && onChange(event.target.value, hintWordCount)}
+            autoFocus
+          />
+          <Button color="primary" onClick={() => hintWordCount && sendHint && sendHint(hintWord, hintWordCount)}>
+            Send Hint
+          </Button>
+        </div>
+      ) : (
+        <div className={classes.hintWord}>{hintWord}</div>
+      )}
+      <div className={classes.numbers}>
+        {R.range(1, 9).map(c => (
+          <HintCount
+            key={c}
+            count={c}
+            selected={c === hintWordCount}
+            onChange={onChange ? count => onChange(hintWord, count) : undefined}
+          />
+        ))}
+      </div>
+    </Paper>
   )
 }
 
 interface HintCountProps {
   count: number
   selected: boolean
-  onChange: (n: number) => void
+  onChange?: (n: number) => void
 }
 
-const HintCount: React.FC<HintCountProps> = ({ count: n, selected, onChange }) => (
-  <div style={{ ...styles.number, backgroundColor: selected ? "gray" : undefined }} onClick={() => onChange(n)}>
-    {n}
-  </div>
-)
+const HintCount: React.FC<HintCountProps> = ({ count, selected, onChange }) => {
+  const classes = useStyles()
+
+  const styles = {
+    root: {
+      cursor: onChange ? "pointer" : "default",
+      ...(selected && {
+        backgroundColor: purple[500],
+        color: common.white,
+      }),
+    },
+  }
+
+  // return (
+  //   <div style={styles.root} className={classes.number} onClick={() => onChange && onChange(n)}>
+  //     {n}
+  //   </div>
+  // )
+  return (
+    <Button
+      disabled={onChange === undefined}
+      className={classes.number}
+      variant={selected ? "contained" : "outlined"}
+      color="secondary"
+      onClick={() => onChange && onChange(count)}
+    >
+      {count}
+    </Button>
+  )
+}

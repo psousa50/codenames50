@@ -37,8 +37,8 @@ const TeamView: React.FC<TeamViewProps> = ({ team, teamConfig, players, joinTeam
         <UserView userId={teamConfig.spyMaster} team={team} spyMaster />
       </div>
       {members.map((m, i) => (
-        <div className={classes.member}>
-          <UserView key={i} userId={m.userId} team={team} />
+        <div key={i} className={classes.member}>
+          <UserView userId={m.userId} team={team} />
         </div>
       ))}
     </Grid>

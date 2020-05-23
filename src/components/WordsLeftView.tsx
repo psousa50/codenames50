@@ -14,13 +14,13 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     count: {
       display: "flex",
-      width: theme.spacing(8),
-      height: theme.spacing(8),
+      width: theme.spacing(6),
+      height: theme.spacing(6),
       border: `1px solid black`,
       borderRadius: "50%",
       alignItems: "center",
       justifyContent: "center",
-      fontSize: 40,
+      fontSize: 32,
       color: common.white,
     },
   }),

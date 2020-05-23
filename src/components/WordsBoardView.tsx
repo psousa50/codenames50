@@ -1,4 +1,4 @@
-import { Paper, Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
+import { Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
 import { grey } from "@material-ui/core/colors"
 import { makeStyles } from "@material-ui/core/styles"
 import * as R from "ramda"
@@ -21,9 +21,10 @@ const useStyles = makeStyles({
   },
   table: {
     border: "1px solid black",
+    fontSize: 8,
   },
   cell: {
-    border: "5px solid white",
+    border: "3px solid white",
     textAlign: "center",
     borderRadius: "5px",
     boxShadow: "inset 0 0 10px #000000",
@@ -32,8 +33,8 @@ const useStyles = makeStyles({
   },
   word: {
     textAlign: "center",
-    fontSize: 9,
-    padding: "20px 5px 20px 5px",
+    fontSize: 8,
+    padding: "15px 3px 15px 3px",
   },
 })
 
@@ -64,8 +65,9 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordCli
               <TableRow key={row}>
                 {board[row].map((word, col) => (
                   <TableCell
+                    size="small"
+                    align="center"
                     key={col}
-                    component={Paper}
                     scope="row"
                     className={classes.cell}
                     padding="none"
