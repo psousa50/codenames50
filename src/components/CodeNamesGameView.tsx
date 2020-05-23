@@ -10,6 +10,7 @@ import { HintView } from "./HintView"
 import { SetupGameView } from "./SetupGameView"
 import { UserView } from "./UserView"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
+import { WordsLeft } from "./WordsLeftView"
 
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
@@ -194,6 +195,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
       <UserView userId={userId} team={getPlayer(game, userId)?.team} spyMaster />
       <SetupGameView game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} startGame={startGame} />
+      <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
+      <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />
       <WordsBoardView
         board={game.board}
         onWordClick={onWordClick}
