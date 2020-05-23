@@ -82,15 +82,45 @@ describe("joinTeam", () => {
     const p1 = { userId, team: "some-team" }
     const game = {
       players: [p1],
+      blueTeam: {},
+      redTeam: {},
     }
 
     const team = Teams.red
     const p2 = { userId, team }
     const expectedGame = {
       players: [p2],
+      blueTeam: {},
+      redTeam: {},
     }
 
     expect(GameActions.joinTeam(userId, team)(game as any)).toEqual(expectedGame)
+  })
+
+  it("removes spyMaster from blue team if joining red team", () => {
+    const userId = "some-user-id"
+    const game = {
+      players: [{ userId }],
+      redTeam: {},
+      blueTeam: {
+        spyMaster: userId,
+      },
+    }
+
+    expect(GameActions.joinTeam(userId, Teams.red)(game as any).blueTeam.spyMaster).toBeUndefined()
+  })
+
+  it("removes spyMaster from red team if joining blue team", () => {
+    const userId = "some-user-id"
+    const game = {
+      players: [{ userId }],
+      redTeam: {
+        spyMaster: userId,
+      },
+      blueTeam: {},
+    }
+
+    expect(GameActions.joinTeam(userId, Teams.blue)(game as any).redTeam.spyMaster).toBeUndefined()
   })
 })
 

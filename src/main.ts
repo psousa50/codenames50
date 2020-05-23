@@ -58,6 +58,14 @@ export const joinTeam = (userId: string, team: Teams): GameAction => game => {
     ? {
         ...game,
         players: game.players.map(p => (p.userId === userId ? { ...p, team } : p)),
+        blueTeam: {
+          ...game.blueTeam,
+          spyMaster: team === Teams.red && game.blueTeam.spyMaster === userId ? undefined : game.blueTeam.spyMaster,
+        },
+        redTeam: {
+          ...game.redTeam,
+          spyMaster: team === Teams.blue && game.redTeam.spyMaster === userId ? undefined : game.redTeam.spyMaster,
+        },
       }
     : game
 }
