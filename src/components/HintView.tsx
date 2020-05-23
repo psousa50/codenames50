@@ -1,4 +1,4 @@
-import { Button, Table, TableCell, TableRow } from "@material-ui/core"
+import { Button, Table, TableBody, TableCell, TableRow } from "@material-ui/core"
 import * as R from "ramda"
 import React from "react"
 
@@ -36,40 +36,50 @@ export const HintView: React.FC<HintViewProps> = ({ hintWord, hintWordCount, onC
         <col style={{ width: "60%" }} />
         <col style={{ width: "35%" }} />
       </colgroup>
-      <TableRow>
-        <TableCell>Hint:</TableCell>
-        <TableCell>
-          <input value={hintWord} onChange={event => onChange && onChange(event.target.value, hintWordCount)} />
-        </TableCell>
-        <TableCell>
-          {sendHint && (
-            <Button variant="contained" onClick={() => hintWordCount && sendHint && sendHint(hintWord, hintWordCount)}>
-              Send Hint
-            </Button>
-          )}
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell>Count:</TableCell>
-        <TableCell colSpan={2}>
-          <div style={styles.numbers}>
-            {R.range(1, 10).map(c => (
-              <Number n={c} selected={c === hintWordCount} onChange={count => onChange && onChange(hintWord, count)} />
-            ))}
-          </div>
-        </TableCell>
-      </TableRow>
+      <TableBody>
+        <TableRow>
+          <TableCell>Hint:</TableCell>
+          <TableCell>
+            <input value={hintWord} onChange={event => onChange && onChange(event.target.value, hintWordCount)} />
+          </TableCell>
+          <TableCell>
+            {sendHint && (
+              <Button
+                variant="contained"
+                onClick={() => hintWordCount && sendHint && sendHint(hintWord, hintWordCount)}
+              >
+                Send Hint
+              </Button>
+            )}
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>Count:</TableCell>
+          <TableCell colSpan={2}>
+            <div style={styles.numbers}>
+              {R.range(1, 10).map(c => (
+                <HintCount
+                  key={c}
+                  count={c}
+                  selected={c === hintWordCount}
+                  onChange={count => onChange && onChange(hintWord, count)}
+                />
+              ))}
+            </div>
+          </TableCell>
+        </TableRow>
+      </TableBody>
     </Table>
   )
 }
 
-interface NumberProps {
-  n: number
+interface HintCountProps {
+  count: number
   selected: boolean
   onChange: (n: number) => void
 }
 
-const Number: React.FC<NumberProps> = ({ n, selected, onChange }) => (
+const HintCount: React.FC<HintCountProps> = ({ count: n, selected, onChange }) => (
   <div style={{ ...styles.number, backgroundColor: selected ? "gray" : undefined }} onClick={() => onChange(n)}>
     {n}
   </div>

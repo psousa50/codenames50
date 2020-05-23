@@ -32,7 +32,7 @@ export type RegisterUserSocketInput = {
 }
 
 export interface CreateGameInput {
-  gameId: string
+  gameId?: string
   userId: string
   language: string
 }

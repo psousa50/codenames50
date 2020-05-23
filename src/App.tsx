@@ -1,14 +1,27 @@
+import * as qs from "qs"
 import React from "react"
-import * as uuid from "uuid"
+import { Route, Switch, useLocation } from "react-router-dom"
 import { CodeNamesGameView } from "./components/CodeNamesGameView"
+import { CreateGameView } from "./components/CreateGameView"
 
 export const App = () => {
-  const urlParams = new URLSearchParams(window.location.search)
+  const location = useLocation()
 
-  const gameId = uuid.v4()
+  const search = qs.parse(location.search, { ignoreQueryPrefix: true })
+
+  const userId = search.userId?.toString()
+  const gameId = search.gameId?.toString()
+
+  console.log("ROUTER=====>", gameId, userId)
+
   return (
-    <div style={{ display: "flex", flexDirection: "row" }}>
-      <CodeNamesGameView gameId={urlParams.get("gameId") || gameId} userId={urlParams.get("userId")} />
-    </div>
+    <Switch>
+      <Route path="/" exact>
+        <CreateGameView userId={userId} />
+      </Route>
+      <Route path="/game">
+        <CodeNamesGameView gameId={gameId!} userId={userId!} />
+      </Route>
+    </Switch>
   )
 }
