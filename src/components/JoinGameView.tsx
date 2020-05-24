@@ -45,67 +45,65 @@ export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserI
     setJoining(true)
   }
 
-  function JoinGame() {
-    return (
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <FastForward />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Join a game
-          </Typography>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            className={classes.margin}
-            id="used-id"
-            label="Your Name"
-            value={userId}
-            onChange={event => setUserId(event.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AccountCircle />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            className={classes.margin}
-            id="game-id"
-            label="Game ID"
-            value={gameId}
-            onChange={event => setGameId(event.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Games />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Button
-            disabled={!canJoin()}
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={() => {
-              joinGame()
-            }}
-          >
-            Join Game
-          </Button>
-        </div>
-      </Container>
-    )
-  }
-
-  return joining ? <Redirect to={`/game?gameId=${gameId || ""}&userId=${userId || ""}`} /> : <JoinGame />
+  return joining ? (
+    <Redirect to={`/game?gameId=${gameId || ""}&userId=${userId || ""}`} />
+  ) : (
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <Avatar className={classes.avatar}>
+          <FastForward />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Join a game
+        </Typography>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          fullWidth
+          className={classes.margin}
+          id="used-id"
+          label="Your Name"
+          value={userId}
+          onChange={event => setUserId(event.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <AccountCircle />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <TextField
+          variant="outlined"
+          margin="normal"
+          fullWidth
+          className={classes.margin}
+          id="game-id"
+          label="Game ID"
+          value={gameId}
+          onChange={event => setGameId(event.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Games />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Button
+          disabled={!canJoin()}
+          fullWidth
+          variant="contained"
+          color="primary"
+          className={classes.submit}
+          onClick={() => {
+            joinGame()
+          }}
+        >
+          Join Game
+        </Button>
+      </div>
+    </Container>
+  )
 }

@@ -110,6 +110,7 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
           <TextField
             variant="outlined"
             margin="normal"
+            required
             fullWidth
             className={classes.margin}
             id="used-id"
@@ -154,7 +155,7 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
   return gameId ? (
     <Redirect to={`/game?gameId=${gameId}&userId=${userId}`} />
   ) : joining ? (
-    <Redirect to={`/join?gameId=${gameId || ""}&userId=${userId || ""}`} />
+    <Redirect to={`/join?userId=${userId || ""}`} />
   ) : (
     <>
       <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
