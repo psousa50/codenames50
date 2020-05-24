@@ -11,7 +11,7 @@
     "tsc": "tsc --project tsconfig.json",
     "clean": "rm -rf dist",
     "dev": "nodemon --exec 'ts-node --files' ./src/index.ts",
-    "start": "NODE_ENV=production ts-node ./src/index.ts",
+    "start": "NODE_ENV=production node dist/index.js",
     "start:dev": "ts-node ./src/index.ts",
     "test": "jest --testPathPattern=test/.+\\.spec\\.ts",
     "test:watch": "npm test -- --watch",
