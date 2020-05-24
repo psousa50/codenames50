@@ -14,6 +14,7 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
+    "copy-to-clipboard": "^3.3.1",
     "fp-ts": "^2.6.0",
     "moment": "^2.25.3",
     "qs": "^6.9.4",
@@ -34,7 +35,7 @@
     "@types/uuid": "^8.0.0"
   },
   "scripts": {
-    "start": "PORT=4000 react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

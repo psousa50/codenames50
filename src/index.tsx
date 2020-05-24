@@ -1,4 +1,4 @@
-import { createMuiTheme, ThemeProvider } from "@material-ui/core"
+import { createMuiTheme, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
 import { orange, purple } from "@material-ui/core/colors"
 import React from "react"
 import ReactDOM from "react-dom"
@@ -7,12 +7,14 @@ import { App } from "./App"
 import "./index.css"
 import * as serviceWorker from "./serviceWorker"
 
-const theme = createMuiTheme({
-  palette: {
-    primary: purple,
-    secondary: orange,
-  },
-})
+const theme = responsiveFontSizes(
+  createMuiTheme({
+    palette: {
+      primary: purple,
+      secondary: orange,
+    },
+  }),
+)
 
 ReactDOM.render(
   <React.StrictMode>

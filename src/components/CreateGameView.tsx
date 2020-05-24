@@ -38,10 +38,11 @@ export interface CreateGameViewProps {
 export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialUserId }) => {
   const classes = useStyles()
   const history = useHistory()
-  const [socket] = useSocket("http://192.168.1.67:3001", { autoConnect: false })
+  const [socket] = useSocket(process.env.SERVER_URL || "http://localhost:3001", { autoConnect: false })
   const [error, setError] = React.useState("")
   const [gameId, setGameId] = React.useState<string | undefined>()
   const [userId, setUserId] = React.useState(initialUserId || "")
+  const [joining, setJoining] = React.useState(false)
 
   const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: Messages.GameMessage<T>) => {
     setError("")
@@ -57,11 +58,16 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
   }
 
   const createGame = () => {
-    console.log("createGame=====>", userId)
-    if (userId.length > 0) {
+    if (canCreate()) {
       emitMessage(socket, Messages.registerUserSocket({ userId }))
       emitMessage(socket, Messages.createGame({ userId, language: "en" }))
     }
+  }
+
+  const canCreate = () => gameId && userId.trim().length > 0
+
+  const joinGame = () => {
+    setJoining(true)
   }
 
   React.useEffect(() => {
@@ -121,6 +127,16 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
           >
             Create Game
           </Button>
+          <Button
+            size="small"
+            color="secondary"
+            className={classes.submit}
+            onClick={() => {
+              joinGame()
+            }}
+          >
+            Join a Game instead
+          </Button>
         </div>
       </Container>
     )
@@ -128,6 +144,8 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
 
   return gameId ? (
     <Redirect to={`/game?gameId=${gameId}&userId=${userId}`} />
+  ) : joining ? (
+    <Redirect to={`/join?gameId=${gameId || ""}&userId=${userId || ""}`} />
   ) : (
     <>
       <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>

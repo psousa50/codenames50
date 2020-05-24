@@ -14,10 +14,12 @@ const RedChip = redTeamStyles(Chip)
 const BlueChip = blueTeamStyles(Chip)
 
 export const UserView: React.FC<UserViewProps> = ({ userId, team, spyMaster }) =>
-  team === Teams.red ? (
-    <RedChip icon={<FaceIcon />} label={userId} variant={spyMaster ? "default" : "outlined"} />
-  ) : team === Teams.blue ? (
-    <BlueChip icon={<FaceIcon />} label={userId} variant={spyMaster ? "default" : "outlined"} />
-  ) : (
-    <Chip icon={<FaceIcon />} label={userId} variant={spyMaster ? "default" : "outlined"} />
-  )
+  userId ? (
+    team === Teams.red ? (
+      <RedChip icon={<FaceIcon />} label={userId} variant={spyMaster ? "default" : "outlined"} />
+    ) : team === Teams.blue ? (
+      <BlueChip icon={<FaceIcon />} label={userId} variant={spyMaster ? "default" : "outlined"} />
+    ) : (
+      <Chip icon={<FaceIcon />} label={userId} variant={spyMaster ? "default" : "outlined"} />
+    )
+  ) : null

@@ -1,6 +1,5 @@
-import { Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
-import { grey } from "@material-ui/core/colors"
-import { makeStyles } from "@material-ui/core/styles"
+import { common, grey } from "@material-ui/core/colors"
+import { makeStyles, Theme } from "@material-ui/core/styles"
 import * as R from "ramda"
 import React from "react"
 import { BoardWord, WordsBoard, WordType } from "../codenames-core/models"
@@ -15,28 +14,23 @@ const wordColors = {
   [WordType.assassin]: grey[700],
 }
 
-const useStyles = makeStyles({
-  container: {
-    display: "flex",
-  },
+const useStyles = makeStyles((theme: Theme) => ({
   table: {
-    border: "1px solid black",
-    fontSize: 8,
+    width: "100vw",
+    tableLayout: "fixed",
+    padding: "10px",
   },
   cell: {
-    border: "3px solid white",
+    border: "2px solid white",
     textAlign: "center",
     borderRadius: "5px",
     boxShadow: "inset 0 0 10px #000000",
-    backgroundColor: "lightgray",
+    backgroundColor: grey[200],
     cursor: "pointer",
+    fontSize: "8px",
+    padding: "25px 10px 25px 10px",
   },
-  word: {
-    textAlign: "center",
-    fontSize: 8,
-    padding: "15px 3px 15px 3px",
-  },
-})
+}))
 
 interface WordsBoardViewProps {
   board: WordsBoard
@@ -48,50 +42,49 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordCli
   const classes = useStyles()
   const s = 5
 
-  const styles = (wordType: WordType) => ({
-    revealed: {
-      backgroundColor: wordColors[wordType],
-      color: "white",
-      fontWeight: "bold" as "bold",
-    },
-  })
-
   return (
-    <div className={classes.container}>
-      <TableContainer>
-        <Table className={classes.table}>
-          <TableBody>
-            {R.range(0, s).map(row => (
-              <TableRow key={row}>
-                {board[row].map((word, col) => (
-                  <TableCell
-                    size="small"
-                    align="center"
-                    key={col}
-                    scope="row"
-                    className={classes.cell}
-                    padding="none"
-                    style={word.revealed || revealWords ? styles(word.type).revealed : undefined}
-                    onClick={() => onWordClick(word, row, col)}
-                  >
-                    <WordView key={col} word={word} />
-                  </TableCell>
-                ))}
-              </TableRow>
+    <table className={classes.table}>
+      <tbody>
+        {R.range(0, s).map(row => (
+          <tr key={row}>
+            {board[row].map((word, col) => (
+              <td key={col}>
+                <WordView word={word} revealWords={revealWords} onWordClick={onWordClick} row={row} col={col} />
+              </td>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
 interface WordViewProps {
   word: BoardWord
+  row: number
+  col: number
+  revealWords: boolean
+  onWordClick: OnWordClick
 }
 
-const WordView: React.FC<WordViewProps> = ({ word }) => {
+const WordView: React.FC<WordViewProps> = ({ word, revealWords, onWordClick, row, col }) => {
   const classes = useStyles()
 
-  return <div className={classes.word}>{word.word.toUpperCase()}</div>
+  const styles = {
+    revealed: {
+      backgroundColor: wordColors[word.type],
+      color: word.type === WordType.inocent ? common.black : common.white,
+      fontWeight: "bold" as "bold",
+    },
+  }
+
+  return (
+    <div
+      style={revealWords || word.revealed ? styles.revealed : undefined}
+      className={classes.cell}
+      onClick={() => onWordClick(word, row, col)}
+    >
+      {word.word.toUpperCase()}
+    </div>
+  )
 }

@@ -1,46 +1,40 @@
-import { Snackbar } from "@material-ui/core"
+import { Button, Snackbar } from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
+import FileCopy from "@material-ui/icons/FileCopy"
 import { Alert, AlertTitle } from "@material-ui/lab"
+import copy from "copy-to-clipboard"
 import React from "react"
 import * as GameActions from "../codenames-core/main"
 import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/hooks"
-import { HintView } from "./HintView"
+import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
 import { UserView } from "./UserView"
-import { OnWordClick, WordsBoardView } from "./WordsBoardView"
-import { WordsLeft } from "./WordsLeftView"
 
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
+    flexDirection: "column",
     height: "100vh",
   },
   game: {
     display: "flex",
     flexDirection: "column",
-    maxWidth: theme.spacing(80),
-  },
-  user: {
-    border: "1px solid black",
-    fontSize: "20px",
-  },
-  wordsLeftContainer: {
-    display: "flex",
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    padding: "10px",
   },
-  wordsLeft: {
-    paddingLeft: theme.spacing(10),
-    paddingRight: theme.spacing(10),
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
+  header: {
+    display: "flex",
+    flexGrow: 1,
+    flexDirection: "row",
+  },
+  copyId: {
+    display: "flex",
+    flexGrow: 1,
+    alignSelf: "self-end",
   },
 }))
 
@@ -68,6 +62,8 @@ export const addSampleGame = (game: CodeNamesGame) => {
   })
 }
 
+export type EmitMessage = <T extends {}>(message: Messages.GameMessage<T>) => void
+
 export interface CodeNamesGameViewProps {
   gameId: string
   userId: string
@@ -76,15 +72,13 @@ export interface CodeNamesGameViewProps {
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
-  const [socket] = useSocket("http://192.168.1.67:3001", { autoConnect: false })
+  const [socket] = useSocket(process.env.SERVER_URL || "http://localhost:3001", { autoConnect: false })
   const [error, setError] = React.useState("")
-  const [hintWord, setHintWord] = React.useState("")
-  const [hintWordCount, setHintWordCount] = React.useState<number | undefined>()
   const [game, setGame] = React.useState<CodeNamesGame>(
     GameActions.createGame("", "", "", GameActions.buildBoard(5, 5, [])),
   )
 
-  const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: Messages.GameMessage<T>) => {
+  const emitMessage = (socket: SocketIOClient.Socket): EmitMessage => message => {
     setError("")
     console.log("EMIT=====>\n", message)
     socket.emit(message.type, message.data)
@@ -101,6 +95,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   React.useEffect(() => {
     socket.connect()
     console.log("CONNECT", socket.id)
+
+    emitMessage(socket)(Messages.registerUserSocket({ userId }))
 
     addMessageHandler(socket, "connect", connectHandler)
 
@@ -122,31 +118,19 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const joinGame = () => {
     console.log("joinGame=====>", gameId, userId)
-    emitMessage(socket, Messages.joinGame({ gameId, userId }))
+    emitMessage(socket)(Messages.joinGame({ gameId, userId }))
   }
 
   const joinTeam = (team: Teams) => {
-    emitMessage(socket, Messages.joinTeam({ gameId, userId, team }))
+    emitMessage(socket)(Messages.joinTeam({ gameId, userId, team }))
   }
 
   const startGame = () => {
-    emitMessage(socket, Messages.startGame({ gameId, userId }))
+    emitMessage(socket)(Messages.startGame({ gameId, userId }))
   }
 
   const setSpyMaster = () => {
-    emitMessage(socket, Messages.setSpyMaster({ gameId, userId }))
-  }
-
-  const sendHint = () => {
-    hintWordCount && emitMessage(socket, Messages.sendHint({ gameId, userId, hintWord, hintWordCount }))
-  }
-
-  const revealWord = (row: number, col: number) => {
-    emitMessage(socket, Messages.revealWord({ gameId, userId, row, col }))
-  }
-
-  const endTurn = () => {
-    emitMessage(socket, Messages.changeTurn({ gameId, userId }))
+    emitMessage(socket)(Messages.setSpyMaster({ gameId, userId }))
   }
 
   const joinedGameHandler = (game: CodeNamesGame) => {
@@ -181,51 +165,36 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setError(e.message)
   }
 
-  const onWordClick: OnWordClick = (_, row, col) => {
-    revealWord(row, col)
-  }
-
-  const setHint = (hintWord: string, hintWordCount?: number) => {
-    setHintWord(hintWord)
-    setHintWordCount(hintWordCount)
-  }
-
   const handleClose = () => {
     setError("")
   }
 
+  const copyGameId = () => {
+    copy(gameId)
+  }
+
   return (
     <div className={classes.container}>
+      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
+        <Alert severity="error">
+          <AlertTitle>Error</AlertTitle>
+          {error}
+        </Alert>
+      </Snackbar>
       <div className={classes.game}>
-        <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
-          <Alert severity="error">
-            <AlertTitle>Error</AlertTitle>
-            {error}
-          </Alert>
-        </Snackbar>
-
-        <UserView userId={userId} team={getPlayer(game, userId)?.team} spyMaster />
-        <SetupGameView game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} startGame={startGame} />
-        <div className={classes.wordsLeftContainer}>
-          <div className={classes.wordsLeft}>
-            <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
-          </div>
-          <div className={classes.wordsLeft}>
-            <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />
+        <div className={classes.header}>
+          <UserView userId={userId} team={getPlayer(game, userId)?.team} spyMaster />
+          <div className={classes.copyId}>
+            <Button onClick={() => copyGameId()}>
+              <FileCopy />
+            </Button>
           </div>
         </div>
-        <WordsBoardView
-          board={game.board}
-          onWordClick={onWordClick}
-          revealWords={
-            game.state === GameStates.running &&
-            (userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster)
-          }
-        />
-        {userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster ? (
-          <HintView hintWord={hintWord} hintWordCount={hintWordCount} onChange={setHint} sendHint={sendHint} />
-        ) : (
-          <HintView hintWord={game.hintWord} hintWordCount={game.hintWordCount} />
+        {game.state === GameStates.idle && (
+          <SetupGameView game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} startGame={startGame} />
+        )}
+        {game.state === GameStates.running && (
+          <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />
         )}
       </div>
     </div>

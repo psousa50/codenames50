@@ -1,3 +1,4 @@
+import { Button } from "@material-ui/core"
 import { common, grey } from "@material-ui/core/colors"
 import { withStyles } from "@material-ui/styles"
 import { Teams } from "../codenames-core/models"
@@ -24,3 +25,11 @@ const teamStyle = (color: string) =>
 
 export const redTeamStyles = teamStyle(redColor)
 export const blueTeamStyles = teamStyle(blueColor)
+
+const smallButtonStyle = withStyles({
+  root: {
+    minWidth: 0,
+  },
+})
+
+export const SmallButton = smallButtonStyle(Button)

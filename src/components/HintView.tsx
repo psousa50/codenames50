@@ -1,12 +1,20 @@
 import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
-import { common, purple } from "@material-ui/core/colors"
 import * as R from "ramda"
 import React from "react"
+import { SmallButton } from "../utils/styles"
+import { Hint } from "./types"
 
 const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "flex",
+    flexGrow: 1,
+    flexDirection: "row",
+    padding: "10px 10px",
+  },
   hint: {
     display: "flex",
     flexGrow: 1,
+    alignItems: "flex-end",
     justifyContent: "space-between",
     padding: "10px 10px",
   },
@@ -21,55 +29,62 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexGrow: 1,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   number: {
-    maxWidth: theme.spacing(20),
-    maxHeight: theme.spacing(20),
+    fontSize: "10px",
     margin: "5px",
-    fontSize: 14,
-    marginBottom: "30px",
   },
 }))
 
 interface HintViewProps {
-  hintWord: string
-  hintWordCount: number | undefined
-  onChange?: (hintWord: string, hintWordCount?: number) => void
-  sendHint?: (hintWord: string, hintWordCount: number) => void
+  hint: Hint
+  onChange?: (hint: Hint) => void
+  sendHint?: (hint: Hint) => void
+  endTurn?: () => void
 }
 
-export const HintView: React.FC<HintViewProps> = ({ hintWord, hintWordCount, onChange, sendHint }) => {
+export const HintView: React.FC<HintViewProps> = ({ hint, onChange, sendHint, endTurn }) => {
   const classes = useStyles()
 
   return (
-    <Paper elevation={3} variant="outlined" style={{ marginTop: "20px" }}>
-      {sendHint ? (
+    <div className={classes.container}>
+      <Paper elevation={3} variant="outlined" style={{ marginTop: "20px" }}>
         <div className={classes.hint}>
-          <TextField
-            id="hint-word"
-            label="Hint Word"
-            value={hintWord}
-            onChange={event => onChange && onChange(event.target.value, hintWordCount)}
-            autoFocus
-          />
-          <Button color="primary" onClick={() => hintWordCount && sendHint && sendHint(hintWord, hintWordCount)}>
-            Send Hint
-          </Button>
+          {sendHint ? (
+            <>
+              <TextField
+                id="hint-word"
+                label="Hint Word"
+                value={hint.word}
+                onChange={event => onChange && onChange({ ...hint, word: event.target.value })}
+                autoFocus
+              />
+              <Button color="primary" onClick={() => hint.count && sendHint && sendHint(hint)}>
+                Send Hint
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className={classes.hintWord}>{hint.word}</div>
+              <Button color="primary" onClick={() => endTurn && endTurn()}>
+                End Turn
+              </Button>
+            </>
+          )}
         </div>
-      ) : (
-        <div className={classes.hintWord}>{hintWord}</div>
-      )}
-      <div className={classes.numbers}>
-        {R.range(1, 9).map(c => (
-          <HintCount
-            key={c}
-            count={c}
-            selected={c === hintWordCount}
-            onChange={onChange ? count => onChange(hintWord, count) : undefined}
-          />
-        ))}
-      </div>
-    </Paper>
+        <div className={classes.numbers}>
+          {R.range(1, 8).map(c => (
+            <HintCount
+              key={c}
+              count={c}
+              selected={c === hint.count}
+              onChange={onChange ? count => onChange({ ...hint, count }) : undefined}
+            />
+          ))}
+        </div>
+      </Paper>
+    </div>
   )
 }
 
@@ -82,23 +97,9 @@ interface HintCountProps {
 const HintCount: React.FC<HintCountProps> = ({ count, selected, onChange }) => {
   const classes = useStyles()
 
-  const styles = {
-    root: {
-      cursor: onChange ? "pointer" : "default",
-      ...(selected && {
-        backgroundColor: purple[500],
-        color: common.white,
-      }),
-    },
-  }
-
-  // return (
-  //   <div style={styles.root} className={classes.number} onClick={() => onChange && onChange(n)}>
-  //     {n}
-  //   </div>
-  // )
   return (
-    <Button
+    <SmallButton
+      size="small"
       disabled={onChange === undefined}
       className={classes.number}
       variant={selected ? "contained" : "outlined"}
@@ -106,6 +107,6 @@ const HintCount: React.FC<HintCountProps> = ({ count, selected, onChange }) => {
       onClick={() => onChange && onChange(count)}
     >
       {count}
-    </Button>
+    </SmallButton>
   )
 }
