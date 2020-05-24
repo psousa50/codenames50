@@ -38,11 +38,13 @@ export interface CreateGameViewProps {
 export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialUserId }) => {
   const classes = useStyles()
   const history = useHistory()
-  const [socket] = useSocket(process.env.SERVER_URL || "http://localhost:3001", { autoConnect: false })
+  const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [error, setError] = React.useState("")
   const [gameId, setGameId] = React.useState<string | undefined>()
   const [userId, setUserId] = React.useState(initialUserId || "")
   const [joining, setJoining] = React.useState(false)
+
+  console.log("=====>", process.env.REACT_APP_SERVER_URL)
 
   const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: Messages.GameMessage<T>) => {
     setError("")
@@ -58,13 +60,11 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
   }
 
   const createGame = () => {
-    if (canCreate()) {
+    if (userId.trim().length > 0) {
       emitMessage(socket, Messages.registerUserSocket({ userId }))
       emitMessage(socket, Messages.createGame({ userId, language: "en" }))
     }
   }
-
-  const canCreate = () => gameId && userId.trim().length > 0
 
   const joinGame = () => {
     setJoining(true)
@@ -73,6 +73,15 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
   React.useEffect(() => {
     socket.connect()
     console.log("CONNECT")
+    socket.on("connect", (d: any) => {
+      console.log("connect=====>", d)
+    })
+    socket.on("connect_error", (d: any) => {
+      console.log("connect_error=====>", d)
+    })
+    socket.on("connect_timeout", (d: any) => {
+      console.log("connect_timeout=====>", d)
+    })
   }, [socket])
 
   React.useEffect(() => {

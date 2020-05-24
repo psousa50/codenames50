@@ -72,7 +72,7 @@ export interface CodeNamesGameViewProps {
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
-  const [socket] = useSocket(process.env.SERVER_URL || "http://localhost:3001", { autoConnect: false })
+  const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [error, setError] = React.useState("")
   const [game, setGame] = React.useState<CodeNamesGame>(
     GameActions.createGame("", "", "", GameActions.buildBoard(5, 5, [])),

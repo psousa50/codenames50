@@ -35,7 +35,8 @@
     "@types/uuid": "^8.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "REACT_APP_SERVER_URL=https://codenames50.herokuapp.com react-scripts start",
+    "start:dev": "REACT_APP_SERVER_URL=localhost:5000 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
