@@ -1,4 +1,4 @@
-import { CodeNamesGame } from "../codenames-core/models"
+import { CodeNamesGame, Teams } from "../codenames-core/models"
 
 export type GameMessageType =
   | "connect"
@@ -32,7 +32,7 @@ export type RegisterUserSocketInput = {
 }
 
 export interface CreateGameInput {
-  gameId: string
+  gameId?: string
   userId: string
   language: string
 }
@@ -92,11 +92,6 @@ export type SetSpyMasterInput = {
 }
 
 export type SetSpyMasterOutput = CodeNamesGame
-
-export enum Teams {
-  red = "red",
-  blue = "blue",
-}
 
 export interface ErrorInput {
   code: string

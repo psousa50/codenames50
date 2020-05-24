@@ -13,6 +13,7 @@ import { ServiceError } from "../utils/errors"
 import { UUID } from "../utils/types"
 import { DomainEnvironment, DomainPort } from "./adapters"
 import { ErrorCodes } from "./errors"
+import { CreateGameInput } from "./models"
 
 const e = (game: CodeNamesGame) => (v: GameRules.ValidationError | undefined) =>
   v === undefined ? right(game) : left(new ServiceError(v, v))
@@ -81,7 +82,7 @@ const getGame: DomainPort<UUID, CodeNamesGame> = gameId =>
     ),
   )
 
-export const create: DomainPort<Messages.CreateGameInput, Messages.CreateGameOutput> = ({ gameId, userId, language }) =>
+export const create: DomainPort<CreateGameInput, Messages.CreateGameOutput> = ({ gameId, userId, language }) =>
   withEnv(({ repositoriesAdapter: { wordsRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
       adapt<RepositoriesEnvironment, DomainEnvironment, Words | null>(
