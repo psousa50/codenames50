@@ -1,3 +1,4 @@
+import cors from "cors"
 import * as dotenv from "dotenv"
 import { MongoClient } from "mongodb"
 import { buildExpressEnvironment } from "./app/adapters"
@@ -35,6 +36,7 @@ const startApplication = async () => {
     const expressEnvironment = buildExpressEnvironment(config, domainEnvironment, gamesDomainPorts)
 
     const app = createExpressApp(expressEnvironment)
+    app.use(cors())
 
     const server = app.listen(appPort)
 
