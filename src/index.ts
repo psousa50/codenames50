@@ -38,7 +38,7 @@ const startApplication = async () => {
     const app = createExpressApp(expressEnvironment)
     app.use(cors())
 
-    const server = app.listen(appPort + 1)
+    // const server = app.listen(appPort + 1)
 
     const socketsEnvironment = buildSocketsEnvironment(
       io,
@@ -49,12 +49,12 @@ const startApplication = async () => {
     )
     startSocketsApplication(io, socketsEnvironment)
 
-    server.on("checkContinue", (__, res) => {
-      res.writeContinue()
-    })
-    server.once("error", (error: Error) => {
-      exitProcess(error)
-    })
+    // server.on("checkContinue", (__, res) => {
+    //   res.writeContinue()
+    // })
+    // server.once("error", (error: Error) => {
+    //   exitProcess(error)
+    // })
   } catch (error) {
     exitProcess(error)
   }
