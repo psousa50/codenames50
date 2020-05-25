@@ -44,6 +44,33 @@ describe("buildBoards", () => {
   })
 })
 
+describe("createGame", () => {
+  it("creates a new game", () => {
+    const gameId = "some-gameId"
+    const userId = "some-userId"
+    const timestamp = "some-timestamp"
+    const board = { some: "board" } as any
+
+    const expectedGame = {
+      gameId,
+      timestamp,
+      userId,
+      players: [{ userId, team: Teams.red }],
+      redTeam: {},
+      blueTeam: {},
+      hintWord: "",
+      hintWordCount: 0,
+      wordsRevealedCount: 0,
+      state: GameStates.idle,
+      board,
+    }
+
+    const newGame = GameActions.createGame(gameId, userId, timestamp, board)
+
+    expect(newGame).toEqual(expectedGame)
+  })
+})
+
 describe("addPlayer", () => {
   it("adds a player to the game", () => {
     const userId = "some-user-id"
@@ -53,12 +80,78 @@ describe("addPlayer", () => {
     }
 
     const userToAddId = "user-to-add"
-    const p2 = { userId: userToAddId }
+    const p2 = { userId: userToAddId, team: Teams.red }
     const expectedGame = {
       players: [p1, p2],
     }
 
     expect(GameActions.addPlayer(userToAddId)(game as any)).toEqual(expectedGame)
+  })
+
+  it("adds the player to the team with less elements", () => {
+    const p1 = { userId: "some-user-id-1", team: Teams.red }
+    const p2 = { userId: "some-user-id-2", team: Teams.red }
+    const p3 = { userId: "some-user-id-3", team: Teams.blue }
+    const game = {
+      players: [p1, p2, p3],
+    }
+
+    const userToAddId = "user-to-add"
+    const p4 = { userId: userToAddId, team: Teams.blue }
+    const expectedGame = {
+      players: [p1, p2, p3, p4],
+    }
+
+    expect(GameActions.addPlayer(userToAddId)(game as any)).toEqual(expectedGame)
+  })
+
+  describe("removePlayer", () => {
+    it("removes a player from the game", () => {
+      const userId = "some-user-id"
+      const p1 = { userId }
+      const p2 = { userId: "some-user-id-2" }
+      const game = {
+        players: [p1, p2],
+        redTeam: {},
+        blueTeam: {},
+      }
+
+      const expectedGame = {
+        players: [p2],
+        redTeam: {},
+        blueTeam: {},
+      }
+
+      expect(GameActions.removePlayer(userId)(game as any)).toEqual(expectedGame)
+    })
+
+    it("removes red spyMaster if player is removed", () => {
+      const userId = "some-user-id"
+      const p1 = { userId }
+      const game = {
+        players: [p1],
+        redTeam: {
+          spyMaster: userId,
+        },
+        blueTeam: {},
+      }
+
+      expect(GameActions.removePlayer(userId)(game as any).redTeam.spyMaster).toBeUndefined()
+    })
+
+    it("removes blue spyMaster if player is removed", () => {
+      const userId = "some-user-id"
+      const p1 = { userId }
+      const game = {
+        players: [p1],
+        redTeam: {},
+        blueTeam: {
+          spyMaster: userId,
+        },
+      }
+
+      expect(GameActions.removePlayer(userId)(game as any).blueTeam.spyMaster).toBeUndefined()
+    })
   })
 
   it("does not add player if it is already there", () => {

@@ -7,26 +7,27 @@ export type GameAction = (game: CodeNamesGame) => CodeNamesGame
 
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
-export const createGame = (gameId: string, userId: string, timestamp: string, board: WordsBoard): CodeNamesGame => ({
-  gameId,
-  timestamp,
-  userId,
-  players: [{ userId, team: undefined }],
-  redTeam: {
-    spyMaster: undefined,
-    wordsLeft: undefined,
-  },
-  blueTeam: {
-    spyMaster: undefined,
-    wordsLeft: undefined,
-  },
-  hintWord: "",
-  hintWordCount: 0,
-  wordsRevealedCount: 0,
-  state: GameStates.idle,
-  turn: undefined,
-  board,
-})
+export const createGame = (gameId: string, userId: string, timestamp: string, board: WordsBoard): CodeNamesGame =>
+  addPlayer(userId)({
+    gameId,
+    timestamp,
+    userId,
+    players: [],
+    redTeam: {
+      spyMaster: undefined,
+      wordsLeft: undefined,
+    },
+    blueTeam: {
+      spyMaster: undefined,
+      wordsLeft: undefined,
+    },
+    hintWord: "",
+    hintWordCount: 0,
+    wordsRevealedCount: 0,
+    state: GameStates.idle,
+    turn: undefined,
+    board,
+  })
 
 export const buildBoard = (boardWidth: number, boardHeight: number, words: string[]): WordsBoard => {
   const numberOfWords = boardWidth * boardHeight
@@ -44,13 +45,33 @@ export const buildBoard = (boardWidth: number, boardHeight: number, words: strin
   return R.range(0, boardHeight).map(r => wordTypes.slice(r * boardWidth, r * boardWidth + boardWidth))
 }
 
-export const addPlayer = (userId: string): GameAction => game =>
-  game.players.find(p => p.userId === userId)
+export const addPlayer = (userId: string): GameAction => game => {
+  const teamRedCount = game.players.filter(p => p.team === Teams.red).length
+  const teamBlueCount = game.players.filter(p => p.team === Teams.blue).length
+  const team = teamBlueCount < teamRedCount ? Teams.blue : Teams.red
+
+  return game.players.find(p => p.userId === userId)
     ? game
     : {
         ...game,
-        players: [...game.players, { userId, team: undefined }],
+        players: [...game.players, { userId, team }],
       }
+}
+
+export const removePlayer = (userId: string): GameAction => game => {
+  return {
+    ...game,
+    players: game.players.filter(p => p.userId !== userId),
+    redTeam: {
+      ...game.redTeam,
+      spyMaster: game.redTeam.spyMaster === userId ? undefined : game.redTeam.spyMaster,
+    },
+    blueTeam: {
+      ...game.blueTeam,
+      spyMaster: game.blueTeam.spyMaster === userId ? undefined : game.blueTeam.spyMaster,
+    },
+  }
+}
 
 export const joinTeam = (userId: string, team: Teams): GameAction => game => {
   const player = getPlayer(game, userId)
