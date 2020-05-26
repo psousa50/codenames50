@@ -185,6 +185,7 @@ export const gameActions = {
   createGame,
   buildBoard,
   addPlayer,
+  removePlayer,
   joinTeam,
   setSpyMaster,
   startGame,
