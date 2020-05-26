@@ -5,7 +5,13 @@ import { shuffle } from "./utils/random"
 
 export type GameAction = (game: CodeNamesGame) => CodeNamesGame
 
+const nullAction = (game: CodeNamesGame) => game
+const conditionalAction = (v: boolean, action: GameAction) => (v ? action : nullAction)
+const act = (actions: GameAction[]) => (game: CodeNamesGame) => actions.reduce((acc, action) => action(acc), game)
+
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
+
+const otherTeam = (team?: Teams) => (team === Teams.red ? Teams.blue : team === Teams.blue ? Teams.red : undefined)
 
 export const createGame = (gameId: string, userId: string, timestamp: string, board: WordsBoard): CodeNamesGame =>
   addPlayer(userId)({
@@ -26,6 +32,7 @@ export const createGame = (gameId: string, userId: string, timestamp: string, bo
     wordsRevealedCount: 0,
     state: GameStates.idle,
     turn: undefined,
+    winner: undefined,
     board,
   })
 
@@ -109,19 +116,23 @@ export const setSpyMaster = (userId: string): GameAction => game => {
 }
 
 const countTypes = (board: WordsBoard, type: WordType) => R.flatten(board).filter(w => w.type === type).length
-export const startGame: GameAction = game => ({
-  ...game,
-  state: GameStates.running,
-  turn: Teams.blue,
-  redTeam: {
-    ...game.redTeam,
-    wordsLeft: countTypes(game.board, WordType.red),
-  },
-  blueTeam: {
-    ...game.blueTeam,
-    wordsLeft: countTypes(game.board, WordType.blue),
-  },
-})
+export const startGame: GameAction = game => {
+  const redWordsLeft = countTypes(game.board, WordType.red)
+  const blueWordsLeft = countTypes(game.board, WordType.blue)
+  return {
+    ...game,
+    state: GameStates.running,
+    turn: redWordsLeft > blueWordsLeft ? Teams.red : Teams.blue,
+    redTeam: {
+      ...game.redTeam,
+      wordsLeft: redWordsLeft,
+    },
+    blueTeam: {
+      ...game.blueTeam,
+      wordsLeft: blueWordsLeft,
+    },
+  }
+}
 
 export const sendHint = (hintWord: string, hintWordCount: number): GameAction => game => ({
   ...game,
@@ -130,40 +141,43 @@ export const sendHint = (hintWord: string, hintWordCount: number): GameAction =>
   wordsRevealedCount: 0,
 })
 
-const decreaseWordsLeft = (userId: string): GameAction => game => {
-  const team = getPlayer(game, userId)?.team
-  return {
-    ...game,
-    blueTeam: {
-      ...game.blueTeam,
-      wordsLeft: (game.blueTeam.wordsLeft || 0) - (team === Teams.blue ? 1 : 0),
-    },
-    redTeam: {
-      ...game.redTeam,
-      wordsLeft: (game.redTeam.wordsLeft || 0) - (team === Teams.red ? 1 : 0),
-    },
-  }
-}
+const decreaseWordsLeft = (team?: Teams): GameAction => game => ({
+  ...game,
+  blueTeam: {
+    ...game.blueTeam,
+    wordsLeft: (game.blueTeam.wordsLeft || 0) - (team === Teams.blue ? 1 : 0),
+  },
+  redTeam: {
+    ...game.redTeam,
+    wordsLeft: (game.redTeam.wordsLeft || 0) - (team === Teams.red ? 1 : 0),
+  },
+})
 
 const reveal = (w: BoardWord) => ({ ...w, revealed: true })
+const checkWin = (game: CodeNamesGame) => ({
+  ...game,
+  state: game.redTeam.wordsLeft === 0 || game.blueTeam.wordsLeft === 0 ? GameStates.ended : game.state,
+  winner: game.redTeam.wordsLeft === 0 ? Teams.red : game.blueTeam.wordsLeft === 0 ? Teams.blue : game.winner,
+})
+
 export const revealWord = (userId: string, row: number, col: number) => (game: CodeNamesGame) => {
   const revealedWord = game.board[row][col]
-  const team = getPlayer(game, userId)?.team
-  const failedGuess =
-    (revealedWord.type === WordType.blue && team === Teams.red) ||
-    (revealedWord.type === WordType.red && team === Teams.blue) ||
-    revealedWord.type === WordType.inocent
-  const updatedGame =
-    revealedWord.type === WordType.assassin
-      ? endGame(game)
-      : failedGuess || game.wordsRevealedCount >= game.hintWordCount
-      ? changeTurn(game)
-      : game
+  const revealedWordTeam =
+    revealedWord.type === WordType.blue ? Teams.blue : revealedWord.type === WordType.red ? Teams.red : undefined
+  const playerTeam = getPlayer(game, userId)?.team
+  const failedGuess = playerTeam && revealedWordTeam !== playerTeam
+
+  const updatedGame = act([
+    conditionalAction(revealedWord.type === WordType.assassin, endGame(otherTeam(playerTeam))),
+    decreaseWordsLeft(revealedWordTeam),
+    conditionalAction(failedGuess || game.wordsRevealedCount >= game.hintWordCount, changeTurn),
+    checkWin,
+  ])(game)
 
   return {
-    ...(failedGuess ? updatedGame : decreaseWordsLeft(userId)(updatedGame)),
-    board: update2dCell(game.board)(reveal, row, col),
-    wordsRevealedCount: game.wordsRevealedCount + 1,
+    ...updatedGame,
+    board: update2dCell(updatedGame.board)(reveal, row, col),
+    wordsRevealedCount: updatedGame.wordsRevealedCount + 1,
   }
 }
 
@@ -175,9 +189,10 @@ export const changeTurn = (game: CodeNamesGame) => ({
   wordsRevealedCount: 0,
 })
 
-export const endGame = (game: CodeNamesGame) => ({
+export const endGame = (winner: Teams | undefined) => (game: CodeNamesGame) => ({
   ...game,
   state: GameStates.ended,
+  winner,
 })
 
 export const gameActions = {

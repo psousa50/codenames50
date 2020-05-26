@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface WordsBoardViewProps {
   board: WordsBoard
   revealWords: boolean
-  onWordClick: OnWordClick
+  onWordClick?: OnWordClick
 }
 
 export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordClick, revealWords }) => {
@@ -49,7 +49,13 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordCli
           <tr key={row}>
             {board[row].map((word, col) => (
               <td key={col}>
-                <WordView word={word} revealWords={revealWords} onWordClick={onWordClick} row={row} col={col} />
+                <WordView
+                  word={word}
+                  revealWords={revealWords}
+                  onWordClick={onWordClick || (() => {})}
+                  row={row}
+                  col={col}
+                />
               </td>
             ))}
           </tr>

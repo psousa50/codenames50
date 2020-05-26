@@ -39,12 +39,13 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 interface HintViewProps {
   hint: Hint
+  canEndTurn: boolean
   onChange?: (hint: Hint) => void
   sendHint?: (hint: Hint) => void
   endTurn?: () => void
 }
 
-export const HintView: React.FC<HintViewProps> = ({ hint, onChange, sendHint, endTurn }) => {
+export const HintView: React.FC<HintViewProps> = ({ hint, onChange, sendHint, endTurn, canEndTurn }) => {
   const classes = useStyles()
 
   return (
@@ -60,14 +61,18 @@ export const HintView: React.FC<HintViewProps> = ({ hint, onChange, sendHint, en
                 onChange={event => onChange && onChange({ ...hint, word: event.target.value })}
                 autoFocus
               />
-              <Button color="primary" onClick={() => hint.count && sendHint && sendHint(hint)}>
+              <Button
+                disabled={hint.word.trim().length === 0 || hint.count === 0}
+                color="primary"
+                onClick={() => hint.count && sendHint && sendHint(hint)}
+              >
                 Send Hint
               </Button>
             </>
           ) : (
             <>
               <div className={classes.hintWord}>{hint.word}</div>
-              <Button color="primary" onClick={() => endTurn && endTurn()}>
+              <Button disabled={!canEndTurn} color="primary" onClick={() => endTurn && endTurn()}>
                 End Turn
               </Button>
             </>

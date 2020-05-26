@@ -1,6 +1,7 @@
 import { makeStyles, Theme } from "@material-ui/core"
 import React from "react"
 import { CodeNamesGame, Teams } from "../codenames-core/models"
+import * as GameRules from "../codenames-core/rules"
 import * as Messages from "../messaging/messages"
 import { teamColor } from "../utils/styles"
 import { EmitMessage } from "./CodeNamesGameView"
@@ -8,6 +9,8 @@ import { HintView } from "./HintView"
 import { Hint } from "./types"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
 import { WordsLeft } from "./WordsLeftView"
+
+const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -65,6 +68,8 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
     emitMessage(Messages.revealWord({ gameId, userId, row, col }))
   }
 
+  const canEndTurn = GameRules.changeTurn(userId)(game) === undefined
+
   return (
     <div className={classes.container}>
       <div className={classes.wordsLeftContainer}>
@@ -82,10 +87,16 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
       />
       <div style={styles.turn}>{game.turn === Teams.red ? "Red's Turn" : "Blue's turn"}</div>
       <div className={classes.hint}>
-        {userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster ? (
-          <HintView hint={hint} onChange={setHint} sendHint={sendHint} />
+        {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
+        game.turn === getPlayer(game, userId)?.team &&
+        game.hintWordCount === 0 ? (
+          <HintView hint={hint} canEndTurn={canEndTurn} onChange={setHint} sendHint={sendHint} />
         ) : (
-          <HintView hint={{ word: game.hintWord, count: game.hintWordCount }} endTurn={endTurn} />
+          <HintView
+            hint={{ word: game.hintWord, count: game.hintWordCount }}
+            canEndTurn={canEndTurn}
+            endTurn={endTurn}
+          />
         )}
       </div>
     </div>

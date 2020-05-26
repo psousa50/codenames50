@@ -8,6 +8,7 @@ import * as GameActions from "../codenames-core/main"
 import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/hooks"
+import { EndedGameView } from "./EndedGameView"
 import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
 import { UserView } from "./UserView"
@@ -37,30 +38,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignSelf: "self-end",
   },
 }))
-
-export const addSampleGame = (game: CodeNamesGame) => {
-  const players = [
-    { userId: "Pedro", team: Teams.blue },
-    { userId: "Carla", team: Teams.blue },
-    { userId: "Beatriz", team: Teams.blue },
-    { userId: "Vasco", team: Teams.red },
-    { userId: "Guiga", team: Teams.red },
-    { userId: "Filipe", team: Teams.red },
-    { userId: "Rozito", team: Teams.red },
-  ]
-  return GameActions.startGame({
-    ...game,
-    players,
-    blueTeam: {
-      spyMaster: "Pedro",
-      wordsLeft: undefined,
-    },
-    redTeam: {
-      spyMaster: "Vasco",
-      wordsLeft: undefined,
-    },
-  })
-}
 
 export type EmitMessage = <T extends {}>(message: Messages.GameMessage<T>) => void
 
@@ -118,7 +95,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   }
 
   const joinGame = () => {
-    console.log("joinGame=====>", gameId, userId)
     emitMessage(socket)(Messages.joinGame({ gameId, userId }))
   }
 
@@ -134,12 +110,12 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     emitMessage(socket)(Messages.setSpyMaster({ gameId, userId }))
   }
 
-  const removePlayerHandler = ({ userId }: Messages.RemovePlayerInput) => {
-    setGame(GameActions.removePlayer(userId))
-  }
-
   const joinedGameHandler = (game: CodeNamesGame) => {
     setGame(game)
+  }
+
+  const removePlayerHandler = ({ userId }: Messages.RemovePlayerInput) => {
+    setGame(GameActions.removePlayer(userId))
   }
 
   const joinTeamHandler = ({ userId, team }: Messages.JoinTeamInput) => {
@@ -158,7 +134,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setGame(GameActions.sendHint(hintWord, hintWordCount))
   }
 
-  const revealWordHandler = ({ row, col }: Messages.RevealWordInput) => {
+  const revealWordHandler = ({ userId, row, col }: Messages.RevealWordInput) => {
     setGame(GameActions.revealWord(userId, row, col))
   }
 
@@ -201,6 +177,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         {game.state === GameStates.running && (
           <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />
         )}
+        {game.state === GameStates.ended && <EndedGameView game={game} />}
       </div>
     </div>
   )
