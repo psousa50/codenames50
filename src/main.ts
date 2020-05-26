@@ -13,7 +13,13 @@ const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p =
 
 const otherTeam = (team?: Teams) => (team === Teams.red ? Teams.blue : team === Teams.blue ? Teams.red : undefined)
 
-export const createGame = (gameId: string, userId: string, timestamp: string, board: WordsBoard): CodeNamesGame =>
+export const createGame = (
+  gameId: string,
+  userId: string,
+  timestamp: string,
+  language: string,
+  board: WordsBoard,
+): CodeNamesGame =>
   addPlayer(userId)({
     gameId,
     timestamp,
@@ -33,6 +39,7 @@ export const createGame = (gameId: string, userId: string, timestamp: string, bo
     state: GameStates.idle,
     turn: undefined,
     winner: undefined,
+    language,
     board,
   })
 

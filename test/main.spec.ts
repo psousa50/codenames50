@@ -49,6 +49,7 @@ describe("createGame", () => {
     const gameId = "some-gameId"
     const userId = "some-userId"
     const timestamp = "some-timestamp"
+    const language = "some-language"
     const board = { some: "board" } as any
 
     const expectedGame = {
@@ -62,10 +63,11 @@ describe("createGame", () => {
       hintWordCount: 0,
       wordsRevealedCount: 0,
       state: GameStates.idle,
+      language,
       board,
     }
 
-    const newGame = GameActions.createGame(gameId, userId, timestamp, board)
+    const newGame = GameActions.createGame(gameId, userId, timestamp, language, board)
 
     expect(newGame).toEqual(expectedGame)
   })

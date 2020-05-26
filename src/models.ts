@@ -42,6 +42,7 @@ export interface CodeNamesGame {
   state: GameStates
   turn: Teams | undefined
   winner: Teams | undefined
+  language: string
   board: WordsBoard
 }
 
