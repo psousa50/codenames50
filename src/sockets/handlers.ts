@@ -45,8 +45,9 @@ export const registerUserHandler: SocketHandler<Messages.RegisterUserSocketInput
     pipe(adapt(gameMessagingPorts.registerUser({ userId, socketId: socket.id }), gameMessagingEnvironment)),
   )
 
-const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) => {
+const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks => {
+  console.log("removeUserFromGame=====>\n", userLinks)
+  return withEnv(({ gamesDomainPorts, domainEnvironment }) => {
     return pipe(
       userLinks.length === 1 && userLinks[0].gameId
         ? pipe(
@@ -60,7 +61,7 @@ const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
       map(_ => undefined),
     )
   })
-
+}
 export const disconnectHandler: SocketHandler = socket => () => {
   console.log("DISCONNECT=====>\n", socket.id)
   return withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
