@@ -58,6 +58,7 @@ export const gameMessagingPorts = {
   emitMessage: voidAction,
   registerUser: jest.fn(),
   unregisterSocket: jest.fn(),
+  addGameToUser: jest.fn(),
   broadcastMessage: voidAction,
 }
 

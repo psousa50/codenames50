@@ -116,6 +116,21 @@ export const join: DomainPort<Messages.JoinGameInput, Messages.JoinGameOutput> =
     ),
   )
 
+export const removePlayer: DomainPort<Messages.JoinGameInput, Messages.JoinGameOutput> = ({ gameId, userId }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
+    pipe(
+      getGame(gameId),
+      chain(game => actionOf(gameActions.removePlayer(userId)(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
+      chain(game => broadcastMessage(Messages.removePlayer({ gameId, userId }))(game)),
+    ),
+  )
+
 export const joinTeam: DomainPort<Messages.JoinTeamInput, Messages.JoinTeamOutput> = ({ gameId, userId, team }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
@@ -225,6 +240,7 @@ export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput, Messages.SetSp
 export const gamesDomainPorts = {
   create,
   join,
+  removePlayer,
   joinTeam,
   setSpyMaster,
   startGame,

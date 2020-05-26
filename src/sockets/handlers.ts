@@ -1,6 +1,7 @@
 import { pipe } from "fp-ts/lib/pipeable"
-import { map, mapLeft, run } from "fp-ts/lib/ReaderTaskEither"
+import { chain, map, mapLeft, run } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
+import { UserSocketLink } from "../messaging/main"
 import * as Messages from "../messaging/messages"
 import { actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
@@ -44,29 +45,76 @@ export const registerUserHandler: SocketHandler<Messages.RegisterUserSocketInput
     pipe(adapt(gameMessagingPorts.registerUser({ userId, socketId: socket.id }), gameMessagingEnvironment)),
   )
 
+const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
+  withEnv(({ gamesDomainPorts, domainEnvironment }) => {
+    return pipe(
+      userLinks.length === 1 && userLinks[0].gameId
+        ? pipe(
+            adapt(
+              gamesDomainPorts.removePlayer({ gameId: userLinks[0].gameId, userId: userLinks[0].userId }),
+              domainEnvironment,
+            ),
+            map(_ => undefined),
+          )
+        : actionOf(undefined as any),
+      map(_ => undefined),
+    )
+  })
+
 export const disconnectHandler: SocketHandler = socket => () => {
   console.log("DISCONNECT=====>\n", socket.id)
   return withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
-    pipe(adapt(gameMessagingPorts.unregisterSocket({ socketId: socket.id }), gameMessagingEnvironment)),
+    pipe(
+      adapt(gameMessagingPorts.unregisterSocket({ socketId: socket.id }), gameMessagingEnvironment),
+      chain(removeUserFromGame),
+      map(_ => undefined),
+    ),
   )
 }
+
 export const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ gameId, userId, language }) =>
-  withEnv(({ gamesDomainPorts, domainEnvironment, uuid }) => {
+  withEnv(({ gamesDomainPorts, domainEnvironment, uuid, gameMessagingPorts, gameMessagingEnvironment }) => {
     const newGameId = gameId || uuid()
     socket.join(newGameId, async (_: any) => {
-      await gamesDomainPorts.create({ gameId: newGameId, userId, language })(domainEnvironment)()
+      const h = pipe(
+        gamesDomainPorts.create({ gameId: newGameId, userId, language }),
+        chain(game =>
+          adapt(
+            gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId: game.gameId, userId }),
+            gameMessagingEnvironment,
+          ),
+        ),
+      )
+      await run(h, domainEnvironment)
     })
     return actionOf(undefined)
   })
 
 export const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => input => {
-  return withEnv(({ gamesDomainPorts, domainEnvironment }) => {
+  return withEnv(({ gamesDomainPorts, domainEnvironment, gameMessagingPorts, gameMessagingEnvironment }) => {
     socket.join(input.gameId, async (_: any) => {
-      await gamesDomainPorts.join(input)(domainEnvironment)()
+      const h = pipe(
+        gamesDomainPorts.join(input),
+        chain(game =>
+          adapt(
+            gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId: game.gameId, userId: input.userId }),
+            gameMessagingEnvironment,
+          ),
+        ),
+      )
+      await run(h, domainEnvironment)
     })
     return actionOf(undefined)
   })
 }
+
+export const removePlayerHandler: SocketHandler<Messages.RemovePlayerInput> = _ => input =>
+  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
+    pipe(
+      adapt(gamesDomainPorts.removePlayer(input), domainEnvironment),
+      map(_ => undefined),
+    ),
+  )
 
 export const joinTeamHandler: SocketHandler<Messages.JoinTeamInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
@@ -121,6 +169,7 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   addMessageHandler(env)(socket, "registerUserSocket", registerUserHandler)
   addMessageHandler(env)(socket, "createGame", createGameHandler)
   addMessageHandler(env)(socket, "joinGame", joinGameHandler)
+  addMessageHandler(env)(socket, "removePlayer", removePlayerHandler)
   addMessageHandler(env)(socket, "joinTeam", joinTeamHandler)
   addMessageHandler(env)(socket, "setSpyMaster", setSpyMasterHandler)
   addMessageHandler(env)(socket, "startGame", startGameHandler)

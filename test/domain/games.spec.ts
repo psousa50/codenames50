@@ -70,7 +70,7 @@ describe("create", () => {
       words: ["w1", "w2", "w3", "w4"],
     } as any
 
-    const newGame = { gameId } as any
+    const newGame = { gameId, players: [] } as any
     const createGame = jest.fn(() => newGame)
     const newBoard = { some: "board" } as any
     const buildBoard = jest.fn(() => newBoard)
