@@ -507,7 +507,7 @@ describe("revealWord", () => {
   })
 
   describe("ends the game", () => {
-    it("if red team reveals all of their words", () => {
+    it("if red team gets all of their words revealed", () => {
       const game = {
         ...buildGameForRevealWord(WordType.red, Teams.red),
         hintWordCount: 1,
@@ -517,7 +517,9 @@ describe("revealWord", () => {
         },
       }
 
-      expect(GameActions.revealWord(userId, 0, 0)(game as any).state).toBe(GameStates.ended)
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game)
+      expect(updatedGame.state).toBe(GameStates.ended)
+      expect(updatedGame.winner).toBe(Teams.red)
     })
 
     it("if blue team gets all of their words revealed", () => {
@@ -530,13 +532,25 @@ describe("revealWord", () => {
         },
       }
 
-      expect(GameActions.revealWord(userId, 0, 0)(game as any).state).toBe(GameStates.ended)
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game)
+      expect(updatedGame.state).toBe(GameStates.ended)
+      expect(updatedGame.winner).toBe(Teams.blue)
     })
 
-    it("if revealed word is the assassin", () => {
+    it("if red reveals the assassin, blue wins", () => {
       const game = buildGameForRevealWord(WordType.assassin, Teams.red)
 
-      expect(GameActions.revealWord(userId, 0, 0)(game as any).state).toBe(GameStates.ended)
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game)
+      expect(updatedGame.state).toBe(GameStates.ended)
+      expect(updatedGame.winner).toBe(Teams.blue)
+    })
+
+    it("if blue reveals the assassin, red wins", () => {
+      const game = buildGameForRevealWord(WordType.assassin, Teams.blue)
+
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game)
+      expect(updatedGame.state).toBe(GameStates.ended)
+      expect(updatedGame.winner).toBe(Teams.red)
     })
   })
 })
