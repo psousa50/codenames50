@@ -100,6 +100,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
     addMessageHandler(socket, "connect", connectHandler)
 
+    addMessageHandler(socket, "removePlayer", removePlayerHandler)
     addMessageHandler(socket, "joinedGame", joinedGameHandler)
     addMessageHandler(socket, "joinTeam", joinTeamHandler)
     addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
@@ -131,6 +132,10 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const setSpyMaster = () => {
     emitMessage(socket)(Messages.setSpyMaster({ gameId, userId }))
+  }
+
+  const removePlayerHandler = ({ userId }: Messages.RemovePlayerInput) => {
+    setGame(GameActions.removePlayer(userId))
   }
 
   const joinedGameHandler = (game: CodeNamesGame) => {
