@@ -41,6 +41,7 @@ export interface CodeNamesGame {
   wordsRevealedCount: number
   state: GameStates
   turn: Teams | undefined
+  winner: Teams | undefined
   board: WordsBoard
 }
 
