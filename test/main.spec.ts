@@ -402,6 +402,19 @@ describe("revealWord", () => {
       expect(revealWord(game).blueTeam.wordsLeft).toBe(2)
     })
 
+    it("if word is from the players blue team when red is playing", () => {
+      const game = {
+        ...buildGameForRevealWord(WordType.blue, Teams.red),
+        hintWordCount: 2,
+        wordsRevealedCount: 1,
+        blueTeam: {
+          wordsLeft: 3,
+        },
+      }
+
+      expect(revealWord(game).blueTeam.wordsLeft).toBe(2)
+    })
+
     it("if word is from the players blue team and turn finishes", () => {
       const game = {
         ...buildGameForRevealWord(WordType.blue, Teams.blue),
@@ -418,6 +431,19 @@ describe("revealWord", () => {
     it("if word is from the players redteam", () => {
       const game = {
         ...buildGameForRevealWord(WordType.red, Teams.red),
+        hintWordCount: 2,
+        wordsRevealedCount: 1,
+        redTeam: {
+          wordsLeft: 3,
+        },
+      }
+
+      expect(revealWord(game).redTeam.wordsLeft).toBe(2)
+    })
+
+    it("if word is from the players redteam when blue is playing", () => {
+      const game = {
+        ...buildGameForRevealWord(WordType.red, Teams.blue),
         hintWordCount: 2,
         wordsRevealedCount: 1,
         redTeam: {
@@ -480,7 +506,33 @@ describe("revealWord", () => {
     })
   })
 
-  describe("end the game", () => {
+  describe("ends the game", () => {
+    it("if red team reveals all of their words", () => {
+      const game = {
+        ...buildGameForRevealWord(WordType.red, Teams.red),
+        hintWordCount: 1,
+        wordsRevealedCount: 1,
+        redTeam: {
+          wordsLeft: 1,
+        },
+      }
+
+      expect(GameActions.revealWord(userId, 0, 0)(game as any).state).toBe(GameStates.ended)
+    })
+
+    it("if blue team gets all of their words revealed", () => {
+      const game = {
+        ...buildGameForRevealWord(WordType.blue, Teams.red),
+        hintWordCount: 1,
+        wordsRevealedCount: 1,
+        blueTeam: {
+          wordsLeft: 1,
+        },
+      }
+
+      expect(GameActions.revealWord(userId, 0, 0)(game as any).state).toBe(GameStates.ended)
+    })
+
     it("if revealed word is the assassin", () => {
       const game = buildGameForRevealWord(WordType.assassin, Teams.red)
 
