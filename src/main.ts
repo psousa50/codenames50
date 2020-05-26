@@ -154,15 +154,14 @@ export const revealWord = (userId: string, row: number, col: number) => (game: C
     (revealedWord.type === WordType.red && team === Teams.blue) ||
     revealedWord.type === WordType.inocent
   const updatedGame =
-    failedGuess || game.wordsRevealedCount === game.hintWordCount
-      ? changeTurn(game)
-      : revealedWord.type === WordType.assassin
+    revealedWord.type === WordType.assassin
       ? endGame(game)
-      : failedGuess
-      ? game
-      : decreaseWordsLeft(userId)(game)
+      : failedGuess || game.wordsRevealedCount >= game.hintWordCount
+      ? changeTurn(game)
+      : game
+
   return {
-    ...updatedGame,
+    ...(failedGuess ? updatedGame : decreaseWordsLeft(userId)(updatedGame)),
     board: update2dCell(game.board)(reveal, row, col),
     wordsRevealedCount: game.wordsRevealedCount + 1,
   }
