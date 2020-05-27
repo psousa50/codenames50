@@ -114,11 +114,11 @@ export const setSpyMaster = (userId: string, team: Teams): GameAction => game =>
   ...game,
   redTeam: {
     ...game.redTeam,
-    spyMaster: team === Teams.red ? userId : game.redTeam.spyMaster,
+    spyMaster: team === Teams.red ? userId : game.redTeam.spyMaster === userId ? undefined : game.redTeam.spyMaster,
   },
   blueTeam: {
     ...game.blueTeam,
-    spyMaster: team === Teams.blue ? userId : game.blueTeam.spyMaster,
+    spyMaster: team === Teams.blue ? userId : game.blueTeam.spyMaster === userId ? undefined : game.blueTeam.spyMaster,
   },
   players: game.players.map(p => (p.userId === userId ? { ...p, team } : p)),
 })

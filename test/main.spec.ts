@@ -295,6 +295,31 @@ describe("setSpyMaster", () => {
     expect(GameActions.setSpyMaster(userId, Teams.red)(game as any)).toEqual(expectedGame)
   })
 
+  it("clears the blue spy master if setting for red tean", () => {
+    const userId = "some-user-id"
+    const game = {
+      players: [{ userId, team: Teams.blue }],
+      blueTeam: {
+        spyMaster: userId,
+      },
+      redTeam: {
+        spyMaster: "some-red-user",
+      },
+    }
+
+    const expectedGame = {
+      players: [{ userId, team: Teams.red }],
+      blueTeam: {
+        spyMaster: undefined,
+      },
+      redTeam: {
+        spyMaster: userId,
+      },
+    }
+
+    expect(GameActions.setSpyMaster(userId, Teams.red)(game as any)).toEqual(expectedGame)
+  })
+
   it("sets the spy master for team blue", () => {
     const userId = "some-user-id"
     const game = {
@@ -314,6 +339,31 @@ describe("setSpyMaster", () => {
       },
       redTeam: {
         spyMaster: "some-red-user",
+      },
+    }
+
+    expect(GameActions.setSpyMaster(userId, Teams.blue)(game as any)).toEqual(expectedGame)
+  })
+
+  it("clears the red spy master when setting for team blue", () => {
+    const userId = "some-user-id"
+    const game = {
+      players: [{ userId, team: Teams.red }],
+      blueTeam: {
+        spyMaster: "some-blue-user",
+      },
+      redTeam: {
+        spyMaster: userId,
+      },
+    }
+
+    const expectedGame = {
+      players: [{ userId, team: Teams.blue }],
+      blueTeam: {
+        spyMaster: userId,
+      },
+      redTeam: {
+        spyMaster: undefined,
       },
     }
 

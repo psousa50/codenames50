@@ -39,9 +39,6 @@ const doesNotHaveHint: GameRule = (game: CodeNamesGame) => v(game.hintWordCount 
 const isPlayersTurn = (userId: string): GameRule => game =>
   v(game.turn === getPlayer(game, userId)?.team, "notPlayersTurn")
 
-const playerHasTeam = (userId: string): GameRule => game =>
-  v(exists(getPlayer(game, userId)?.team), "playerMustHaveTeam")
-
 const playerIsSpyMaster = (userId: string): GameRule => game =>
   v(game.redTeam.spyMaster === userId || game.blueTeam.spyMaster === userId, "mustBeSpyMaster")
 
