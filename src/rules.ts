@@ -70,7 +70,7 @@ const hasMoreGuesses: GameRule = game => v(game.wordsRevealedCount < game.hintWo
 const wordIsNotRevealed = (row: number, col: number): GameRule => game =>
   v(!game.board[row][col].revealed, "alreadyRevealed")
 
-export const joinTeam = validate([idle])
+export const joinTeam = validate([])
 
 export const startGame = validate([idle, hasBothSpyMasters, hasAtleastTwoPlayesAtEachTeam])
 

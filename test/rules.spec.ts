@@ -9,23 +9,10 @@ const buildGame = (validGame: DeepPartial<CodeNamesGame>, game: DeepPartial<Code
   R.mergeDeepRight(validGame, game)
 
 describe("joinTeam", () => {
-  const validGame: DeepPartial<CodeNamesGame> = {
-    state: GameStates.idle,
-  }
+  const validIdleGame: DeepPartial<CodeNamesGame> = {}
 
-  it("is valid for a valid game", () => {
-    expect(GameRules.joinTeam(validGame as any)).toBeUndefined()
-  })
-
-  describe("is invalid", () => {
-    it("if game is not idle", () => {
-      const game = {
-        ...validGame,
-        state: GameStates.running,
-      }
-
-      expect(GameRules.joinTeam(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
-    })
+  it("is always valid", () => {
+    expect(GameRules.joinTeam(validIdleGame as any)).toBeUndefined()
   })
 })
 
