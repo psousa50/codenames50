@@ -73,6 +73,12 @@ describe("setSpyMaster", () => {
 describe("startGame", () => {
   const validGame: DeepPartial<CodeNamesGame> = {
     state: GameStates.idle,
+    players: [
+      { userId: "some-user-id-1", team: Teams.red },
+      { userId: "some-user-id-2", team: Teams.red },
+      { userId: "some-user-id-3", team: Teams.blue },
+      { userId: "some-user-id-4", team: Teams.blue },
+    ],
     blueTeam: {
       spyMaster: "some-blue-user",
     },
@@ -114,6 +120,32 @@ describe("startGame", () => {
       }
 
       expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
+    })
+
+    it("if red team doesn't have two players", () => {
+      const game = {
+        ...validGame,
+        players: [
+          { userId: "some-user-id-1", team: Teams.red },
+          { userId: "some-user-id-2", team: Teams.blue },
+          { userId: "some-user-id-3", team: Teams.blue },
+        ],
+      }
+
+      expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveTwoPlayers"))
+    })
+
+    it("if red team doesn't have two players", () => {
+      const game = {
+        ...validGame,
+        players: [
+          { userId: "some-user-id-1", team: Teams.red },
+          { userId: "some-user-id-2", team: Teams.red },
+          { userId: "some-user-id-3", team: Teams.blue },
+        ],
+      }
+
+      expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveTwoPlayers"))
     })
   })
 })

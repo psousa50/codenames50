@@ -1,4 +1,4 @@
-import { CodeNamesGame, GameStates } from "./models"
+import { CodeNamesGame, GameStates, Teams } from "./models"
 
 export type ValidationError =
   | "gameIsAlreadyRunning"
@@ -8,6 +8,7 @@ export type ValidationError =
   | "cantBeSpyMaster"
   | "mustBeSpyMaster"
   | "mustHaveSpyMasters"
+  | "mustHaveTwoPlayers"
   | "noHint"
   | "alreadyHasHint"
   | "mustGuessOnce"
@@ -50,6 +51,13 @@ const playerIsNotSpyMaster = (userId: string): GameRule => game =>
 const hasBothSpyMasters: GameRule = game =>
   v(exists(game.redTeam.spyMaster) && exists(game.blueTeam.spyMaster), "mustHaveSpyMasters")
 
+const hasAtleastTwoPlayesAtEachTeam: GameRule = game =>
+  v(
+    game.players.filter(p => p.team === Teams.red).length >= 2 &&
+      game.players.filter(p => p.team === Teams.blue).length >= 2,
+    "mustHaveTwoPlayers",
+  )
+
 const hasAtLeastOneGuess: GameRule = game => v(game.wordsRevealedCount > 0, "mustGuessOnce")
 
 const hasMoreGuesses: GameRule = game => v(game.wordsRevealedCount < game.hintWordCount + 1, "tooMuchGuesses")
@@ -59,7 +67,7 @@ const wordIsNotRevealed = (row: number, col: number): GameRule => game =>
 
 export const joinTeam = validate([idle])
 
-export const startGame = validate([idle, hasBothSpyMasters])
+export const startGame = validate([idle, hasBothSpyMasters, hasAtleastTwoPlayesAtEachTeam])
 
 export const setSpyMaster = (userId: string) => validate([idle, playerHasTeam(userId)])
 
