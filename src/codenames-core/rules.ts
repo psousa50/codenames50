@@ -54,7 +54,11 @@ const hasBothSpyMasters: GameRule = game =>
   v(exists(game.redTeam.spyMaster) && exists(game.blueTeam.spyMaster), "mustHaveSpyMasters")
 
 const spyMasterIsNotSet = (team: Teams): GameRule => game =>
-  v(team === Teams.red && !exists(game.redTeam.spyMaster), "spyMasterAlreadySet")
+  v(
+    (team === Teams.red && !exists(game.redTeam.spyMaster)) ||
+      (team === Teams.blue && !exists(game.blueTeam.spyMaster)),
+    "spyMasterAlreadySet",
+  )
 
 const hasAtleastTwoPlayesAtEachTeam: GameRule = game =>
   v(
