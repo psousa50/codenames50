@@ -245,19 +245,23 @@ export const changeTurn: DomainPort<Messages.ChangeTurnInput, Messages.ChangeTur
     ),
   )
 
-export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput, Messages.SetSpyMasterOutput> = ({ gameId, userId }) =>
+export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput, Messages.SetSpyMasterOutput> = ({
+  gameId,
+  userId,
+  team,
+}) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
-      chain(checkRules(gameRules.setSpyMaster(userId))),
-      chain(doAction(gameActions.setSpyMaster(userId))),
+      chain(checkRules(gameRules.setSpyMaster())),
+      chain(doAction(gameActions.setSpyMaster(userId, team))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
           repositoriesEnvironment,
         ),
       ),
-      chain(broadcastMessage(Messages.setSpyMaster({ gameId, userId }))),
+      chain(broadcastMessage(Messages.setSpyMaster({ gameId, userId, team }))),
     ),
   )
 

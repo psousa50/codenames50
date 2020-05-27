@@ -110,22 +110,18 @@ export const joinTeam = (userId: string, team: Teams): GameAction => game => {
     : game
 }
 
-export const setSpyMaster = (userId: string): GameAction => game => {
-  const p = getPlayer(game, userId)
-  return p && p.team
-    ? {
-        ...game,
-        redTeam: {
-          ...game.redTeam,
-          spyMaster: p.team === Teams.red ? p.userId : game.redTeam.spyMaster,
-        },
-        blueTeam: {
-          ...game.blueTeam,
-          spyMaster: p.team === Teams.blue ? p.userId : game.blueTeam.spyMaster,
-        },
-      }
-    : game
-}
+export const setSpyMaster = (userId: string, team: Teams): GameAction => game => ({
+  ...game,
+  redTeam: {
+    ...game.redTeam,
+    spyMaster: team === Teams.red ? userId : game.redTeam.spyMaster === userId ? undefined : game.redTeam.spyMaster,
+  },
+  blueTeam: {
+    ...game.blueTeam,
+    spyMaster: team === Teams.blue ? userId : game.blueTeam.spyMaster === userId ? undefined : game.blueTeam.spyMaster,
+  },
+  players: game.players.map(p => (p.userId === userId ? { ...p, team } : p)),
+})
 
 const countTypes = (board: WordsBoard, type: WordType) => R.flatten(board).filter(w => w.type === type).length
 export const startGame: GameAction = game => {
