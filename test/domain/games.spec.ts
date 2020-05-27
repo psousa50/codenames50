@@ -73,6 +73,7 @@ describe("create", () => {
     const newGame = { gameId, players: [] } as any
     const createGame = jest.fn(() => newGame)
     const newBoard = { some: "board" } as any
+    const language = "some-language"
     const buildBoard = jest.fn(() => newBoard)
     const { domainEnvironment, insertGame, emitMessage } = buildEnvironment(
       {
@@ -88,9 +89,9 @@ describe("create", () => {
       { words },
     )
 
-    await getRight(Games.create({ gameId, userId, language: "en" })(domainEnvironment))()
+    await getRight(Games.create({ gameId, userId, language })(domainEnvironment))()
 
-    expect(createGame).toHaveBeenCalledWith(gameId, userId, timestamp.format("YYYY-MM-DD HH:mm:ss"), newBoard)
+    expect(createGame).toHaveBeenCalledWith(gameId, userId, timestamp.format("YYYY-MM-DD HH:mm:ss"), language, newBoard)
     expect(insertGame).toHaveBeenCalledWith(newGame)
 
     expect(emitMessage).toHaveBeenCalledTimes(1)

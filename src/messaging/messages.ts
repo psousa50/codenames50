@@ -9,6 +9,7 @@ export type GameMessageType =
   | "gameCreated"
   | "joinGame"
   | "joinedGame"
+  | "nextGame"
   | "removePlayer"
   | "joinTeam"
   | "setSpyMaster"
@@ -46,6 +47,13 @@ export interface JoinGameInput {
 }
 
 export type JoinGameOutput = CodeNamesGame
+
+export interface NextGameInput {
+  gameId: string
+  language?: string
+}
+
+export type NextGameOutput = CodeNamesGame
 
 export interface RemovePlayerInput {
   gameId: string
@@ -111,6 +119,7 @@ export const createGame = (data: CreateGameInput) => createGameMessage("createGa
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
 export const joinedGame = (data: CodeNamesGame) => createGameMessage("joinedGame", data)
+export const nextGame = (data: NextGameInput) => createGameMessage("nextGame", data)
 export const removePlayer = (data: RemovePlayerInput) => createGameMessage("removePlayer", data)
 export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)
 export const startGame = (data: StartGameInput) => createGameMessage("startGame", data)

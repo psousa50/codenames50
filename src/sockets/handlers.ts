@@ -109,6 +109,14 @@ export const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => 
   })
 }
 
+export const nextGameHandler: SocketHandler<Messages.NextGameInput> = _ => input =>
+  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
+    pipe(
+      adapt(gamesDomainPorts.nextGame(input), domainEnvironment),
+      map(_ => undefined),
+    ),
+  )
+
 export const removePlayerHandler: SocketHandler<Messages.RemovePlayerInput> = _ => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
@@ -170,6 +178,7 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   addMessageHandler(env)(socket, "registerUserSocket", registerUserHandler)
   addMessageHandler(env)(socket, "createGame", createGameHandler)
   addMessageHandler(env)(socket, "joinGame", joinGameHandler)
+  addMessageHandler(env)(socket, "nextGame", nextGameHandler)
   addMessageHandler(env)(socket, "removePlayer", removePlayerHandler)
   addMessageHandler(env)(socket, "joinTeam", joinTeamHandler)
   addMessageHandler(env)(socket, "setSpyMaster", setSpyMasterHandler)
