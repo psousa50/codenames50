@@ -79,7 +79,7 @@ export const HintView: React.FC<HintViewProps> = ({ hint, onChange, sendHint, en
           )}
         </div>
         <div className={classes.numbers}>
-          {R.range(1, 8).map(c => (
+          {R.range(1, 10).map(c => (
             <HintCount
               key={c}
               count={c}

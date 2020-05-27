@@ -46,10 +46,12 @@ export const createGame = (
 export const buildBoard = (boardWidth: number, boardHeight: number, words: string[]): WordsBoard => {
   const numberOfWords = boardWidth * boardHeight
   const numberOfWordsForTeams = Math.max(0, Math.floor((numberOfWords - 1) / 3))
-  const numberOfWordsForInocents = Math.max(numberOfWords - 1 - numberOfWordsForTeams * 2, 0)
+  const reds = numberOfWordsForTeams + (Math.random() < 0.5 ? 1 : 0)
+  const blues = numberOfWordsForTeams * 2 + 1 - reds
+  const numberOfWordsForInocents = Math.max(numberOfWords - 1 - reds - blues, 0)
   const types = shuffle([
-    ...new Array(numberOfWordsForTeams).fill(WordType.red),
-    ...new Array(numberOfWordsForTeams).fill(WordType.blue),
+    ...new Array(reds).fill(WordType.red),
+    ...new Array(blues).fill(WordType.blue),
     ...new Array(numberOfWordsForInocents).fill(WordType.inocent),
     WordType.assassin,
   ])

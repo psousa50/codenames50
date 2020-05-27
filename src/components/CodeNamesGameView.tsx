@@ -189,15 +189,15 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
             spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
           />
         </div>
-        {game.state === GameStates.idle && (
-          <SetupGameView
-            userId={userId}
-            game={game}
-            joinTeam={joinTeam}
-            setSpyMaster={setSpyMaster}
-            startGame={startGame}
-          />
-        )}
+
+        <SetupGameView
+          userId={userId}
+          game={game}
+          joinTeam={joinTeam}
+          setSpyMaster={setSpyMaster}
+          startGame={startGame}
+        />
+
         {game.state === GameStates.running && (
           <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />
         )}

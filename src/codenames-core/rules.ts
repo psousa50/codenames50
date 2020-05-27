@@ -7,6 +7,7 @@ export type ValidationError =
   | "playerMustHaveTeam"
   | "cantBeSpyMaster"
   | "mustBeSpyMaster"
+  | "spyMasterAlreadySet"
   | "mustHaveSpyMasters"
   | "mustHaveTwoPlayers"
   | "noHint"
@@ -26,6 +27,10 @@ const v = (valid: boolean, error: ValidationError) => (valid ? undefined : error
 const validate = (rules: GameRule[]): GameRule => game =>
   rules.reduce((acc, rule) => acc || rule(game), undefined as ValidationError | undefined)
 
+const or = (rules1: GameRule[], rules2: GameRule[]): GameRule => game => {
+  const r1 = validate(rules1)(game)
+  return r1 === undefined ? r1 : validate(rules2)(game)
+}
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
 const idle: GameRule = (game: CodeNamesGame) => v(game.state === GameStates.idle, "gameIsAlreadyRunning")
@@ -48,6 +53,9 @@ const playerIsNotSpyMaster = (userId: string): GameRule => game =>
 const hasBothSpyMasters: GameRule = game =>
   v(exists(game.redTeam.spyMaster) && exists(game.blueTeam.spyMaster), "mustHaveSpyMasters")
 
+const spyMasterIsNotSet = (team: Teams): GameRule => game =>
+  v(team === Teams.red && !exists(game.redTeam.spyMaster), "spyMasterAlreadySet")
+
 const hasAtleastTwoPlayesAtEachTeam: GameRule = game =>
   v(
     game.players.filter(p => p.team === Teams.red).length >= 2 &&
@@ -62,11 +70,11 @@ const hasMoreGuesses: GameRule = game => v(game.wordsRevealedCount < game.hintWo
 const wordIsNotRevealed = (row: number, col: number): GameRule => game =>
   v(!game.board[row][col].revealed, "alreadyRevealed")
 
-export const joinTeam = validate([idle])
+export const joinTeam = validate([])
 
 export const startGame = validate([idle, hasBothSpyMasters, hasAtleastTwoPlayesAtEachTeam])
 
-export const setSpyMaster = () => validate([idle])
+export const setSpyMaster = (team: Teams) => or([idle], [running, spyMasterIsNotSet(team)])
 
 export const sendHint = (userId: string) =>
   validate([running, isPlayersTurn(userId), doesNotHaveHint, playerIsSpyMaster(userId)])
