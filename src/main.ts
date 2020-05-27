@@ -59,6 +59,11 @@ export const buildBoard = (boardWidth: number, boardHeight: number, words: strin
   return R.range(0, boardHeight).map(r => wordTypes.slice(r * boardWidth, r * boardWidth + boardWidth))
 }
 
+export const resetGame = (timestamp: string, language: string, board: WordsBoard): GameAction => game => ({
+  ...createGame(game.gameId, game.userId, timestamp, language, board),
+  players: game.players,
+})
+
 export const addPlayer = (userId: string): GameAction => game => {
   const teamRedCount = game.players.filter(p => p.team === Teams.red).length
   const teamBlueCount = game.players.filter(p => p.team === Teams.blue).length
@@ -205,6 +210,7 @@ export const endGame = (winner: Teams | undefined) => (game: CodeNamesGame) => (
 export const gameActions = {
   createGame,
   buildBoard,
+  resetGame,
   addPlayer,
   removePlayer,
   joinTeam,

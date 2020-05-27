@@ -73,6 +73,56 @@ describe("createGame", () => {
   })
 })
 
+describe("resetGame", () => {
+  const gameId = "some-gameId"
+  const userId = "some-userId"
+  const timestamp = "some-timestamp"
+  const language = "some-language"
+  const board = { some: "board" } as any
+  const newTimestamp = "some-new-timestamp"
+  const newlanguage = "some-new-language"
+  const newBoard = { some: "new-board" } as any
+  it("resets the game to starting state, keeping the teams structure", () => {
+    const game = {
+      gameId,
+      timestamp,
+      userId,
+      players: [{ some: "players" }],
+      redTeam: {
+        spyMaster: "some-spy-master-1",
+        wordsLeft: 1,
+      },
+      blueTeam: {
+        spyMaster: "some-spy-master-2",
+        wordsLeft: 2,
+      },
+      hintWord: "some-word",
+      hintWordCount: 1,
+      wordsRevealedCount: 2,
+      state: GameStates.ended,
+      language,
+      board,
+    } as any
+
+    const resetedGame = {
+      gameId,
+      timestamp: newTimestamp,
+      userId,
+      players: [{ some: "players" }],
+      redTeam: {},
+      blueTeam: {},
+      hintWord: "",
+      hintWordCount: 0,
+      wordsRevealedCount: 0,
+      state: GameStates.idle,
+      language: newlanguage,
+      board: newBoard,
+    }
+
+    expect(GameActions.resetGame(newTimestamp, newlanguage, newBoard)(game)).toEqual(resetedGame)
+  })
+})
+
 describe("addPlayer", () => {
   it("adds a player to the game", () => {
     const userId = "some-user-id"
