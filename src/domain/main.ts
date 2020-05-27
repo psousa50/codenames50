@@ -253,7 +253,7 @@ export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput, Messages.SetSp
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
-      chain(checkRules(gameRules.setSpyMaster())),
+      chain(checkRules(gameRules.setSpyMaster(team))),
       chain(doAction(gameActions.setSpyMaster(userId, team))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
