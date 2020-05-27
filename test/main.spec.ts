@@ -13,9 +13,14 @@ describe("buildBoards", () => {
     const board = GameActions.buildBoard(5, 5, words)
 
     const flattenBoard = R.flatten(board)
-    expect(flattenBoard.filter(b => b.type === WordType.red).length).toBe(8)
-    expect(flattenBoard.filter(b => b.type === WordType.blue).length).toBe(8)
-    expect(flattenBoard.filter(b => b.type === WordType.inocent).length).toBe(8)
+    const reds = flattenBoard.filter(b => b.type === WordType.red).length
+    const blues = flattenBoard.filter(b => b.type === WordType.blue).length
+    expect(reds).toBeGreaterThanOrEqual(8)
+    expect(reds).toBeLessThanOrEqual(9)
+    expect(blues).toBeGreaterThanOrEqual(8)
+    expect(blues).toBeLessThanOrEqual(9)
+    expect(reds + blues).toBe(17)
+    expect(flattenBoard.filter(b => b.type === WordType.inocent).length).toBe(7)
     expect(flattenBoard.filter(b => b.type === WordType.assassin).length).toBe(1)
     expect(flattenBoard.filter(b => b.revealed).length).toBe(0)
   })
