@@ -20,6 +20,8 @@ const useStyles = makeStyles((theme: Theme) =>
     list: {
       textAlign: "center",
       padding: 0,
+      minHeight: "300px",
+      overflow: "scroll",
     },
     item: {
       textAlign: "center",
@@ -68,8 +70,12 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, team, teamConfig, players, 
       aria-labelledby="nested-list-subheader"
       subheader={
         <ListSubheader>
-          <Button style={styles.teamColor} onClick={() => joinTeam(team)}>
-            {`${teamName(team)} Team`}
+          <Button
+            disabled={teamConfig.spyMaster === userId || members.find(m => m.userId === userId) !== undefined}
+            color="primary"
+            onClick={() => joinTeam(team)}
+          >
+            {`Join ${teamName(team)} Team`}
           </Button>
         </ListSubheader>
       }
@@ -78,7 +84,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, team, teamConfig, players, 
       <ListItem divider alignItems="center" className={classes.item}>
         <ListItemText
           primary={
-            <Button disabled={teamConfig.spyMaster === userId} color="secondary" onClick={() => setSpyMaster(team)}>
+            <Button disabled={teamConfig.spyMaster === userId} color="primary" onClick={() => setSpyMaster(team)}>
               Set me as SpyMaster
             </Button>
           }
