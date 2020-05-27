@@ -30,27 +30,49 @@ describe("joinTeam", () => {
 })
 
 describe("setSpyMaster", () => {
-  const validGame: DeepPartial<CodeNamesGame> = {
+  const validIdleGame: DeepPartial<CodeNamesGame> = {
     state: GameStates.idle,
-    players: [
-      {
-        userId,
-      },
-    ],
   }
 
-  it("is valid for a valid game", () => {
-    expect(GameRules.setSpyMaster()(validGame as any)).toBeUndefined()
+  it("is valid for an idle game", () => {
+    expect(GameRules.setSpyMaster("user-id", Teams.red)(validIdleGame as any)).toBeUndefined()
+  })
+
+  const validRunningGame: DeepPartial<CodeNamesGame> = {
+    state: GameStates.running,
+    redTeam: {},
+    blueTeam: {},
+  }
+
+  it("is valid for a running game with no Spy Masters", () => {
+    expect(GameRules.setSpyMaster("user-id", Teams.red)(validRunningGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
-    it("if game is not idle", () => {
-      const game = {
-        ...validGame,
-        state: GameStates.running,
-      }
+    describe("when game is running", () => {
+      it("and red spyMaster is set", () => {
+        const game = {
+          ...validRunningGame,
+          redTeam: {
+            spyMaster: "some-user",
+          },
+        }
 
-      expect(GameRules.setSpyMaster()(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
+        expect(GameRules.setSpyMaster("user-id", Teams.red)(game as any)).toBe(GameRules.message("spyMasterAlreadySet"))
+      })
+
+      it("and blue spyMaster is set", () => {
+        const game = {
+          ...validRunningGame,
+          blueTeam: {
+            spyMaster: "some-user",
+          },
+        }
+
+        expect(GameRules.setSpyMaster("user-id", Teams.blue)(game as any)).toBe(
+          GameRules.message("spyMasterAlreadySet"),
+        )
+      })
     })
   })
 })
