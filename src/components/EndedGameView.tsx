@@ -1,4 +1,4 @@
-import { Button, makeStyles, Theme, Typography } from "@material-ui/core"
+import { Button, makeStyles, Theme } from "@material-ui/core"
 import React from "react"
 import { CodeNamesGame } from "../codenames-core/models"
 import { teamColor } from "../utils/styles"
@@ -31,13 +31,8 @@ export const EndedGameView: React.FC<EndedGameViewProps> = ({ game, nextGame }) 
 
   return (
     <div className={classes.container}>
-      <WordsLeftView game={game} />
+      <WordsLeftView game={game} text={`${teamName(game.winner)} Wins!`} team={game.winner} />
       <WordsBoardView board={game.board} revealWords={true} />
-      <div className={classes.container}>
-        <Typography style={styles.winText} component="h1" variant="h5">
-          {`${teamName(game.winner)} Wins!`}
-        </Typography>
-      </div>
       <Button size="small" color="secondary" onClick={() => nextGame()}>
         Next Game
       </Button>

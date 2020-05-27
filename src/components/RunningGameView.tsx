@@ -3,7 +3,6 @@ import React from "react"
 import { CodeNamesGame, Teams } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
 import * as Messages from "../messaging/messages"
-import { teamColor } from "../utils/styles"
 import { EmitMessage } from "./CodeNamesGameView"
 import { HintView } from "./HintView"
 import { Hint } from "./types"
@@ -34,14 +33,6 @@ interface RunningGameViewProps {
 export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, emitMessage }) => {
   const classes = useStyles()
 
-  const styles = {
-    turn: {
-      fontSize: 20,
-      fontWeight: "bold" as "bold",
-      color: teamColor(game.turn),
-    },
-  }
-
   const gameId = game.gameId
   const [hint, setHint] = React.useState<Hint>({ word: "" })
 
@@ -60,13 +51,12 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
 
   return (
     <div className={classes.container}>
-      <WordsLeftView game={game} />
+      <WordsLeftView game={game} text={game.turn === Teams.red ? "Red's Turn" : "Blue's turn"} team={game.turn} />
       <WordsBoardView
         board={game.board}
         onWordClick={onWordClick}
         revealWords={userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster}
       />
-      <div style={styles.turn}>{game.turn === Teams.red ? "Red's Turn" : "Blue's turn"}</div>
       <div className={classes.hint}>
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
         game.turn === getPlayer(game, userId)?.team &&
