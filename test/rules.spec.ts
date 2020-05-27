@@ -22,7 +22,7 @@ describe("setSpyMaster", () => {
   }
 
   it("is valid for an idle game", () => {
-    expect(GameRules.setSpyMaster("user-id", Teams.red)(validIdleGame as any)).toBeUndefined()
+    expect(GameRules.setSpyMaster(Teams.red)(validIdleGame as any)).toBeUndefined()
   })
 
   const validRunningGame: DeepPartial<CodeNamesGame> = {
@@ -32,7 +32,7 @@ describe("setSpyMaster", () => {
   }
 
   it("is valid for a running game with no Spy Masters", () => {
-    expect(GameRules.setSpyMaster("user-id", Teams.red)(validRunningGame as any)).toBeUndefined()
+    expect(GameRules.setSpyMaster(Teams.red)(validRunningGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -45,7 +45,7 @@ describe("setSpyMaster", () => {
           },
         }
 
-        expect(GameRules.setSpyMaster("user-id", Teams.red)(game as any)).toBe(GameRules.message("spyMasterAlreadySet"))
+        expect(GameRules.setSpyMaster(Teams.red)(game as any)).toBe(GameRules.message("spyMasterAlreadySet"))
       })
 
       it("and blue spyMaster is set", () => {
@@ -56,9 +56,7 @@ describe("setSpyMaster", () => {
           },
         }
 
-        expect(GameRules.setSpyMaster("user-id", Teams.blue)(game as any)).toBe(
-          GameRules.message("spyMasterAlreadySet"),
-        )
+        expect(GameRules.setSpyMaster(Teams.blue)(game as any)).toBe(GameRules.message("spyMasterAlreadySet"))
       })
     })
   })
