@@ -1,4 +1,4 @@
-import { makeStyles, Theme } from "@material-ui/core"
+import { Grid, makeStyles, Theme } from "@material-ui/core"
 import React from "react"
 import { CodeNamesGame, Teams } from "../codenames-core/models"
 import { teamColor } from "../utils/styles"
@@ -44,20 +44,18 @@ export const WordsLeftView: React.FC<WordsLeftViewProps> = ({ game, text, team }
   }
 
   return (
-    <div className={classes.container}>
-      <div className={classes.wordsLeftContainer}>
-        <div className={classes.wordsLeft}>
-          <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
+    <Grid container direction="row" justify="space-evenly" alignItems="center">
+      <Grid item>
+        <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
+      </Grid>
+      <Grid item>
+        <div style={styles.teamColor} className={classes.text}>
+          {text}
         </div>
-        {text && (
-          <div style={styles.teamColor} className={classes.text}>
-            {text}
-          </div>
-        )}
-        <div className={classes.wordsLeft}>
-          <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />
-        </div>
-      </div>
-    </div>
+      </Grid>
+      <Grid item>
+        <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />
+      </Grid>
+    </Grid>
   )
 }
