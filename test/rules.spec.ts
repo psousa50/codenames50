@@ -35,13 +35,12 @@ describe("setSpyMaster", () => {
     players: [
       {
         userId,
-        team: Teams.blue,
       },
     ],
   }
 
   it("is valid for a valid game", () => {
-    expect(GameRules.setSpyMaster(userId)(validGame as any)).toBeUndefined()
+    expect(GameRules.setSpyMaster()(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -51,21 +50,7 @@ describe("setSpyMaster", () => {
         state: GameStates.running,
       }
 
-      expect(GameRules.setSpyMaster(userId)(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
-    })
-
-    it("if player does not have team", () => {
-      const game = buildGame(validGame, {
-        ...validGame,
-        players: [
-          {
-            userId,
-            team: undefined,
-          },
-        ],
-      })
-
-      expect(GameRules.setSpyMaster(userId)(game as any)).toBe(GameRules.message("playerMustHaveTeam"))
+      expect(GameRules.setSpyMaster()(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
     })
   })
 })

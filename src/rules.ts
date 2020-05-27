@@ -69,7 +69,7 @@ export const joinTeam = validate([idle])
 
 export const startGame = validate([idle, hasBothSpyMasters, hasAtleastTwoPlayesAtEachTeam])
 
-export const setSpyMaster = (userId: string) => validate([idle, playerHasTeam(userId)])
+export const setSpyMaster = () => validate([idle])
 
 export const sendHint = (userId: string) =>
   validate([running, isPlayersTurn(userId), doesNotHaveHint, playerIsSpyMaster(userId)])

@@ -272,9 +272,8 @@ describe("joinTeam", () => {
 describe("setSpyMaster", () => {
   it("sets the spy master for team red", () => {
     const userId = "some-user-id"
-    const p1 = { userId, team: Teams.red }
     const game = {
-      players: [p1],
+      players: [{ userId, team: Teams.blue }],
       blueTeam: {
         spyMaster: "some-blue-user",
       },
@@ -284,7 +283,7 @@ describe("setSpyMaster", () => {
     }
 
     const expectedGame = {
-      players: [p1],
+      players: [{ userId, team: Teams.red }],
       blueTeam: {
         spyMaster: "some-blue-user",
       },
@@ -293,14 +292,13 @@ describe("setSpyMaster", () => {
       },
     }
 
-    expect(GameActions.setSpyMaster(userId)(game as any)).toEqual(expectedGame)
+    expect(GameActions.setSpyMaster(userId, Teams.red)(game as any)).toEqual(expectedGame)
   })
 
   it("sets the spy master for team blue", () => {
     const userId = "some-user-id"
-    const p1 = { userId, team: Teams.blue }
     const game = {
-      players: [p1],
+      players: [{ userId, team: Teams.red }],
       blueTeam: {
         spyMaster: "some-blue-user",
       },
@@ -310,7 +308,7 @@ describe("setSpyMaster", () => {
     }
 
     const expectedGame = {
-      players: [p1],
+      players: [{ userId, team: Teams.blue }],
       blueTeam: {
         spyMaster: userId,
       },
@@ -319,7 +317,7 @@ describe("setSpyMaster", () => {
       },
     }
 
-    expect(GameActions.setSpyMaster(userId)(game as any)).toEqual(expectedGame)
+    expect(GameActions.setSpyMaster(userId, Teams.blue)(game as any)).toEqual(expectedGame)
   })
 })
 
