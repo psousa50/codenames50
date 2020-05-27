@@ -1,63 +1,142 @@
-import { Button, createStyles, Grid, makeStyles, Theme } from "@material-ui/core"
+import {
+  Button,
+  createStyles,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  ListSubheader,
+  makeStyles,
+  Theme,
+} from "@material-ui/core"
 import React from "react"
 import { CodeNamesGame, Player, TeamConfig, Teams } from "../codenames-core/models"
+import { teamColor } from "../utils/styles"
 import { teamName } from "../utils/ui"
-import { UserView } from "./UserView"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    list: {
+      textAlign: "center",
+      padding: 0,
+    },
+    item: {
+      textAlign: "center",
+      padding: 0,
+    },
+    teamName: {
+      fontSize: 26,
+      fontWeight: "bold",
+    },
     spyMaster: {
-      padding: theme.spacing(3),
+      fontSize: 24,
+      height: "2rem",
+    },
+    noSpyMaster: {
+      fontSize: 14,
+      height: "2rem",
     },
     member: {
-      padding: theme.spacing(1),
+      fontSize: 12,
     },
   }),
 )
 
 interface TeamViewProps {
+  userId: string
   team: Teams
   teamConfig: TeamConfig
   players: Player[]
   joinTeam: (team: Teams) => void
+  setSpyMaster: (team: Teams) => void
 }
 
-const TeamView: React.FC<TeamViewProps> = ({ team, teamConfig, players, joinTeam }) => {
+const TeamView: React.FC<TeamViewProps> = ({ userId, team, teamConfig, players, joinTeam, setSpyMaster }) => {
   const classes = useStyles()
   const members = players.filter(p => p.team === team && p.userId !== teamConfig.spyMaster)
 
+  const styles = {
+    teamColor: {
+      color: teamColor(team),
+    },
+  }
+
   return (
-    <Grid container spacing={0} direction="column" alignItems="center" justify="center">
-      <div>
-        <Button size="small" color="secondary" onClick={() => joinTeam(team)}>
-          {`Join ${teamName(team)}`}
-        </Button>
-      </div>
-      <div className={classes.spyMaster}>
-        <UserView userId={teamConfig.spyMaster} team={team} spyMaster />
-      </div>
-      {members.map((m, i) => (
-        <div key={i} className={classes.member}>
-          <UserView userId={m.userId} team={team} />
-        </div>
+    <List
+      className={classes.list}
+      aria-labelledby="nested-list-subheader"
+      subheader={
+        <ListSubheader>
+          <Button style={styles.teamColor} onClick={() => joinTeam(team)}>
+            {`${teamName(team)} Team`}
+          </Button>
+        </ListSubheader>
+      }
+    >
+      <Divider variant="middle" component="li" />
+      <ListItem divider alignItems="center" className={classes.item}>
+        <ListItemText
+          primary={
+            <Button disabled={teamConfig.spyMaster === userId} color="secondary" onClick={() => setSpyMaster(team)}>
+              Set me as SpyMaster
+            </Button>
+          }
+        />
+      </ListItem>
+      <ListItem divider alignItems="center" className={classes.item}>
+        <ListItemText
+          primary={
+            teamConfig.spyMaster ? (
+              <div style={styles.teamColor} className={classes.spyMaster}>
+                {teamConfig.spyMaster}
+              </div>
+            ) : (
+              <div style={styles.teamColor} className={classes.noSpyMaster}>
+                (No SpyMaster yet)
+              </div>
+            )
+          }
+        />
+      </ListItem>
+      {members.map(m => (
+        <ListItem key={m.userId} alignItems="center" className={classes.item}>
+          <ListItemText style={styles.teamColor} className={classes.member} primary={m.userId} />
+        </ListItem>
       ))}
-    </Grid>
+    </List>
   )
 }
 
 interface TeamsViewProps {
+  userId: string
   game: CodeNamesGame
   joinTeam: (team: Teams) => void
+  setSpyMaster: (team: Teams) => void
 }
 
-export const TeamsView: React.FC<TeamsViewProps> = ({ game, joinTeam }) => {
+export const TeamsView: React.FC<TeamsViewProps> = ({ userId, game, joinTeam, setSpyMaster }) => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={6}>
-        <TeamView team={Teams.red} teamConfig={game.redTeam} players={game.players} joinTeam={joinTeam} />
+        <TeamView
+          userId={userId}
+          team={Teams.red}
+          teamConfig={game.redTeam}
+          players={game.players}
+          joinTeam={joinTeam}
+          setSpyMaster={setSpyMaster}
+        />
       </Grid>
       <Grid item xs={6}>
-        <TeamView team={Teams.blue} teamConfig={game.blueTeam} players={game.players} joinTeam={joinTeam} />
+        <TeamView
+          userId={userId}
+          team={Teams.blue}
+          teamConfig={game.blueTeam}
+          players={game.players}
+          joinTeam={joinTeam}
+          setSpyMaster={setSpyMaster}
+        />
       </Grid>
     </Grid>
   )

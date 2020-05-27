@@ -66,7 +66,10 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     type: Messages.GameMessageType,
     handler: (data: T) => void,
   ) => {
-    socket.on(type, handler)
+    socket.on(type, (data: T) => {
+      console.log("RECEIVED=====>", type, data)
+      return handler(data)
+    })
   }
 
   React.useEffect(() => {
@@ -111,8 +114,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     emitMessage(socket)(Messages.nextGame({ gameId }))
   }
 
-  const setSpyMaster = () => {
-    emitMessage(socket)(Messages.setSpyMaster({ gameId, userId }))
+  const setSpyMaster = (team: Teams) => {
+    emitMessage(socket)(Messages.setSpyMaster({ gameId, userId, team }))
   }
 
   const joinedGameHandler = (game: CodeNamesGame) => {
@@ -135,8 +138,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setGame(GameActions.startGame)
   }
 
-  const setSpyMasterHandler = ({ userId }: Messages.SetSpyMasterInput) => {
-    setGame(GameActions.setSpyMaster(userId))
+  const setSpyMasterHandler = ({ userId, team }: Messages.SetSpyMasterInput) => {
+    setGame(GameActions.setSpyMaster(userId, team))
   }
 
   const sendHintHandler = ({ hintWord, hintWordCount }: Messages.SendHintInput) => {
@@ -181,7 +184,13 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
           </div>
         </div>
         {game.state === GameStates.idle && (
-          <SetupGameView game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} startGame={startGame} />
+          <SetupGameView
+            userId={userId}
+            game={game}
+            joinTeam={joinTeam}
+            setSpyMaster={setSpyMaster}
+            startGame={startGame}
+          />
         )}
         {game.state === GameStates.running && (
           <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />

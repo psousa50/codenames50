@@ -5,21 +5,19 @@ import * as GameRules from "../codenames-core/rules"
 import { TeamsView } from "./TeamsView"
 
 interface SetupGameViewProps {
+  userId: string
   game: CodeNamesGame
   joinTeam: (team: Teams) => void
-  setSpyMaster: () => void
+  setSpyMaster: (team: Teams) => void
   startGame: () => void
 }
 
-export const SetupGameView: React.FC<SetupGameViewProps> = ({ game, joinTeam, setSpyMaster, startGame }) => {
+export const SetupGameView: React.FC<SetupGameViewProps> = ({ userId, game, joinTeam, setSpyMaster, startGame }) => {
   const canStartGame = GameRules.startGame(game) === undefined
 
   return (
     <Grid container spacing={0} direction="column" alignItems="center" justify="center">
-      <Button size="small" color="secondary" onClick={() => setSpyMaster()}>
-        I'm Spy Master!
-      </Button>
-      <TeamsView game={game} joinTeam={joinTeam} />
+      <TeamsView userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
       <Button disabled={!canStartGame} size="small" color="primary" onClick={() => startGame()}>
         start Game
       </Button>

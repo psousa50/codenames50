@@ -105,6 +105,7 @@ export type ChangeTurnOutput = CodeNamesGame
 export type SetSpyMasterInput = {
   gameId: string
   userId: string
+  team: Teams
 }
 
 export type SetSpyMasterOutput = CodeNamesGame
