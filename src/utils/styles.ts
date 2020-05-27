@@ -11,8 +11,8 @@ export const teamColor = (team?: Teams) => (team === Teams.red ? redColor : team
 const teamStyle = (color: string) =>
   withStyles({
     root: {
-      color: common.white,
       backgroundColor: color,
+      color: common.white,
     },
     outlined: {
       color,

@@ -1,6 +1,5 @@
-import { Button, Snackbar } from "@material-ui/core"
+import { Snackbar, Tooltip } from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
-import FileCopy from "@material-ui/icons/FileCopy"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import copy from "copy-to-clipboard"
 import React from "react"
@@ -31,11 +30,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexGrow: 1,
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   copyId: {
-    display: "flex",
-    flexGrow: 1,
-    alignSelf: "self-end",
+    fontSize: 10,
+    cursor: "pointer",
+    paddingBottom: "10px",
   },
 }))
 
@@ -76,8 +77,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     socket.connect()
     console.log("CONNECT", socket.id)
 
-    emitMessage(socket)(Messages.registerUserSocket({ userId }))
-
     addMessageHandler(socket, "connect", connectHandler)
 
     addMessageHandler(socket, "removePlayer", removePlayerHandler)
@@ -95,6 +94,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   }, [])
 
   const connectHandler = () => {
+    emitMessage(socket)(Messages.registerUserSocket({ userId }))
+
     joinGame()
   }
 
@@ -163,7 +164,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   }
 
   const copyGameId = () => {
-    copy(gameId)
+    const url = `${window.location.origin}/join?gameId=${gameId}`
+    copy(url)
   }
 
   return (
@@ -175,13 +177,17 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         </Alert>
       </Snackbar>
       <div className={classes.game}>
-        <div className={classes.header}>
-          <UserView userId={userId} team={getPlayer(game, userId)?.team} spyMaster />
-          <div className={classes.copyId}>
-            <Button onClick={() => copyGameId()}>
-              <FileCopy />
-            </Button>
+        <Tooltip title="Click to Copy" aria-label="add">
+          <div className={classes.copyId} onClick={() => copyGameId()}>
+            Copy game link
           </div>
+        </Tooltip>
+        <div className={classes.header}>
+          <UserView
+            userId={userId}
+            team={getPlayer(game, userId)?.team}
+            spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
+          />
         </div>
         {game.state === GameStates.idle && (
           <SetupGameView
