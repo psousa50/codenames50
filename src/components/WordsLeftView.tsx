@@ -1,43 +1,45 @@
-import { Theme } from "@material-ui/core"
-import { common } from "@material-ui/core/colors"
-import { createStyles, makeStyles } from "@material-ui/styles"
+import { makeStyles, Theme } from "@material-ui/core"
 import React from "react"
-import { Teams } from "../codenames-core/models"
-import { teamColor } from "../utils/styles"
+import { CodeNamesGame, Teams } from "../codenames-core/models"
+import { WordsLeft } from "./WordsLeft"
 
-interface WordsLeftProps {
-  team?: Teams
-  count?: number
+const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  wordsLeftContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  wordsLeft: {
+    paddingLeft: theme.spacing(10),
+    paddingRight: theme.spacing(10),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+  },
+}))
+
+interface WordsLeftViewProps {
+  game: CodeNamesGame
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    count: {
-      display: "flex",
-      width: theme.spacing(6),
-      height: theme.spacing(6),
-      border: `1px solid black`,
-      borderRadius: "50%",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: 32,
-      color: common.white,
-    },
-  }),
-)
-
-export const WordsLeft: React.FC<WordsLeftProps> = ({ count, team }) => {
+export const WordsLeftView: React.FC<WordsLeftViewProps> = ({ game }) => {
   const classes = useStyles()
 
-  const styles = {
-    count: {
-      backgroundColor: teamColor(team),
-    },
-  }
-
-  return count ? (
-    <div style={styles.count} className={classes.count}>
-      {count.toString()}
+  return (
+    <div className={classes.container}>
+      <div className={classes.wordsLeftContainer}>
+        <div className={classes.wordsLeft}>
+          <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
+        </div>
+        <div className={classes.wordsLeft}>
+          <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />
+        </div>
+      </div>
     </div>
-  ) : null
+  )
 }

@@ -8,7 +8,7 @@ import { EmitMessage } from "./CodeNamesGameView"
 import { HintView } from "./HintView"
 import { Hint } from "./types"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
-import { WordsLeft } from "./WordsLeftView"
+import { WordsLeftView } from "./WordsLeftView"
 
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
@@ -17,18 +17,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-  },
-  wordsLeftContainer: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  wordsLeft: {
-    paddingLeft: theme.spacing(10),
-    paddingRight: theme.spacing(10),
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
   },
   hint: {
     display: "flex",
@@ -72,14 +60,7 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
 
   return (
     <div className={classes.container}>
-      <div className={classes.wordsLeftContainer}>
-        <div className={classes.wordsLeft}>
-          <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
-        </div>
-        <div className={classes.wordsLeft}>
-          <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />
-        </div>
-      </div>
+      <WordsLeftView game={game} />
       <WordsBoardView
         board={game.board}
         onWordClick={onWordClick}

@@ -52,7 +52,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [error, setError] = React.useState("")
   const [game, setGame] = React.useState<CodeNamesGame>(
-    GameActions.createGame("", "", "", GameActions.buildBoard(5, 5, [])),
+    GameActions.createGame("", "", "", "", GameActions.buildBoard(5, 5, [])),
   )
 
   const emitMessage = (socket: SocketIOClient.Socket): EmitMessage => message => {
@@ -80,6 +80,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     addMessageHandler(socket, "removePlayer", removePlayerHandler)
     addMessageHandler(socket, "joinedGame", joinedGameHandler)
     addMessageHandler(socket, "joinTeam", joinTeamHandler)
+    addMessageHandler(socket, "nextGame", nextGameHandler)
     addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
     addMessageHandler(socket, "startGame", startGameHandler)
     addMessageHandler(socket, "sendHint", sendHintHandler)
@@ -106,6 +107,10 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     emitMessage(socket)(Messages.startGame({ gameId, userId }))
   }
 
+  const nextGame = () => {
+    emitMessage(socket)(Messages.nextGame({ gameId }))
+  }
+
   const setSpyMaster = () => {
     emitMessage(socket)(Messages.setSpyMaster({ gameId, userId }))
   }
@@ -120,6 +125,10 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const joinTeamHandler = ({ userId, team }: Messages.JoinTeamInput) => {
     setGame(GameActions.joinTeam(userId, team))
+  }
+
+  const nextGameHandler = (game: CodeNamesGame) => {
+    setGame(game)
   }
 
   const startGameHandler = () => {
@@ -177,7 +186,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         {game.state === GameStates.running && (
           <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />
         )}
-        {game.state === GameStates.ended && <EndedGameView game={game} />}
+        {game.state === GameStates.ended && <EndedGameView game={game} nextGame={nextGame} />}
       </div>
     </div>
   )

@@ -62,7 +62,7 @@ export const HintView: React.FC<HintViewProps> = ({ hint, onChange, sendHint, en
                 autoFocus
               />
               <Button
-                disabled={hint.word.trim().length === 0 || hint.count === 0}
+                disabled={hint.word.trim().length === 0 || hint.count === undefined}
                 color="primary"
                 onClick={() => hint.count && sendHint && sendHint(hint)}
               >
