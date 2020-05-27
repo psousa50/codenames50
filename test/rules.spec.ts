@@ -31,8 +31,20 @@ describe("setSpyMaster", () => {
     blueTeam: {},
   }
 
-  it("is valid for a running game with no Spy Masters", () => {
-    expect(GameRules.setSpyMaster(Teams.red)(validRunningGame as any)).toBeUndefined()
+  it("is valid for a running game with no red Spy Master", () => {
+    const game = {
+      ...validRunningGame,
+    }
+
+    expect(GameRules.setSpyMaster(Teams.red)(game as any)).toBeUndefined()
+  })
+
+  it("is valid for a running game with no blue Spy Master", () => {
+    const game = {
+      ...validRunningGame,
+    }
+
+    expect(GameRules.setSpyMaster(Teams.blue)(game as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -48,7 +60,7 @@ describe("setSpyMaster", () => {
         expect(GameRules.setSpyMaster(Teams.red)(game as any)).toBe(GameRules.message("spyMasterAlreadySet"))
       })
 
-      it("and blue spyMaster is set", () => {
+      it.only("and blue spyMaster is set", () => {
         const game = {
           ...validRunningGame,
           blueTeam: {
