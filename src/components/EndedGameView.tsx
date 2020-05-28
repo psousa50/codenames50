@@ -6,6 +6,7 @@ import { WordsBoardView } from "./WordsBoardView"
 import { WordsLeftView } from "./WordsLeftView"
 
 interface EndedGameViewProps {
+  userId: string
   game: CodeNamesGame
   nextGame: () => void
 }
@@ -20,13 +21,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-export const EndedGameView: React.FC<EndedGameViewProps> = ({ game, nextGame }) => {
+export const EndedGameView: React.FC<EndedGameViewProps> = ({ userId, game, nextGame }) => {
   const classes = useStyles()
 
   return (
     <div className={classes.container}>
       <WordsLeftView game={game} text={`${teamName(game.winner)} Wins!`} team={game.winner} />
-      <WordsBoardView board={game.board} revealWords={true} />
+      <WordsBoardView userId={userId} game={game} board={game.board} revealWords={true} />
       <Button size="small" color="secondary" onClick={() => nextGame()}>
         New Game
       </Button>

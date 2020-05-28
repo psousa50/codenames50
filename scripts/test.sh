@@ -1,8 +1,8 @@
 #!/bin/bash
 
-gameID=$1
+JOIN_URL=http://localhost:3000/join?gameId=4cb9e55f-bb2e-453e-8da3-0b244e4678ef
+GAME_URL=${JOIN_URL/join/game}
 
-open "http://localhost:3000/game?gameId=$gameID&userId=Pedro"
-open "http://localhost:3000/game?gameId=$gameID&userId=Carla"
-open "http://localhost:3000/game?gameId=$gameID&userId=Vasco"
-open "http://localhost:3000/game?gameId=$gameID&userId=Guiga"
+open "$GAME_URL&userId=Carla"
+open "$GAME_URL&userId=Vasco"
+open "$GAME_URL&userId=Guiga"

@@ -201,7 +201,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         {game.state === GameStates.running && (
           <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />
         )}
-        {game.state === GameStates.ended && <EndedGameView game={game} nextGame={nextGame} />}
+        {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} nextGame={nextGame} />}
       </div>
     </div>
   )

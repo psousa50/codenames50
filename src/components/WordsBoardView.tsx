@@ -2,7 +2,8 @@ import { common, grey } from "@material-ui/core/colors"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import * as R from "ramda"
 import React from "react"
-import { BoardWord, WordsBoard, WordType } from "../codenames-core/models"
+import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "../codenames-core/models"
+import * as GameRules from "../codenames-core/rules"
 import { blueColor, redColor } from "../utils/styles"
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
@@ -26,19 +27,20 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderRadius: "5px",
     boxShadow: "inset 0 0 10px #000000",
     backgroundColor: grey[200],
-    cursor: "pointer",
     fontSize: "8px",
     padding: "25px 10px 25px 10px",
   },
 }))
 
 interface WordsBoardViewProps {
+  userId: string
+  game: CodeNamesGame
   board: WordsBoard
   revealWords: boolean
   onWordClick?: OnWordClick
 }
 
-export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordClick, revealWords }) => {
+export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ userId, game, board, onWordClick, revealWords }) => {
   const classes = useStyles()
   const s = 5
 
@@ -50,6 +52,8 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordCli
             {board[row].map((word, col) => (
               <td key={col}>
                 <WordView
+                  userId={userId}
+                  game={game}
                   word={word}
                   revealWords={revealWords}
                   onWordClick={onWordClick || (() => {})}
@@ -66,6 +70,8 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ board, onWordCli
 }
 
 interface WordViewProps {
+  userId: string
+  game: CodeNamesGame
   word: BoardWord
   row: number
   col: number
@@ -73,10 +79,15 @@ interface WordViewProps {
   onWordClick: OnWordClick
 }
 
-const WordView: React.FC<WordViewProps> = ({ word, revealWords, onWordClick, row, col }) => {
+const WordView: React.FC<WordViewProps> = ({ userId, game, word, revealWords, onWordClick, row, col }) => {
   const classes = useStyles()
 
+  const canReveal = GameRules.revealWord(row, col, userId)(game) === undefined
+
   const styles = {
+    normal: {
+      cursor: canReveal ? "pointer" : undefined,
+    },
     revealed: {
       backgroundColor: wordColors[word.type],
       color: word.type === WordType.inocent ? common.black : common.white,
@@ -84,9 +95,11 @@ const WordView: React.FC<WordViewProps> = ({ word, revealWords, onWordClick, row
     },
   }
 
+  const revealStyle = revealWords || word.revealed ? styles.revealed : undefined
+
   return (
     <div
-      style={revealWords || word.revealed ? styles.revealed : undefined}
+      style={{ ...styles.normal, ...revealStyle }}
       className={classes.cell}
       onClick={() => onWordClick(word, row, col)}
     >
