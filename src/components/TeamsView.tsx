@@ -74,11 +74,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
       subheader={
         <ListSubheader>
           <Button
-            disabled={
-              !canSetSpyMaster ||
-              teamConfig.spyMaster === userId ||
-              members.find(m => m.userId === userId) !== undefined
-            }
+            disabled={teamConfig.spyMaster === userId || members.find(m => m.userId === userId) !== undefined}
             color="primary"
             onClick={() => joinTeam(team)}
           >
@@ -91,7 +87,11 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
       <ListItem divider alignItems="center" className={classes.item}>
         <ListItemText
           primary={
-            <Button disabled={teamConfig.spyMaster === userId} color="primary" onClick={() => setSpyMaster(team)}>
+            <Button
+              disabled={!canSetSpyMaster || teamConfig.spyMaster === userId}
+              color="primary"
+              onClick={() => setSpyMaster(team)}
+            >
               Set me as SpyMaster
             </Button>
           }
