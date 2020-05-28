@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core"
 import React from "react"
 import { CodeNamesGame, Player, TeamConfig, Teams } from "../codenames-core/models"
+import * as GameRules from "../codenames-core/rules"
 import { teamColor } from "../utils/styles"
 import { teamName } from "../utils/ui"
 
@@ -20,7 +21,6 @@ const useStyles = makeStyles((theme: Theme) =>
     list: {
       textAlign: "center",
       padding: 0,
-      minHeight: "300px",
       overflow: "scroll",
     },
     item: {
@@ -47,6 +47,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface TeamViewProps {
   userId: string
+  game: CodeNamesGame
   team: Teams
   teamConfig: TeamConfig
   players: Player[]
@@ -54,7 +55,7 @@ interface TeamViewProps {
   setSpyMaster: (team: Teams) => void
 }
 
-const TeamView: React.FC<TeamViewProps> = ({ userId, team, teamConfig, players, joinTeam, setSpyMaster }) => {
+const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, players, joinTeam, setSpyMaster }) => {
   const classes = useStyles()
   const members = players.filter(p => p.team === team && p.userId !== teamConfig.spyMaster)
 
@@ -64,6 +65,8 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, team, teamConfig, players, 
     },
   }
 
+  const canSetSpyMaster = GameRules.setSpyMaster(team)(game) === undefined
+
   return (
     <List
       className={classes.list}
@@ -71,7 +74,11 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, team, teamConfig, players, 
       subheader={
         <ListSubheader>
           <Button
-            disabled={teamConfig.spyMaster === userId || members.find(m => m.userId === userId) !== undefined}
+            disabled={
+              !canSetSpyMaster ||
+              teamConfig.spyMaster === userId ||
+              members.find(m => m.userId === userId) !== undefined
+            }
             color="primary"
             onClick={() => joinTeam(team)}
           >
@@ -127,6 +134,7 @@ export const TeamsView: React.FC<TeamsViewProps> = ({ userId, game, joinTeam, se
       <Grid item xs={6}>
         <TeamView
           userId={userId}
+          game={game}
           team={Teams.red}
           teamConfig={game.redTeam}
           players={game.players}
@@ -137,6 +145,7 @@ export const TeamsView: React.FC<TeamsViewProps> = ({ userId, game, joinTeam, se
       <Grid item xs={6}>
         <TeamView
           userId={userId}
+          game={game}
           team={Teams.blue}
           teamConfig={game.blueTeam}
           players={game.players}

@@ -27,7 +27,24 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderRadius: "5px",
     boxShadow: "inset 0 0 10px #000000",
     backgroundColor: grey[200],
-    fontSize: "8px",
+    [theme.breakpoints.down(400)]: {
+      fontSize: "4px",
+    },
+    [theme.breakpoints.between(400, 600)]: {
+      fontSize: "6px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "10px",
+    },
+    [theme.breakpoints.up("md")]: {
+      fontSize: "14px",
+    },
+    [theme.breakpoints.up("lg")]: {
+      fontSize: "16px",
+    },
+    [theme.breakpoints.up("xl")]: {
+      fontSize: "20px",
+    },
     padding: "25px 10px 25px 10px",
   },
 }))
