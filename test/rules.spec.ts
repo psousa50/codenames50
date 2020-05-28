@@ -60,7 +60,7 @@ describe("setSpyMaster", () => {
         expect(GameRules.setSpyMaster(Teams.red)(game as any)).toBe(GameRules.message("spyMasterAlreadySet"))
       })
 
-      it.only("and blue spyMaster is set", () => {
+      it("and blue spyMaster is set", () => {
         const game = {
           ...validRunningGame,
           blueTeam: {
