@@ -69,7 +69,14 @@ export const resetGame = (timestamp: string, language: string, board: WordsBoard
 export const addPlayer = (userId: string): GameAction => game => {
   const teamRedCount = game.players.filter(p => p.team === Teams.red).length
   const teamBlueCount = game.players.filter(p => p.team === Teams.blue).length
-  const team = teamBlueCount < teamRedCount ? Teams.blue : Teams.red
+  const team =
+    game.redTeam.spyMaster === userId
+      ? Teams.red
+      : game.blueTeam.spyMaster === userId
+      ? Teams.blue
+      : teamBlueCount < teamRedCount
+      ? Teams.blue
+      : Teams.red
 
   return game.players.find(p => p.userId === userId)
     ? game
@@ -83,14 +90,6 @@ export const removePlayer = (userId: string): GameAction => game => {
   return {
     ...game,
     players: game.players.filter(p => p.userId !== userId),
-    redTeam: {
-      ...game.redTeam,
-      spyMaster: game.redTeam.spyMaster === userId ? undefined : game.redTeam.spyMaster,
-    },
-    blueTeam: {
-      ...game.blueTeam,
-      spyMaster: game.blueTeam.spyMaster === userId ? undefined : game.blueTeam.spyMaster,
-    },
   }
 }
 
