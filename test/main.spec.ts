@@ -134,15 +134,49 @@ describe("addPlayer", () => {
     const p1 = { userId }
     const game = {
       players: [p1],
+      redTeam: {},
+      blueTeam: {},
     }
 
     const userToAddId = "user-to-add"
     const p2 = { userId: userToAddId, team: Teams.red }
     const expectedGame = {
       players: [p1, p2],
+      redTeam: {},
+      blueTeam: {},
     }
 
     expect(GameActions.addPlayer(userToAddId)(game as any)).toEqual(expectedGame)
+  })
+
+  it("adds a player to the red team if it is assigned as SpyMaster", () => {
+    const userId = "some-user-id"
+    const game = {
+      players: [],
+      redTeam: {
+        spyMaster: userId,
+      },
+      blueTeam: {},
+    }
+
+    const updatedGame = GameActions.addPlayer(userId)(game as any)
+
+    expect(updatedGame.players).toEqual([{ userId, team: Teams.red }])
+  })
+
+  it("adds a player to the blue team if it is assigned as SpyMaster", () => {
+    const userId = "some-user-id"
+    const game = {
+      players: [],
+      redTeam: {},
+      blueTeam: {
+        spyMaster: userId,
+      },
+    }
+
+    const updatedGame = GameActions.addPlayer(userId)(game as any)
+
+    expect(updatedGame.players).toEqual([{ userId, team: Teams.blue }])
   })
 
   it("adds the player to the team with less elements", () => {
@@ -151,64 +185,19 @@ describe("addPlayer", () => {
     const p3 = { userId: "some-user-id-3", team: Teams.blue }
     const game = {
       players: [p1, p2, p3],
+      redTeam: {},
+      blueTeam: {},
     }
 
     const userToAddId = "user-to-add"
     const p4 = { userId: userToAddId, team: Teams.blue }
     const expectedGame = {
       players: [p1, p2, p3, p4],
+      redTeam: {},
+      blueTeam: {},
     }
 
     expect(GameActions.addPlayer(userToAddId)(game as any)).toEqual(expectedGame)
-  })
-
-  describe("removePlayer", () => {
-    it("removes a player from the game", () => {
-      const userId = "some-user-id"
-      const p1 = { userId }
-      const p2 = { userId: "some-user-id-2" }
-      const game = {
-        players: [p1, p2],
-        redTeam: {},
-        blueTeam: {},
-      }
-
-      const expectedGame = {
-        players: [p2],
-        redTeam: {},
-        blueTeam: {},
-      }
-
-      expect(GameActions.removePlayer(userId)(game as any)).toEqual(expectedGame)
-    })
-
-    it("removes red spyMaster if player is removed", () => {
-      const userId = "some-user-id"
-      const p1 = { userId }
-      const game = {
-        players: [p1],
-        redTeam: {
-          spyMaster: userId,
-        },
-        blueTeam: {},
-      }
-
-      expect(GameActions.removePlayer(userId)(game as any).redTeam.spyMaster).toBeUndefined()
-    })
-
-    it("removes blue spyMaster if player is removed", () => {
-      const userId = "some-user-id"
-      const p1 = { userId }
-      const game = {
-        players: [p1],
-        redTeam: {},
-        blueTeam: {
-          spyMaster: userId,
-        },
-      }
-
-      expect(GameActions.removePlayer(userId)(game as any).blueTeam.spyMaster).toBeUndefined()
-    })
   })
 
   it("does not add player if it is already there", () => {
@@ -216,13 +205,66 @@ describe("addPlayer", () => {
     const p1 = { userId }
     const game = {
       players: [p1],
+      redTeam: {},
+      blueTeam: {},
     }
 
     const expectedGame = {
       players: [p1],
+      redTeam: {},
+      blueTeam: {},
     }
 
     expect(GameActions.addPlayer(userId)(game as any)).toEqual(expectedGame)
+  })
+})
+
+describe("removePlayer", () => {
+  it("removes a player from the game", () => {
+    const userId = "some-user-id"
+    const p1 = { userId }
+    const p2 = { userId: "some-user-id-2" }
+    const game = {
+      players: [p1, p2],
+      redTeam: {},
+      blueTeam: {},
+    }
+
+    const expectedGame = {
+      players: [p2],
+      redTeam: {},
+      blueTeam: {},
+    }
+
+    expect(GameActions.removePlayer(userId)(game as any)).toEqual(expectedGame)
+  })
+
+  it("does not clear red spyMaster if player is removed", () => {
+    const userId = "some-user-id"
+    const p1 = { userId }
+    const game = {
+      players: [p1],
+      redTeam: {
+        spyMaster: userId,
+      },
+      blueTeam: {},
+    }
+
+    expect(GameActions.removePlayer(userId)(game as any).redTeam.spyMaster).toBe(userId)
+  })
+
+  it("does not clear blue spyMaster if player is removed", () => {
+    const userId = "some-user-id"
+    const p1 = { userId }
+    const game = {
+      players: [p1],
+      redTeam: {},
+      blueTeam: {
+        spyMaster: userId,
+      },
+    }
+
+    expect(GameActions.removePlayer(userId)(game as any).blueTeam.spyMaster).toBe(userId)
   })
 })
 
