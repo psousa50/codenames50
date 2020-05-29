@@ -2,6 +2,7 @@ import { common, grey } from "@material-ui/core/colors"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import * as R from "ramda"
 import React from "react"
+import { animated as a, useSpring } from "react-spring"
 import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
 import { blueColor, redColor } from "../utils/styles"
@@ -22,11 +23,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: "10px",
   },
   cell: {
-    border: "2px solid white",
+    position: "relative",
+    display: "flex",
+    flexGrow: 1,
+    padding: "50px 10px 50px 10px",
+  },
+  word: {
+    display: "flex",
+    flex: 1,
     textAlign: "center",
-    borderRadius: "5px",
-    boxShadow: "inset 0 0 10px #000000",
-    backgroundColor: grey[200],
+    justifyContent: "center",
     [theme.breakpoints.down(400)]: {
       fontSize: "4px",
     },
@@ -45,7 +51,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     [theme.breakpoints.up("xl")]: {
       fontSize: "20px",
     },
-    padding: "25px 10px 25px 10px",
   },
 }))
 
@@ -103,7 +108,19 @@ const WordView: React.FC<WordViewProps> = ({ userId, game, word, revealWords, on
 
   const styles = {
     normal: {
+      backgroundColor: grey[200],
       cursor: canReveal ? "pointer" : undefined,
+      position: "absolute" as "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      flex: 1,
+      alignItems: "center",
+      border: "2px solid white",
+      borderRadius: "5px",
+      boxShadow: "inset 0 0 10px #000000",
     },
     revealed: {
       backgroundColor: wordColors[word.type],
@@ -112,15 +129,37 @@ const WordView: React.FC<WordViewProps> = ({ userId, game, word, revealWords, on
     },
   }
 
-  const revealStyle = revealWords || word.revealed ? styles.revealed : undefined
+  const rw = revealWords || word.revealed
+
+  const { transform, opacity } = useSpring({
+    opacity: rw ? 1 : 0,
+    transform: `perspective(600px) rotateX(${rw ? 180 : 0}deg)`,
+    config: { mass: 5, tension: 500, friction: 80 },
+  })
 
   return (
-    <div
-      style={{ ...styles.normal, ...revealStyle }}
-      className={classes.cell}
-      onClick={() => onWordClick(word, row, col)}
-    >
-      {word.word.toUpperCase()}
+    <div className={classes.cell} onClick={() => onWordClick(word, row, col)}>
+      <a.div
+        style={{
+          opacity: opacity.interpolate(o => 1 - (typeof o === "number" ? o : Number.parseInt(o || "0"))),
+          transform,
+          ...styles.normal,
+        }}
+        className={classes.word}
+      >
+        {word.word.toUpperCase()}
+      </a.div>
+      <a.div
+        style={{
+          opacity,
+          transform: transform.interpolate(t => `${t} rotateX(180deg)`),
+          ...styles.normal,
+          ...styles.revealed,
+        }}
+        className={classes.word}
+      >
+        {word.word.toUpperCase()}
+      </a.div>
     </div>
   )
 }

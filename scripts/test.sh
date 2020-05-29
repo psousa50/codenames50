@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JOIN_URL=http://localhost:3000/join?gameId=4cb9e55f-bb2e-453e-8da3-0b244e4678ef
+JOIN_URL=http://localhost:3000/join?gameId=cde20ffe-51d0-453c-ba4a-62dcf549a075
 GAME_URL=${JOIN_URL/join/game}
 
 open "$GAME_URL&userId=Carla"
