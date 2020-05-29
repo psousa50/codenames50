@@ -88,7 +88,7 @@ export const sendHint = (userId: string) =>
 export const changeTurn = (userId: string) =>
   validIfAll([running, hasHint, isPlayersTurn(userId), playerIsNotSpyMaster(userId), hasAtLeastOneGuess])
 
-export const revealWord2 = (row: number, col: number, userId: string) =>
+export const revealWord = (row: number, col: number, userId: string) =>
   validIfAll([
     running,
     isPlayersTurn(userId),
@@ -97,8 +97,6 @@ export const revealWord2 = (row: number, col: number, userId: string) =>
     hasMoreGuesses,
     wordIsNotRevealed(row, col),
   ])
-
-export const revealWord = (row: number, col: number, userId: string) => (game: CodeNamesGame) => undefined
 
 export const gameRules = {
   joinTeam,
