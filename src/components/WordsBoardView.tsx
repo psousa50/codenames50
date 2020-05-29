@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: "relative",
     display: "flex",
     flexGrow: 1,
-    padding: "50px 10px 50px 10px",
+    padding: "2rem 0.1rem 2rem 0.1rem",
   },
   word: {
     display: "flex",
@@ -34,10 +34,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     textAlign: "center",
     justifyContent: "center",
     [theme.breakpoints.down(400)]: {
-      fontSize: "4px",
+      fontSize: "6px",
     },
     [theme.breakpoints.between(400, 600)]: {
-      fontSize: "6px",
+      fontSize: "8px",
     },
     [theme.breakpoints.up("sm")]: {
       fontSize: "10px",

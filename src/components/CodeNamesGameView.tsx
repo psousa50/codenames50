@@ -1,5 +1,13 @@
-import { Snackbar, Tooltip } from "@material-ui/core"
+import {
+  ExpansionPanel,
+  ExpansionPanelDetails,
+  ExpansionPanelSummary,
+  Snackbar,
+  Tooltip,
+  Typography,
+} from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import copy from "copy-to-clipboard"
 import React from "react"
@@ -32,6 +40,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+  },
+  teams: {
+    marginTop: "2rem",
+    marginBottom: "2rem",
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular,
   },
   copyId: {
     fontSize: 10,
@@ -190,17 +206,27 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
           />
         </div>
 
-        <SetupGameView
-          userId={userId}
-          game={game}
-          joinTeam={joinTeam}
-          setSpyMaster={setSpyMaster}
-          startGame={startGame}
-        />
+        <div className={classes.teams}>
+          <ExpansionPanel>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+              <Typography className={classes.heading}>Teams</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <SetupGameView
+                userId={userId}
+                game={game}
+                joinTeam={joinTeam}
+                setSpyMaster={setSpyMaster}
+                startGame={startGame}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
+        </div>
 
         {game.state === GameStates.running && (
           <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />
         )}
+
         {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} nextGame={nextGame} />}
       </div>
     </div>
