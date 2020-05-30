@@ -1,8 +1,9 @@
 import { makeStyles, Theme } from "@material-ui/core"
 import React from "react"
-import { CodeNamesGame, Teams } from "../codenames-core/models"
+import { CodeNamesGame } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
 import * as Messages from "../messaging/messages"
+import { teamName } from "../utils/ui"
 import { EmitMessage } from "./CodeNamesGameView"
 import { HintView } from "./HintView"
 import { Hint } from "./types"
@@ -52,7 +53,7 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
 
   return (
     <div className={classes.container}>
-      <WordsLeftView game={game} text={game.turn === Teams.red ? "Red's Turn" : "Blue's turn"} team={game.turn} />
+      <WordsLeftView game={game} text={`${teamName(game.turn)}'s turn`} team={game.turn} />
       <WordsBoardView userId={userId} game={game} board={game.board} onWordClick={onWordClick} revealWords={false} />
       <div className={classes.hint}>
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&

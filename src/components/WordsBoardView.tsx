@@ -5,36 +5,31 @@ import React from "react"
 import { animated as a, useSpring } from "react-spring"
 import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
-import { blueColor, dimmedBlueColor, dimmedRedColor, redColor } from "../utils/styles"
+import { blueColor, blueColorLight, inocentColor, inocentColorLight, redColor, redColorLight } from "../utils/styles"
+
+const background = common.white
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
 
 const wordColors = {
-  [WordType.red]: redColor,
-  [WordType.blue]: blueColor,
-  [WordType.inocent]: "#f0f4c3",
-  [WordType.assassin]: common.black,
+  [WordType.red]: [background, common.black],
+  [WordType.blue]: [background, common.black],
+  [WordType.inocent]: [background, common.black],
+  [WordType.assassin]: [background, common.black],
 }
 
-const dimmedWordColors = {
-  [WordType.red]: dimmedRedColor,
-  [WordType.blue]: dimmedBlueColor,
-  [WordType.inocent]: grey[200],
-  [WordType.assassin]: common.black,
+const wordRevealedColors = {
+  [WordType.red]: [redColor, common.white],
+  [WordType.blue]: [blueColor, common.white],
+  [WordType.inocent]: [inocentColor, common.black],
+  [WordType.assassin]: [common.black, common.white],
 }
 
-const wordTextColors = {
-  [WordType.red]: common.white,
-  [WordType.blue]: common.white,
-  [WordType.inocent]: common.black,
-  [WordType.assassin]: common.white,
-}
-
-const dimmedWordTextColors = {
-  [WordType.red]: redColor,
-  [WordType.blue]: blueColor,
-  [WordType.inocent]: common.black,
-  [WordType.assassin]: common.white,
+const wordSpyMasterColors = {
+  [WordType.red]: [redColorLight, common.white],
+  [WordType.blue]: [blueColorLight, common.white],
+  [WordType.inocent]: [inocentColorLight, common.black],
+  [WordType.assassin]: [common.black, common.white],
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -150,17 +145,22 @@ const WordView: React.FC<WordViewProps> = ({
 
   const canReveal = GameRules.revealWord(row, col, userId)(game) === undefined
 
+  const rw = revealWords || word.revealed
+  const colors = (forSpyMaster ? wordSpyMasterColors : wordColors)[word.type]
+  const revealedColors = wordRevealedColors[word.type]
+
   const styles = {
     normal: {
       cursor: canReveal ? "pointer" : undefined,
+      backgroundColor: colors[0],
+      color: colors[1],
     },
     revealed: {
-      backgroundColor: forSpyMaster && !word.revealed ? dimmedWordColors[word.type] : wordColors[word.type],
-      color: forSpyMaster && !word.revealed ? dimmedWordTextColors[word.type] : wordTextColors[word.type],
+      // backgroundColor: forSpyMaster && !word.revealed ? dimmedWordColors[word.type] : wordColors[word.type],
+      backgroundColor: revealedColors[0],
+      color: revealedColors[1],
     },
   }
-
-  const rw = revealWords || forSpyMaster || word.revealed
 
   const { transform, opacity } = useSpring({
     opacity: rw ? 1 : 0,

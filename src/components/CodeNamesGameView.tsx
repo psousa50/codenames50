@@ -18,7 +18,9 @@ const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p =
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
+    flow: 1,
     flexDirection: "column",
+    backgroundColor: "#8eacbb",
     height: "100vh",
   },
   game: {
