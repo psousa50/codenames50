@@ -23,6 +23,20 @@ const dimmedWordColors = {
   [WordType.assassin]: common.black,
 }
 
+const wordTextColors = {
+  [WordType.red]: common.white,
+  [WordType.blue]: common.white,
+  [WordType.inocent]: common.black,
+  [WordType.assassin]: common.white,
+}
+
+const dimmedWordTextColors = {
+  [WordType.red]: redColor,
+  [WordType.blue]: blueColor,
+  [WordType.inocent]: common.black,
+  [WordType.assassin]: common.white,
+}
+
 const useStyles = makeStyles((theme: Theme) => ({
   table: {
     width: "100vw",
@@ -49,6 +63,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     border: `0.1rem solid #37474f`,
     borderRadius: "3px",
     textAlign: "center",
+    userSelect: "none",
     [theme.breakpoints.down(400)]: {
       fontSize: "8px",
     },
@@ -141,7 +156,7 @@ const WordView: React.FC<WordViewProps> = ({
     },
     revealed: {
       backgroundColor: forSpyMaster && !word.revealed ? dimmedWordColors[word.type] : wordColors[word.type],
-      color: word.type === WordType.inocent ? common.black : common.white,
+      color: forSpyMaster && !word.revealed ? dimmedWordTextColors[word.type] : wordTextColors[word.type],
     },
   }
 
