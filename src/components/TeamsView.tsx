@@ -14,14 +14,12 @@ import React from "react"
 import { CodeNamesGame, Player, TeamConfig, Teams } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
 import { teamColor } from "../utils/styles"
-import { teamName } from "../utils/ui"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     list: {
       textAlign: "center",
       padding: 0,
-      overflow: "scroll",
     },
     item: {
       textAlign: "center",
@@ -32,12 +30,13 @@ const useStyles = makeStyles((theme: Theme) =>
       fontWeight: "bold",
     },
     spyMaster: {
-      fontSize: 24,
+      fontSize: 20,
       height: "2rem",
     },
     noSpyMaster: {
-      fontSize: 14,
-      height: "2rem",
+      marginTop: "0.5rem",
+      fontSize: 12,
+      height: "1.5rem",
     },
     member: {
       fontSize: 12,
@@ -78,7 +77,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
             color="primary"
             onClick={() => joinTeam(team)}
           >
-            {`Join ${teamName(team)} Team`}
+            Join
           </Button>
         </ListSubheader>
       }
@@ -92,7 +91,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
               color="primary"
               onClick={() => setSpyMaster(team)}
             >
-              Set me as SpyMaster
+              Spy Master
             </Button>
           }
         />
@@ -106,7 +105,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
               </div>
             ) : (
               <div style={styles.teamColor} className={classes.noSpyMaster}>
-                (No SpyMaster yet)
+                (No SpyMaster)
               </div>
             )
           }
@@ -130,7 +129,7 @@ interface TeamsViewProps {
 
 export const TeamsView: React.FC<TeamsViewProps> = ({ userId, game, joinTeam, setSpyMaster }) => {
   return (
-    <Grid container spacing={3}>
+    <Grid container>
       <Grid item xs={6}>
         <TeamView
           userId={userId}

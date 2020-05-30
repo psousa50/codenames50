@@ -1,6 +1,6 @@
 import { Button, Grid } from "@material-ui/core"
 import React from "react"
-import { CodeNamesGame, Teams } from "../codenames-core/models"
+import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
 import { TeamsView } from "./TeamsView"
 
@@ -18,9 +18,11 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({ userId, game, join
   return (
     <Grid container spacing={0} direction="column" alignItems="center" justify="center">
       <TeamsView userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
-      <Button disabled={!canStartGame} size="small" color="primary" onClick={() => startGame()}>
-        start Game
-      </Button>
+      {game.state === GameStates.idle && (
+        <Button disabled={!canStartGame} size="small" color="primary" onClick={() => startGame()}>
+          start Game
+        </Button>
+      )}
     </Grid>
   )
 }
