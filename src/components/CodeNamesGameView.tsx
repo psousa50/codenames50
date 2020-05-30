@@ -19,7 +19,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
     flow: 1,
+    width: "100vw",
     flexDirection: "column",
+    alignItems: "center",
     backgroundColor: backgroundColor,
     height: "100vh",
   },
