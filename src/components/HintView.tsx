@@ -10,14 +10,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexGrow: 1,
     flexDirection: "row",
-    padding: "10px 10px",
   },
   hint: {
     display: "flex",
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "10px 10px",
+    paddingLeft: "20px",
+    paddingRight: "20px",
   },
   hintWord: {
     display: "flex",
@@ -42,9 +42,22 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    paddingLeft: "20px",
+    paddingRight: "20px",
   },
   number: {
-    fontSize: "10px",
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "10px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "14px",
+    },
+    [theme.breakpoints.up("lg")]: {
+      fontSize: "16px",
+    },
+    [theme.breakpoints.up("xl")]: {
+      fontSize: "18px",
+    },
     margin: "5px",
   },
 }))

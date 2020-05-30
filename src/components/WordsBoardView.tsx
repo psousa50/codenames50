@@ -11,10 +11,8 @@ export type OnWordClick = (word: BoardWord, row: number, col: number) => void
 
 const useStyles = makeStyles((theme: Theme) => ({
   table: {
-    width: "100vw",
+    width: "85vw",
     tableLayout: "fixed",
-    paddingLeft: "50px",
-    paddingRight: "50px",
   },
   cellWrapper: {
     position: "relative",
@@ -129,48 +127,48 @@ const WordView: React.FC<WordViewProps> = ({
     },
     unrevelead: {
       backgroundColor: common.white,
-      border: `5px solid ${common.white}`,
+      border: `4px solid ${common.white}`,
       color: common.black,
     },
     unrevelead_spyMaster: {
       [WordType.red]: {
-        color: redColor,
-        border: `5px solid ${redColor}`,
+        color: common.white,
+        border: `4px solid ${redColor}`,
       },
       [WordType.blue]: {
-        color: blueColor,
-        border: `5px solid ${blueColor}`,
+        color: common.white,
+        border: `4px solid ${blueColor}`,
       },
       [WordType.inocent]: {
         backgroundColor: common.white,
-        border: `5px solid ${common.white}`,
+        border: `4px solid ${common.white}`,
         color: common.black,
       },
       [WordType.assassin]: {
-        backgroundColor: common.white,
-        border: `5px solid ${common.white}`,
-        color: common.black,
+        backgroundColor: common.black,
+        border: `4px solid ${common.white}`,
+        color: common.white,
       },
     },
     revealed: {
       [WordType.red]: {
         backgroundColor: redColor,
-        border: `5px solid ${redColor}`,
-        color: common.white,
+        border: `4px solid ${redColor}`,
+        color: common.black,
       },
       [WordType.blue]: {
         backgroundColor: blueColor,
-        border: `5px solid ${blueColor}`,
+        border: `4px solid ${blueColor}`,
         color: common.white,
       },
       [WordType.inocent]: {
         backgroundColor: inocentColor,
-        border: `5px solid ${inocentColor}`,
+        border: `4px solid ${inocentColor}`,
         color: common.black,
       },
       [WordType.assassin]: {
         backgroundColor: common.black,
-        border: `5px solid ${common.black}`,
+        border: `4px solid ${common.black}`,
         color: common.white,
       },
     },

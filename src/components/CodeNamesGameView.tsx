@@ -36,6 +36,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
     justifyContent: "center",
   },
+  content: {
+    justifyContent: "center",
+  },
   teams: {
     marginTop: "2rem",
     marginBottom: "2rem",
@@ -203,7 +206,14 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
         <div className={classes.teams}>
           <ExpansionPanel>
-            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+            <ExpansionPanelSummary
+              classes={{
+                content: classes.content,
+              }}
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
               <Typography className={classes.heading}>Teams</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>
