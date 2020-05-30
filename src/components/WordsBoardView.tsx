@@ -127,48 +127,48 @@ const WordView: React.FC<WordViewProps> = ({
     },
     unrevelead: {
       backgroundColor: common.white,
-      border: `4px solid ${common.white}`,
+      border: `3px solid ${common.white}`,
       color: common.black,
     },
     unrevelead_spyMaster: {
       [WordType.red]: {
         color: common.white,
-        border: `4px solid ${redColor}`,
+        border: `3px solid ${redColor}`,
       },
       [WordType.blue]: {
         color: common.white,
-        border: `4px solid ${blueColor}`,
+        border: `3px solid ${blueColor}`,
       },
       [WordType.inocent]: {
         backgroundColor: common.white,
-        border: `4px solid ${common.white}`,
+        border: `3px solid ${common.white}`,
         color: common.black,
       },
       [WordType.assassin]: {
         backgroundColor: common.black,
-        border: `4px solid ${common.white}`,
+        border: `3px solid ${common.black}`,
         color: common.white,
       },
     },
     revealed: {
       [WordType.red]: {
         backgroundColor: redColor,
-        border: `4px solid ${redColor}`,
+        border: `3px solid ${redColor}`,
         color: common.black,
       },
       [WordType.blue]: {
         backgroundColor: blueColor,
-        border: `4px solid ${blueColor}`,
+        border: `3px solid ${blueColor}`,
         color: common.white,
       },
       [WordType.inocent]: {
         backgroundColor: inocentColor,
-        border: `4px solid ${inocentColor}`,
+        border: `3px solid ${inocentColor}`,
         color: common.black,
       },
       [WordType.assassin]: {
         backgroundColor: common.black,
-        border: `4px solid ${common.black}`,
+        border: `3px solid ${common.black}`,
         color: common.white,
       },
     },
