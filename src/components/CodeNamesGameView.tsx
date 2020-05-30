@@ -225,6 +225,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
                 joinTeam={joinTeam}
                 setSpyMaster={setSpyMaster}
                 startGame={startGame}
+                nextGame={nextGame}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>

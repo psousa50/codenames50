@@ -10,17 +10,29 @@ interface SetupGameViewProps {
   joinTeam: (team: Teams) => void
   setSpyMaster: (team: Teams) => void
   startGame: () => void
+  nextGame: () => void
 }
 
-export const SetupGameView: React.FC<SetupGameViewProps> = ({ userId, game, joinTeam, setSpyMaster, startGame }) => {
+export const SetupGameView: React.FC<SetupGameViewProps> = ({
+  userId,
+  game,
+  joinTeam,
+  setSpyMaster,
+  startGame,
+  nextGame,
+}) => {
   const canStartGame = GameRules.startGame(game) === undefined
 
   return (
     <Grid container spacing={0} direction="column" alignItems="center" justify="center">
       <TeamsView userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
-      {game.state === GameStates.idle && (
+      {game.state === GameStates.idle ? (
         <Button disabled={!canStartGame} size="small" color="primary" onClick={() => startGame()}>
-          start Game
+          Start Game
+        </Button>
+      ) : (
+        <Button size="small" color="primary" onClick={() => nextGame()}>
+          New Game
         </Button>
       )}
     </Grid>
