@@ -53,13 +53,7 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
   return (
     <div className={classes.container}>
       <WordsLeftView game={game} text={game.turn === Teams.red ? "Red's Turn" : "Blue's turn"} team={game.turn} />
-      <WordsBoardView
-        userId={userId}
-        game={game}
-        board={game.board}
-        onWordClick={onWordClick}
-        revealWords={userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster}
-      />
+      <WordsBoardView userId={userId} game={game} board={game.board} onWordClick={onWordClick} revealWords={false} />
       <div className={classes.hint}>
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
         game.turn === getPlayer(game, userId)?.team &&

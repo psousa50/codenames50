@@ -14,13 +14,24 @@ const useStyles = makeStyles((theme: Theme) => ({
   hint: {
     display: "flex",
     flexGrow: 1,
-    alignItems: "flex-end",
+    alignItems: "center",
     justifyContent: "space-between",
     padding: "10px 10px",
   },
   hintWord: {
     display: "flex",
-    fontSize: 30,
+    [theme.breakpoints.down("sm")]: {
+      fontSize: "12px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "16px",
+    },
+    [theme.breakpoints.up("lg")]: {
+      fontSize: "20px",
+    },
+    [theme.breakpoints.up("xl")]: {
+      fontSize: "24px",
+    },
     alignItems: "center",
     justifyContent: "center",
   },

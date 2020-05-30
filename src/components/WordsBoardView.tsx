@@ -5,15 +5,22 @@ import React from "react"
 import { animated as a, useSpring } from "react-spring"
 import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
-import { blueColor, redColor } from "../utils/styles"
+import { blueColor, dimmedBlueColor, dimmedRedColor, redColor } from "../utils/styles"
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
 
 const wordColors = {
   [WordType.red]: redColor,
   [WordType.blue]: blueColor,
-  [WordType.inocent]: grey[400],
-  [WordType.assassin]: grey[700],
+  [WordType.inocent]: "#f0f4c3",
+  [WordType.assassin]: common.black,
+}
+
+const dimmedWordColors = {
+  [WordType.red]: dimmedRedColor,
+  [WordType.blue]: dimmedBlueColor,
+  [WordType.inocent]: grey[200],
+  [WordType.assassin]: common.black,
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -22,25 +29,34 @@ const useStyles = makeStyles((theme: Theme) => ({
     tableLayout: "fixed",
     padding: "10px",
   },
-  cell: {
+  cellWrapper: {
     position: "relative",
     display: "flex",
     flexGrow: 1,
-    padding: "2rem 0.1rem 2rem 0.1rem",
+    padding: "2rem 0.0rem 2rem 0.0rem",
   },
-  word: {
+  cell: {
+    position: "absolute",
     display: "flex",
     flex: 1,
-    textAlign: "center",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    backgroundColor: grey[200],
+    alignItems: "center",
     justifyContent: "center",
+    border: `0.1rem solid #37474f`,
+    borderRadius: "3px",
+    textAlign: "center",
     [theme.breakpoints.down(400)]: {
-      fontSize: "6px",
-    },
-    [theme.breakpoints.between(400, 600)]: {
       fontSize: "8px",
     },
-    [theme.breakpoints.up("sm")]: {
+    [theme.breakpoints.between(400, 600)]: {
       fontSize: "10px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "12px",
     },
     [theme.breakpoints.up("md")]: {
       fontSize: "14px",
@@ -66,6 +82,8 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ userId, game, bo
   const classes = useStyles()
   const s = 5
 
+  const forSpyMaster = game.redTeam.spyMaster === userId || game.blueTeam.spyMaster === userId
+
   return (
     <table className={classes.table}>
       <tbody>
@@ -78,6 +96,7 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ userId, game, bo
                   game={game}
                   word={word}
                   revealWords={revealWords}
+                  forSpyMaster={forSpyMaster}
                   onWordClick={onWordClick || (() => {})}
                   row={row}
                   col={col}
@@ -98,38 +117,35 @@ interface WordViewProps {
   row: number
   col: number
   revealWords: boolean
+  forSpyMaster: boolean
   onWordClick: OnWordClick
 }
 
-const WordView: React.FC<WordViewProps> = ({ userId, game, word, revealWords, onWordClick, row, col }) => {
+const WordView: React.FC<WordViewProps> = ({
+  userId,
+  game,
+  word,
+  revealWords,
+  forSpyMaster,
+  onWordClick,
+  row,
+  col,
+}) => {
   const classes = useStyles()
 
   const canReveal = GameRules.revealWord(row, col, userId)(game) === undefined
 
   const styles = {
     normal: {
-      backgroundColor: grey[200],
       cursor: canReveal ? "pointer" : undefined,
-      position: "absolute" as "absolute",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      display: "flex",
-      flex: 1,
-      alignItems: "center",
-      border: "2px solid white",
-      borderRadius: "5px",
-      boxShadow: "inset 0 0 10px #000000",
     },
     revealed: {
-      backgroundColor: wordColors[word.type],
+      backgroundColor: forSpyMaster && !word.revealed ? dimmedWordColors[word.type] : wordColors[word.type],
       color: word.type === WordType.inocent ? common.black : common.white,
-      fontWeight: "bold" as "bold",
     },
   }
 
-  const rw = revealWords || word.revealed
+  const rw = revealWords || forSpyMaster || word.revealed
 
   const { transform, opacity } = useSpring({
     opacity: rw ? 1 : 0,
@@ -138,14 +154,14 @@ const WordView: React.FC<WordViewProps> = ({ userId, game, word, revealWords, on
   })
 
   return (
-    <div className={classes.cell} onClick={() => onWordClick(word, row, col)}>
+    <div className={classes.cellWrapper} onClick={() => onWordClick(word, row, col)}>
       <a.div
         style={{
           opacity: opacity.interpolate(o => 1 - (typeof o === "number" ? o : Number.parseInt(o || "0"))),
           transform,
           ...styles.normal,
         }}
-        className={classes.word}
+        className={classes.cell}
       >
         {word.word.toUpperCase()}
       </a.div>
@@ -156,7 +172,7 @@ const WordView: React.FC<WordViewProps> = ({ userId, game, word, revealWords, on
           ...styles.normal,
           ...styles.revealed,
         }}
-        className={classes.word}
+        className={classes.cell}
       >
         {word.word.toUpperCase()}
       </a.div>

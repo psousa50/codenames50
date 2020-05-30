@@ -1,11 +1,4 @@
-import {
-  ExpansionPanel,
-  ExpansionPanelDetails,
-  ExpansionPanelSummary,
-  Snackbar,
-  Tooltip,
-  Typography,
-} from "@material-ui/core"
+import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar, Typography } from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import { Alert, AlertTitle } from "@material-ui/lab"
@@ -193,11 +186,11 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         </Alert>
       </Snackbar>
       <div className={classes.game}>
-        <Tooltip title="Click to Copy" aria-label="add">
+        {/* <Tooltip title="Click to Copy" aria-label="add">
           <div className={classes.copyId} onClick={() => copyGameId()}>
             Copy game link
           </div>
-        </Tooltip>
+        </Tooltip> */}
         <div className={classes.header}>
           <UserView
             userId={userId}

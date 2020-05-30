@@ -16,7 +16,6 @@ const useStyles = makeStyles((theme: Theme) =>
       display: "flex",
       width: theme.spacing(6),
       height: theme.spacing(6),
-      border: `1px solid black`,
       borderRadius: "50%",
       alignItems: "center",
       justifyContent: "center",

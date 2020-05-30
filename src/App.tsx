@@ -14,16 +14,18 @@ export const App = () => {
   const gameId = search.gameId?.toString()
 
   return (
-    <Switch>
-      <Route path="/" exact>
-        <CreateGameView userId={userId} />
-      </Route>
-      <Route path="/join">
-        <JoinGameView gameId={gameId} userId={userId} />
-      </Route>
-      <Route path="/game">
-        <CodeNamesGameView gameId={gameId!} userId={userId!} />
-      </Route>
-    </Switch>
+    <div style={{ backgroundColor: "#263238", width: "100vw" }}>
+      <Switch>
+        <Route path="/" exact>
+          <CreateGameView userId={userId} />
+        </Route>
+        <Route path="/join">
+          <JoinGameView gameId={gameId} userId={userId} />
+        </Route>
+        <Route path="/game">
+          <CodeNamesGameView gameId={gameId!} userId={userId!} />
+        </Route>
+      </Switch>
+    </div>
   )
 }
