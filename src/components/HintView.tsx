@@ -1,7 +1,8 @@
 import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import * as R from "ramda"
 import React from "react"
-import { SmallButton } from "../utils/styles"
+import { Teams } from "../codenames-core/models"
+import { SmallButton, teamColor } from "../utils/styles"
 import { Hint } from "./types"
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -49,6 +50,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }))
 
 interface HintViewProps {
+  team: Teams | undefined
   hint: Hint
   canEndTurn: boolean
   onChange?: (hint: Hint) => void
@@ -56,12 +58,12 @@ interface HintViewProps {
   endTurn?: () => void
 }
 
-export const HintView: React.FC<HintViewProps> = ({ hint, onChange, sendHint, endTurn, canEndTurn }) => {
+export const HintView: React.FC<HintViewProps> = ({ team, hint, onChange, sendHint, endTurn, canEndTurn }) => {
   const classes = useStyles()
 
   return (
     <div className={classes.container}>
-      <Paper elevation={3} variant="outlined" style={{ marginTop: "20px" }}>
+      <Paper elevation={3} variant="outlined" style={{ marginTop: "20px", border: `2px solid ${teamColor(team)}` }}>
         <div className={classes.hint}>
           {sendHint ? (
             <>

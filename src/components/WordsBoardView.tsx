@@ -1,62 +1,38 @@
-import { common, grey } from "@material-ui/core/colors"
+import { common } from "@material-ui/core/colors"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import * as R from "ramda"
 import React from "react"
 import { animated as a, useSpring } from "react-spring"
 import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
-import { blueColor, blueColorLight, inocentColor, inocentColorLight, redColor, redColorLight } from "../utils/styles"
-
-const background = common.white
+import { backgroundColor, blueColor, inocentColor, redColor } from "../utils/styles"
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
-
-const wordColors = {
-  [WordType.red]: [background, common.black],
-  [WordType.blue]: [background, common.black],
-  [WordType.inocent]: [background, common.black],
-  [WordType.assassin]: [background, common.black],
-}
-
-const wordRevealedColors = {
-  [WordType.red]: [redColor, common.white],
-  [WordType.blue]: [blueColor, common.white],
-  [WordType.inocent]: [inocentColor, common.black],
-  [WordType.assassin]: [common.black, common.white],
-}
-
-const wordSpyMasterColors = {
-  [WordType.red]: [redColorLight, common.white],
-  [WordType.blue]: [blueColorLight, common.white],
-  [WordType.inocent]: [inocentColorLight, common.black],
-  [WordType.assassin]: [common.black, common.white],
-}
 
 const useStyles = makeStyles((theme: Theme) => ({
   table: {
     width: "100vw",
     tableLayout: "fixed",
-    padding: "10px",
+    paddingLeft: "50px",
+    paddingRight: "50px",
   },
   cellWrapper: {
     position: "relative",
     display: "flex",
     flexGrow: 1,
     padding: "2rem 0.0rem 2rem 0.0rem",
+    border: `6px solid ${backgroundColor}`,
   },
   cell: {
     position: "absolute",
     display: "flex",
     flex: 1,
-    top: 0,
-    left: 0,
+    top: -3,
+    left: -3,
     width: "100%",
     height: "100%",
-    backgroundColor: grey[200],
     alignItems: "center",
     justifyContent: "center",
-    border: `0.1rem solid #37474f`,
-    borderRadius: "3px",
     textAlign: "center",
     userSelect: "none",
     [theme.breakpoints.down(400)]: {
@@ -146,21 +122,61 @@ const WordView: React.FC<WordViewProps> = ({
   const canReveal = GameRules.revealWord(row, col, userId)(game) === undefined
 
   const rw = revealWords || word.revealed
-  const colors = (forSpyMaster ? wordSpyMasterColors : wordColors)[word.type]
-  const revealedColors = wordRevealedColors[word.type]
 
   const styles = {
-    normal: {
+    base: {
       cursor: canReveal ? "pointer" : undefined,
-      backgroundColor: colors[0],
-      color: colors[1],
+    },
+    unrevelead: {
+      backgroundColor: common.white,
+      border: `5px solid ${common.white}`,
+      color: common.black,
+    },
+    unrevelead_spyMaster: {
+      [WordType.red]: {
+        color: redColor,
+        border: `5px solid ${redColor}`,
+      },
+      [WordType.blue]: {
+        color: blueColor,
+        border: `5px solid ${blueColor}`,
+      },
+      [WordType.inocent]: {
+        backgroundColor: common.white,
+        border: `5px solid ${common.white}`,
+        color: common.black,
+      },
+      [WordType.assassin]: {
+        backgroundColor: common.white,
+        border: `5px solid ${common.white}`,
+        color: common.black,
+      },
     },
     revealed: {
-      // backgroundColor: forSpyMaster && !word.revealed ? dimmedWordColors[word.type] : wordColors[word.type],
-      backgroundColor: revealedColors[0],
-      color: revealedColors[1],
+      [WordType.red]: {
+        backgroundColor: redColor,
+        border: `5px solid ${redColor}`,
+        color: common.white,
+      },
+      [WordType.blue]: {
+        backgroundColor: blueColor,
+        border: `5px solid ${blueColor}`,
+        color: common.white,
+      },
+      [WordType.inocent]: {
+        backgroundColor: inocentColor,
+        border: `5px solid ${inocentColor}`,
+        color: common.black,
+      },
+      [WordType.assassin]: {
+        backgroundColor: common.black,
+        border: `5px solid ${common.black}`,
+        color: common.white,
+      },
     },
   }
+
+  const unrevealedStyles = forSpyMaster ? styles.unrevelead_spyMaster[word.type] : styles.unrevelead
 
   const { transform, opacity } = useSpring({
     opacity: rw ? 1 : 0,
@@ -174,7 +190,8 @@ const WordView: React.FC<WordViewProps> = ({
         style={{
           opacity: opacity.interpolate(o => 1 - (typeof o === "number" ? o : Number.parseInt(o || "0"))),
           transform,
-          ...styles.normal,
+          ...styles.base,
+          ...unrevealedStyles,
         }}
         className={classes.cell}
       >
@@ -184,8 +201,8 @@ const WordView: React.FC<WordViewProps> = ({
         style={{
           opacity,
           transform: transform.interpolate(t => `${t} rotateX(180deg)`),
-          ...styles.normal,
-          ...styles.revealed,
+          ...styles.base,
+          ...styles.revealed[word.type],
         }}
         className={classes.cell}
       >

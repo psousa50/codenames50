@@ -2,12 +2,12 @@ import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar,
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import { Alert, AlertTitle } from "@material-ui/lab"
-import copy from "copy-to-clipboard"
 import React from "react"
 import * as GameActions from "../codenames-core/main"
 import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/hooks"
+import { backgroundColor } from "../utils/styles"
 import { EndedGameView } from "./EndedGameView"
 import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flow: 1,
     flexDirection: "column",
-    backgroundColor: "#8eacbb",
+    backgroundColor: backgroundColor,
     height: "100vh",
   },
   game: {
@@ -174,10 +174,10 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setError("")
   }
 
-  const copyGameId = () => {
-    const url = `${window.location.origin}/join?gameId=${gameId}`
-    copy(url)
-  }
+  // const copyGameId = () => {
+  //   const url = `${window.location.origin}/join?gameId=${gameId}`
+  //   copy(url)
+  // }
 
   return (
     <div className={classes.container}>
