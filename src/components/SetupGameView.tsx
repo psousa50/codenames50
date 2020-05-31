@@ -26,12 +26,13 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
   return (
     <Grid container spacing={0} direction="column" alignItems="center" justify="center">
       <TeamsView userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
+      <div style={{ marginTop: "30px" }}></div>
       {game.state === GameStates.idle ? (
-        <Button disabled={!canStartGame} size="small" color="primary" onClick={() => startGame()}>
+        <Button variant="contained" disabled={!canStartGame} size="small" color="primary" onClick={() => startGame()}>
           Start Game
         </Button>
       ) : (
-        <Button size="small" color="primary" onClick={() => nextGame()}>
+        <Button variant="contained" size="small" color="primary" onClick={() => nextGame()}>
           New Game
         </Button>
       )}

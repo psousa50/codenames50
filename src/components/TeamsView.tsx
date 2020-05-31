@@ -13,7 +13,7 @@ import {
 import React from "react"
 import { CodeNamesGame, Player, TeamConfig, Teams } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
-import { teamColor } from "../utils/styles"
+import { blueColor, redColor, teamColor } from "../utils/styles"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -73,6 +73,8 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
       subheader={
         <ListSubheader>
           <Button
+            fullWidth
+            variant="contained"
             disabled={teamConfig.spyMaster === userId || members.find(m => m.userId === userId) !== undefined}
             color="primary"
             onClick={() => joinTeam(team)}
@@ -87,6 +89,8 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
         <ListItemText
           primary={
             <Button
+              fullWidth
+              variant="contained"
               disabled={!canSetSpyMaster || teamConfig.spyMaster === userId}
               color="primary"
               onClick={() => setSpyMaster(team)}
@@ -100,20 +104,16 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
         <ListItemText
           primary={
             teamConfig.spyMaster ? (
-              <div style={styles.teamColor} className={classes.spyMaster}>
-                {teamConfig.spyMaster}
-              </div>
+              <div className={classes.spyMaster}>{teamConfig.spyMaster}</div>
             ) : (
-              <div style={styles.teamColor} className={classes.noSpyMaster}>
-                (No SpyMaster)
-              </div>
+              <div className={classes.noSpyMaster}>(No SpyMaster)</div>
             )
           }
         />
       </ListItem>
       {members.map(m => (
         <ListItem key={m.userId} alignItems="center" className={classes.item}>
-          <ListItemText style={styles.teamColor} className={classes.member} primary={m.userId} />
+          <ListItemText className={classes.member} primary={m.userId} />
         </ListItem>
       ))}
     </List>
@@ -129,8 +129,8 @@ interface TeamsViewProps {
 
 export const TeamsView: React.FC<TeamsViewProps> = ({ userId, game, joinTeam, setSpyMaster }) => {
   return (
-    <Grid container>
-      <Grid item xs={6}>
+    <Grid container spacing={5}>
+      <Grid item xs={6} style={{ border: `10px solid ${redColor}` }}>
         <TeamView
           userId={userId}
           game={game}
@@ -141,7 +141,7 @@ export const TeamsView: React.FC<TeamsViewProps> = ({ userId, game, joinTeam, se
           setSpyMaster={setSpyMaster}
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={6} style={{ border: `10px solid ${blueColor}` }}>
         <TeamView
           userId={userId}
           game={game}

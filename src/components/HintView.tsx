@@ -2,7 +2,7 @@ import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import * as R from "ramda"
 import React from "react"
 import { Teams } from "../codenames-core/models"
-import { SmallButton, teamColor } from "../utils/styles"
+import { calculatedWidth, SmallButton, teamColor } from "../utils/styles"
 import { Hint } from "./types"
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -10,19 +10,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexGrow: 1,
     flexDirection: "row",
+    width: calculatedWidth,
   },
   hint: {
     display: "flex",
-    flexGrow: 1,
     alignItems: "center",
     justifyContent: "space-between",
-    paddingLeft: "20px",
-    paddingRight: "20px",
+    padding: "10px",
   },
   hintWord: {
     display: "flex",
     [theme.breakpoints.down("sm")]: {
-      fontSize: "12px",
+      fontSize: "1px",
     },
     [theme.breakpoints.up("sm")]: {
       fontSize: "16px",
@@ -38,12 +37,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   numbers: {
     display: "flex",
-    flexGrow: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingLeft: "20px",
-    paddingRight: "20px",
   },
   number: {
     [theme.breakpoints.down("sm")]: {
@@ -74,9 +70,16 @@ interface HintViewProps {
 export const HintView: React.FC<HintViewProps> = ({ team, hint, onChange, sendHint, endTurn, canEndTurn }) => {
   const classes = useStyles()
 
+  const styles = {
+    paper: {
+      border: `3px solid ${teamColor(team)}`,
+      width: calculatedWidth,
+    },
+  }
+
   return (
     <div className={classes.container}>
-      <Paper elevation={3} variant="outlined" style={{ marginTop: "20px", border: `2px solid ${teamColor(team)}` }}>
+      <Paper elevation={3} variant="outlined" style={styles.paper}>
         <div className={classes.hint}>
           {sendHint ? (
             <>
@@ -87,6 +90,7 @@ export const HintView: React.FC<HintViewProps> = ({ team, hint, onChange, sendHi
                 onChange={event => onChange && onChange({ ...hint, word: event.target.value })}
               />
               <Button
+                variant="contained"
                 disabled={hint.word.trim().length === 0 || hint.count === undefined}
                 color="primary"
                 onClick={() => hint.count && sendHint && sendHint(hint)}
@@ -97,7 +101,7 @@ export const HintView: React.FC<HintViewProps> = ({ team, hint, onChange, sendHi
           ) : (
             <>
               <div className={classes.hintWord}>{hint.word}</div>
-              <Button disabled={!canEndTurn} color="primary" onClick={() => endTurn && endTurn()}>
+              <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn && endTurn()}>
                 End Turn
               </Button>
             </>

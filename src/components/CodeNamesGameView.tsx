@@ -7,7 +7,6 @@ import * as GameActions from "../codenames-core/main"
 import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/hooks"
-import { backgroundColor } from "../utils/styles"
 import { EndedGameView } from "./EndedGameView"
 import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
@@ -19,11 +18,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
     flow: 1,
-    width: "100vw",
+    maxWidth: "990px",
     flexDirection: "column",
     alignItems: "center",
-    backgroundColor: backgroundColor,
-    height: "100vh",
   },
   game: {
     display: "flex",
@@ -42,8 +39,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: "center",
   },
   teams: {
-    marginTop: "2rem",
-    marginBottom: "2rem",
+    marginTop: "0.5rem",
+    marginBottom: "0.5rem",
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),

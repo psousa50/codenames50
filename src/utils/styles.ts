@@ -8,6 +8,8 @@ export const blueColor = "#1b74ca"
 export const inocentColor = "#bdbdbd"
 export const backgroundColor = "#424242"
 
+export const calculatedWidth = "calc(min(990px, 95vw))"
+
 export const teamColor = (team?: Teams) => (team === Teams.red ? redColor : team === Teams.blue ? blueColor : undefined)
 
 const teamStyle = (color: string) =>

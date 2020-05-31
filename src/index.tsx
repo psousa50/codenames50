@@ -1,5 +1,5 @@
 import { createMuiTheme, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
-import { orange, purple } from "@material-ui/core/colors"
+import { cyan, teal } from "@material-ui/core/colors"
 import React from "react"
 import ReactDOM from "react-dom"
 import { BrowserRouter } from "react-router-dom"
@@ -10,8 +10,12 @@ import * as serviceWorker from "./serviceWorker"
 const theme = responsiveFontSizes(
   createMuiTheme({
     palette: {
-      primary: purple,
-      secondary: orange,
+      type: "dark",
+      primary: teal,
+      secondary: cyan,
+      background: {
+        default: "#424242",
+      },
     },
   }),
 )

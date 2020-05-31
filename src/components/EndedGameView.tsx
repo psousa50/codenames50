@@ -28,7 +28,7 @@ export const EndedGameView: React.FC<EndedGameViewProps> = ({ userId, game, next
     <div className={classes.container}>
       <WordsLeftView game={game} text={`${teamName(game.winner)} Wins!`} team={game.winner} />
       <WordsBoardView userId={userId} game={game} board={game.board} revealWords={true} />
-      <Button size="small" color="secondary" onClick={() => nextGame()}>
+      <Button variant="contained" size="small" color="primary" onClick={() => nextGame()}>
         New Game
       </Button>
     </div>

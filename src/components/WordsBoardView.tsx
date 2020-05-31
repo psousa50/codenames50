@@ -5,66 +5,63 @@ import React from "react"
 import { animated as a, useSpring } from "react-spring"
 import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
-import { blueColor, inocentColor, redColor } from "../utils/styles"
+import { blueColor, calculatedWidth, inocentColor, redColor } from "../utils/styles"
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
-
-const calcWidth = "calc(100vw/5 - 20px)"
 
 const useStyles = makeStyles((theme: Theme) => ({
   rows: {
     display: "flex",
     flex: 1,
     flexDirection: "column",
+    width: calculatedWidth,
+    height: calculatedWidth,
   },
   cells: {
     display: "flex",
     flex: 1,
     flexDirection: "row",
-    padding: "5px",
   },
   cellWrapper: {
     position: "relative",
-    display: "flex",
-    flex: 1,
-    width: calcWidth,
-    height: calcWidth,
-    maxWidth: "150px",
-    maxHeight: "150px",
+    flex: "1 0 auto",
     alignItems: "center",
     justifyContent: "center",
-    padding: "5px",
+    maxWidth: "200px",
+    maxHeight: "200px",
+    "&:after": {
+      content: "",
+      float: "left",
+      display: "block",
+      paddingTop: "100%",
+    },
   },
   cell: {
     position: "absolute",
-    width: calcWidth,
-    height: calcWidth,
-    maxWidth: "150px",
-    maxHeight: "150px",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
     display: "flex",
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    textAlign: "center",
+    margin: "2px",
     userSelect: "none",
     fontFamily: "Teko",
-    [theme.breakpoints.down(400)]: {
+    [theme.breakpoints.down(300)]: {
+      fontSize: "12px",
+    },
+    [theme.breakpoints.between(300, 600)]: {
       fontSize: "14px",
     },
-    [theme.breakpoints.between(400, 600)]: {
-      fontSize: "18px",
-    },
     [theme.breakpoints.up("sm")]: {
-      fontSize: "18px",
+      fontSize: "20px",
     },
     [theme.breakpoints.up("md")]: {
-      fontSize: "26px",
+      fontSize: "32px",
     },
     [theme.breakpoints.up("lg")]: {
-      fontSize: "30px",
-    },
-    [theme.breakpoints.up("xl")]: {
-      fontSize: "34px",
+      fontSize: "40px",
     },
   },
 }))
@@ -89,6 +86,7 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ userId, game, bo
         <div key={row} className={classes.cells}>
           {board[row].map((word, col) => (
             <WordView
+              key={col}
               userId={userId}
               game={game}
               word={word}

@@ -7,11 +7,13 @@ import { CreateGameView } from "./components/CreateGameView"
 import { JoinGameView } from "./components/JoinGameView"
 
 const useStyles = makeStyles((theme: Theme) => ({
-  container: {
+  app: {
     display: "flex",
     flex: 1,
+    width: "100vw",
     alignItems: "center",
     flexDirection: "column",
+    backgroundColor: theme.palette.background.default,
   },
 }))
 
@@ -26,7 +28,7 @@ export const App = () => {
   const gameId = search.gameId?.toString()
 
   return (
-    <div className={classes.container}>
+    <div className={classes.app}>
       <Switch>
         <Route path="/" exact>
           <CreateGameView userId={userId} />

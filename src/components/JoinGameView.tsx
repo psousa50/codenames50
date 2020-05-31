@@ -1,6 +1,5 @@
 import { Button, InputAdornment, makeStyles, TextField } from "@material-ui/core"
 import Avatar from "@material-ui/core/Avatar"
-import { common } from "@material-ui/core/colors"
 import Container from "@material-ui/core/Container"
 import CssBaseline from "@material-ui/core/CssBaseline"
 import Typography from "@material-ui/core/Typography"
@@ -16,7 +15,6 @@ const useStyles = makeStyles(theme => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    backgroundColor: common.white,
   },
   margin: {
     margin: theme.spacing(1),
