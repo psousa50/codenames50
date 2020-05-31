@@ -33,23 +33,24 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: "center",
     textAlign: "center",
     userSelect: "none",
+    fontFamily: "Teko",
     [theme.breakpoints.down(400)]: {
-      fontSize: "8px",
-    },
-    [theme.breakpoints.between(400, 600)]: {
-      fontSize: "10px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "12px",
-    },
-    [theme.breakpoints.up("md")]: {
       fontSize: "14px",
     },
+    [theme.breakpoints.between(400, 600)]: {
+      fontSize: "18px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "22px",
+    },
+    [theme.breakpoints.up("md")]: {
+      fontSize: "26px",
+    },
     [theme.breakpoints.up("lg")]: {
-      fontSize: "16px",
+      fontSize: "30px",
     },
     [theme.breakpoints.up("xl")]: {
-      fontSize: "20px",
+      fontSize: "34px",
     },
   },
 }))
