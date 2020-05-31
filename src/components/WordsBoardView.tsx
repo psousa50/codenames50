@@ -5,30 +5,44 @@ import React from "react"
 import { animated as a, useSpring } from "react-spring"
 import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
-import { backgroundColor, blueColor, inocentColor, redColor } from "../utils/styles"
+import { blueColor, inocentColor, redColor } from "../utils/styles"
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
 
+const calcWidth = "calc(100vw/5 - 20px)"
+
 const useStyles = makeStyles((theme: Theme) => ({
-  table: {
-    width: "85vw",
-    tableLayout: "fixed",
+  rows: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "column",
+  },
+  cells: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "row",
+    padding: "5px",
   },
   cellWrapper: {
     position: "relative",
     display: "flex",
-    flexGrow: 1,
-    padding: "2rem 0.0rem 2rem 0.0rem",
-    border: `6px solid ${backgroundColor}`,
+    flex: 1,
+    width: calcWidth,
+    height: calcWidth,
+    maxWidth: "150px",
+    maxHeight: "150px",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "5px",
   },
   cell: {
     position: "absolute",
+    width: calcWidth,
+    height: calcWidth,
+    maxWidth: "150px",
+    maxHeight: "150px",
     display: "flex",
     flex: 1,
-    top: -3,
-    left: -3,
-    width: "100%",
-    height: "100%",
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
@@ -41,7 +55,7 @@ const useStyles = makeStyles((theme: Theme) => ({
       fontSize: "18px",
     },
     [theme.breakpoints.up("sm")]: {
-      fontSize: "22px",
+      fontSize: "18px",
     },
     [theme.breakpoints.up("md")]: {
       fontSize: "26px",
@@ -70,28 +84,24 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ userId, game, bo
   const forSpyMaster = game.redTeam.spyMaster === userId || game.blueTeam.spyMaster === userId
 
   return (
-    <table className={classes.table}>
-      <tbody>
-        {R.range(0, s).map(row => (
-          <tr key={row}>
-            {board[row].map((word, col) => (
-              <td key={col}>
-                <WordView
-                  userId={userId}
-                  game={game}
-                  word={word}
-                  revealWords={revealWords}
-                  forSpyMaster={forSpyMaster}
-                  onWordClick={onWordClick || (() => {})}
-                  row={row}
-                  col={col}
-                />
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className={classes.rows}>
+      {R.range(0, s).map(row => (
+        <div key={row} className={classes.cells}>
+          {board[row].map((word, col) => (
+            <WordView
+              userId={userId}
+              game={game}
+              word={word}
+              revealWords={revealWords}
+              forSpyMaster={forSpyMaster}
+              onWordClick={onWordClick || (() => {})}
+              row={row}
+              col={col}
+            />
+          ))}
+        </div>
+      ))}
+    </div>
   )
 }
 
