@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom"
 import { App } from "./App"
 import "./index.css"
 import * as serviceWorker from "./serviceWorker"
+import { ViewportProvider } from "./utils/viewPort"
 
 const theme = responsiveFontSizes(
   createMuiTheme({
@@ -22,11 +23,13 @@ const theme = responsiveFontSizes(
 
 ReactDOM.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <ViewportProvider>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
+    </ViewportProvider>
   </React.StrictMode>,
   document.getElementById("root"),
 )
