@@ -204,7 +204,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         </div>
 
         <div className={classes.teams}>
-          <ExpansionPanel>
+          <ExpansionPanel defaultExpanded={game.state === GameStates.idle}>
             <ExpansionPanelSummary
               classes={{
                 content: classes.content,
