@@ -65,6 +65,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [error, setError] = React.useState("")
+  const [teamsExpanded, setTeamsExpanded] = React.useState(false)
   const [game, setGame] = React.useState<CodeNamesGame>(
     GameActions.createGame("", "", "", "", GameActions.buildBoard(5, 5, [])),
   )
@@ -146,10 +147,12 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const nextGameHandler = (game: CodeNamesGame) => {
     setGame(game)
+    setTeamsExpanded(true)
   }
 
   const startGameHandler = () => {
     setGame(GameActions.startGame)
+    setTeamsExpanded(false)
   }
 
   const setSpyMasterHandler = ({ userId, team }: Messages.SetSpyMasterInput) => {
@@ -176,6 +179,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setError("")
   }
 
+  const handleTeamsExpanded = (event: React.ChangeEvent<{}>, isExpanded: boolean) => setTeamsExpanded(isExpanded)
+
   // const copyGameId = () => {
   //   const url = `${window.location.origin}/join?gameId=${gameId}`
   //   copy(url)
@@ -199,7 +204,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         </div>
 
         <div className={classes.teams}>
-          <ExpansionPanel defaultExpanded={game.state === GameStates.idle}>
+          <ExpansionPanel expanded={teamsExpanded} onChange={handleTeamsExpanded}>
             <ExpansionPanelSummary
               classes={{
                 content: classes.content,
