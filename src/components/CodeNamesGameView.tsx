@@ -190,11 +190,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         </Alert>
       </Snackbar>
       <div className={classes.game}>
-        {/* <Tooltip title="Click to Copy" aria-label="add">
-          <div className={classes.copyId} onClick={() => copyGameId()}>
-            Copy game link
-          </div>
-        </Tooltip> */}
         <div className={classes.header}>
           <UserView
             userId={userId}

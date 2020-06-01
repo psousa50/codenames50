@@ -1,4 +1,4 @@
-import { createMuiTheme, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
+import { createMuiTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
 import { cyan, teal } from "@material-ui/core/colors"
 import React from "react"
 import ReactDOM from "react-dom"
@@ -14,9 +14,6 @@ const theme = responsiveFontSizes(
       type: "dark",
       primary: teal,
       secondary: cyan,
-      background: {
-        default: "#424242",
-      },
     },
   }),
 )
@@ -25,6 +22,7 @@ ReactDOM.render(
   <React.StrictMode>
     <ViewportProvider>
       <ThemeProvider theme={theme}>
+        <CssBaseline />
         <BrowserRouter>
           <App />
         </BrowserRouter>
