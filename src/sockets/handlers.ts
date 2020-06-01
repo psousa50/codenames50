@@ -1,6 +1,7 @@
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, map, mapLeft, run } from "fp-ts/lib/ReaderTaskEither"
 import { task } from "fp-ts/lib/Task"
+import { DomainPort } from "../domain/adapters"
 import { UserSocketLink } from "../messaging/main"
 import * as Messages from "../messaging/messages"
 import { actionOf, withEnv } from "../utils/actions"
@@ -40,7 +41,7 @@ const addMessageHandler = (socketsEnvironment: SocketsEnvironment) => <T>(
   return task.of(undefined)
 }
 
-export const registerUserHandler: SocketHandler<Messages.RegisterUserSocketInput> = socket => ({ userId }) =>
+const registerUserHandler: SocketHandler<Messages.RegisterUserSocketInput> = socket => ({ userId }) =>
   withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
     pipe(adapt(gameMessagingPorts.registerUser({ userId, socketId: socket.id }), gameMessagingEnvironment)),
   )
@@ -62,7 +63,7 @@ const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks => {
     )
   })
 }
-export const disconnectHandler: SocketHandler = socket => () => {
+const disconnectHandler: SocketHandler = socket => () => {
   console.log("DISCONNECT=====>\n", socket.id)
   return withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
     pipe(
@@ -73,7 +74,7 @@ export const disconnectHandler: SocketHandler = socket => () => {
   )
 }
 
-export const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ gameId, userId, language }) =>
+const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ gameId, userId, language }) =>
   withEnv(({ gamesDomainPorts, domainEnvironment, uuid, gameMessagingPorts, gameMessagingEnvironment }) => {
     const newGameId = gameId || uuid()
     socket.join(newGameId, async (_: any) => {
@@ -91,7 +92,7 @@ export const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ ga
     return actionOf(undefined)
   })
 
-export const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => input => {
+const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => input => {
   return withEnv(({ gamesDomainPorts, domainEnvironment, gameMessagingPorts, gameMessagingEnvironment }) => {
     socket.join(input.gameId, async (_: any) => {
       const h = pipe(
@@ -109,81 +110,25 @@ export const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => 
   })
 }
 
-export const nextGameHandler: SocketHandler<Messages.NextGameInput> = _ => input =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
+const handleDomainPort = <I, O>(domainPort: DomainPort<I, O>): SocketHandler<I> => _ => (input: I) =>
+  withEnv(({ domainEnvironment }) =>
     pipe(
-      adapt(gamesDomainPorts.nextGame(input), domainEnvironment),
-      map(_ => undefined),
-    ),
-  )
-
-export const removePlayerHandler: SocketHandler<Messages.RemovePlayerInput> = _ => input =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
-    pipe(
-      adapt(gamesDomainPorts.removePlayer(input), domainEnvironment),
-      map(_ => undefined),
-    ),
-  )
-
-export const joinTeamHandler: SocketHandler<Messages.JoinTeamInput> = _ => input =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
-    pipe(
-      adapt(gamesDomainPorts.joinTeam(input), domainEnvironment),
-      map(_ => undefined),
-    ),
-  )
-
-export const setSpyMasterHandler: SocketHandler<Messages.SetSpyMasterInput> = _ => input =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
-    pipe(
-      adapt(gamesDomainPorts.setSpyMaster(input), domainEnvironment),
-      map(_ => undefined),
-    ),
-  )
-
-export const startGameHandler: SocketHandler<Messages.StartGameInput> = _ => input =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
-    pipe(
-      adapt(gamesDomainPorts.startGame(input), domainEnvironment),
-      map(_ => undefined),
-    ),
-  )
-
-export const sendHintHandler: SocketHandler<Messages.SendHintInput> = _ => input =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
-    pipe(
-      adapt(gamesDomainPorts.sendHint(input), domainEnvironment),
-      map(_ => undefined),
-    ),
-  )
-
-export const revealWordHandler: SocketHandler<Messages.RevealWordInput> = _ => input =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
-    pipe(
-      adapt(gamesDomainPorts.revealWord(input), domainEnvironment),
-      map(_ => undefined),
-    ),
-  )
-
-export const changeTurnHandler: SocketHandler<Messages.ChangeTurnInput> = _ => input =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
-    pipe(
-      adapt(gamesDomainPorts.changeTurn(input), domainEnvironment),
+      adapt(domainPort(input), domainEnvironment),
       map(_ => undefined),
     ),
   )
 
 export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Socket) => {
-  addMessageHandler(env)(socket, "disconnect", disconnectHandler)
   addMessageHandler(env)(socket, "registerUserSocket", registerUserHandler)
+  addMessageHandler(env)(socket, "disconnect", disconnectHandler)
   addMessageHandler(env)(socket, "createGame", createGameHandler)
   addMessageHandler(env)(socket, "joinGame", joinGameHandler)
-  addMessageHandler(env)(socket, "nextGame", nextGameHandler)
-  addMessageHandler(env)(socket, "removePlayer", removePlayerHandler)
-  addMessageHandler(env)(socket, "joinTeam", joinTeamHandler)
-  addMessageHandler(env)(socket, "setSpyMaster", setSpyMasterHandler)
-  addMessageHandler(env)(socket, "startGame", startGameHandler)
-  addMessageHandler(env)(socket, "sendHint", sendHintHandler)
-  addMessageHandler(env)(socket, "revealWord", revealWordHandler)
-  addMessageHandler(env)(socket, "changeTurn", changeTurnHandler)
+  addMessageHandler(env)(socket, "nextGame", handleDomainPort(env.gamesDomainPorts.nextGame))
+  addMessageHandler(env)(socket, "removePlayer", handleDomainPort(env.gamesDomainPorts.removePlayer))
+  addMessageHandler(env)(socket, "joinTeam", handleDomainPort(env.gamesDomainPorts.joinTeam))
+  addMessageHandler(env)(socket, "setSpyMaster", handleDomainPort(env.gamesDomainPorts.setSpyMaster))
+  addMessageHandler(env)(socket, "startGame", handleDomainPort(env.gamesDomainPorts.startGame))
+  addMessageHandler(env)(socket, "sendHint", handleDomainPort(env.gamesDomainPorts.sendHint))
+  addMessageHandler(env)(socket, "revealWord", handleDomainPort(env.gamesDomainPorts.revealWord))
+  addMessageHandler(env)(socket, "changeTurn", handleDomainPort(env.gamesDomainPorts.changeTurn))
 }
