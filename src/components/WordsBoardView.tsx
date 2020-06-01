@@ -5,7 +5,7 @@ import React from "react"
 import { animated as a, useSpring } from "react-spring"
 import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
-import { blueColor, calculatedWidth, inocentColor, redColor } from "../utils/styles"
+import { blueColor, calculatedHeight, calculatedWidth, inocentColor, redColor } from "../utils/styles"
 
 export type OnWordClick = (word: BoardWord, row: number, col: number) => void
 
@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     flex: 1,
     flexDirection: "column",
     width: calculatedWidth,
-    height: calculatedWidth,
+    height: calculatedHeight,
   },
   cells: {
     display: "flex",
