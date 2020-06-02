@@ -29,6 +29,8 @@ export interface TeamConfig {
   wordsLeft: number | undefined
 }
 
+export type TurnOutcome = "success" | "failure" | undefined
+
 export interface CodeNamesGame {
   gameId: string
   timestamp: string
@@ -41,6 +43,7 @@ export interface CodeNamesGame {
   wordsRevealedCount: number
   state: GameStates
   turn: Teams | undefined
+  turnOutcome: TurnOutcome | undefined
   winner: Teams | undefined
   language: string
   board: WordsBoard
