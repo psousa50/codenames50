@@ -38,6 +38,7 @@ export const createGame = (
     wordsRevealedCount: 0,
     state: GameStates.idle,
     turn: undefined,
+    turnOutcome: undefined,
     winner: undefined,
     language,
     board,
@@ -169,7 +170,7 @@ const checkWin = (game: CodeNamesGame) => ({
   winner: game.redTeam.wordsLeft === 0 ? Teams.red : game.blueTeam.wordsLeft === 0 ? Teams.blue : game.winner,
 })
 
-export const revealWord = (userId: string, row: number, col: number) => (game: CodeNamesGame) => {
+export const revealWord = (userId: string, row: number, col: number): GameAction => game => {
   const revealedWord = game.board[row][col]
   const revealedWordTeam =
     revealedWord.type === WordType.blue ? Teams.blue : revealedWord.type === WordType.red ? Teams.red : undefined
@@ -185,12 +186,13 @@ export const revealWord = (userId: string, row: number, col: number) => (game: C
 
   return {
     ...updatedGame,
+    turnOutcome: failedGuess ? "failure" : "success",
     board: update2dCell(updatedGame.board)(reveal, row, col),
     wordsRevealedCount: updatedGame.wordsRevealedCount + 1,
   }
 }
 
-export const changeTurn = (game: CodeNamesGame) => ({
+export const changeTurn: GameAction = game => ({
   ...game,
   turn: game.turn === Teams.blue ? Teams.red : Teams.blue,
   hintWord: "",
@@ -198,7 +200,7 @@ export const changeTurn = (game: CodeNamesGame) => ({
   wordsRevealedCount: 0,
 })
 
-export const endGame = (winner: Teams | undefined) => (game: CodeNamesGame) => ({
+export const endGame = (winner: Teams | undefined): GameAction => game => ({
   ...game,
   state: GameStates.ended,
   winner,
