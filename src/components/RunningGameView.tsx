@@ -35,14 +35,14 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
   const classes = useStyles()
 
   const gameId = game.gameId
-  const [hint, setHint] = React.useState<Hint>({ word: "" })
+  const [hint, setHint] = React.useState<Hint>({ word: "", count: 0 })
 
   const endTurn = () => {
     emitMessage(Messages.changeTurn({ gameId, userId }))
   }
 
   const sendHint = () => {
-    setHint({ word: "" })
+    setHint({ word: "", count: 0 })
     hint.count && emitMessage(Messages.sendHint({ gameId, userId, hintWord: hint.word, hintWordCount: hint.count }))
   }
   const onWordClick: OnWordClick = (_, row, col) => {

@@ -3,6 +3,7 @@ import * as R from "ramda"
 import React from "react"
 import { Teams } from "../codenames-core/models"
 import { calculatedWidth, SmallButton, teamColor } from "../utils/styles"
+import { PlaySound } from "./PlaySound"
 import { Hint } from "./types"
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -79,6 +80,10 @@ export const HintView: React.FC<HintViewProps> = ({ team, hint, onChange, sendHi
 
   return (
     <div className={classes.container}>
+      <PlaySound
+        url="https://freesound.org/data/previews/72/72128_1028972-lq.mp3"
+        play={hint.count > 0 && sendHint === undefined}
+      />
       <Paper elevation={3} variant="outlined" style={styles.paper}>
         <div className={classes.hint}>
           {sendHint ? (

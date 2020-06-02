@@ -1,8 +1,16 @@
-import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar, Typography } from "@material-ui/core"
+import {
+  Button,
+  ExpansionPanel,
+  ExpansionPanelDetails,
+  ExpansionPanelSummary,
+  Snackbar,
+  Typography,
+} from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
+import useSound from "use-sound"
 import * as GameActions from "../codenames-core/main"
 import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
@@ -11,6 +19,8 @@ import { EndedGameView } from "./EndedGameView"
 import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
 import { UserView } from "./UserView"
+
+const successSound = require("../assets/sounds/success.mp3")
 
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
@@ -63,6 +73,8 @@ export interface CodeNamesGameViewProps {
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
+  const [playSuccessSound] = useSound(successSound)
+
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [error, setError] = React.useState("")
   const [teamsExpanded, setTeamsExpanded] = React.useState(false)
@@ -90,6 +102,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   React.useEffect(() => {
     socket.connect()
     console.log("CONNECT", socket.id)
+    playSuccessSound()
 
     addMessageHandler(socket, "connect", connectHandler)
 
@@ -165,6 +178,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const revealWordHandler = ({ userId, row, col }: Messages.RevealWordInput) => {
     setGame(GameActions.revealWord(userId, row, col))
+    playSuccessSound()
   }
 
   const endTurnHandler = () => {
@@ -172,7 +186,9 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   }
 
   const errorHandler = (e: { message: string }) => {
+    playSuccessSound()
     setError(e.message)
+    console.log("ERROR=====>")
   }
 
   const handleClose = () => {
@@ -194,6 +210,11 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
           {error}
         </Alert>
       </Snackbar>
+
+      <Button variant="contained" color="primary" onClick={() => playSuccessSound()}>
+        Play
+      </Button>
+
       <div className={classes.game}>
         <div className={classes.header}>
           <UserView
