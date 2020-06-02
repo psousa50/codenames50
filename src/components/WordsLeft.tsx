@@ -14,12 +14,26 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     count: {
       display: "flex",
-      width: theme.spacing(6),
-      height: theme.spacing(6),
+      width: "min(50px, 12vw)",
+      height: "min(50px, 12vw)",
       borderRadius: "50%",
       alignItems: "center",
       justifyContent: "center",
-      fontSize: 32,
+      [theme.breakpoints.down(300)]: {
+        fontSize: "12px",
+      },
+      [theme.breakpoints.between(300, 600)]: {
+        fontSize: "14px",
+      },
+      [theme.breakpoints.up("sm")]: {
+        fontSize: "20px",
+      },
+      [theme.breakpoints.up("md")]: {
+        fontSize: "32px",
+      },
+      [theme.breakpoints.up("lg")]: {
+        fontSize: "40px",
+      },
       color: common.white,
     },
   }),

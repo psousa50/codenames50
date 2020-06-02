@@ -23,7 +23,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingBottom: theme.spacing(1),
   },
   text: {
-    fontSize: 24,
+    [theme.breakpoints.down(300)]: {
+      fontSize: "12px",
+    },
+    [theme.breakpoints.between(300, 600)]: {
+      fontSize: "16px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "26px",
+    },
+    [theme.breakpoints.up("md")]: {
+      fontSize: "32px",
+    },
     fontWeight: "bold",
   },
 }))

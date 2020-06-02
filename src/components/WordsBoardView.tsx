@@ -52,16 +52,13 @@ const useStyles = makeStyles((theme: Theme) => ({
       fontSize: "12px",
     },
     [theme.breakpoints.between(300, 600)]: {
-      fontSize: "14px",
+      fontSize: "16px",
     },
     [theme.breakpoints.up("sm")]: {
-      fontSize: "20px",
+      fontSize: "26px",
     },
     [theme.breakpoints.up("md")]: {
       fontSize: "32px",
-    },
-    [theme.breakpoints.up("lg")]: {
-      fontSize: "40px",
     },
   },
 }))
