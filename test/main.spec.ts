@@ -535,6 +535,44 @@ describe("revealWord", () => {
     expect(updatedGame.wordsRevealedCount).toBe(2)
   })
 
+  describe("sets the turn outcome", () => {
+    const buildGame = (playerTeam: Teams, wordType: WordType) => {
+      const userId = "some-user-id"
+      const w00 = { word: "w00", type: wordType, revealed: false }
+      const board = [[w00]] as any
+
+      return {
+        board,
+        players: [{ userId, team: playerTeam }],
+        blueTeam: {},
+        redTeam: {},
+        hintWordCount: 2,
+        wordsRevealedCount: 1,
+      }
+    }
+
+    it("to success if blue player reveals blue word", () => {
+      const game = buildGame(Teams.blue, WordType.blue)
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+
+      expect(updatedGame.turnOutcome).toBe("success")
+    })
+
+    it("to success if red player reveals red word", () => {
+      const game = buildGame(Teams.red, WordType.red)
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+
+      expect(updatedGame.turnOutcome).toBe("success")
+    })
+
+    it("to failue if player reveals inocent word", () => {
+      const game = buildGame(Teams.red, WordType.inocent)
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+
+      expect(updatedGame.turnOutcome).toBe("failure")
+    })
+  })
+
   describe("decreases words left", () => {
     it("if word is from the players blue team", () => {
       const game = {
