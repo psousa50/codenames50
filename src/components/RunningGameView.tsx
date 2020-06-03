@@ -6,6 +6,7 @@ import * as Messages from "../messaging/messages"
 import { teamName } from "../utils/ui"
 import { EmitMessage } from "./CodeNamesGameView"
 import { HintView } from "./HintView"
+import { SendHintView } from "./SendHintView"
 import { Hint } from "./types"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
 import { WordsLeftView } from "./WordsLeftView"
@@ -61,7 +62,7 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
         game.turn === getPlayer(game, userId)?.team &&
         game.hintWordCount === 0 ? (
-          <HintView team={game.turn} hint={hint} canEndTurn={canEndTurn} onChange={setHint} sendHint={sendHint} />
+          <SendHintView team={game.turn} hint={hint} onChange={setHint} sendHint={sendHint} />
         ) : (
           <HintView
             team={game.turn}
