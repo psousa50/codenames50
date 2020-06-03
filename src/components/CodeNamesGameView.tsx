@@ -18,9 +18,6 @@ const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p =
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
-    flow: 1,
-    maxWidth: "990px",
-    flexDirection: "column",
     alignItems: "center",
   },
   game: {
@@ -31,10 +28,15 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   header: {
     display: "flex",
-    flexGrow: 1,
+    flex: 1,
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+  },
+  sound: {
+    position: "absolute",
+    right: "10px",
   },
   content: {
     justifyContent: "center",
@@ -121,7 +123,9 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
             team={getPlayer(game, userId)?.team}
             spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
           />
-          <div onClick={() => handleSound()}>{soundOn ? <VolumeUp /> : <VolumeOff />}</div>
+          <div className={classes.sound} onClick={() => handleSound()}>
+            {soundOn ? <VolumeUp /> : <VolumeOff />}
+          </div>
         </div>
 
         <div className={classes.teams}>
