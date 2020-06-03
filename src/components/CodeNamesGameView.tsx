@@ -1,23 +1,16 @@
-import {
-  ExpansionPanel,
-  ExpansionPanelDetails,
-  ExpansionPanelSummary,
-  makeStyles,
-  Snackbar,
-  Theme,
-  Typography,
-} from "@material-ui/core"
+import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar, Typography } from "@material-ui/core"
+import { makeStyles, Theme } from "@material-ui/core/styles"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import VolumeOff from "@material-ui/icons/VolumeOff"
 import VolumeUp from "@material-ui/icons/VolumeUp"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
 import * as GameActions from "../codenames-core/main"
-import { CodeNamesGame, GameStates, Teams, TurnOutcome } from "../codenames-core/models"
+import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/hooks"
+import { sounds, usePlaySound } from "../utils/usePlaySounds"
 import { EndedGameView } from "./EndedGameView"
-import { PlaySound } from "./PlaySound"
 import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
 import { UserView } from "./UserView"
@@ -73,10 +66,16 @@ export interface CodeNamesGameViewProps {
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
+  const [playSuccessSound] = usePlaySound(sounds.success)
+  const [playFailureSound] = usePlaySound(sounds.failure)
+  const [playHintAlertSound] = usePlaySound(sounds.hintAlert)
+  const [playAssassinSound] = usePlaySound(sounds.assassin)
+  const [playEndGame] = usePlaySound(sounds.endGame)
+
+  const [soundOn, setSoundOn] = React.useState(true)
+
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [error, setError] = React.useState("")
-  const [soundOn, setSoundOn] = React.useState(true)
-  const [turnOutcome, setTurnOutcome] = React.useState<TurnOutcome>()
   const [teamsExpanded, setTeamsExpanded] = React.useState(false)
   const [game, setGame] = React.useState<CodeNamesGame>(
     GameActions.createGame("", "", "", "", GameActions.buildBoard(5, 5, [])),
@@ -173,14 +172,27 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const sendHintHandler = ({ hintWord, hintWordCount }: Messages.SendHintInput) => {
     setGame(GameActions.sendHint(hintWord, hintWordCount))
+    const teamConfig = game.turn === Teams.red ? game.redTeam : game.blueTeam
+    if (teamConfig.spyMaster !== userId) {
+      playHintAlertSound(soundOn)
+    }
   }
 
   const revealWordHandler = ({ userId, row, col }: Messages.RevealWordInput) => {
     setGame(oldGame => {
       const newGame = GameActions.revealWord(userId, row, col)(oldGame)
-      if (soundOn) {
-        setTurnOutcome(newGame.turnOutcome)
+      if (newGame.turnOutcome === "success") {
+        playSuccessSound(soundOn)
       }
+      if (newGame.turnOutcome === "failure") {
+        playFailureSound(soundOn)
+      }
+      if (newGame.turnOutcome === "assassin") {
+        playAssassinSound(soundOn)
+      } else if (newGame.state === GameStates.ended) {
+        playEndGame(soundOn)
+      }
+
       return newGame
     })
   }
@@ -191,6 +203,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const errorHandler = (e: { message: string }) => {
     setError(e.message)
+    console.log("ERROR=====>")
   }
 
   const handleClose = () => {
@@ -208,7 +221,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   //   copy(url)
   // }
 
-  console.log("soundOn=====>", soundOn, turnOutcome)
   return (
     <div className={classes.container}>
       <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
@@ -217,17 +229,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
           {error}
         </Alert>
       </Snackbar>
-
-      <PlaySound
-        soundOn={soundOn}
-        url="https://freesound.org/data/previews/242/242501_4414128-lq.mp3"
-        playWhen={turnOutcome === "success"}
-      />
-      <PlaySound
-        soundOn={soundOn}
-        url="https://freesound.org/data/previews/216/216090_3450800-lq.mp3"
-        playWhen={turnOutcome === "failure"}
-      />
 
       <div className={classes.game}>
         <div className={classes.header}>
@@ -265,7 +266,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
         </div>
 
         {game.state === GameStates.running && (
-          <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} soundOn={soundOn} />
+          <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />
         )}
 
         {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} nextGame={nextGame} />}

@@ -9,7 +9,6 @@ import { HintView } from "./HintView"
 import { Hint } from "./types"
 import { OnWordClick, WordsBoardView } from "./WordsBoardView"
 import { WordsLeftView } from "./WordsLeftView"
-import { PlaySound } from "./PlaySound"
 
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
@@ -30,10 +29,9 @@ interface RunningGameViewProps {
   game: CodeNamesGame
   userId: string
   emitMessage: EmitMessage
-  soundOn: boolean
 }
 
-export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, emitMessage, soundOn }) => {
+export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, emitMessage }) => {
   const classes = useStyles()
 
   const gameId = game.gameId
@@ -55,12 +53,6 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
 
   return (
     <div className={classes.container}>
-      <PlaySound
-        soundOn={soundOn}
-        url="https://freesound.org/data/previews/72/72128_1028972-lq.mp3"
-        playWhen={hint.count > 0 && userId !== game.redTeam.spyMaster && userId !== game.blueTeam.spyMaster}
-      />
-
       <WordsLeftView game={game} text={`${teamName(game.turn)}'s turn`} team={game.turn} />
       <div style={{ marginTop: 20 }}></div>
       <WordsBoardView userId={userId} game={game} board={game.board} onWordClick={onWordClick} revealWords={false} />

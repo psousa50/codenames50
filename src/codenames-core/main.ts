@@ -186,7 +186,7 @@ export const revealWord = (userId: string, row: number, col: number): GameAction
 
   return {
     ...updatedGame,
-    turnOutcome: failedGuess ? "failure" : "success",
+    turnOutcome: revealedWord.type === WordType.assassin ? "assassin" : failedGuess ? "failure" : "success",
     board: update2dCell(updatedGame.board)(reveal, row, col),
     wordsRevealedCount: updatedGame.wordsRevealedCount + 1,
   }
