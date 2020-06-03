@@ -29,7 +29,7 @@ export interface TeamConfig {
   wordsLeft: number | undefined
 }
 
-export type TurnOutcome = "success" | "failure" | undefined
+export type TurnOutcome = "success" | "failure" | "assassin" | undefined
 
 export interface CodeNamesGame {
   gameId: string

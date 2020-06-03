@@ -565,11 +565,18 @@ describe("revealWord", () => {
       expect(updatedGame.turnOutcome).toBe("success")
     })
 
-    it("to failue if player reveals inocent word", () => {
+    it("to failure if player reveals inocent word", () => {
       const game = buildGame(Teams.red, WordType.inocent)
       const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
 
       expect(updatedGame.turnOutcome).toBe("failure")
+    })
+
+    it("to assassin if player reveals assassin word", () => {
+      const game = buildGame(Teams.red, WordType.assassin)
+      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+
+      expect(updatedGame.turnOutcome).toBe("assassin")
     })
   })
 
