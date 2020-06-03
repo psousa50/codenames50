@@ -5,11 +5,9 @@ import VolumeOff from "@material-ui/icons/VolumeOff"
 import VolumeUp from "@material-ui/icons/VolumeUp"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
-import * as GameActions from "../codenames-core/main"
-import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
+import { CodeNamesGame, GameStates } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
-import { useSocket } from "../utils/hooks"
-import { sounds, usePlaySound } from "../utils/usePlaySounds"
+import { useMessaging } from "../messaging/messaging"
 import { EndedGameView } from "./EndedGameView"
 import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
@@ -67,145 +65,28 @@ export interface CodeNamesGameViewProps {
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
-  const [playSuccessSound] = usePlaySound(sounds.success)
-  const [playFailureSound] = usePlaySound(sounds.failure)
-  const [playHintAlertSound] = usePlaySound(sounds.hintAlert)
-  const [playAssassinSound] = usePlaySound(sounds.assassin)
-  const [playEndGame] = usePlaySound(sounds.endGame)
-
-  const [soundOn, setSoundOn] = React.useState(true)
-
-  const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
-  const [error, setError] = React.useState("")
   const [teamsExpanded, setTeamsExpanded] = React.useState(false)
-  const [game, setGame] = React.useState<CodeNamesGame>(
-    GameActions.createGame("", "", "", "", GameActions.buildBoard(5, 5, [])),
-  )
 
-  const emitMessage = (socket: SocketIOClient.Socket): EmitMessage => message => {
-    setError("")
-    console.log("EMIT=====>\n", message)
-    socket.emit(message.type, message.data)
-  }
-
-  const addMessageHandler = <T extends {}>(
-    socket: SocketIOClient.Socket,
-    type: Messages.GameMessageType,
-    handler: (data: T) => void,
-  ) => {
-    socket.on(type, (data: T) => {
-      console.log("RECEIVED=====>", type, data)
-      return handler(data)
-    })
-  }
-
-  React.useEffect(() => {
-    socket.connect()
-    console.log("CONNECT", socket.id)
-
-    addMessageHandler(socket, "connect", connectHandler)
-
-    addMessageHandler(socket, "removePlayer", removePlayerHandler)
-    addMessageHandler(socket, "joinedGame", joinedGameHandler)
-    addMessageHandler(socket, "joinTeam", joinTeamHandler)
-    addMessageHandler(socket, "nextGame", nextGameHandler)
-    addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
-    addMessageHandler(socket, "startGame", startGameHandler)
-    addMessageHandler(socket, "sendHint", sendHintHandler)
-    addMessageHandler(socket, "revealWord", revealWordHandler)
-    addMessageHandler(socket, "changeTurn", endTurnHandler)
-    addMessageHandler(socket, "gameError", errorHandler)
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const connectHandler = () => {
-    emitMessage(socket)(Messages.registerUserSocket({ userId }))
-
-    joinGame()
-  }
-
-  const joinGame = () => {
-    emitMessage(socket)(Messages.joinGame({ gameId, userId }))
-  }
-
-  const joinTeam = (team: Teams) => {
-    emitMessage(socket)(Messages.joinTeam({ gameId, userId, team }))
-  }
-
-  const startGame = () => {
-    emitMessage(socket)(Messages.startGame({ gameId, userId }))
-  }
-
-  const nextGame = () => {
-    emitMessage(socket)(Messages.nextGame({ gameId }))
-  }
-
-  const setSpyMaster = (team: Teams) => {
-    emitMessage(socket)(Messages.setSpyMaster({ gameId, userId, team }))
-  }
-
-  const joinedGameHandler = (game: CodeNamesGame) => {
-    setGame(game)
-  }
-
-  const removePlayerHandler = ({ userId }: Messages.RemovePlayerInput) => {
-    setGame(GameActions.removePlayer(userId))
-  }
-
-  const joinTeamHandler = ({ userId, team }: Messages.JoinTeamInput) => {
-    setGame(GameActions.joinTeam(userId, team))
-  }
-
-  const nextGameHandler = (game: CodeNamesGame) => {
-    setGame(game)
-    setTeamsExpanded(true)
-  }
-
-  const startGameHandler = () => {
-    setGame(GameActions.startGame)
+  const onNextGame = () => {
     setTeamsExpanded(false)
   }
 
-  const setSpyMasterHandler = ({ userId, team }: Messages.SetSpyMasterInput) => {
-    setGame(GameActions.setSpyMaster(userId, team))
+  const onStartGame = () => {
+    setTeamsExpanded(true)
   }
 
-  const sendHintHandler = ({ hintWord, hintWordCount }: Messages.SendHintInput) => {
-    setGame(GameActions.sendHint(hintWord, hintWordCount))
-    const teamConfig = game.turn === Teams.red ? game.redTeam : game.blueTeam
-    if (teamConfig.spyMaster !== userId) {
-      playHintAlertSound(soundOn)
-    }
-  }
-
-  const revealWordHandler = ({ userId, row, col }: Messages.RevealWordInput) => {
-    setGame(oldGame => {
-      const newGame = GameActions.revealWord(userId, row, col)(oldGame)
-      if (newGame.turnOutcome === "success") {
-        playSuccessSound(soundOn)
-      }
-      if (newGame.turnOutcome === "failure") {
-        playFailureSound(soundOn)
-      }
-      if (newGame.turnOutcome === "assassin") {
-        playAssassinSound(soundOn)
-      } else if (newGame.state === GameStates.ended) {
-        playEndGame(soundOn)
-      }
-
-      return newGame
-    })
-  }
-
-  const endTurnHandler = () => {
-    setGame(GameActions.changeTurn)
-  }
-
-  const errorHandler = (e: { message: string }) => {
-    setError(e.message)
-    console.log("ERROR=====>")
-  }
+  const {
+    game,
+    error,
+    setError,
+    soundOn,
+    setSoundOn,
+    emitMessage,
+    joinTeam,
+    startGame,
+    nextGame,
+    setSpyMaster,
+  } = useMessaging(gameId, userId, onNextGame, onStartGame)
 
   const handleClose = () => {
     setError("")
@@ -215,7 +96,9 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setSoundOn(s => !s)
   }
 
-  const handleTeamsExpanded = (event: React.ChangeEvent<{}>, isExpanded: boolean) => setTeamsExpanded(isExpanded)
+  const handleTeamsExpanded = (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
+    setTeamsExpanded(isExpanded)
+  }
 
   // const copyGameId = () => {
   //   const url = `${window.location.origin}/join?gameId=${gameId}`
@@ -266,9 +149,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
           </ExpansionPanel>
         </div>
 
-        {game.state === GameStates.running && (
-          <RunningGameView game={game} userId={userId} emitMessage={emitMessage(socket)} />
-        )}
+        {game.state === GameStates.running && <RunningGameView game={game} userId={userId} emitMessage={emitMessage} />}
 
         {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} nextGame={nextGame} />}
       </div>

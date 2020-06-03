@@ -20,7 +20,7 @@ import React from "react"
 import { Redirect, useHistory } from "react-router-dom"
 import { CodeNamesGame } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
-import { useSocket } from "../utils/hooks"
+import { useSocket } from "../utils/useSocket"
 
 const useStyles = makeStyles(theme => ({
   paper: {
