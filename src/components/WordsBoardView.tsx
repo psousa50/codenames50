@@ -46,13 +46,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
     justifyContent: "center",
     margin: "2px",
-    userSelect: "none",
     fontFamily: "Teko",
+    userSelect: "none",
     [theme.breakpoints.down(300)]: {
-      fontSize: "12px",
+      fontSize: "10px",
     },
     [theme.breakpoints.between(300, 600)]: {
-      fontSize: "16px",
+      fontSize: "14px",
     },
     [theme.breakpoints.up("sm")]: {
       fontSize: "26px",

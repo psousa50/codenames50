@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingBottom: theme.spacing(1),
   },
   text: {
+    userSelect: "none",
     [theme.breakpoints.down(300)]: {
       fontSize: "12px",
     },

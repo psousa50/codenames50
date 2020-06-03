@@ -6,11 +6,9 @@ import { teamColor } from "../utils/styles"
 
 const useStyles = makeStyles((theme: Theme) => ({
   text: {
-    [theme.breakpoints.down(300)]: {
-      fontSize: "12px",
-    },
-    [theme.breakpoints.between(300, 600)]: {
-      fontSize: "16px",
+    userSelect: "none",
+    [theme.breakpoints.up("xs")]: {
+      fontSize: "14px",
     },
     [theme.breakpoints.up("sm")]: {
       fontSize: "26px",

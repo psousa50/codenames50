@@ -19,14 +19,15 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: "50%",
       alignItems: "center",
       justifyContent: "center",
+      userSelect: "none",
       [theme.breakpoints.down(300)]: {
         fontSize: "12px",
       },
       [theme.breakpoints.between(300, 600)]: {
-        fontSize: "14px",
+        fontSize: "20px",
       },
       [theme.breakpoints.up("sm")]: {
-        fontSize: "20px",
+        fontSize: "24px",
       },
       [theme.breakpoints.up("md")]: {
         fontSize: "32px",

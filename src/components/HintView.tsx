@@ -20,17 +20,18 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   hintWord: {
     display: "flex",
+    userSelect: "none",
     [theme.breakpoints.down("sm")]: {
-      fontSize: "1px",
+      fontSize: "12px",
     },
     [theme.breakpoints.up("sm")]: {
-      fontSize: "16px",
-    },
-    [theme.breakpoints.up("lg")]: {
       fontSize: "20px",
     },
-    [theme.breakpoints.up("xl")]: {
+    [theme.breakpoints.up("lg")]: {
       fontSize: "24px",
+    },
+    [theme.breakpoints.up("xl")]: {
+      fontSize: "32px",
     },
     alignItems: "center",
     justifyContent: "center",

@@ -46,8 +46,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginBottom: "0.5rem",
   },
   heading: {
-    fontSize: theme.typography.pxToRem(15),
-    fontWeight: theme.typography.fontWeightRegular,
+    fontSize: theme.typography.pxToRem(20),
+    fontWeight: theme.typography.fontWeightMedium,
+    color: theme.palette.secondary.main,
   },
   copyId: {
     fontSize: 10,
