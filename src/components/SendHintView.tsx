@@ -3,7 +3,7 @@ import * as R from "ramda"
 import React from "react"
 import { Teams } from "../codenames-core/models"
 import { calculatedWidth, SmallButton, teamColor } from "../utils/styles"
-import { Hint } from "./types"
+import { Hint } from "../utils/types"
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -54,13 +54,13 @@ export const SendHintView: React.FC<SendHintViewProps> = ({ team, hint, onChange
             id="hint-word"
             label="Hint Word"
             value={hint.word}
-            onChange={event => onChange && onChange({ ...hint, word: event.target.value })}
+            onChange={event => onChange({ ...hint, word: event.target.value })}
           />
           <Button
             variant="contained"
             disabled={hint.word.trim().length === 0 || hint.count === undefined}
             color="primary"
-            onClick={() => hint.count && sendHint(hint)}
+            onClick={() => hint.count > 0 && sendHint(hint)}
           >
             Send Hint
           </Button>
