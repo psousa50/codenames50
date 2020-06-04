@@ -1,4 +1,5 @@
 import { Grid, makeStyles, Theme } from "@material-ui/core"
+import Typography from "@material-ui/core/Typography"
 import React from "react"
 import { CodeNamesGame, Teams } from "../codenames-core/models"
 import { teamColor } from "../utils/styles"
@@ -24,18 +25,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   text: {
     userSelect: "none",
-    [theme.breakpoints.down(300)]: {
-      fontSize: "12px",
-    },
-    [theme.breakpoints.between(300, 600)]: {
-      fontSize: "16px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "26px",
-    },
-    [theme.breakpoints.up("md")]: {
-      fontSize: "32px",
-    },
     fontWeight: "bold",
   },
 }))
@@ -61,9 +50,9 @@ export const WordsLeftView: React.FC<WordsLeftViewProps> = ({ game, text, team }
         <WordsLeft count={game.redTeam.wordsLeft} team={Teams.red} />
       </Grid>
       <Grid item>
-        <div style={styles.teamColor} className={classes.text}>
+        <Typography variant="h4" style={styles.teamColor} className={classes.text}>
           {text}
-        </div>
+        </Typography>
       </Grid>
       <Grid item>
         <WordsLeft count={game.blueTeam.wordsLeft} team={Teams.blue} />

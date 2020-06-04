@@ -18,24 +18,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: "space-between",
     padding: "10px",
   },
-  hintWord: {
-    display: "flex",
-    userSelect: "none",
-    [theme.breakpoints.down("sm")]: {
-      fontSize: "12px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "20px",
-    },
-    [theme.breakpoints.up("lg")]: {
-      fontSize: "24px",
-    },
-    [theme.breakpoints.up("xl")]: {
-      fontSize: "32px",
-    },
-    alignItems: "center",
-    justifyContent: "center",
-  },
   numbers: {
     display: "flex",
     flexDirection: "row",
@@ -43,18 +25,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: "center",
   },
   number: {
-    [theme.breakpoints.down("sm")]: {
-      fontSize: "10px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "14px",
-    },
-    [theme.breakpoints.up("lg")]: {
-      fontSize: "16px",
-    },
-    [theme.breakpoints.up("xl")]: {
-      fontSize: "18px",
-    },
     margin: "5px",
   },
 }))
@@ -108,7 +78,7 @@ export const SendHintView: React.FC<SendHintViewProps> = ({ team, hint, onChange
 interface HintCountProps {
   count: number
   selected: boolean
-  onChange?: (n: number) => void
+  onChange: (n: number) => void
 }
 
 const HintCount: React.FC<HintCountProps> = ({ count, selected, onChange }) => {
@@ -121,7 +91,7 @@ const HintCount: React.FC<HintCountProps> = ({ count, selected, onChange }) => {
       className={classes.number}
       variant={selected ? "contained" : "outlined"}
       color="secondary"
-      onClick={() => onChange && onChange(count)}
+      onClick={() => onChange(count)}
     >
       {count}
     </SmallButton>

@@ -9,6 +9,7 @@ import {
   makeStyles,
   Theme,
 } from "@material-ui/core"
+import Typography from "@material-ui/core/Typography"
 import React from "react"
 import { CodeNamesGame, Player, TeamConfig, Teams } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
@@ -32,20 +33,7 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: 0,
     },
     teamName: {
-      fontSize: 26,
       fontWeight: "bold",
-    },
-    spyMaster: {
-      fontSize: 20,
-      height: "2rem",
-    },
-    noSpyMaster: {
-      marginTop: "0.5rem",
-      fontSize: 12,
-      height: "1.5rem",
-    },
-    member: {
-      fontSize: 12,
     },
   }),
 )
@@ -113,16 +101,22 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
           <ListItemText
             primary={
               teamConfig.spyMaster ? (
-                <div className={classes.spyMaster}>{teamConfig.spyMaster}</div>
+                <ListItemText>
+                  <Typography variant="h5">{teamConfig.spyMaster}</Typography>
+                </ListItemText>
               ) : (
-                <div className={classes.noSpyMaster}>(No SpyMaster)</div>
+                <ListItemText>
+                  <Typography variant="h6">{"(No SpyMaster)"}</Typography>
+                </ListItemText>
               )
             }
           />
         </ListItem>
         {members.map(m => (
           <ListItem key={m.userId} alignItems="center" className={classes.item}>
-            <ListItemText className={classes.member} primary={m.userId} />
+            <ListItemText>
+              <Typography variant="subtitle1">{m.userId}</Typography>
+            </ListItemText>
           </ListItem>
         ))}
       </List>

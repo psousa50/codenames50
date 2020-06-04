@@ -1,5 +1,6 @@
 import { makeStyles, Theme } from "@material-ui/core"
 import { common } from "@material-ui/core/colors"
+import Typography from "@material-ui/core/Typography"
 import React from "react"
 import { Teams } from "../codenames-core/models"
 import { teamColor } from "../utils/styles"
@@ -7,15 +8,6 @@ import { teamColor } from "../utils/styles"
 const useStyles = makeStyles((theme: Theme) => ({
   text: {
     userSelect: "none",
-    [theme.breakpoints.up("xs")]: {
-      fontSize: "14px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "26px",
-    },
-    [theme.breakpoints.up("md")]: {
-      fontSize: "32px",
-    },
     textAlign: "center",
     padding: "2px 50px 2px 50px",
     borderRadius: "10px",
@@ -47,8 +39,8 @@ export const UserView: React.FC<UserViewProps> = ({ userId, team, spyMaster }) =
   const spyMasterStyle = spyMaster ? styles.spyMaster : styles.notSpyMaster
 
   return (
-    <div style={spyMasterStyle} className={classes.text}>
+    <Typography variant="h4" style={spyMasterStyle} className={classes.text}>
       {userId}
-    </div>
+    </Typography>
   )
 }

@@ -1,4 +1,5 @@
 import { Button, makeStyles, Paper, Theme } from "@material-ui/core"
+import Typography from "@material-ui/core/Typography"
 import React from "react"
 import { Teams } from "../codenames-core/models"
 import { calculatedWidth, teamColor } from "../utils/styles"
@@ -11,40 +12,16 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: "row",
     width: calculatedWidth,
     padding: "5px 10px",
+    alignItems: "center",
     justifyContent: "space-between",
   },
   hintWord: {
     display: "flex",
     userSelect: "none",
-    [theme.breakpoints.down("sm")]: {
-      fontSize: "16px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "20px",
-    },
-    [theme.breakpoints.up("lg")]: {
-      fontSize: "24px",
-    },
-    [theme.breakpoints.up("xl")]: {
-      fontSize: "28px",
-    },
     alignItems: "center",
     justifyContent: "center",
   },
-
   number: {
-    [theme.breakpoints.down("sm")]: {
-      fontSize: "16px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "20px",
-    },
-    [theme.breakpoints.up("lg")]: {
-      fontSize: "24px",
-    },
-    [theme.breakpoints.up("xl")]: {
-      fontSize: "28px",
-    },
     margin: "5px",
   },
 }))
@@ -68,8 +45,8 @@ export const HintView: React.FC<HintViewProps> = ({ team, hint, endTurn, canEndT
 
   return (
     <Paper elevation={3} variant="outlined" style={styles.paper} className={classes.container}>
-      <div className={classes.hintWord}>{hint.word}</div>
-      <div className={classes.number}>{hint.count > 0 ? hint.count : ""}</div>
+      <Typography variant="h4">{hint.word}</Typography>
+      <Typography variant="h4">{hint.count > 0 ? hint.count : ""}</Typography>
       <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn()}>
         End Turn
       </Button>

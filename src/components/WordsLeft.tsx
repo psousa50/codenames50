@@ -1,5 +1,6 @@
 import { Theme } from "@material-ui/core"
 import { common } from "@material-ui/core/colors"
+import Typography from "@material-ui/core/Typography"
 import { createStyles, makeStyles } from "@material-ui/styles"
 import React from "react"
 import { Teams } from "../codenames-core/models"
@@ -20,21 +21,6 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: "center",
       justifyContent: "center",
       userSelect: "none",
-      [theme.breakpoints.down(300)]: {
-        fontSize: "12px",
-      },
-      [theme.breakpoints.between(300, 600)]: {
-        fontSize: "20px",
-      },
-      [theme.breakpoints.up("sm")]: {
-        fontSize: "24px",
-      },
-      [theme.breakpoints.up("md")]: {
-        fontSize: "32px",
-      },
-      [theme.breakpoints.up("lg")]: {
-        fontSize: "40px",
-      },
       color: common.white,
     },
   }),
@@ -50,8 +36,8 @@ export const WordsLeft: React.FC<WordsLeftProps> = ({ count, team }) => {
   }
 
   return count !== undefined ? (
-    <div style={styles.count} className={classes.count}>
+    <Typography variant="h4" style={styles.count} className={classes.count}>
       {count.toString()}
-    </div>
+    </Typography>
   ) : null
 }
