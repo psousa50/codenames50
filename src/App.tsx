@@ -6,6 +6,16 @@ import { AppRouter } from "./AppRouter"
 import { Environment, EnvironmentContext } from "./environment"
 import { ViewportProvider } from "./utils/viewPort"
 
+const darkTheme = responsiveFontSizes(
+  createMuiTheme({
+    palette: {
+      type: "dark",
+      primary: teal,
+      secondary: cyan,
+    },
+  }),
+)
+
 export const App = () => {
   const defaultEnvironment: Environment = {
     soundOn: false,
@@ -14,21 +24,11 @@ export const App = () => {
 
   const [environment, setEnvironment] = useState(defaultEnvironment)
 
-  const theme = responsiveFontSizes(
-    createMuiTheme({
-      palette: {
-        type: "dark",
-        primary: teal,
-        secondary: cyan,
-      },
-    }),
-  )
-
   return (
     <React.StrictMode>
       <ViewportProvider>
         <EnvironmentContext.Provider value={environment}>
-          <ThemeProvider theme={theme}>
+          <ThemeProvider theme={darkTheme}>
             <CssBaseline />
             <BrowserRouter>
               <AppRouter />
