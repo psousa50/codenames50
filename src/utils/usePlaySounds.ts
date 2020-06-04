@@ -1,5 +1,6 @@
 import React from "react"
 import useSound from "use-sound"
+import { EnvironmentContext } from "../environment"
 
 export const sounds = {
   success: require("../assets/sounds/success.mp3"),
@@ -10,20 +11,20 @@ export const sounds = {
 }
 
 export const usePlaySound = (url: string) => {
+  const environment = React.useContext(EnvironmentContext)
   const [playSound] = useSound(url)
-  const [playTrigger, setPlayTrigger] = React.useState(0)
+  const [playIt, setPlayIt] = React.useState(false)
 
-  const play = (soundOn: boolean) => {
-    if (soundOn) {
-      setPlayTrigger(p => p + 1)
-    }
+  const play = () => {
+    setPlayIt(true)
   }
 
   React.useEffect(() => {
-    if (playTrigger > 0) {
+    if (environment.soundOn && playIt) {
       playSound()
     }
-  }, [playSound, playTrigger])
+    setPlayIt(false)
+  }, [environment.soundOn, playSound, playIt])
 
   return [play]
 }

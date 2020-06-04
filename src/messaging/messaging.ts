@@ -15,9 +15,8 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   const [playFailureSound] = usePlaySound(sounds.failure)
   const [playHintAlertSound] = usePlaySound(sounds.hintAlert)
   const [playAssassinSound] = usePlaySound(sounds.assassin)
-  const [playEndGame] = usePlaySound(sounds.endGame)
+  const [playEndGameSound] = usePlaySound(sounds.endGame)
 
-  const [soundOn, setSoundOn] = React.useState(true)
   const [error, setError] = React.useState("")
 
   const emitMessage = (socket: SocketIOClient.Socket): EmitMessage => message => {
@@ -107,7 +106,7 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     setGame(GameActions.sendHint(hintWord, hintWordCount))
     const teamConfig = game.turn === Teams.red ? game.redTeam : game.blueTeam
     if (teamConfig.spyMaster !== userId) {
-      playHintAlertSound(soundOn)
+      playHintAlertSound()
     }
   }
 
@@ -116,15 +115,15 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
       const newGame = GameActions.revealWord(userId, row, col)(oldGame)
 
       if (newGame.turnOutcome === "success") {
-        playSuccessSound(soundOn)
+        playSuccessSound()
       }
       if (newGame.turnOutcome === "failure") {
-        playFailureSound(soundOn)
+        playFailureSound()
       }
       if (newGame.state === GameStates.ended) {
         if (newGame.turnOutcome === "assassin") {
-          playAssassinSound(soundOn)
-        } else playEndGame(soundOn)
+          playAssassinSound()
+        } else playEndGameSound()
       }
 
       return newGame
@@ -144,8 +143,6 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     game,
     error,
     setError,
-    soundOn,
-    setSoundOn,
     emitMessage: emitMessage(socket),
     joinTeam,
     startGame,

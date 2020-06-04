@@ -6,6 +6,7 @@ import VolumeUp from "@material-ui/icons/VolumeUp"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
 import { CodeNamesGame, GameStates } from "../codenames-core/models"
+import { EnvironmentContext } from "../environment"
 import * as Messages from "../messaging/messages"
 import { useMessaging } from "../messaging/messaging"
 import { EndedGameView } from "./EndedGameView"
@@ -68,6 +69,9 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   const classes = useStyles()
 
   const [teamsExpanded, setTeamsExpanded] = React.useState(false)
+  const environment = React.useContext(EnvironmentContext)
+
+  console.log("environment.soundOn=====>", environment.soundOn)
 
   const onNextGame = () => {
     setTeamsExpanded(false)
@@ -77,25 +81,19 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setTeamsExpanded(true)
   }
 
-  const {
-    game,
-    error,
-    setError,
-    soundOn,
-    setSoundOn,
-    emitMessage,
-    joinTeam,
-    startGame,
-    nextGame,
-    setSpyMaster,
-  } = useMessaging(gameId, userId, onNextGame, onStartGame)
+  const { game, error, setError, emitMessage, joinTeam, startGame, nextGame, setSpyMaster } = useMessaging(
+    gameId,
+    userId,
+    onNextGame,
+    onStartGame,
+  )
 
   const handleClose = () => {
     setError("")
   }
 
   const handleSound = () => {
-    setSoundOn(s => !s)
+    environment.toggleSound()
   }
 
   const handleTeamsExpanded = (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
@@ -124,7 +122,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
             spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
           />
           <div className={classes.sound} onClick={() => handleSound()}>
-            {soundOn ? <VolumeUp /> : <VolumeOff />}
+            {environment.soundOn ? <VolumeUp /> : <VolumeOff />}
           </div>
         </div>
 
