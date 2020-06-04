@@ -71,8 +71,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   const [teamsExpanded, setTeamsExpanded] = React.useState(false)
   const environment = React.useContext(EnvironmentContext)
 
-  console.log("environment.soundOn=====>", environment.soundOn)
-
   const onNextGame = () => {
     setTeamsExpanded(false)
   }

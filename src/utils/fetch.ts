@@ -48,7 +48,6 @@ function responseMapper(response: Response): ActionResult<Response> {
 
 export const fetchAction = (input: Request | string, init?: RequestInit): ActionResult<Response> => {
   function coreFetch(): ActionResult<Response> {
-    console.log("init=====>\n", init)
     return tryCatch(
       () => fetch(input, init),
       error => error as Error,

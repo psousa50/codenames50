@@ -136,7 +136,6 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
 
   const errorHandler = (e: { message: string }) => {
     setError(e.message)
-    console.log("ERROR=====>")
   }
 
   return {
