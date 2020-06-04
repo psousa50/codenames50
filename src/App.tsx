@@ -14,7 +14,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: "100vh",
     alignItems: "center",
     flexDirection: "column",
-    backgroundColor: theme.palette.background.default,
   },
 }))
 
