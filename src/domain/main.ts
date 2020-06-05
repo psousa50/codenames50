@@ -15,11 +15,10 @@ import { DomainEnvironment, DomainPort } from "./adapters"
 import { ErrorCodes } from "./errors"
 import { CreateGameInput } from "./models"
 
-const e = (game: CodeNamesGame) => (v: GameRules.ValidationError | undefined) =>
-  v === undefined ? right(game) : left(new ServiceError(v, v))
-
-const checkRules = (rule: GameRules.GameRule): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
-  fromEither(e(game)(rule(game)))
+const checkRules = (rule: GameRules.GameRule): DomainPort<CodeNamesGame, CodeNamesGame> => game => {
+  const validation = rule(game)
+  return fromEither(validation === undefined ? right(game) : left(new ServiceError(validation, validation)))
+}
 
 const doAction = (action: GameActions.GameAction): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
   fromEither(right(action(game)))
@@ -110,7 +109,7 @@ export const join: DomainPort<Messages.JoinGameInput, Messages.JoinGameOutput> =
           repositoriesEnvironment,
         ),
       ),
-      chain(game => broadcastMessage(Messages.joinedGame(game))(game)),
+      chain(game => broadcastMessage(Messages.joinedGame({ game, userId }))(game)),
     ),
   )
 

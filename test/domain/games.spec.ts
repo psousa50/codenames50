@@ -124,7 +124,10 @@ describe("join", () => {
     expect(addPlayer).toHaveBeenCalledWith(userId)
     expect(addPlayerAction).toHaveBeenCalledWith(someGame)
     expect(updateGame).toHaveBeenCalledWith(updatedGame)
-    expect(broadcastMessage).toHaveBeenCalledWith({ roomId: gameId, message: Messages.joinedGame(updatedGame) })
+    expect(broadcastMessage).toHaveBeenCalledWith({
+      roomId: gameId,
+      message: Messages.joinedGame({ game: updatedGame, userId }),
+    })
   })
 
   it("gives an error if the game does not exist", async () => {
