@@ -1,6 +1,5 @@
-import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar, Typography } from "@material-ui/core"
+import { Snackbar } from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import VolumeOff from "@material-ui/icons/VolumeOff"
 import VolumeUp from "@material-ui/icons/VolumeUp"
 import { Alert, AlertTitle } from "@material-ui/lab"
@@ -8,7 +7,7 @@ import React from "react"
 import { CodeNamesGame, GameStates } from "../codenames-core/models"
 import { EnvironmentContext } from "../environment"
 import * as Messages from "../messaging/messages"
-import { useMessaging } from "../messaging/messaging"
+import { useMessaging } from "../utils/messaging"
 import { EndedGameView } from "./EndedGameView"
 import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
@@ -68,16 +67,11 @@ export interface CodeNamesGameViewProps {
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
-  const [teamsExpanded, setTeamsExpanded] = React.useState(false)
   const environment = React.useContext(EnvironmentContext)
 
-  const onNextGame = () => {
-    setTeamsExpanded(false)
-  }
+  const onNextGame = () => {}
 
-  const onStartGame = () => {
-    setTeamsExpanded(true)
-  }
+  const onStartGame = () => {}
 
   const { game, error, setError, emitMessage, joinTeam, startGame, nextGame, setSpyMaster } = useMessaging(
     gameId,
@@ -92,10 +86,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const handleSound = () => {
     environment.toggleSound()
-  }
-
-  const handleTeamsExpanded = (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
-    setTeamsExpanded(isExpanded)
   }
 
   // const copyGameId = () => {
@@ -124,30 +114,14 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
           </div>
         </div>
 
-        <div className={classes.teams}>
-          <ExpansionPanel expanded={teamsExpanded} onChange={handleTeamsExpanded}>
-            <ExpansionPanelSummary
-              classes={{
-                content: classes.content,
-              }}
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
-            >
-              <Typography className={classes.heading}>Teams</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
-              <SetupGameView
-                userId={userId}
-                game={game}
-                joinTeam={joinTeam}
-                setSpyMaster={setSpyMaster}
-                startGame={startGame}
-                nextGame={nextGame}
-              />
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
-        </div>
+        <SetupGameView
+          userId={userId}
+          game={game}
+          joinTeam={joinTeam}
+          setSpyMaster={setSpyMaster}
+          startGame={startGame}
+          nextGame={nextGame}
+        />
 
         {game.state === GameStates.running && <RunningGameView game={game} userId={userId} emitMessage={emitMessage} />}
 

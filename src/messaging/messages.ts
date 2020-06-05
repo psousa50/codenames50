@@ -48,6 +48,11 @@ export interface JoinGameInput {
 
 export type JoinGameOutput = CodeNamesGame
 
+export interface JoinedGameInput {
+  game: CodeNamesGame
+  userId: string
+}
+
 export interface NextGameInput {
   gameId: string
   language?: string
@@ -119,7 +124,7 @@ export const registerUserSocket = (userId: RegisterUserSocketInput) => createGam
 export const createGame = (data: CreateGameInput) => createGameMessage("createGame", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
-export const joinedGame = (data: CodeNamesGame) => createGameMessage("joinedGame", data)
+export const joinedGame = (data: JoinedGameInput) => createGameMessage("joinedGame", data)
 export const nextGame = (data: NextGameInput) => createGameMessage("nextGame", data)
 export const removePlayer = (data: RemovePlayerInput) => createGameMessage("removePlayer", data)
 export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)

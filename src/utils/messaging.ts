@@ -3,8 +3,8 @@ import * as GameActions from "../codenames-core/main"
 import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import { EmitMessage } from "../components/CodeNamesGameView"
 import * as Messages from "../messaging/messages"
-import { sounds, usePlaySound } from "../utils/usePlaySounds"
-import { useSocket } from "../utils/useSocket"
+import { sounds, usePlaySound } from "./usePlaySounds"
+import { useSocket } from "./useSocket"
 
 export const useMessaging = (gameId: string, userId: string, onStartGame: () => void, onNextGame: () => void) => {
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
@@ -76,8 +76,8 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     emitMessage(socket)(Messages.setSpyMaster({ gameId, userId, team }))
   }
 
-  const joinedGameHandler = (game: CodeNamesGame) => {
-    setGame(game)
+  const joinedGameHandler = (input: Messages.JoinedGameInput) => {
+    setGame(input.game)
   }
 
   const removePlayerHandler = ({ userId }: Messages.RemovePlayerInput) => {

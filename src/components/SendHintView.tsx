@@ -55,6 +55,7 @@ export const SendHintView: React.FC<SendHintViewProps> = ({ team, hint, onChange
             label="Hint Word"
             value={hint.word}
             onChange={event => onChange({ ...hint, word: event.target.value })}
+            inputProps={{ maxLength: 30 }}
           />
           <Button
             variant="contained"
