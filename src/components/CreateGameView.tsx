@@ -1,13 +1,4 @@
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  InputAdornment,
-  makeStyles,
-  Snackbar,
-  TextField,
-} from "@material-ui/core"
+import { Button, InputAdornment, makeStyles, Snackbar, TextField } from "@material-ui/core"
 import Avatar from "@material-ui/core/Avatar"
 import Container from "@material-ui/core/Container"
 import CssBaseline from "@material-ui/core/CssBaseline"
@@ -15,9 +6,8 @@ import Typography from "@material-ui/core/Typography"
 import AccountCircle from "@material-ui/icons/AccountCircle"
 import NoteAdd from "@material-ui/icons/NoteAdd"
 import { Alert, AlertTitle } from "@material-ui/lab"
-import copy from "copy-to-clipboard"
 import React from "react"
-import { Redirect, useHistory } from "react-router-dom"
+import { Redirect } from "react-router-dom"
 import { CodeNamesGame } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useSocket } from "../utils/useSocket"
@@ -47,13 +37,11 @@ export interface CreateGameViewProps {
 
 export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialUserId }) => {
   const classes = useStyles()
-  const history = useHistory()
+
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [error, setError] = React.useState("")
   const [gameId, setGameId] = React.useState<string | undefined>()
   const [userId, setUserId] = React.useState(initialUserId || "")
-  const [created, setCreated] = React.useState(false)
-  const [joining, setJoining] = React.useState(false)
 
   const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: Messages.GameMessage<T>) => {
     setError("")
@@ -75,31 +63,14 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
     }
   }
 
-  const joinGame = () => {
-    setJoining(true)
-  }
-
   React.useEffect(() => {
     socket.connect()
-    console.log("CONNECT")
-    socket.on("connect", (d: any) => {
-      console.log("connect=====>", d)
-    })
-    socket.on("connect_error", (d: any) => {
-      console.log("connect_error=====>", d)
-    })
-    socket.on("connect_timeout", (d: any) => {
-      console.log("connect_timeout=====>", d)
-    })
-  }, [socket])
-
-  React.useEffect(() => {
     const gameCreatedHandler = (game: CodeNamesGame) => {
       setGameId(game.gameId)
     }
 
     addMessageHandler(socket, "gameCreated", gameCreatedHandler)
-  }, [history, socket, userId])
+  }, [socket])
 
   const handleClose = () => {
     setError("")
@@ -146,58 +117,15 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
           >
             Create Game
           </Button>
-          <Button
-            size="small"
-            color="secondary"
-            className={classes.submit}
-            onClick={() => {
-              joinGame()
-            }}
-          >
-            Join a Game instead
-          </Button>
         </div>
       </Container>
     )
   }
 
-  const showGameLinkDialog = () => {
-    const handleClose = () => {
-      setGameId("")
-    }
-
-    const copyGameLink = () => {
-      const url = `${window.location.href}join?gameId=${gameId || ""}`
-      copy(url)
-      setCreated(true)
-    }
-
-    return (
-      <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" open={!created && gameId !== undefined}>
-        <DialogTitle id="simple-dialog-title">Game created</DialogTitle>
-        <DialogContent>
-          <Button
-            size="small"
-            color="secondary"
-            className={classes.submit}
-            onClick={() => {
-              copyGameLink()
-            }}
-          >
-            Copy game link to invite other players
-          </Button>
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
-  return created ? (
+  return gameId && userId ? (
     <Redirect to={`/game?gameId=${gameId}&userId=${userId}`} />
-  ) : joining ? (
-    <Redirect to={`/join?userId=${userId || ""}`} />
   ) : (
     <>
-      {showGameLinkDialog()}
       <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
         <Alert severity="error">
           <AlertTitle>Error</AlertTitle>

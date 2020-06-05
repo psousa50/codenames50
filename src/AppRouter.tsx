@@ -33,12 +33,8 @@ export const AppRouter = () => {
         <Route path="/" exact>
           <CreateGameView userId={userId} />
         </Route>
-        <Route path="/join">
-          <JoinGameView gameId={gameId} userId={userId} />
-        </Route>
-        <Route path="/game">
-          <CodeNamesGameView gameId={gameId!} userId={userId!} />
-        </Route>
+        <Route path="/join">{gameId && <JoinGameView gameId={gameId} userId={userId || ""} />}</Route>
+        <Route path="/game">{gameId && userId && <CodeNamesGameView gameId={gameId} userId={userId} />}</Route>
       </Switch>
     </div>
   )

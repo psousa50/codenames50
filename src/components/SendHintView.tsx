@@ -68,7 +68,13 @@ export const SendHintView: React.FC<SendHintViewProps> = ({ team, hint, onChange
         </div>
         <div className={classes.numbers}>
           {R.range(1, 10).map(c => (
-            <HintCount key={c} count={c} selected={c === hint.count} onChange={count => onChange({ ...hint, count })} />
+            <HintCount
+              key={c}
+              team={team}
+              count={c}
+              selected={c === hint.count}
+              onChange={count => onChange({ ...hint, count })}
+            />
           ))}
         </div>
       </Paper>
@@ -77,21 +83,27 @@ export const SendHintView: React.FC<SendHintViewProps> = ({ team, hint, onChange
 }
 
 interface HintCountProps {
+  team: Teams | undefined
   count: number
   selected: boolean
   onChange: (n: number) => void
 }
 
-const HintCount: React.FC<HintCountProps> = ({ count, selected, onChange }) => {
+const HintCount: React.FC<HintCountProps> = ({ team, count, selected, onChange }) => {
   const classes = useStyles()
 
+  const styles = {
+    teamColor: {
+      color: teamColor(team),
+    },
+  }
   return (
     <SmallButton
       size="small"
       disabled={onChange === undefined}
       className={classes.number}
       variant={selected ? "contained" : "outlined"}
-      color="secondary"
+      style={styles.teamColor}
       onClick={() => onChange(count)}
     >
       {count}

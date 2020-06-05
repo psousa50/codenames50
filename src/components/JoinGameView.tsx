@@ -5,7 +5,6 @@ import CssBaseline from "@material-ui/core/CssBaseline"
 import Typography from "@material-ui/core/Typography"
 import AccountCircle from "@material-ui/icons/AccountCircle"
 import FastForward from "@material-ui/icons/FastForward"
-import Games from "@material-ui/icons/Games"
 import React from "react"
 import { Redirect } from "react-router-dom"
 
@@ -29,13 +28,12 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export interface JoinGameViewProps {
-  gameId?: string
-  userId?: string
+  gameId: string
+  userId: string
 }
 
-export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserId, gameId: initialGameId }) => {
+export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserId, gameId }) => {
   const classes = useStyles()
-  const [gameId, setGameId] = React.useState(initialGameId || "")
   const [userId, setUserId] = React.useState(initialUserId || "")
   const [joining, setJoining] = React.useState(false)
 
@@ -70,23 +68,6 @@ export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserI
             startAdornment: (
               <InputAdornment position="start">
                 <AccountCircle />
-              </InputAdornment>
-            ),
-          }}
-        />
-        <TextField
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          className={classes.margin}
-          id="game-id"
-          label="Game ID"
-          value={gameId}
-          onChange={event => setGameId(event.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Games />
               </InputAdornment>
             ),
           }}

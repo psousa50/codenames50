@@ -1,19 +1,15 @@
-import { Snackbar } from "@material-ui/core"
+import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar, Typography } from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
-import VolumeOff from "@material-ui/icons/VolumeOff"
-import VolumeUp from "@material-ui/icons/VolumeUp"
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
-import { CodeNamesGame, GameStates } from "../codenames-core/models"
-import { EnvironmentContext } from "../environment"
+import { GameStates } from "../codenames-core/models"
 import * as Messages from "../messaging/messages"
 import { useMessaging } from "../utils/messaging"
 import { EndedGameView } from "./EndedGameView"
+import { HeaderView } from "./HeaderView"
 import { RunningGameView } from "./RunningGameView"
 import { SetupGameView } from "./SetupGameView"
-import { UserView } from "./UserView"
-
-const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -64,14 +60,20 @@ export interface CodeNamesGameViewProps {
   userId: string
 }
 
+const Separator = () => <div style={{ height: "20px" }}></div>
+
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
-  const environment = React.useContext(EnvironmentContext)
+  const [teamsExpanded, setTeamsExpanded] = React.useState(true)
 
-  const onNextGame = () => {}
+  const onNextGame = () => {
+    setTeamsExpanded(false)
+  }
 
-  const onStartGame = () => {}
+  const onStartGame = () => {
+    setTeamsExpanded(true)
+  }
 
   const { game, error, setError, emitMessage, joinTeam, startGame, nextGame, setSpyMaster } = useMessaging(
     gameId,
@@ -84,14 +86,9 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setError("")
   }
 
-  const handleSound = () => {
-    environment.toggleSound()
+  const handleTeamsExpanded = (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
+    setTeamsExpanded(isExpanded)
   }
-
-  // const copyGameId = () => {
-  //   const url = `${window.location.origin}/join?gameId=${gameId}`
-  //   copy(url)
-  // }
 
   return (
     <div className={classes.container}>
@@ -103,25 +100,36 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
       </Snackbar>
 
       <div className={classes.game}>
-        <div className={classes.header}>
-          <UserView
-            userId={userId}
-            team={getPlayer(game, userId)?.team}
-            spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
-          />
-          <div className={classes.sound} onClick={() => handleSound()}>
-            {environment.soundOn ? <VolumeUp /> : <VolumeOff />}
-          </div>
+        <HeaderView game={game} userId={userId} />
+
+        <Separator />
+
+        <div className={classes.teams}>
+          <ExpansionPanel expanded={teamsExpanded} onChange={handleTeamsExpanded}>
+            <ExpansionPanelSummary
+              classes={{
+                content: classes.content,
+              }}
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <Typography className={classes.heading}>Game Setup</Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <SetupGameView
+                userId={userId}
+                game={game}
+                joinTeam={joinTeam}
+                setSpyMaster={setSpyMaster}
+                startGame={startGame}
+                nextGame={nextGame}
+              />
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
         </div>
 
-        <SetupGameView
-          userId={userId}
-          game={game}
-          joinTeam={joinTeam}
-          setSpyMaster={setSpyMaster}
-          startGame={startGame}
-          nextGame={nextGame}
-        />
+        <Separator />
 
         {game.state === GameStates.running && <RunningGameView game={game} userId={userId} emitMessage={emitMessage} />}
 

@@ -1,18 +1,26 @@
-import { Button, Grid, makeStyles, Theme } from "@material-ui/core"
+import { Button, makeStyles, Theme } from "@material-ui/core"
 import React from "react"
 import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
+import { InvitePlayersDialog } from "./InvitePlayersDialog"
 import { TeamsView } from "./TeamsView"
 
 const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
   buttons: {
     display: "flex",
     flow: 1,
-    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: theme.spacing(3),
+  },
+  button: {
+    margin: "20px",
   },
 }))
 
@@ -35,25 +43,45 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
 }) => {
   const classes = useStyles()
 
+  const [invitePlayersOpened, openInvitePlayers] = React.useState(false)
+
   const canStartGame = GameRules.startGame(game) === undefined
 
   return (
-    <Grid container spacing={0} direction="column" alignItems="center" justify="center">
+    <div className={classes.container}>
       <TeamsView userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
       <div className={classes.buttons}>
-        <Button variant="contained" disabled={!canStartGame} size="small" color="primary" onClick={() => startGame()}>
+        <Button
+          disabled={!canStartGame}
+          variant="contained"
+          size="small"
+          color="primary"
+          className={classes.button}
+          onClick={() => startGame()}
+        >
           Start Game
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
+          color="secondary"
+          className={classes.button}
+          onClick={() => openInvitePlayers(true)}
+        >
+          Invite Players
         </Button>
         <Button
           disabled={game.state === GameStates.idle}
           variant="contained"
           size="small"
           color="primary"
+          className={classes.button}
           onClick={() => nextGame()}
         >
           New Game
         </Button>
       </div>
-    </Grid>
+      <InvitePlayersDialog onClose={() => openInvitePlayers(false)} open={invitePlayersOpened} gameId={game.gameId} />
+    </div>
   )
 }

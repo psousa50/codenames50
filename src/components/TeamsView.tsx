@@ -56,6 +56,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
 
   const styles = {
     team: {
+      width: "100%",
       border: `2px solid ${teamColor(team)}`,
       margin: "5px",
       padding: "10px",
@@ -70,7 +71,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
         subheader={
           <ListSubheader>
             <Button
-              fullWidth
+              size="small"
               variant="contained"
               disabled={teamConfig.spyMaster === userId || members.find(m => m.userId === userId) !== undefined}
               color="primary"
@@ -86,7 +87,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
           <ListItemText
             primary={
               <Button
-                fullWidth
+                size="small"
                 variant="contained"
                 disabled={!canSetSpyMaster || teamConfig.spyMaster === userId}
                 color="primary"
@@ -102,7 +103,7 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
             primary={
               teamConfig.spyMaster ? (
                 <ListItemText>
-                  <Typography variant="h5">{teamConfig.spyMaster}</Typography>
+                  <Typography variant="h6">{teamConfig.spyMaster}</Typography>
                 </ListItemText>
               ) : (
                 <ListItemText>
