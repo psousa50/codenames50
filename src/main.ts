@@ -1,4 +1,5 @@
 import * as R from "ramda"
+import { getPlayer, otherTeam } from "./helpers"
 import { BoardWord, CodeNamesGame, GameStates, Teams, WordsBoard, WordType } from "./models"
 import { update2dCell } from "./utils/collections"
 import { shuffle } from "./utils/random"
@@ -8,10 +9,6 @@ export type GameAction = (game: CodeNamesGame) => CodeNamesGame
 const nullAction = (game: CodeNamesGame) => game
 const conditionalAction = (v: boolean, action: GameAction) => (v ? action : nullAction)
 const act = (actions: GameAction[]) => (game: CodeNamesGame) => actions.reduce((acc, action) => action(acc), game)
-
-const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
-
-const otherTeam = (team?: Teams) => (team === Teams.red ? Teams.blue : team === Teams.blue ? Teams.red : undefined)
 
 export const createGame = (
   gameId: string,
@@ -124,6 +121,24 @@ export const setSpyMaster = (userId: string, team: Teams): GameAction => game =>
   },
   players: game.players.map(p => (p.userId === userId ? { ...p, team } : p)),
 })
+
+export const randomizeTeams: GameAction = game => {
+  const middle = Math.floor(game.players.length / 2)
+  const randomizedPlayers = shuffle(game.players).map((p, i) => ({ ...p, team: i < middle ? Teams.red : Teams.blue }))
+
+  return {
+    ...game,
+    players: randomizedPlayers,
+    redTeam: {
+      ...game.redTeam,
+      spyMaster: undefined,
+    },
+    blueTeam: {
+      ...game.blueTeam,
+      spyMaster: undefined,
+    },
+  }
+}
 
 const countTypes = (board: WordsBoard, type: WordType) => R.flatten(board).filter(w => w.type === type).length
 export const startGame: GameAction = game => {

@@ -82,6 +82,8 @@ export const startGame = validIfAll([idle, hasBothSpyMasters, hasAtleastTwoPlaye
 
 export const setSpyMaster = (team: Teams) => validIfOneOf([[idle], [running, spyMasterIsNotSet(team)]])
 
+export const ramdomizeTeams = validIfAll([idle])
+
 export const sendHint = (userId: string) =>
   validIfAll([running, isPlayersTurn(userId), doesNotHaveHint, playerIsSpyMaster(userId)])
 

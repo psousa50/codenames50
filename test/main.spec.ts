@@ -418,6 +418,47 @@ describe("setSpyMaster", () => {
   })
 })
 
+describe("randomizeTeams", () => {
+  it("assigns a random team to each player, evenly distributed", () => {
+    const game = {
+      players: R.range(0, 21).map(i => ({ userId: `${i}`, team: i > 15 ? Teams.red : Teams.blue })),
+    }
+
+    const updatedGame = GameActions.randomizeTeams(game as any)
+    const redPlayers = updatedGame.players.filter(p => p.team === Teams.red)
+    const bluePlayers = updatedGame.players.filter(p => p.team === Teams.blue)
+
+    expect(redPlayers.length).toBe(10)
+    expect(bluePlayers.length).toBe(11)
+
+    expect(redPlayers.map(p => p.userId)).not.toEqual(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+  })
+
+  it("clears Spy Masters", () => {
+    const game = {
+      players: [],
+      blueTeam: {
+        spyMaster: "some-blue-user",
+      },
+      redTeam: {
+        spyMaster: "some-red-user",
+      },
+    }
+
+    const expectedGame = {
+      players: [],
+      blueTeam: {
+        spyMaster: undefined,
+      },
+      redTeam: {
+        spyMaster: undefined,
+      },
+    }
+
+    expect(GameActions.randomizeTeams(game as any)).toEqual(expectedGame)
+  })
+})
+
 describe("startGame", () => {
   it("sets the rame running", () => {
     const w00 = { word: "w00", type: WordType.blue }
