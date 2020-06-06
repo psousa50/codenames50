@@ -51,11 +51,24 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
   const [invitePlayersOpened, openInvitePlayers] = React.useState(false)
 
   const canStartGame = GameRules.startGame(game) === undefined
+  const canRandomizeTeams = GameRules.ramdomizeTeams(game) === undefined
 
   return (
     <div className={classes.container}>
       <TeamsView userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
       <div className={classes.buttons}>
+        <div className={classes.button}>
+          <Button
+            disabled={!canRandomizeTeams}
+            variant="contained"
+            size="small"
+            color="secondary"
+            className={classes.button}
+            onClick={() => randomizeTeams()}
+          >
+            Randomize Team
+          </Button>
+        </div>
         <div className={classes.button}>
           <Button
             variant="contained"
@@ -65,17 +78,6 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
             onClick={() => openInvitePlayers(true)}
           >
             Invite Players
-          </Button>
-        </div>
-        <div className={classes.button}>
-          <Button
-            variant="contained"
-            size="small"
-            color="secondary"
-            className={classes.button}
-            onClick={() => randomizeTeams()}
-          >
-            Randomize Team
           </Button>
         </div>
       </div>

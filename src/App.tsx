@@ -1,5 +1,5 @@
 import { createMuiTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
-import { cyan, teal } from "@material-ui/core/colors"
+import { indigo, teal } from "@material-ui/core/colors"
 import React, { useState } from "react"
 import { BrowserRouter } from "react-router-dom"
 import { AppRouter } from "./AppRouter"
@@ -11,7 +11,7 @@ const darkTheme = responsiveFontSizes(
     palette: {
       type: "dark",
       primary: teal,
-      secondary: cyan,
+      secondary: indigo,
     },
   }),
 )
