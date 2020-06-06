@@ -7,6 +7,7 @@ export type GameMessageType =
   | "disconnect"
   | "gameCreated"
   | "gameError"
+  | "hintSent"
   | "joinedGame"
   | "joinGame"
   | "joinTeam"
@@ -41,24 +42,16 @@ export interface CreateGameInput {
   language: string
 }
 
-export type CreateGameOutput = CodeNamesGame
-
 export interface JoinGameInput {
   gameId: string
   userId: string
 }
 
-export type JoinGameOutput = CodeNamesGame
-
 export interface RandomizeTeamsInput {
   gameId: string
 }
 
-export type RandomizeTeamsOutput = CodeNamesGame
-
-export interface UpdateGameInput {
-  game: CodeNamesGame
-}
+export type UpdateGameInput = CodeNamesGame
 
 export interface JoinedGameInput {
   game: CodeNamesGame
@@ -70,14 +63,10 @@ export interface NextGameInput {
   language?: string
 }
 
-export type NextGameOutput = CodeNamesGame
-
 export interface RemovePlayerInput {
   gameId: string
   userId: string
 }
-
-export type RemovePlayerOutput = CodeNamesGame
 
 export interface JoinTeamInput {
   gameId: string
@@ -85,14 +74,10 @@ export interface JoinTeamInput {
   team: Teams
 }
 
-export type JoinTeamOutput = CodeNamesGame
-
 export interface StartGameInput {
   gameId: string
   userId: string
 }
-
-export type StartGameOutput = CodeNamesGame
 
 export type SendHintInput = {
   gameId: string
@@ -101,7 +86,13 @@ export type SendHintInput = {
   hintWordCount: number
 }
 
-export type SendHintOutput = CodeNamesGame
+export type HintSentInput = {
+  gameId: string
+  userId: string
+  hintWord: string
+  hintWordCount: number
+  hintWordStartedTime: number
+}
 
 export type RevealWordInput = {
   gameId: string
@@ -110,22 +101,16 @@ export type RevealWordInput = {
   col: number
 }
 
-export type RevealWordOutput = CodeNamesGame
-
 export type ChangeTurnInput = {
   gameId: string
   userId: string
 }
-
-export type ChangeTurnOutput = CodeNamesGame
 
 export type SetSpyMasterInput = {
   gameId: string
   userId: string
   team: Teams
 }
-
-export type SetSpyMasterOutput = CodeNamesGame
 
 export interface ErrorInput {
   code: string
@@ -134,6 +119,7 @@ export interface ErrorInput {
 
 export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTurn", data)
 export const createGame = (data: CreateGameInput) => createGameMessage("createGame", data)
+export const hintSent = (data: HintSentInput) => createGameMessage("hintSent", data)
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
 export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)
 export const nextGame = (data: NextGameInput) => createGameMessage("nextGame", data)

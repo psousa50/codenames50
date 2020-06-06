@@ -38,12 +38,12 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     addMessageHandler(socket, "changeTurn", endTurnHandler)
     addMessageHandler(socket, "connect", connectHandler)
     addMessageHandler(socket, "gameError", errorHandler)
+    addMessageHandler(socket, "hintSent", hintSentHandler)
     addMessageHandler(socket, "joinedGame", joinedGameHandler)
     addMessageHandler(socket, "joinTeam", joinTeamHandler)
     addMessageHandler(socket, "nextGame", nextGameHandler)
     addMessageHandler(socket, "removePlayer", removePlayerHandler)
     addMessageHandler(socket, "revealWord", revealWordHandler)
-    addMessageHandler(socket, "sendHint", sendHintHandler)
     addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
     addMessageHandler(socket, "startGame", startGameHandler)
     addMessageHandler(socket, "updateGame", updateGameHandler)
@@ -111,8 +111,8 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     setGame(GameActions.setSpyMaster(userId, team))
   }
 
-  const sendHintHandler = ({ hintWord, hintWordCount }: Messages.SendHintInput) => {
-    setGame(GameActions.sendHint(hintWord, hintWordCount))
+  const hintSentHandler = ({ hintWord, hintWordCount, hintWordStartedTime }: Messages.HintSentInput) => {
+    setGame(GameActions.sendHint(hintWord, hintWordCount, hintWordStartedTime))
     const teamConfig = game.turn === Teams.red ? game.redTeam : game.blueTeam
     if (teamConfig.spyMaster !== userId) {
       playHintAlertSound()

@@ -32,6 +32,7 @@ export const createGame = (
     },
     hintWord: "",
     hintWordCount: 0,
+    hintWordStartedTime: undefined,
     wordsRevealedCount: 0,
     state: GameStates.idle,
     turn: undefined,
@@ -159,10 +160,11 @@ export const startGame: GameAction = game => {
   }
 }
 
-export const sendHint = (hintWord: string, hintWordCount: number): GameAction => game => ({
+export const sendHint = (hintWord: string, hintWordCount: number, now: number): GameAction => game => ({
   ...game,
   hintWord,
   hintWordCount,
+  hintWordStartedTime: now,
   wordsRevealedCount: 0,
 })
 
@@ -213,6 +215,7 @@ export const changeTurn: GameAction = game => ({
   hintWord: "",
   hintWordCount: 0,
   wordsRevealedCount: 0,
+  hintWordStartedTime: undefined,
 })
 
 export const endGame = (winner: Teams | undefined): GameAction => game => ({

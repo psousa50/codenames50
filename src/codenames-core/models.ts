@@ -40,6 +40,7 @@ export interface CodeNamesGame {
   redTeam: TeamConfig
   hintWord: string
   hintWordCount: number
+  hintWordStartedTime: number | undefined
   wordsRevealedCount: number
   state: GameStates
   turn: Teams | undefined

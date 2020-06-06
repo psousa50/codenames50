@@ -47,6 +47,7 @@ export const HintView: React.FC<HintViewProps> = ({ team, hint, endTurn, canEndT
     <Paper elevation={3} variant="outlined" style={styles.paper} className={classes.container}>
       <Typography variant="h4">{hint.word.toUpperCase()}</Typography>
       <Typography variant="h4">{hint.count > 0 ? hint.count : ""}</Typography>
+      {/* <TimeLeft started={hint.startedTime} timeoutMs={2 * 60 * 1000} onTimeout={() => undefined} /> */}
       <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn()}>
         End Turn
       </Button>

@@ -36,16 +36,17 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
   const classes = useStyles()
 
   const gameId = game.gameId
-  const [hint, setHint] = React.useState<Hint>({ word: "", count: 0 })
+  const [hint, setHint] = React.useState<Hint>({ word: "", count: 0, startedTime: 0 })
 
   const endTurn = () => {
     emitMessage(Messages.changeTurn({ gameId, userId }))
   }
 
   const sendHint = () => {
-    setHint({ word: "", count: 0 })
+    setHint({ word: "", count: 0, startedTime: 0 })
     hint.count && emitMessage(Messages.sendHint({ gameId, userId, hintWord: hint.word, hintWordCount: hint.count }))
   }
+
   const onWordClick: OnWordClick = (_, row, col) => {
     emitMessage(Messages.revealWord({ gameId, userId, row, col }))
   }
@@ -66,7 +67,7 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
         ) : (
           <HintView
             team={game.turn}
-            hint={{ word: game.hintWord, count: game.hintWordCount }}
+            hint={{ word: game.hintWord, count: game.hintWordCount, startedTime: game.hintWordStartedTime || 0 }}
             canEndTurn={canEndTurn}
             endTurn={endTurn}
           />
