@@ -18,8 +18,13 @@ const darkTheme = responsiveFontSizes(
 
 export const App = () => {
   const defaultEnvironment: Environment = {
-    soundOn: false,
-    toggleSound: () => setEnvironment(e => ({ ...e, soundOn: !e.soundOn })),
+    soundOn: (localStorage.getItem("soundOn") || "") === "true",
+    toggleSound: () =>
+      setEnvironment(e => {
+        const soundOn = !e.soundOn
+        localStorage.setItem("soundOn", soundOn ? "true" : "false")
+        return { ...e, soundOn }
+      }),
   }
 
   const [environment, setEnvironment] = useState(defaultEnvironment)
