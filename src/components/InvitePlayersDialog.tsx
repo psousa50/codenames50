@@ -40,7 +40,9 @@ export const InvitePlayersDialog: React.FC<InvitePlayersDialogProps> = ({ gameId
   return (
     <Dialog aria-labelledby="simple-dialog-title" onClose={onClose} open={open}>
       <DialogTitle>
-        <Typography variant="h6">Invite Players</Typography>
+        <div>
+          <Typography variant="h6">Invite Players</Typography>
+        </div>
         <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
           <CloseIcon />
         </IconButton>

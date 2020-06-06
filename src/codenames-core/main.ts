@@ -122,6 +122,24 @@ export const setSpyMaster = (userId: string, team: Teams): GameAction => game =>
   players: game.players.map(p => (p.userId === userId ? { ...p, team } : p)),
 })
 
+export const randomizeTeams: GameAction = game => {
+  const middle = Math.floor(game.players.length / 2)
+  const randomizedPlayers = shuffle(game.players).map((p, i) => ({ ...p, team: i < middle ? Teams.red : Teams.blue }))
+
+  return {
+    ...game,
+    players: randomizedPlayers,
+    redTeam: {
+      ...game.redTeam,
+      spyMaster: undefined,
+    },
+    blueTeam: {
+      ...game.blueTeam,
+      spyMaster: undefined,
+    },
+  }
+}
+
 const countTypes = (board: WordsBoard, type: WordType) => R.flatten(board).filter(w => w.type === type).length
 export const startGame: GameAction = game => {
   const redWordsLeft = countTypes(game.board, WordType.red)
@@ -204,18 +222,19 @@ export const endGame = (winner: Teams | undefined): GameAction => game => ({
 })
 
 export const gameActions = {
-  createGame,
-  buildBoard,
-  resetGame,
   addPlayer,
-  removePlayer,
+  buildBoard,
+  changeTurn,
+  createGame,
+  endGame,
   joinTeam,
+  removePlayer,
+  resetGame,
+  revealWord,
+  sendHint,
   setSpyMaster,
   startGame,
-  sendHint,
-  revealWord,
-  changeTurn,
-  endGame,
+  randomizeTeams,
 }
 
 export type GameActions = typeof gameActions

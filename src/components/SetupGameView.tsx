@@ -12,15 +12,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
   },
   buttons: {
+    width: "100%",
     display: "flex",
     flow: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: theme.spacing(3),
+    justifyContent: "center",
   },
   button: {
-    margin: "20px",
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    padding: "5px",
   },
 }))
 
@@ -29,6 +32,7 @@ interface SetupGameViewProps {
   game: CodeNamesGame
   joinTeam: (team: Teams) => void
   setSpyMaster: (team: Teams) => void
+  randomizeTeams: () => void
   startGame: () => void
   nextGame: () => void
 }
@@ -38,6 +42,7 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
   game,
   joinTeam,
   setSpyMaster,
+  randomizeTeams,
   startGame,
   nextGame,
 }) => {
@@ -51,35 +56,54 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
     <div className={classes.container}>
       <TeamsView userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
       <div className={classes.buttons}>
-        <Button
-          disabled={!canStartGame}
-          variant="contained"
-          size="small"
-          color="primary"
-          className={classes.button}
-          onClick={() => startGame()}
-        >
-          Start Game
-        </Button>
-        <Button
-          variant="contained"
-          size="small"
-          color="secondary"
-          className={classes.button}
-          onClick={() => openInvitePlayers(true)}
-        >
-          Invite Players
-        </Button>
-        <Button
-          disabled={game.state === GameStates.idle}
-          variant="contained"
-          size="small"
-          color="primary"
-          className={classes.button}
-          onClick={() => nextGame()}
-        >
-          New Game
-        </Button>
+        <div className={classes.button}>
+          <Button
+            variant="contained"
+            size="small"
+            color="secondary"
+            className={classes.button}
+            onClick={() => openInvitePlayers(true)}
+          >
+            Invite Players
+          </Button>
+        </div>
+        <div className={classes.button}>
+          <Button
+            variant="contained"
+            size="small"
+            color="secondary"
+            className={classes.button}
+            onClick={() => randomizeTeams()}
+          >
+            Randomize Team
+          </Button>
+        </div>
+      </div>
+      <div className={classes.buttons}>
+        <div className={classes.button}>
+          <Button
+            disabled={!canStartGame}
+            variant="contained"
+            size="small"
+            color="primary"
+            className={classes.button}
+            onClick={() => startGame()}
+          >
+            Start Game
+          </Button>
+        </div>
+        <div className={classes.button}>
+          <Button
+            disabled={game.state === GameStates.idle}
+            variant="contained"
+            size="small"
+            color="primary"
+            className={classes.button}
+            onClick={() => nextGame()}
+          >
+            New Game
+          </Button>
+        </div>
       </div>
       <InvitePlayersDialog onClose={() => openInvitePlayers(false)} open={invitePlayersOpened} gameId={game.gameId} />
     </div>

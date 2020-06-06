@@ -35,17 +35,18 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   React.useEffect(() => {
     socket.connect()
 
+    addMessageHandler(socket, "changeTurn", endTurnHandler)
     addMessageHandler(socket, "connect", connectHandler)
-    addMessageHandler(socket, "removePlayer", removePlayerHandler)
+    addMessageHandler(socket, "gameError", errorHandler)
     addMessageHandler(socket, "joinedGame", joinedGameHandler)
     addMessageHandler(socket, "joinTeam", joinTeamHandler)
     addMessageHandler(socket, "nextGame", nextGameHandler)
+    addMessageHandler(socket, "removePlayer", removePlayerHandler)
+    addMessageHandler(socket, "revealWord", revealWordHandler)
+    addMessageHandler(socket, "sendHint", sendHintHandler)
     addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
     addMessageHandler(socket, "startGame", startGameHandler)
-    addMessageHandler(socket, "sendHint", sendHintHandler)
-    addMessageHandler(socket, "revealWord", revealWordHandler)
-    addMessageHandler(socket, "changeTurn", endTurnHandler)
-    addMessageHandler(socket, "gameError", errorHandler)
+    addMessageHandler(socket, "updateGame", updateGameHandler)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -62,6 +63,10 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
 
   const joinTeam = (team: Teams) => {
     emitMessage(socket)(Messages.joinTeam({ gameId, userId, team }))
+  }
+
+  const randomizeTeams = () => {
+    emitMessage(socket)(Messages.randomizeTeam({ gameId }))
   }
 
   const startGame = () => {
@@ -96,6 +101,10 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   const startGameHandler = () => {
     setGame(GameActions.startGame)
     onStartGame()
+  }
+
+  const updateGameHandler = (game: CodeNamesGame) => {
+    setGame(game)
   }
 
   const setSpyMasterHandler = ({ userId, team }: Messages.SetSpyMasterInput) => {
@@ -139,13 +148,14 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   }
 
   return {
-    game,
-    error,
-    setError,
     emitMessage: emitMessage(socket),
+    error,
+    game,
     joinTeam,
-    startGame,
     nextGame,
+    setError,
     setSpyMaster,
+    startGame,
+    randomizeTeams,
   }
 }
