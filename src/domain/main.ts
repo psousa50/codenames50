@@ -9,6 +9,7 @@ import * as Messages from "../messaging/messages"
 import { RepositoriesEnvironment } from "../repositories/adapters"
 import { actionErrorOf, actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
+import { currentUtcDateTime } from "../utils/dates"
 import { ServiceError } from "../utils/errors"
 import { UUID } from "../utils/types"
 import { DomainEnvironment, DomainPort } from "./adapters"
@@ -202,22 +203,23 @@ export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId }) =>
     ),
   )
 
-export const sendHint: DomainPort<Messages.SendHintInput> = ({ gameId, userId, hintWord, hintWordCount }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
+export const sendHint: DomainPort<Messages.SendHintInput> = ({ gameId, userId, hintWord, hintWordCount }) => {
+  const hintWordStartedTime = currentUtcDateTime().toDate().getTime()
+  return withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
       chain(checkRules(gameRules.sendHint(userId))),
-      chain(game => actionOf(gameActions.sendHint(hintWord, hintWordCount)(game))),
+      chain(game => actionOf(gameActions.sendHint(hintWord, hintWordCount, hintWordStartedTime)(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
           repositoriesEnvironment,
         ),
       ),
-      chain(broadcastMessage(Messages.sendHint({ gameId, userId, hintWord, hintWordCount }))),
+      chain(broadcastMessage(Messages.hintSent({ gameId, userId, hintWord, hintWordCount, hintWordStartedTime }))),
     ),
   )
-
+}
 export const revealWord: DomainPort<Messages.RevealWordInput> = ({ gameId, userId, row, col }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(

@@ -7,6 +7,7 @@ export type GameMessageType =
   | "disconnect"
   | "gameCreated"
   | "gameError"
+  | "hintSent"
   | "joinedGame"
   | "joinGame"
   | "joinTeam"
@@ -85,6 +86,14 @@ export type SendHintInput = {
   hintWordCount: number
 }
 
+export type HintSentInput = {
+  gameId: string
+  userId: string
+  hintWord: string
+  hintWordCount: number
+  hintWordStartedTime: number
+}
+
 export type RevealWordInput = {
   gameId: string
   userId: string
@@ -110,6 +119,7 @@ export interface ErrorInput {
 
 export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTurn", data)
 export const createGame = (data: CreateGameInput) => createGameMessage("createGame", data)
+export const hintSent = (data: HintSentInput) => createGameMessage("hintSent", data)
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
 export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)
 export const nextGame = (data: NextGameInput) => createGameMessage("nextGame", data)
