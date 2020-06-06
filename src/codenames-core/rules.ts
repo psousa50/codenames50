@@ -82,6 +82,8 @@ export const startGame = validIfAll([idle, hasBothSpyMasters, hasAtleastTwoPlaye
 
 export const setSpyMaster = (team: Teams) => validIfOneOf([[idle], [running, spyMasterIsNotSet(team)]])
 
+export const ramdomizeTeams = validIfAll([idle])
+
 export const sendHint = (userId: string) =>
   validIfAll([running, isPlayersTurn(userId), doesNotHaveHint, playerIsSpyMaster(userId)])
 
@@ -99,12 +101,13 @@ export const revealWord = (row: number, col: number, userId: string) =>
   ])
 
 export const gameRules = {
-  joinTeam,
-  startGame,
-  setSpyMaster,
-  sendHint,
   changeTurn,
+  joinTeam,
   revealWord,
+  sendHint,
+  setSpyMaster,
+  startGame,
+  ramdomizeTeams,
 }
 
 export type GameRules = typeof gameRules

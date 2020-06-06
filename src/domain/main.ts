@@ -83,7 +83,7 @@ const buildBoard: DomainPort<string, WordsBoard> = language =>
       ),
   )
 
-export const create: DomainPort<CreateGameInput, Messages.CreateGameOutput> = ({ gameId, userId, language }) =>
+export const create: DomainPort<CreateGameInput> = ({ gameId, userId, language }) =>
   withEnv(
     ({ currentUtcDateTime, gameActions, repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
       pipe(
@@ -98,7 +98,7 @@ export const create: DomainPort<CreateGameInput, Messages.CreateGameOutput> = ({
       ),
   )
 
-export const join: DomainPort<Messages.JoinGameInput, Messages.JoinGameOutput> = ({ gameId, userId }) =>
+export const join: DomainPort<Messages.JoinGameInput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
       getGame(gameId),
@@ -129,7 +129,7 @@ const resetGame = (language?: string): DomainPort<CodeNamesGame, CodeNamesGame> 
     ),
   )
 
-export const nextGame: DomainPort<Messages.NextGameInput, Messages.NextGameOutput> = ({ gameId, language }) =>
+export const nextGame: DomainPort<Messages.NextGameInput> = ({ gameId, language }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
       getGame(gameId),
@@ -139,7 +139,7 @@ export const nextGame: DomainPort<Messages.NextGameInput, Messages.NextGameOutpu
     ),
   )
 
-export const removePlayer: DomainPort<Messages.JoinGameInput, Messages.JoinGameOutput> = ({ gameId, userId }) =>
+export const removePlayer: DomainPort<Messages.JoinGameInput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
       getGame(gameId),
@@ -154,7 +154,7 @@ export const removePlayer: DomainPort<Messages.JoinGameInput, Messages.JoinGameO
     ),
   )
 
-export const joinTeam: DomainPort<Messages.JoinTeamInput, Messages.JoinTeamOutput> = ({ gameId, userId, team }) =>
+export const joinTeam: DomainPort<Messages.JoinTeamInput> = ({ gameId, userId, team }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
@@ -170,7 +170,23 @@ export const joinTeam: DomainPort<Messages.JoinTeamInput, Messages.JoinTeamOutpu
     ),
   )
 
-export const startGame: DomainPort<Messages.StartGameInput, Messages.StartGameOutput> = ({ gameId }) =>
+export const randomizeTeams: DomainPort<Messages.RandomizeTeamsInput> = ({ gameId }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
+    pipe(
+      getGame(gameId),
+      chain(checkRules(gameRules.ramdomizeTeams)),
+      chain(game => actionOf(gameActions.randomizeTeams(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
+      chain(game => broadcastMessage(Messages.updateGame(game))(game)),
+    ),
+  )
+
+export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
@@ -186,12 +202,7 @@ export const startGame: DomainPort<Messages.StartGameInput, Messages.StartGameOu
     ),
   )
 
-export const sendHint: DomainPort<Messages.SendHintInput, Messages.SendHintOutput> = ({
-  gameId,
-  userId,
-  hintWord,
-  hintWordCount,
-}) =>
+export const sendHint: DomainPort<Messages.SendHintInput> = ({ gameId, userId, hintWord, hintWordCount }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
@@ -207,12 +218,7 @@ export const sendHint: DomainPort<Messages.SendHintInput, Messages.SendHintOutpu
     ),
   )
 
-export const revealWord: DomainPort<Messages.RevealWordInput, Messages.RevealWordOutput> = ({
-  gameId,
-  userId,
-  row,
-  col,
-}) =>
+export const revealWord: DomainPort<Messages.RevealWordInput> = ({ gameId, userId, row, col }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
@@ -228,7 +234,7 @@ export const revealWord: DomainPort<Messages.RevealWordInput, Messages.RevealWor
     ),
   )
 
-export const changeTurn: DomainPort<Messages.ChangeTurnInput, Messages.ChangeTurnOutput> = ({ gameId, userId }) =>
+export const changeTurn: DomainPort<Messages.ChangeTurnInput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
@@ -244,11 +250,7 @@ export const changeTurn: DomainPort<Messages.ChangeTurnInput, Messages.ChangeTur
     ),
   )
 
-export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput, Messages.SetSpyMasterOutput> = ({
-  gameId,
-  userId,
-  team,
-}) =>
+export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput> = ({ gameId, userId, team }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
@@ -265,16 +267,17 @@ export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput, Messages.SetSp
   )
 
 export const gamesDomainPorts = {
+  changeTurn,
   create,
   join,
+  joinTeam,
   nextGame,
   removePlayer,
-  joinTeam,
+  revealWord,
+  sendHint,
   setSpyMaster,
   startGame,
-  changeTurn,
-  sendHint,
-  revealWord,
+  randomizeTeams,
 }
 
 export type GamesDomainPorts = typeof gamesDomainPorts
