@@ -221,6 +221,8 @@ export const changeTurn: GameAction = game => ({
   hintWordStartedTime: undefined,
 })
 
+export const turnTimeout: GameAction = changeTurn
+
 export const endGame = (winner: Teams | undefined): GameAction => game => ({
   ...game,
   state: GameStates.ended,
@@ -241,6 +243,7 @@ export const gameActions = {
   setSpyMaster,
   startGame,
   randomizeTeams,
+  turnTimeout,
 }
 
 export type GameActions = typeof gameActions
