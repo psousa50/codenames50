@@ -86,7 +86,7 @@ export const startGame = (config: GameConfig) =>
 
 export const setSpyMaster = (team: Teams) => validIfOneOf([[idle], [running, spyMasterIsNotSet(team)]])
 
-export const ramdomizeTeams = validIfAll([idle])
+export const randomizeTeams = validIfAll([idle])
 
 export const sendHint = (userId: string) =>
   validIfAll([running, isPlayersTurn(userId), doesNotHaveHint, playerIsSpyMaster(userId)])
@@ -111,7 +111,7 @@ export const gameRules = {
   sendHint,
   setSpyMaster,
   startGame,
-  ramdomizeTeams,
+  randomizeTeams,
 }
 
 export type GameRules = typeof gameRules

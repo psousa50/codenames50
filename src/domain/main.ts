@@ -159,7 +159,7 @@ export const randomizeTeams: DomainPort<Messages.RandomizeTeamsInput> = ({ gameI
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
-      chain(checkRules(gameRules.ramdomizeTeams)),
+      chain(checkRules(gameRules.randomizeTeams)),
       chain(game => actionOf(gameActions.randomizeTeams(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
