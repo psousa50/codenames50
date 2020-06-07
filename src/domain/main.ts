@@ -196,7 +196,7 @@ export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId, config 
             repositoriesEnvironment,
           ),
         ),
-        chain(game => broadcastMessage(Messages.updateGame(game))(game)),
+        chain(game => broadcastMessage(Messages.gameStarted(game))(game)),
       ),
   )
 
