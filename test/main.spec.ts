@@ -413,8 +413,7 @@ describe("randomizeTeams", () => {
 describe("startGame", () => {
   it("sets the rame running", () => {
     const timestamp = "some-timestamp"
-    const language = "some-language"
-    const responseTimeoutSec = 60
+    const config = { some: "config" } as any
     const w00 = { word: "w00", type: WordType.blue }
     const w01 = { word: "w01", type: WordType.red }
     const w10 = { word: "w10", type: WordType.blue }
@@ -435,6 +434,7 @@ describe("startGame", () => {
     }
 
     const expectedGame = {
+      config,
       timestamp,
       board,
       state: GameStates.running,
@@ -447,11 +447,9 @@ describe("startGame", () => {
         spyMaster: "some-blue-user",
         wordsLeft: 2,
       },
-      language,
-      responseTimeoutSec,
     }
 
-    expect(GameActions.startGame({ language, responseTimeoutSec }, timestamp, board)(game as any)).toEqual(expectedGame)
+    expect(GameActions.startGame(config, timestamp, board)(game as any)).toEqual(expectedGame)
   })
 })
 
@@ -480,7 +478,6 @@ describe("restartGame", () => {
 describe("sendHint", () => {
   it("sets the hint for the turn", () => {
     const game = {}
-
     const hintWord = "some-hint"
     const hintWordCount = 3
     const now = 1234
