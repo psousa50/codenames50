@@ -31,21 +31,27 @@ export interface TeamConfig {
 
 export type TurnOutcome = "success" | "failure" | "assassin" | undefined
 
+export interface GameConfig {
+  language: string | undefined
+  responseTimeoutSec: number | undefined
+}
+
 export interface CodeNamesGame {
   gameId: string
   timestamp: string
+  config: GameConfig
   userId: string
   players: Player[]
   blueTeam: TeamConfig
   redTeam: TeamConfig
   hintWord: string
   hintWordCount: number
+  hintWordStartedTime: number | undefined
   wordsRevealedCount: number
   state: GameStates
   turn: Teams | undefined
   turnOutcome: TurnOutcome | undefined
   winner: Teams | undefined
-  language: string
   board: WordsBoard
 }
 

@@ -111,8 +111,12 @@ describe("startGame", () => {
       spyMaster: "some-red-user",
     },
   }
+  const validConfig = {
+    language: "some-language",
+    responseTimeoutSec: undefined,
+  }
   it("is valid for a valid game", () => {
-    expect(GameRules.startGame(validGame as any)).toBeUndefined()
+    expect(GameRules.startGame(validConfig)(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -122,7 +126,16 @@ describe("startGame", () => {
         state: GameStates.running,
       }
 
-      expect(GameRules.startGame(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
+      expect(GameRules.startGame(validConfig)(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
+    })
+
+    it("if language is not specfied", () => {
+      const game = {
+        ...validGame,
+      }
+      const config = { language: undefined, responseTimeoutSec: undefined }
+
+      expect(GameRules.startGame(config)(game as any)).toBe(GameRules.message("missingLanguage"))
     })
 
     it("if red spyMasters is not defined", () => {
@@ -133,7 +146,7 @@ describe("startGame", () => {
         },
       }
 
-      expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
+      expect(GameRules.startGame(validConfig)(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
     })
 
     it("if blue spyMasters is not defined", () => {
@@ -144,7 +157,7 @@ describe("startGame", () => {
         },
       }
 
-      expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
+      expect(GameRules.startGame(validConfig)(game as any)).toBe(GameRules.message("mustHaveSpyMasters"))
     })
 
     it("if red team doesn't have two players", () => {
@@ -157,7 +170,7 @@ describe("startGame", () => {
         ],
       }
 
-      expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveTwoPlayers"))
+      expect(GameRules.startGame(validConfig)(game as any)).toBe(GameRules.message("mustHaveTwoPlayers"))
     })
 
     it("if red team doesn't have two players", () => {
@@ -170,7 +183,7 @@ describe("startGame", () => {
         ],
       }
 
-      expect(GameRules.startGame(game as any)).toBe(GameRules.message("mustHaveTwoPlayers"))
+      expect(GameRules.startGame(validConfig)(game as any)).toBe(GameRules.message("mustHaveTwoPlayers"))
     })
   })
 })

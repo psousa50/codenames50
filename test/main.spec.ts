@@ -54,11 +54,13 @@ describe("createGame", () => {
     const gameId = "some-gameId"
     const userId = "some-userId"
     const timestamp = "some-timestamp"
-    const language = "some-language"
-    const board = { some: "board" } as any
 
     const expectedGame = {
       gameId,
+      config: {
+        language: undefined,
+        responseTimeoutSec: undefined,
+      },
       timestamp,
       userId,
       players: [{ userId, team: Teams.red }],
@@ -68,63 +70,12 @@ describe("createGame", () => {
       hintWordCount: 0,
       wordsRevealedCount: 0,
       state: GameStates.idle,
-      language,
-      board,
+      board: [],
     }
 
-    const newGame = GameActions.createGame(gameId, userId, timestamp, language, board)
+    const newGame = GameActions.createGame(gameId, userId, timestamp)
 
     expect(newGame).toEqual(expectedGame)
-  })
-})
-
-describe("resetGame", () => {
-  const gameId = "some-gameId"
-  const userId = "some-userId"
-  const timestamp = "some-timestamp"
-  const language = "some-language"
-  const board = { some: "board" } as any
-  const newTimestamp = "some-new-timestamp"
-  const newlanguage = "some-new-language"
-  const newBoard = { some: "new-board" } as any
-  it("resets the game to starting state, keeping the teams structure", () => {
-    const game = {
-      gameId,
-      timestamp,
-      userId,
-      players: [{ some: "players" }],
-      redTeam: {
-        spyMaster: "some-spy-master-1",
-        wordsLeft: 1,
-      },
-      blueTeam: {
-        spyMaster: "some-spy-master-2",
-        wordsLeft: 2,
-      },
-      hintWord: "some-word",
-      hintWordCount: 1,
-      wordsRevealedCount: 2,
-      state: GameStates.ended,
-      language,
-      board,
-    } as any
-
-    const resetedGame = {
-      gameId,
-      timestamp: newTimestamp,
-      userId,
-      players: [{ some: "players" }],
-      redTeam: {},
-      blueTeam: {},
-      hintWord: "",
-      hintWordCount: 0,
-      wordsRevealedCount: 0,
-      state: GameStates.idle,
-      language: newlanguage,
-      board: newBoard,
-    }
-
-    expect(GameActions.resetGame(newTimestamp, newlanguage, newBoard)(game)).toEqual(resetedGame)
   })
 })
 
@@ -461,6 +412,9 @@ describe("randomizeTeams", () => {
 
 describe("startGame", () => {
   it("sets the rame running", () => {
+    const timestamp = "some-timestamp"
+    const language = "some-language"
+    const responseTimeoutSec = 60
     const w00 = { word: "w00", type: WordType.blue }
     const w01 = { word: "w01", type: WordType.red }
     const w10 = { word: "w10", type: WordType.blue }
@@ -470,7 +424,7 @@ describe("startGame", () => {
       [w10, w11],
     ] as any
     const game = {
-      board,
+      board: [],
       redTeam: {
         spyMaster: "some-red-user",
       },
@@ -481,6 +435,7 @@ describe("startGame", () => {
     }
 
     const expectedGame = {
+      timestamp,
       board,
       state: GameStates.running,
       turn: Teams.blue,
@@ -492,9 +447,33 @@ describe("startGame", () => {
         spyMaster: "some-blue-user",
         wordsLeft: 2,
       },
+      language,
+      responseTimeoutSec,
     }
 
-    expect(GameActions.startGame(game as any)).toEqual(expectedGame)
+    expect(GameActions.startGame({ language, responseTimeoutSec }, timestamp, board)(game as any)).toEqual(expectedGame)
+  })
+})
+
+describe("restartGame", () => {
+  it("prepares a game to start again", () => {
+    const game = {
+      state: GameStates.running,
+      hintWord: "some-hint",
+      hintWordCount: 3,
+      wordsRevealedCount: 2,
+      something: "else",
+    } as any
+
+    const expectedGame = {
+      state: GameStates.idle,
+      hintWord: "",
+      hintWordCount: 0,
+      wordsRevealedCount: 0,
+      something: "else",
+    }
+
+    expect(GameActions.restartGame(game as any)).toEqual(expectedGame)
   })
 })
 
@@ -504,13 +483,15 @@ describe("sendHint", () => {
 
     const hintWord = "some-hint"
     const hintWordCount = 3
+    const now = 1234
     const expectedGame = {
       hintWord,
       hintWordCount,
+      hintWordStartedTime: now,
       wordsRevealedCount: 0,
     }
 
-    expect(GameActions.sendHint(hintWord, hintWordCount)(game as any)).toEqual(expectedGame)
+    expect(GameActions.sendHint(hintWord, hintWordCount, now)(game as any)).toEqual(expectedGame)
   })
 })
 
@@ -792,6 +773,7 @@ describe("changeTurn", () => {
   it("change the team from red to blue", () => {
     const game = {
       turn: Teams.red,
+      hintWordStartedTime: 1234,
     }
 
     const expectedGame = {
@@ -799,6 +781,7 @@ describe("changeTurn", () => {
       hintWord: "",
       hintWordCount: 0,
       wordsRevealedCount: 0,
+      hintWordStartedTime: undefined,
     }
 
     expect(GameActions.changeTurn(game as any)).toEqual(expectedGame)
@@ -807,6 +790,7 @@ describe("changeTurn", () => {
   it("change the team from blue to red", () => {
     const game = {
       turn: Teams.blue,
+      hintWordStartedTime: 1234,
     }
 
     const expectedGame = {
@@ -814,6 +798,7 @@ describe("changeTurn", () => {
       hintWord: "",
       hintWordCount: 0,
       wordsRevealedCount: 0,
+      hintWordStartedTime: undefined,
     }
 
     expect(GameActions.changeTurn(game as any)).toEqual(expectedGame)
