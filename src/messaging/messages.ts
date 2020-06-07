@@ -1,4 +1,4 @@
-import { CodeNamesGame, Teams } from "../codenames-core/models"
+import { CodeNamesGame, GameConfig, Teams } from "../codenames-core/models"
 
 export type GameMessageType =
   | "changeTurn"
@@ -7,20 +7,21 @@ export type GameMessageType =
   | "disconnect"
   | "gameCreated"
   | "gameError"
+  | "gameStarted"
   | "hintSent"
   | "joinedGame"
   | "joinGame"
   | "joinTeam"
-  | "nextGame"
-  | "updateGame"
   | "randomizeTeam"
   | "reconnect"
   | "registerUserSocket"
   | "removePlayer"
+  | "restartGame"
   | "revealWord"
   | "sendHint"
   | "setSpyMaster"
   | "startGame"
+  | "updateGame"
 
 export type GameMessage<T = {}> = {
   type: GameMessageType
@@ -39,7 +40,6 @@ export type RegisterUserSocketInput = {
 export interface CreateGameInput {
   gameId?: string
   userId: string
-  language: string
 }
 
 export interface JoinGameInput {
@@ -58,10 +58,7 @@ export interface JoinedGameInput {
   userId: string
 }
 
-export interface NextGameInput {
-  gameId: string
-  language?: string
-}
+export type GameStartedInput = CodeNamesGame
 
 export interface RemovePlayerInput {
   gameId: string
@@ -77,6 +74,11 @@ export interface JoinTeamInput {
 export interface StartGameInput {
   gameId: string
   userId: string
+  config: GameConfig
+}
+
+export interface RestartGameInput {
+  gameId: string
 }
 
 export type SendHintInput = {
@@ -122,7 +124,6 @@ export const createGame = (data: CreateGameInput) => createGameMessage("createGa
 export const hintSent = (data: HintSentInput) => createGameMessage("hintSent", data)
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
 export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)
-export const nextGame = (data: NextGameInput) => createGameMessage("nextGame", data)
 export const randomizeTeam = (data: RandomizeTeamsInput) => createGameMessage("randomizeTeam", data)
 export const registerUserSocket = (userId: RegisterUserSocketInput) => createGameMessage("registerUserSocket", userId)
 export const removePlayer = (data: RemovePlayerInput) => createGameMessage("removePlayer", data)
@@ -130,8 +131,10 @@ export const revealWord = (data: RevealWordInput) => createGameMessage("revealWo
 export const sendHint = (data: SendHintInput) => createGameMessage("sendHint", data)
 export const setSpyMaster = (data: SetSpyMasterInput) => createGameMessage("setSpyMaster", data)
 export const startGame = (data: StartGameInput) => createGameMessage("startGame", data)
+export const restartGame = (data: RestartGameInput) => createGameMessage("restartGame", data)
 
 export const error = (data: ErrorInput) => createGameMessage("gameError", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)
 export const joinedGame = (data: JoinedGameInput) => createGameMessage("joinedGame", data)
 export const updateGame = (data: UpdateGameInput) => createGameMessage("updateGame", data)
+export const gameStarted = (data: GameStartedInput) => createGameMessage("gameStarted", data)

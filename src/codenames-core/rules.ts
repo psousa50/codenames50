@@ -1,20 +1,21 @@
-import { CodeNamesGame, GameStates, Teams } from "./models"
+import { CodeNamesGame, GameConfig, GameStates, Teams } from "./models"
 
 export type ValidationError =
+  | "alreadyHasHint"
+  | "alreadyRevealed"
+  | "cantBeSpyMaster"
   | "gameIsAlreadyRunning"
   | "gameIsNotRunning"
-  | "notPlayersTurn"
-  | "playerMustHaveTeam"
-  | "cantBeSpyMaster"
+  | "missingLanguage"
   | "mustBeSpyMaster"
-  | "spyMasterAlreadySet"
+  | "mustGuessOnce"
   | "mustHaveSpyMasters"
   | "mustHaveTwoPlayers"
   | "noHint"
-  | "alreadyHasHint"
-  | "mustGuessOnce"
+  | "notPlayersTurn"
+  | "playerMustHaveTeam"
+  | "spyMasterAlreadySet"
   | "tooMuchGuesses"
-  | "alreadyRevealed"
 
 export type GameRule = (game: CodeNamesGame) => ValidationError | undefined
 
@@ -78,7 +79,10 @@ const wordIsNotRevealed = (row: number, col: number): GameRule => game =>
 
 export const joinTeam = validIfAll([])
 
-export const startGame = validIfAll([idle, hasBothSpyMasters, hasAtleastTwoPlayesAtEachTeam])
+const configIsValid = (config: GameConfig): GameRule => _ => v(config.language !== undefined, "missingLanguage")
+
+export const startGame = (config: GameConfig) =>
+  validIfAll([idle, configIsValid(config), hasBothSpyMasters, hasAtleastTwoPlayesAtEachTeam])
 
 export const setSpyMaster = (team: Teams) => validIfOneOf([[idle], [running, spyMasterIsNotSet(team)]])
 

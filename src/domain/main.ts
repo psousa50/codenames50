@@ -84,16 +84,11 @@ const buildBoard: DomainPort<string, WordsBoard> = language =>
       ),
   )
 
-export const create: DomainPort<CreateGameInput> = ({ gameId, userId, language }) =>
+export const create: DomainPort<CreateGameInput> = ({ gameId, userId }) =>
   withEnv(
     ({ currentUtcDateTime, gameActions, repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
       pipe(
-        buildBoard(language),
-        chain(board =>
-          actionOf(
-            gameActions.createGame(gameId, userId, currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"), language, board),
-          ),
-        ),
+        actionOf(gameActions.createGame(gameId, userId, currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"))),
         chain(game => adapt(gamesRepositoryPorts.insert(game), repositoriesEnvironment)),
         chain(game => emitMessage(userId, Messages.gameCreated(game))(game)),
       ),
@@ -114,32 +109,6 @@ export const join: DomainPort<Messages.JoinGameInput> = ({ gameId, userId }) =>
     ),
   )
 
-const resetGame = (language?: string): DomainPort<CodeNamesGame, CodeNamesGame> => game =>
-  withEnv(({ currentUtcDateTime, gameActions }) =>
-    pipe(
-      buildBoard(language || game.language),
-      chain(board =>
-        actionOf(
-          gameActions.resetGame(
-            currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"),
-            language || game.language,
-            board,
-          )(game),
-        ),
-      ),
-    ),
-  )
-
-export const nextGame: DomainPort<Messages.NextGameInput> = ({ gameId, language }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
-    pipe(
-      getGame(gameId),
-      chain(resetGame(language)),
-      chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
-      chain(game => broadcastMessage(Messages.nextGame(game))(game)),
-    ),
-  )
-
 export const removePlayer: DomainPort<Messages.JoinGameInput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
@@ -152,6 +121,21 @@ export const removePlayer: DomainPort<Messages.JoinGameInput> = ({ gameId, userI
         ),
       ),
       chain(game => broadcastMessage(Messages.removePlayer({ gameId, userId }))(game)),
+    ),
+  )
+
+export const restartGame: DomainPort<Messages.RestartGameInput> = ({ gameId }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
+    pipe(
+      getGame(gameId),
+      chain(game => actionOf(gameActions.restartGame(game))),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
+      chain(game => broadcastMessage(Messages.restartGame({ gameId }))(game)),
     ),
   )
 
@@ -187,20 +171,33 @@ export const randomizeTeams: DomainPort<Messages.RandomizeTeamsInput> = ({ gameI
     ),
   )
 
-export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
-    pipe(
-      getGame(gameId),
-      chain(checkRules(gameRules.startGame)),
-      chain(game => actionOf(gameActions.startGame(game))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
+export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId, config }) =>
+  withEnv(
+    ({
+      repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment },
+      gameActions,
+      gameRules,
+      currentUtcDateTime,
+    }) =>
+      pipe(
+        getGame(gameId),
+        chain(checkRules(gameRules.startGame(config))),
+        chain(game =>
+          pipe(
+            buildBoard(config.language!),
+            chain(board =>
+              actionOf(gameActions.startGame(config, currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"), board)(game)),
+            ),
+          ),
         ),
+        chain(game =>
+          adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+            gamesRepositoryPorts.update(game),
+            repositoriesEnvironment,
+          ),
+        ),
+        chain(game => broadcastMessage(Messages.updateGame(game))(game)),
       ),
-      chain(game => broadcastMessage(Messages.startGame(game))(game)),
-    ),
   )
 
 export const sendHint: DomainPort<Messages.SendHintInput> = ({ gameId, userId, hintWord, hintWordCount }) => {
@@ -273,13 +270,13 @@ export const gamesDomainPorts = {
   create,
   join,
   joinTeam,
-  nextGame,
   removePlayer,
   revealWord,
   sendHint,
   setSpyMaster,
   startGame,
   randomizeTeams,
+  restartGame,
 }
 
 export type GamesDomainPorts = typeof gamesDomainPorts

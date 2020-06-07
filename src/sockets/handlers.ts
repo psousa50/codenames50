@@ -8,12 +8,6 @@ import { actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
 import { SocketsEnvironment, SocketsPort } from "./adapters"
 
-type CreateGameInput = {
-  gameId?: string
-  userId: string
-  language: string
-}
-
 type SocketHandler<T = void> = (socket: SocketIO.Socket) => SocketsPort<T, void>
 
 const addMessageHandler = (socketsEnvironment: SocketsEnvironment) => <T>(
@@ -74,12 +68,12 @@ const disconnectHandler: SocketHandler = socket => () => {
   )
 }
 
-const createGameHandler: SocketHandler<CreateGameInput> = socket => ({ gameId, userId, language }) =>
+const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ gameId, userId }) =>
   withEnv(({ gamesDomainPorts, domainEnvironment, uuid, gameMessagingPorts, gameMessagingEnvironment }) => {
     const newGameId = gameId || uuid()
     socket.join(newGameId, async (_: any) => {
       const h = pipe(
-        gamesDomainPorts.create({ gameId: newGameId, userId, language }),
+        gamesDomainPorts.create({ gameId: newGameId, userId }),
         chain(game =>
           adapt(
             gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId: game.gameId, userId }),
@@ -124,10 +118,10 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   addMessageHandler(env)(socket, "disconnect", disconnectHandler)
   addMessageHandler(env)(socket, "joinGame", joinGameHandler)
   addMessageHandler(env)(socket, "joinTeam", handleDomainPort(env.gamesDomainPorts.joinTeam))
-  addMessageHandler(env)(socket, "nextGame", handleDomainPort(env.gamesDomainPorts.nextGame))
   addMessageHandler(env)(socket, "randomizeTeam", handleDomainPort(env.gamesDomainPorts.randomizeTeams))
   addMessageHandler(env)(socket, "registerUserSocket", registerUserHandler)
   addMessageHandler(env)(socket, "removePlayer", handleDomainPort(env.gamesDomainPorts.removePlayer))
+  addMessageHandler(env)(socket, "restartGame", handleDomainPort(env.gamesDomainPorts.restartGame))
   addMessageHandler(env)(socket, "revealWord", handleDomainPort(env.gamesDomainPorts.revealWord))
   addMessageHandler(env)(socket, "sendHint", handleDomainPort(env.gamesDomainPorts.sendHint))
   addMessageHandler(env)(socket, "setSpyMaster", handleDomainPort(env.gamesDomainPorts.setSpyMaster))

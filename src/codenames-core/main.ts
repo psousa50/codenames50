@@ -1,6 +1,6 @@
 import * as R from "ramda"
 import { getPlayer, otherTeam } from "./helpers"
-import { BoardWord, CodeNamesGame, GameStates, Teams, WordsBoard, WordType } from "./models"
+import { BoardWord, CodeNamesGame, GameConfig, GameStates, Teams, WordsBoard, WordType } from "./models"
 import { update2dCell } from "./utils/collections"
 import { shuffle } from "./utils/random"
 
@@ -10,15 +10,13 @@ const nullAction = (game: CodeNamesGame) => game
 const conditionalAction = (v: boolean, action: GameAction) => (v ? action : nullAction)
 const act = (actions: GameAction[]) => (game: CodeNamesGame) => actions.reduce((acc, action) => action(acc), game)
 
-export const createGame = (
-  gameId: string,
-  userId: string,
-  timestamp: string,
-  language: string,
-  board: WordsBoard,
-): CodeNamesGame =>
+export const createGame = (gameId: string, userId: string, timestamp: string): CodeNamesGame =>
   addPlayer(userId)({
     gameId,
+    config: {
+      language: undefined,
+      responseTimeoutSec: undefined,
+    },
     timestamp,
     userId,
     players: [],
@@ -38,8 +36,7 @@ export const createGame = (
     turn: undefined,
     turnOutcome: undefined,
     winner: undefined,
-    language,
-    board,
+    board: [],
   })
 
 export const buildBoard = (boardWidth: number, boardHeight: number, words: string[]): WordsBoard => {
@@ -59,10 +56,12 @@ export const buildBoard = (boardWidth: number, boardHeight: number, words: strin
 
   return R.range(0, boardHeight).map(r => wordTypes.slice(r * boardWidth, r * boardWidth + boardWidth))
 }
-
-export const resetGame = (timestamp: string, language: string, board: WordsBoard): GameAction => game => ({
-  ...createGame(game.gameId, game.userId, timestamp, language, board),
-  players: game.players,
+export const restartGame: GameAction = game => ({
+  ...game,
+  state: GameStates.idle,
+  hintWord: "",
+  hintWordCount: 0,
+  wordsRevealedCount: 0,
 })
 
 export const addPlayer = (userId: string): GameAction => game => {
@@ -142,9 +141,14 @@ export const randomizeTeams: GameAction = game => {
 }
 
 const countTypes = (board: WordsBoard, type: WordType) => R.flatten(board).filter(w => w.type === type).length
-export const startGame: GameAction = game => {
-  const redWordsLeft = countTypes(game.board, WordType.red)
-  const blueWordsLeft = countTypes(game.board, WordType.blue)
+
+export const startGame = (
+  { language, responseTimeoutSec }: GameConfig,
+  timestamp: string,
+  board: WordsBoard,
+): GameAction => game => {
+  const redWordsLeft = countTypes(board, WordType.red)
+  const blueWordsLeft = countTypes(board, WordType.blue)
   return {
     ...game,
     state: GameStates.running,
@@ -157,6 +161,10 @@ export const startGame: GameAction = game => {
       ...game.blueTeam,
       wordsLeft: blueWordsLeft,
     },
+    timestamp,
+    language,
+    board,
+    responseTimeoutSec,
   }
 }
 
@@ -232,7 +240,7 @@ export const gameActions = {
   endGame,
   joinTeam,
   removePlayer,
-  resetGame,
+  restartGame,
   revealWord,
   sendHint,
   setSpyMaster,
