@@ -79,7 +79,7 @@ const wordIsNotRevealed = (row: number, col: number): GameRule => game =>
 
 export const joinTeam = validIfAll([])
 
-const configIsValid = (config: GameConfig): GameRule => _ => v(config.language !== undefined, "missingLanguage")
+const configIsValid = (config: GameConfig): GameRule => _ => v(exists(config.language), "missingLanguage")
 
 export const startGame = (config: GameConfig) =>
   validIfAll([idle, configIsValid(config), hasBothSpyMasters, hasAtleastTwoPlayesAtEachTeam])

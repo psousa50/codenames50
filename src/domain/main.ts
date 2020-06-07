@@ -124,7 +124,7 @@ export const removePlayer: DomainPort<Messages.JoinGameInput> = ({ gameId, userI
     ),
   )
 
-export const restartGame: DomainPort<Messages.RestartGameInput> = ({ gameId }) =>
+export const restartGame: DomainPort<Messages.RestartGameInput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
       getGame(gameId),
@@ -135,7 +135,7 @@ export const restartGame: DomainPort<Messages.RestartGameInput> = ({ gameId }) =
           repositoriesEnvironment,
         ),
       ),
-      chain(game => broadcastMessage(Messages.restartGame({ gameId }))(game)),
+      chain(game => broadcastMessage(Messages.restartGame({ gameId, userId }))(game)),
     ),
   )
 
@@ -249,6 +249,21 @@ export const changeTurn: DomainPort<Messages.ChangeTurnInput> = ({ gameId, userI
     ),
   )
 
+export const turnTimeout: DomainPort<Messages.ChangeTurnInput> = ({ gameId, userId }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
+    pipe(
+      getGame(gameId),
+      chain(doAction(gameActions.turnTimeout)),
+      chain(game =>
+        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+          gamesRepositoryPorts.update(game),
+          repositoriesEnvironment,
+        ),
+      ),
+      chain(broadcastMessage(Messages.turnTimeout({ gameId, userId }))),
+    ),
+  )
+
 export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput> = ({ gameId, userId, team }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
@@ -277,6 +292,7 @@ export const gamesDomainPorts = {
   startGame,
   randomizeTeams,
   restartGame,
+  turnTimeout,
 }
 
 export type GamesDomainPorts = typeof gamesDomainPorts

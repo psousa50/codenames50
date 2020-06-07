@@ -126,4 +126,5 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   addMessageHandler(env)(socket, "sendHint", handleDomainPort(env.gamesDomainPorts.sendHint))
   addMessageHandler(env)(socket, "setSpyMaster", handleDomainPort(env.gamesDomainPorts.setSpyMaster))
   addMessageHandler(env)(socket, "startGame", handleDomainPort(env.gamesDomainPorts.startGame))
+  addMessageHandler(env)(socket, "turnTimeout", handleDomainPort(env.gamesDomainPorts.turnTimeout))
 }
