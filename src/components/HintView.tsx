@@ -2,6 +2,7 @@ import { Button, makeStyles, Paper, Theme } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
 import React from "react"
 import { Teams } from "../codenames-core/models"
+import { exists } from "../utils/misc"
 import { calculatedWidth, teamColor } from "../utils/styles"
 import { Hint } from "../utils/types"
 import { TimeLeft } from "./TimeLeft"
@@ -33,9 +34,17 @@ interface HintViewProps {
   responseTimeoutSec: number | undefined
   canEndTurn: boolean
   endTurn: () => void
+  onTimeout: () => void
 }
 
-export const HintView: React.FC<HintViewProps> = ({ team, hint, responseTimeoutSec, endTurn, canEndTurn }) => {
+export const HintView: React.FC<HintViewProps> = ({
+  team,
+  hint,
+  responseTimeoutSec,
+  endTurn,
+  canEndTurn,
+  onTimeout,
+}) => {
   const classes = useStyles()
 
   const styles = {
@@ -49,8 +58,8 @@ export const HintView: React.FC<HintViewProps> = ({ team, hint, responseTimeoutS
     <Paper elevation={3} variant="outlined" style={styles.paper} className={classes.container}>
       <Typography variant="h4">{hint.word.toUpperCase()}</Typography>
       <Typography variant="h4">{hint.count > 0 ? hint.count : ""}</Typography>
-      {responseTimeoutSec !== undefined ? (
-        <TimeLeft started={hint.startedTime} responseTimeoutSec={responseTimeoutSec} onTimeout={() => undefined} />
+      {exists(responseTimeoutSec) && exists(hint.startedTime) ? (
+        <TimeLeft started={hint.startedTime!} responseTimeoutSec={responseTimeoutSec!} onTimeout={onTimeout} />
       ) : null}
       <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn()}>
         End Turn

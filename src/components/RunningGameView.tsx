@@ -42,6 +42,10 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
     emitMessage(Messages.changeTurn({ gameId, userId }))
   }
 
+  const onTimeout = () => {
+    emitMessage(Messages.turnTimeout({ gameId, userId }))
+  }
+
   const sendHint = () => {
     setHint({ word: "", count: 0, startedTime: 0 })
     hint.count && emitMessage(Messages.sendHint({ gameId, userId, hintWord: hint.word, hintWordCount: hint.count }))
@@ -52,6 +56,8 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
   }
 
   const canEndTurn = GameRules.changeTurn(userId)(game) === undefined
+
+  const hintToView = { word: game.hintWord, count: game.hintWordCount, startedTime: game.hintWordStartedTime }
 
   return (
     <div className={classes.container}>
@@ -67,10 +73,11 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
         ) : (
           <HintView
             team={game.turn}
-            hint={{ word: game.hintWord, count: game.hintWordCount, startedTime: game.hintWordStartedTime || 0 }}
+            hint={hintToView}
             responseTimeoutSec={game.config.responseTimeoutSec}
             canEndTurn={canEndTurn}
             endTurn={endTurn}
+            onTimeout={onTimeout}
           />
         )}
       </div>

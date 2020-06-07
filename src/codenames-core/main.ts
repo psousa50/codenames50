@@ -142,15 +142,12 @@ export const randomizeTeams: GameAction = game => {
 
 const countTypes = (board: WordsBoard, type: WordType) => R.flatten(board).filter(w => w.type === type).length
 
-export const startGame = (
-  { language, responseTimeoutSec }: GameConfig,
-  timestamp: string,
-  board: WordsBoard,
-): GameAction => game => {
+export const startGame = (config: GameConfig, timestamp: string, board: WordsBoard): GameAction => game => {
   const redWordsLeft = countTypes(board, WordType.red)
   const blueWordsLeft = countTypes(board, WordType.blue)
   return {
     ...game,
+    config,
     state: GameStates.running,
     turn: redWordsLeft > blueWordsLeft ? Teams.red : Teams.blue,
     redTeam: {
@@ -162,9 +159,7 @@ export const startGame = (
       wordsLeft: blueWordsLeft,
     },
     timestamp,
-    language,
     board,
-    responseTimeoutSec,
   }
 }
 
@@ -226,6 +221,8 @@ export const changeTurn: GameAction = game => ({
   hintWordStartedTime: undefined,
 })
 
+export const turnTimeout: GameAction = changeTurn
+
 export const endGame = (winner: Teams | undefined): GameAction => game => ({
   ...game,
   state: GameStates.ended,
@@ -246,6 +243,7 @@ export const gameActions = {
   setSpyMaster,
   startGame,
   randomizeTeams,
+  turnTimeout,
 }
 
 export type GameActions = typeof gameActions

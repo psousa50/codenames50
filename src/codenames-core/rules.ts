@@ -79,14 +79,14 @@ const wordIsNotRevealed = (row: number, col: number): GameRule => game =>
 
 export const joinTeam = validIfAll([])
 
-const configIsValid = (config: GameConfig): GameRule => _ => v(config.language !== undefined, "missingLanguage")
+const configIsValid = (config: GameConfig): GameRule => _ => v(exists(config.language), "missingLanguage")
 
 export const startGame = (config: GameConfig) =>
   validIfAll([idle, configIsValid(config), hasBothSpyMasters, hasAtleastTwoPlayesAtEachTeam])
 
 export const setSpyMaster = (team: Teams) => validIfOneOf([[idle], [running, spyMasterIsNotSet(team)]])
 
-export const ramdomizeTeams = validIfAll([idle])
+export const randomizeTeams = validIfAll([idle])
 
 export const sendHint = (userId: string) =>
   validIfAll([running, isPlayersTurn(userId), doesNotHaveHint, playerIsSpyMaster(userId)])
@@ -111,7 +111,7 @@ export const gameRules = {
   sendHint,
   setSpyMaster,
   startGame,
-  ramdomizeTeams,
+  randomizeTeams,
 }
 
 export type GameRules = typeof gameRules

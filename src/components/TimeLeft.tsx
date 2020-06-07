@@ -10,11 +10,17 @@ interface TimeLeftProps {
 
 export const TimeLeft: React.FC<TimeLeftProps> = ({ started, responseTimeoutSec, onTimeout }) => {
   const [remaining, setRemaining] = React.useState(responseTimeoutSec)
+  const [timedOut, setTimedOut] = React.useState(false)
+
+  React.useEffect(() => {
+    setTimedOut(false)
+  }, [started])
 
   React.useEffect(() => {
     const timer = setInterval(() => {
       const elapsed = Date.now() - started
-      if (elapsed > responseTimeoutSec * 1000) {
+      if (!timedOut && elapsed > responseTimeoutSec * 1000) {
+        setTimedOut(true)
         onTimeout()
       }
       setRemaining(Math.max(0, responseTimeoutSec * 1000 - elapsed))

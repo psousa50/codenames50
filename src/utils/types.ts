@@ -1,5 +1,5 @@
 export interface Hint {
   word: string
   count: number
-  startedTime: number
+  startedTime: number | undefined
 }

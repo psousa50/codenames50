@@ -68,12 +68,10 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
   const [teamsExpanded, setTeamsExpanded] = React.useState(true)
 
   const onRestartGame = () => {
-    console.log("onRestartGame=====>")
     setTeamsExpanded(true)
   }
 
   const onStartGame = () => {
-    console.log("onStartGame=====>")
     setTeamsExpanded(false)
   }
 

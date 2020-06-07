@@ -45,6 +45,7 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     addMessageHandler(socket, "revealWord", revealWordHandler)
     addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
     addMessageHandler(socket, "updateGame", updateGameHandler)
+    addMessageHandler(socket, "turnTimeout", turnTimeoutHandler)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -72,7 +73,7 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   }
 
   const restartGame = () => {
-    emitMessage(socket)(Messages.restartGame({ gameId }))
+    emitMessage(socket)(Messages.restartGame({ gameId, userId }))
   }
 
   const setSpyMaster = (team: Teams) => {
@@ -92,7 +93,6 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   }
 
   const gameStartedHandler = (game: CodeNamesGame) => {
-    console.log("gameStartedHandler=====>\n")
     setGame(game)
     onStartGame()
   }
@@ -140,6 +140,10 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
 
   const endTurnHandler = () => {
     setGame(GameActions.changeTurn)
+  }
+
+  const turnTimeoutHandler = () => {
+    setGame(GameActions.turnTimeout)
   }
 
   const errorHandler = (e: { message: string }) => {

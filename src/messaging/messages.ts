@@ -21,6 +21,7 @@ export type GameMessageType =
   | "sendHint"
   | "setSpyMaster"
   | "startGame"
+  | "turnTimeout"
   | "updateGame"
 
 export type GameMessage<T = {}> = {
@@ -79,6 +80,7 @@ export interface StartGameInput {
 
 export interface RestartGameInput {
   gameId: string
+  userId: string
 }
 
 export type SendHintInput = {
@@ -108,6 +110,11 @@ export type ChangeTurnInput = {
   userId: string
 }
 
+export type TurnTimeoutInput = {
+  gameId: string
+  userId: string
+}
+
 export type SetSpyMasterInput = {
   gameId: string
   userId: string
@@ -132,6 +139,7 @@ export const sendHint = (data: SendHintInput) => createGameMessage("sendHint", d
 export const setSpyMaster = (data: SetSpyMasterInput) => createGameMessage("setSpyMaster", data)
 export const startGame = (data: StartGameInput) => createGameMessage("startGame", data)
 export const restartGame = (data: RestartGameInput) => createGameMessage("restartGame", data)
+export const turnTimeout = (data: TurnTimeoutInput) => createGameMessage("turnTimeout", data)
 
 export const error = (data: ErrorInput) => createGameMessage("gameError", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)
