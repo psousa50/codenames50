@@ -65,15 +65,11 @@ const Separator = () => <div style={{ height: "20px" }}></div>
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
-  const [teamsExpanded, setTeamsExpanded] = React.useState(true)
+  const [teamsExpanded, setTeamsExpanded] = React.useState(false)
 
-  const onRestartGame = () => {
-    setTeamsExpanded(true)
-  }
+  const onRestartGame = () => {}
 
-  const onStartGame = () => {
-    setTeamsExpanded(false)
-  }
+  const onStartGame = () => {}
 
   const {
     emitMessage,
@@ -86,6 +82,10 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     startGame,
     restartGame,
   } = useMessaging(gameId, userId, onStartGame, onRestartGame)
+
+  React.useEffect(() => {
+    setTeamsExpanded(game.state === GameStates.idle)
+  }, [game.state])
 
   const handleClose = () => {
     setError("")

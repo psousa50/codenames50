@@ -139,20 +139,20 @@ const WordView: React.FC<WordViewProps> = ({
     unrevelead_spyMaster: {
       [WordType.red]: {
         color: common.white,
-        border: `3px solid ${redColor}`,
+        border: `5px solid ${redColor}`,
       },
       [WordType.blue]: {
         color: common.white,
-        border: `3px solid ${blueColor}`,
+        border: `5px solid ${blueColor}`,
       },
       [WordType.inocent]: {
         backgroundColor: common.white,
-        border: `3px solid ${common.white}`,
+        border: `5px solid ${common.white}`,
         color: common.black,
       },
       [WordType.assassin]: {
         backgroundColor: common.black,
-        border: `3px solid ${common.black}`,
+        border: `5px solid ${common.black}`,
         color: common.white,
       },
     },
