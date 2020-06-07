@@ -80,11 +80,11 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     error,
     game,
     joinTeam,
-    nextGame,
     randomizeTeams,
     setError,
     setSpyMaster,
     startGame,
+    restartGame,
   } = useMessaging(gameId, userId, onNextGame, onStartGame)
 
   const handleClose = () => {
@@ -129,7 +129,6 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
                 setSpyMaster={setSpyMaster}
                 randomizeTeams={randomizeTeams}
                 startGame={startGame}
-                nextGame={nextGame}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>
@@ -139,7 +138,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
         {game.state === GameStates.running && <RunningGameView game={game} userId={userId} emitMessage={emitMessage} />}
 
-        {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} nextGame={nextGame} />}
+        {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} nextGame={restartGame} />}
       </div>
     </div>
   )

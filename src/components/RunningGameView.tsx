@@ -68,6 +68,7 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
           <HintView
             team={game.turn}
             hint={{ word: game.hintWord, count: game.hintWordCount, startedTime: game.hintWordStartedTime || 0 }}
+            responseTimeoutSec={game.config.responseTimeoutSec}
             canEndTurn={canEndTurn}
             endTurn={endTurn}
           />

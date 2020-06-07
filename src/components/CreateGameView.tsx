@@ -59,7 +59,7 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
   const createGame = () => {
     if (userId.trim().length > 0) {
       emitMessage(socket, Messages.registerUserSocket({ userId }))
-      emitMessage(socket, Messages.createGame({ userId, language: "en" }))
+      emitMessage(socket, Messages.createGame({ userId }))
     }
   }
 

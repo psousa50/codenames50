@@ -4,6 +4,7 @@ import React from "react"
 import { Teams } from "../codenames-core/models"
 import { calculatedWidth, teamColor } from "../utils/styles"
 import { Hint } from "../utils/types"
+import { TimeLeft } from "./TimeLeft"
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -29,11 +30,12 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface HintViewProps {
   team: Teams | undefined
   hint: Hint
+  responseTimeoutSec: number | undefined
   canEndTurn: boolean
   endTurn: () => void
 }
 
-export const HintView: React.FC<HintViewProps> = ({ team, hint, endTurn, canEndTurn }) => {
+export const HintView: React.FC<HintViewProps> = ({ team, hint, responseTimeoutSec, endTurn, canEndTurn }) => {
   const classes = useStyles()
 
   const styles = {
@@ -47,7 +49,9 @@ export const HintView: React.FC<HintViewProps> = ({ team, hint, endTurn, canEndT
     <Paper elevation={3} variant="outlined" style={styles.paper} className={classes.container}>
       <Typography variant="h4">{hint.word.toUpperCase()}</Typography>
       <Typography variant="h4">{hint.count > 0 ? hint.count : ""}</Typography>
-      {/* <TimeLeft started={hint.startedTime} timeoutMs={2 * 60 * 1000} onTimeout={() => undefined} /> */}
+      {responseTimeoutSec !== undefined ? (
+        <TimeLeft started={hint.startedTime} responseTimeoutSec={responseTimeoutSec} onTimeout={() => undefined} />
+      ) : null}
       <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn()}>
         End Turn
       </Button>

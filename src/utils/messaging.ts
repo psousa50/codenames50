@@ -1,6 +1,6 @@
 import React from "react"
 import * as GameActions from "../codenames-core/main"
-import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
+import { CodeNamesGame, GameConfig, GameStates, Teams } from "../codenames-core/models"
 import { EmitMessage } from "../components/CodeNamesGameView"
 import * as Messages from "../messaging/messages"
 import { sounds, usePlaySound } from "./usePlaySounds"
@@ -8,9 +8,7 @@ import { useSocket } from "./useSocket"
 
 export const useMessaging = (gameId: string, userId: string, onStartGame: () => void, onNextGame: () => void) => {
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
-  const [game, setGame] = React.useState<CodeNamesGame>(
-    GameActions.createGame("", "", "", "", GameActions.buildBoard(5, 5, [])),
-  )
+  const [game, setGame] = React.useState<CodeNamesGame>(GameActions.createGame("", "", ""))
   const [playSuccessSound] = usePlaySound(sounds.success)
   const [playFailureSound] = usePlaySound(sounds.failure)
   const [playHintAlertSound] = usePlaySound(sounds.hintAlert)
@@ -38,14 +36,14 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     addMessageHandler(socket, "changeTurn", endTurnHandler)
     addMessageHandler(socket, "connect", connectHandler)
     addMessageHandler(socket, "gameError", errorHandler)
+    addMessageHandler(socket, "gameStarted", gameStartedHandler)
     addMessageHandler(socket, "hintSent", hintSentHandler)
     addMessageHandler(socket, "joinedGame", joinedGameHandler)
     addMessageHandler(socket, "joinTeam", joinTeamHandler)
-    addMessageHandler(socket, "nextGame", nextGameHandler)
+    addMessageHandler(socket, "restartGame", restartGameHandler)
     addMessageHandler(socket, "removePlayer", removePlayerHandler)
     addMessageHandler(socket, "revealWord", revealWordHandler)
     addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
-    addMessageHandler(socket, "startGame", startGameHandler)
     addMessageHandler(socket, "updateGame", updateGameHandler)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,12 +67,12 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     emitMessage(socket)(Messages.randomizeTeam({ gameId }))
   }
 
-  const startGame = () => {
-    emitMessage(socket)(Messages.startGame({ gameId, userId }))
+  const startGame = (config: GameConfig) => {
+    emitMessage(socket)(Messages.startGame({ gameId, userId, config }))
   }
 
-  const nextGame = () => {
-    emitMessage(socket)(Messages.nextGame({ gameId }))
+  const restartGame = () => {
+    emitMessage(socket)(Messages.restartGame({ gameId }))
   }
 
   const setSpyMaster = (team: Teams) => {
@@ -93,14 +91,13 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     setGame(GameActions.joinTeam(userId, team))
   }
 
-  const nextGameHandler = (game: CodeNamesGame) => {
+  const gameStartedHandler = (game: CodeNamesGame) => {
     setGame(game)
-    onNextGame()
+    onStartGame()
   }
 
-  const startGameHandler = () => {
-    setGame(GameActions.startGame)
-    onStartGame()
+  const restartGameHandler = () => {
+    setGame(GameActions.restartGame)
   }
 
   const updateGameHandler = (game: CodeNamesGame) => {
@@ -152,10 +149,10 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     error,
     game,
     joinTeam,
-    nextGame,
     setError,
     setSpyMaster,
     startGame,
     randomizeTeams,
+    restartGame,
   }
 }

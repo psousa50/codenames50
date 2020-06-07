@@ -1,6 +1,6 @@
 import { Button, makeStyles, Theme } from "@material-ui/core"
 import React from "react"
-import { CodeNamesGame, GameStates, Teams } from "../codenames-core/models"
+import { CodeNamesGame, GameConfig, Teams } from "../codenames-core/models"
 import * as GameRules from "../codenames-core/rules"
 import { InvitePlayersDialog } from "./InvitePlayersDialog"
 import { TeamsView } from "./TeamsView"
@@ -33,8 +33,7 @@ interface SetupGameViewProps {
   joinTeam: (team: Teams) => void
   setSpyMaster: (team: Teams) => void
   randomizeTeams: () => void
-  startGame: () => void
-  nextGame: () => void
+  startGame: (config: GameConfig) => void
 }
 
 export const SetupGameView: React.FC<SetupGameViewProps> = ({
@@ -44,13 +43,14 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
   setSpyMaster,
   randomizeTeams,
   startGame,
-  nextGame,
 }) => {
   const classes = useStyles()
 
   const [invitePlayersOpened, openInvitePlayers] = React.useState(false)
 
-  const canStartGame = GameRules.startGame(game) === undefined
+  const config = { language: "en", responseTimeoutSec: undefined }
+
+  const canStartGame = GameRules.startGame(config)(game) === undefined
   const canRandomizeTeams = GameRules.ramdomizeTeams(game) === undefined
 
   return (
@@ -89,21 +89,9 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
             size="small"
             color="primary"
             className={classes.button}
-            onClick={() => startGame()}
+            onClick={() => startGame(config)}
           >
             Start Game
-          </Button>
-        </div>
-        <div className={classes.button}>
-          <Button
-            disabled={game.state === GameStates.idle}
-            variant="contained"
-            size="small"
-            color="primary"
-            className={classes.button}
-            onClick={() => nextGame()}
-          >
-            New Game
           </Button>
         </div>
       </div>
