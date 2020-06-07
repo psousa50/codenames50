@@ -74,13 +74,13 @@ describe("setSpyMaster", () => {
   })
 })
 
-describe("ramdomizeTeams", () => {
+describe("randomizeTeams", () => {
   const validGame: DeepPartial<CodeNamesGame> = {
     state: GameStates.idle,
   }
 
   it("is valid for an idle game", () => {
-    expect(GameRules.ramdomizeTeams(validGame as any)).toBeUndefined()
+    expect(GameRules.randomizeTeams(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -90,7 +90,7 @@ describe("ramdomizeTeams", () => {
         state: GameStates.running,
       }
 
-      expect(GameRules.ramdomizeTeams(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
+      expect(GameRules.randomizeTeams(game as any)).toBe(GameRules.message("gameIsAlreadyRunning"))
     })
   })
 })
