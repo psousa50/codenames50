@@ -6,7 +6,7 @@ import * as Messages from "../messaging/messages"
 import { sounds, usePlaySound } from "./usePlaySounds"
 import { useSocket } from "./useSocket"
 
-export const useMessaging = (gameId: string, userId: string, onStartGame: () => void, onNextGame: () => void) => {
+export const useMessaging = (gameId: string, userId: string, onStartGame: () => void, onRestartGame: () => void) => {
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [game, setGame] = React.useState<CodeNamesGame>(GameActions.createGame("", "", ""))
   const [playSuccessSound] = usePlaySound(sounds.success)
@@ -92,12 +92,14 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   }
 
   const gameStartedHandler = (game: CodeNamesGame) => {
+    console.log("gameStartedHandler=====>\n")
     setGame(game)
     onStartGame()
   }
 
   const restartGameHandler = () => {
     setGame(GameActions.restartGame)
+    onRestartGame()
   }
 
   const updateGameHandler = (game: CodeNamesGame) => {

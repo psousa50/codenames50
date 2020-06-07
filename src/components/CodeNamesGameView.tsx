@@ -67,12 +67,14 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   const [teamsExpanded, setTeamsExpanded] = React.useState(true)
 
-  const onNextGame = () => {
-    setTeamsExpanded(false)
+  const onRestartGame = () => {
+    console.log("onRestartGame=====>")
+    setTeamsExpanded(true)
   }
 
   const onStartGame = () => {
-    setTeamsExpanded(true)
+    console.log("onStartGame=====>")
+    setTeamsExpanded(false)
   }
 
   const {
@@ -85,7 +87,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     setSpyMaster,
     startGame,
     restartGame,
-  } = useMessaging(gameId, userId, onNextGame, onStartGame)
+  } = useMessaging(gameId, userId, onStartGame, onRestartGame)
 
   const handleClose = () => {
     setError("")
