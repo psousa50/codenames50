@@ -129,6 +129,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
                 setSpyMaster={setSpyMaster}
                 randomizeTeams={randomizeTeams}
                 startGame={startGame}
+                newGame={restartGame}
               />
             </ExpansionPanelDetails>
           </ExpansionPanel>
@@ -138,7 +139,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
         {game.state === GameStates.running && <RunningGameView game={game} userId={userId} emitMessage={emitMessage} />}
 
-        {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} nextGame={restartGame} />}
+        {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} newGame={restartGame} />}
       </div>
     </div>
   )

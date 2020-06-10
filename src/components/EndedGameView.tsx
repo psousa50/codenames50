@@ -8,7 +8,7 @@ import { WordsLeftView } from "./WordsLeftView"
 interface EndedGameViewProps {
   userId: string
   game: CodeNamesGame
-  nextGame: () => void
+  newGame: () => void
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-export const EndedGameView: React.FC<EndedGameViewProps> = ({ userId, game, nextGame }) => {
+export const EndedGameView: React.FC<EndedGameViewProps> = ({ userId, game, newGame }) => {
   const classes = useStyles()
 
   return (
@@ -30,7 +30,7 @@ export const EndedGameView: React.FC<EndedGameViewProps> = ({ userId, game, next
       <div style={{ marginTop: 20 }}></div>
       <WordsBoardView userId={userId} game={game} board={game.board} revealWords={true} />
       <div style={{ marginTop: 20 }}></div>
-      <Button variant="contained" size="small" color="primary" onClick={() => nextGame()}>
+      <Button variant="contained" size="small" color="primary" onClick={() => newGame()}>
         New Game
       </Button>
     </div>
