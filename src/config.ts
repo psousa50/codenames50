@@ -13,7 +13,7 @@ export interface AppConfig {
 export const config = convict<AppConfig>({
   mongodb: {
     uri: {
-      default: "mongodb://localhost:27017/codenames",
+      default: "mongodb://localhost:27017/codenames50",
       doc: "",
       env: "MONGODB_URI",
     },

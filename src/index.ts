@@ -1,12 +1,12 @@
 import cors from "cors"
 import * as dotenv from "dotenv"
-import { MongoClient } from "mongodb"
 import { buildExpressEnvironment } from "./app/adapters"
 import { createExpressApp } from "./app/main"
 import { config as appConfig } from "./config"
 import { gamesDomainPorts } from "./domain/main"
 import { buildDomainEnvironmentWithRealPorts } from "./environment"
 import { gameMessagingPorts } from "./messaging/main"
+import * as MondoDb from "./mongodb/main"
 import { buildSocketsEnvironment } from "./sockets/adapters"
 import { createSocketsApplication, startSocketsApplication } from "./sockets/main"
 import { logDebug } from "./utils/debug"
@@ -30,7 +30,7 @@ const startApplication = async () => {
     const socketsPort = appPort
     const io = createSocketsApplication(socketsPort)
 
-    const dbClient = await MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+    const dbClient = await MondoDb.connect(mongoUri)
 
     const domainEnvironment = buildDomainEnvironmentWithRealPorts(config, dbClient, io)
     const expressEnvironment = buildExpressEnvironment(config, domainEnvironment, gamesDomainPorts)
