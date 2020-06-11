@@ -8,6 +8,8 @@ export const sounds = {
   hintAlert: require("../assets/sounds/hintAlert.mp3"),
   assassin: require("../assets/sounds/assassin.mp3"),
   endGame: require("../assets/sounds/endGame.mp3"),
+  tick: require("../assets/sounds/tick.mp3"),
+  timeout: require("../assets/sounds/timeout.mp3"),
 }
 
 export const usePlaySound = (url: string) => {

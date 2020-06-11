@@ -1,6 +1,7 @@
 import { Typography } from "@material-ui/core"
 import moment from "moment"
 import React from "react"
+import { sounds, usePlaySound } from "../utils/usePlaySounds"
 
 interface TimeLeftProps {
   started: number
@@ -11,6 +12,8 @@ interface TimeLeftProps {
 export const TimeLeft: React.FC<TimeLeftProps> = ({ started, responseTimeoutSec, onTimeout }) => {
   const [remaining, setRemaining] = React.useState(responseTimeoutSec)
   const [timedOut, setTimedOut] = React.useState(false)
+  const [playTickSound] = usePlaySound(sounds.tick)
+  const [playTimeoutSound] = usePlaySound(sounds.timeout)
 
   React.useEffect(() => {
     setTimedOut(false)
@@ -18,12 +21,18 @@ export const TimeLeft: React.FC<TimeLeftProps> = ({ started, responseTimeoutSec,
 
   React.useEffect(() => {
     const timer = setInterval(() => {
-      const elapsed = Date.now() - started
-      if (!timedOut && elapsed > responseTimeoutSec * 1000) {
-        setTimedOut(true)
-        onTimeout()
+      const timeLeftMs = Math.max(0, responseTimeoutSec * 1000 - (Date.now() - started))
+      if (!timedOut) {
+        if (timeLeftMs < 5 * 1000) {
+          playTickSound()
+        }
+        if (timeLeftMs === 0) {
+          playTimeoutSound()
+          setTimedOut(true)
+          onTimeout()
+        }
       }
-      setRemaining(Math.max(0, responseTimeoutSec * 1000 - elapsed))
+      setRemaining(timeLeftMs)
     }, 1000)
 
     return () => clearInterval(timer)
