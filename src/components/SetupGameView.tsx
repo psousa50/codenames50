@@ -118,7 +118,6 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
               <MenuItem value={0}>
                 <em>No limit</em>
               </MenuItem>
-              <MenuItem value={10}>30 seconds</MenuItem>
               <MenuItem value={60}>1 minute</MenuItem>
               <MenuItem value={120}>2 minutes</MenuItem>
               <MenuItem value={180}>3 minutes</MenuItem>
