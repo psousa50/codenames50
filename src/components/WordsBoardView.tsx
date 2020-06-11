@@ -123,7 +123,7 @@ const WordView: React.FC<WordViewProps> = ({
 }) => {
   const classes = useStyles()
 
-  const canReveal = GameRules.revealWord(row, col, userId)(game) === undefined
+  const canReveal = GameRules.revealWord(userId, row, col)(game) === undefined
 
   const rw = revealWords || word.revealed
 
