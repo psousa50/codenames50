@@ -52,10 +52,13 @@ export const buildBoard = (boardWidth: number, boardHeight: number, words: strin
     WordType.assassin,
   ])
 
-  const wordTypes = shuffle(words).map((word, i) => ({ word, type: types[i], revealed: false }))
+  const boardWords = shuffle(words)
+    .slice(boardWidth * boardHeight)
+    .map((word, i) => ({ word, type: types[i], revealed: false }))
 
-  return R.range(0, boardHeight).map(r => wordTypes.slice(r * boardWidth, r * boardWidth + boardWidth))
+  return R.range(0, boardHeight).map(r => boardWords.slice(r * boardWidth, r * boardWidth + boardWidth))
 }
+
 export const restartGame: GameAction = game => ({
   ...game,
   state: GameStates.idle,
