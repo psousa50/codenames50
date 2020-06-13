@@ -23,7 +23,7 @@ export const TimeLeft: React.FC<TimeLeftProps> = ({ started, responseTimeoutSec,
     const timer = setInterval(() => {
       const timeLeftMs = Math.max(0, responseTimeoutSec * 1000 - (Date.now() - started))
       if (!timedOut) {
-        if (timeLeftMs < 5 * 1000) {
+        if (timeLeftMs < 10 * 1000) {
           playTickSound()
         }
         if (timeLeftMs === 0) {
