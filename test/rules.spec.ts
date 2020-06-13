@@ -387,7 +387,7 @@ describe("revealWord", () => {
   }
 
   it("is valid for a valid game", () => {
-    expect(GameRules.revealWord(0, 0, userId)(validGame as any)).toBeUndefined()
+    expect(GameRules.revealWord(userId, 0, 0)(validGame as any)).toBeUndefined()
   })
 
   describe("is invalid", () => {
@@ -397,7 +397,7 @@ describe("revealWord", () => {
         state: GameStates.idle,
       }
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("gameIsNotRunning"))
+      expect(GameRules.revealWord(userId, 0, 0)(game as any)).toBe(GameRules.message("gameIsNotRunning"))
     })
 
     it("if it's not player's team turn", () => {
@@ -423,7 +423,7 @@ describe("revealWord", () => {
         },
       })
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
+      expect(GameRules.revealWord(userId, 0, 0)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
     })
 
     it("if player is blue SpyMaster", () => {
@@ -434,7 +434,7 @@ describe("revealWord", () => {
         },
       })
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
+      expect(GameRules.revealWord(userId, 0, 0)(game as any)).toBe(GameRules.message("cantBeSpyMaster"))
     })
 
     it("if word is already revealed", () => {
@@ -443,7 +443,7 @@ describe("revealWord", () => {
         board: [[{ revealed: true }]],
       })
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("alreadyRevealed"))
+      expect(GameRules.revealWord(userId, 0, 0)(game as any)).toBe(GameRules.message("alreadyRevealed"))
     })
 
     it("if revealedWords is higher than hintWordCount + 1", () => {
@@ -455,7 +455,7 @@ describe("revealWord", () => {
         wordsRevealedCount: 3,
       })
 
-      expect(GameRules.revealWord(0, 0, userId)(game as any)).toBe(GameRules.message("tooMuchGuesses"))
+      expect(GameRules.revealWord(userId, 0, 0)(game as any)).toBe(GameRules.message("tooMuchGuesses"))
     })
   })
 })

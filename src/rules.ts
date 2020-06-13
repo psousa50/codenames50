@@ -94,7 +94,7 @@ export const sendHint = (userId: string) =>
 export const changeTurn = (userId: string) =>
   validIfAll([running, hasHint, isPlayersTurn(userId), playerIsNotSpyMaster(userId), hasAtLeastOneGuess])
 
-export const revealWord = (row: number, col: number, userId: string) =>
+export const revealWord = (userId: string, row: number, col: number) =>
   validIfAll([
     running,
     isPlayersTurn(userId),
