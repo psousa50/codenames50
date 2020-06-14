@@ -1,7 +1,7 @@
+import { DeepPartial } from "@psousa50/shared/lib/types"
 import * as R from "ramda"
 import { CodeNamesGame, GameStates, Teams } from "../src/models"
 import * as GameRules from "../src/rules"
-import { DeepPartial } from "../src/utils/types"
 
 const userId = "some-user-id"
 

@@ -6,7 +6,7 @@ import { ErrorCodes } from "../../src/domain/errors"
 import * as Games from "../../src/domain/main"
 import * as Messages from "../../src/messaging/messages"
 import { actionOf } from "../../src/utils/actions"
-import { DeepPartial } from "../../src/utils/types"
+import { DeepPartial } from "@psousa50/shared/lib/types"
 import { buildTestDomainEnvironment, getLeft, getRight } from "../helpers"
 
 const gameId = "some-game-id"

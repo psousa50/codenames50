@@ -12,7 +12,7 @@ import { buildMessengerEnvironment } from "../src/messaging/messenger"
 import { buildMongoEnvironment } from "../src/mongodb/adapters"
 import { buildRepositoriesEnvironment } from "../src/repositories/adapters"
 import { actionOf } from "../src/utils/actions"
-import { DeepPartial } from "../src/utils/types"
+import { DeepPartial } from "@psousa50/shared/lib/types"
 
 const defaultConfig = {
   mongodb: {

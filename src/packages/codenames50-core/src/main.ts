@@ -1,8 +1,8 @@
+import { update2dCell } from "@psousa50/shared/lib/collections"
+import { shuffle } from "@psousa50/shared/lib/random"
 import * as R from "ramda"
 import { getPlayer, otherTeam } from "./helpers"
 import { BoardWord, CodeNamesGame, GameConfig, GameStates, Teams, WordsBoard, WordType } from "./models"
-import { update2dCell } from "./utils/collections"
-import { shuffle } from "./utils/random"
 
 export type GameAction = (game: CodeNamesGame) => CodeNamesGame
 

@@ -21,8 +21,9 @@
   "author": "psousa50",
   "license": "ISC",
   "dependencies": {
-    "codenames50-core": "0.1.0",
+    "@psousa50/shared": "0.1.0",
     "body-parser": "^1.19.0",
+    "codenames50-core": "0.1.0",
     "convict": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
@@ -32,6 +33,7 @@
     "mongodb": "^3.5.7",
     "node": "^14.2.0",
     "ramda": "^0.27.0",
+    "shared2": "^1.0.2",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
     "uuid": "^8.0.0"
@@ -50,7 +52,7 @@
     "@types/supertest": "^2.0.9",
     "@types/uuid": "^8.0.0",
     "jest": "26.0.1",
-    "mongodb-memory-server": "^6.5.2",
+    "mongodb-memory-server": "^6.6.1",
     "nodemon": "^2.0.2",
     "supertest": "^4.0.2",
     "ts-jest": "^26.1.0",

@@ -10552,7 +10552,7 @@ mongodb-memory-server-core@6.6.1:
   optionalDependencies:
     mongodb "^3.5.4"
 
-mongodb-memory-server@^6.5.2, mongodb-memory-server@^6.6.1:
+mongodb-memory-server@^6.6.1:
   version "6.6.1"
   resolved "https://registry.yarnpkg.com/mongodb-memory-server/-/mongodb-memory-server-6.6.1.tgz#e7bc7fb0910d2398572c22dac1d96ecb3636f189"
   integrity sha512-qnGpGE50snhS3IgKwiPlxnL5wFWPxWutqcCqlsbb68FKohaEIsvi/gMBqJbBLF2l2sQu4a4aJofuKFudSI38vQ==
@@ -13741,6 +13741,11 @@ shallow-clone@^3.0.0:
   integrity sha512-/6KqX+GVUdqPuPPd2LxDDxzX6CAbjJehAAOKlNpqqUpAqPM6HeL8f+o3a+JsyGjn2lv0WY8UsTgUJjU9Ok55NA==
   dependencies:
     kind-of "^6.0.2"
+
+shared2@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/shared2/-/shared2-1.0.2.tgz#cd172430206c9a5a16880c0e71fadc2baa05e283"
+  integrity sha512-JtudPR++mUNjJifY9IN8NVPt6354F55t9eaNckY7JOA/f/TJp+0FhTHygNWTJ86Hi03rOUFar/eAIReVHgRdyQ==
 
 shebang-command@^1.2.0:
   version "1.2.0"

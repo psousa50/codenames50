@@ -19,7 +19,8 @@
     "prettier-fix": "prettier --no-semi --tab-width 2 --print-width 120 --trailing-comma all --parser typescript --write \"{src,test}/**/*.ts\""
   },
   "dependencies": {
-    "ramda": "^0.27.0"
+    "ramda": "^0.27.0",
+    "@psousa50/shared": "^0.1.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.0",

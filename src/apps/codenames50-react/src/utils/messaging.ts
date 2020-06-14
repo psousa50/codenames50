@@ -1,5 +1,5 @@
 import * as GameActions from "codenames50-core/lib/main"
-import { CodeNamesGame, GameConfig, GameStates, Teams } from "0-core/lib/models"
+import { CodeNamesGame, GameConfig, GameStates, Teams } from "codenames50-core/lib/models"
 import React from "react"
 import { EmitMessage } from "../components/CodeNamesGameView"
 import * as Messages from "../messaging/messages"
