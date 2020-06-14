@@ -1,6 +1,6 @@
 import { makeStyles, Theme } from "@material-ui/core"
-import { CodeNamesGame } from "@psousa50/codenames50-core/lib/models"
-import * as GameRules from "@psousa50/codenames50-core/lib/rules"
+import { CodeNamesGame } from "codenames50-core/lib/models"
+import * as GameRules from "codenames50-core/lib/rules"
 import React from "react"
 import * as Messages from "../messaging/messages"
 import { Hint } from "../utils/types"

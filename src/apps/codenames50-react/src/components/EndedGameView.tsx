@@ -1,5 +1,5 @@
 import { Button, makeStyles, Theme } from "@material-ui/core"
-import { CodeNamesGame } from "@psousa50/codenames50-core/lib/models"
+import { CodeNamesGame } from "codenames50-core/lib/models"
 import React from "react"
 import { teamName } from "../utils/ui"
 import { WordsBoardView } from "./WordsBoardView"

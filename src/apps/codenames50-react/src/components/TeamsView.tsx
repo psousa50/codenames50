@@ -10,8 +10,8 @@ import {
   Theme,
 } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
-import { CodeNamesGame, Player, TeamConfig, Teams } from "@psousa50/codenames50-core/lib/models"
-import * as GameRules from "@psousa50/codenames50-core/lib/rules"
+import { CodeNamesGame, Player, TeamConfig, Teams } from "codenames50-core/lib/models"
+import * as GameRules from "codenames50-core/lib/rules"
 import React from "react"
 import { teamColor } from "../utils/styles"
 

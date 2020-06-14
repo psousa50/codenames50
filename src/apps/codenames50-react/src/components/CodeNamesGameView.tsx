@@ -2,7 +2,7 @@ import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar,
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import { Alert, AlertTitle } from "@material-ui/lab"
-import { GameStates } from "@psousa50/codenames50-core/lib/models"
+import { GameStates } from "codenames50-core/lib/models"
 import React from "react"
 import * as Messages from "../messaging/messages"
 import { useMessaging } from "../utils/messaging"

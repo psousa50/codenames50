@@ -1,5 +1,5 @@
 import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
-import { Teams } from "@psousa50/codenames50-core/lib/models"
+import { Teams } from "codenames50-core/lib/models"
 import * as R from "ramda"
 import React from "react"
 import { exists } from "../utils/misc"

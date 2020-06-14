@@ -1,4 +1,4 @@
-import { Words } from "@psousa50/codenames50-core/lib/models"
+import { Words } from "codenames50-core/lib/models"
 import { fromPromise, fromVoidPromise } from "../utils/actions"
 import { RepositoriesPort } from "./adapters"
 

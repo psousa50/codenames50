@@ -21,7 +21,7 @@
   "author": "psousa50",
   "license": "ISC",
   "dependencies": {
-    "@psousa50/codenames50-core": "0.1.0",
+    "codenames50-core": "0.1.0",
     "body-parser": "^1.19.0",
     "convict": "^6.0.0",
     "cors": "^2.8.5",

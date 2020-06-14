@@ -1,4 +1,4 @@
-import { CodeNamesGame } from "@psousa50/codenames50-core/lib/models"
+import { CodeNamesGame } from "codenames50-core/lib/models"
 import { fromPromise } from "../utils/actions"
 import { UUID } from "../utils/types"
 import { RepositoriesPort } from "./adapters"

@@ -1,4 +1,4 @@
-import { CodeNamesGame } from "@psousa50/codenames50-core/lib/models"
+import { CodeNamesGame } from "codenames50-core/lib/models"
 import { UUID } from "../utils/types"
 import { MongoEnvironment } from "./adapters"
 

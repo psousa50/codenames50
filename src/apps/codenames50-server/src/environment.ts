@@ -1,5 +1,5 @@
-import { GameActions, gameActions } from "@psousa50/codenames50-core/lib/main"
-import { GameRules, gameRules } from "@psousa50/codenames50-core/lib/rules"
+import { GameActions, gameActions } from "codenames50-core/lib/main"
+import { GameRules, gameRules } from "codenames50-core/lib/rules"
 import { MongoClient } from "mongodb"
 import socketIo from "socket.io"
 import { AppConfig } from "./config"

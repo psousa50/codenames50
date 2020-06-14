@@ -1,4 +1,4 @@
-import { CodeNamesGame, GameConfig, Teams } from "@psousa50/codenames50-core/lib/models"
+import { CodeNamesGame, GameConfig, Teams } from "codenames50-core/lib/models"
 
 export type GameMessageType =
   | "changeTurn"

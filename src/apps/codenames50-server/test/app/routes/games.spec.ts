@@ -1,4 +1,4 @@
-import * as GamesModels from "@psousa50/codenames50-core/lib/models"
+import * as GamesModels from "codenames50-core/lib/models"
 import request from "supertest"
 import { ErrorCodes } from "../../../src/app/errors"
 import { createExpressApp } from "../../../src/app/main"

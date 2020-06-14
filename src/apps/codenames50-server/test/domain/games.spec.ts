@@ -1,4 +1,4 @@
-import { CodeNamesGame, Words } from "@psousa50/codenames50-core/lib/models"
+import { CodeNamesGame, Words } from "codenames50-core/lib/models"
 import moment from "moment"
 import * as R from "ramda"
 import { DomainEnvironment } from "../../src/domain/adapters"

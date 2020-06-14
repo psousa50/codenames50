@@ -1,5 +1,5 @@
-import { gameActions } from "@psousa50/codenames50-core/lib/main"
-import { gameRules } from "@psousa50/codenames50-core/lib/rules"
+import { gameActions } from "codenames50-core/lib/main"
+import { gameRules } from "codenames50-core/lib/rules"
 import { pipe } from "fp-ts/lib/pipeable"
 import { task } from "fp-ts/lib/Task"
 import { fold, getOrElse, TaskEither } from "fp-ts/lib/TaskEither"

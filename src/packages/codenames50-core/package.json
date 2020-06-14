@@ -1,5 +1,5 @@
 {
-  "name": "@psousa50/codenames50-core",
+  "name": "codenames50-core",
   "version": "0.1.0",
   "description": "",
   "main": "lib/index.js",
