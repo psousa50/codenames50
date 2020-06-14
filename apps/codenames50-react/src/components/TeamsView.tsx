@@ -10,9 +10,9 @@ import {
   Theme,
 } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
+import { CodeNamesGame, Player, TeamConfig, Teams } from "@psousa50/codenames50-core/lib/models"
+import * as GameRules from "@psousa50/codenames50-core/lib/rules"
 import React from "react"
-import { CodeNamesGame, Player, TeamConfig, Teams } from "../codenames-core/models"
-import * as GameRules from "../codenames-core/rules"
 import { teamColor } from "../utils/styles"
 
 const useStyles = makeStyles((theme: Theme) =>

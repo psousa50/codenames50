@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
-  "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "lerna": "^3.22.1"
+    "jest": "24.9.0",
+    "lerna": "^3.22.1",
+    "mongodb-memory-server": "^6.6.1"
   }
 }

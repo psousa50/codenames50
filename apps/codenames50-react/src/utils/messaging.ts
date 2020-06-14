@@ -1,6 +1,6 @@
+import * as GameActions from "@psousa50/codenames50-core/lib/main"
+import { CodeNamesGame, GameConfig, GameStates, Teams } from "@psousa50/codenames50-core/lib/models"
 import React from "react"
-import * as GameActions from "../codenames-core/main"
-import { CodeNamesGame, GameConfig, GameStates, Teams } from "../codenames-core/models"
 import { EmitMessage } from "../components/CodeNamesGameView"
 import * as Messages from "../messaging/messages"
 import { sounds, usePlaySound } from "./usePlaySounds"

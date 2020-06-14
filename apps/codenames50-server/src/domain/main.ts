@@ -1,9 +1,9 @@
+import * as GameActions from "@psousa50/codenames50-core/lib/main"
+import { CodeNamesGame, Words, WordsBoard } from "@psousa50/codenames50-core/lib/models"
+import * as GameRules from "@psousa50/codenames50-core/lib/rules"
 import { left, right } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, fromEither, map } from "fp-ts/lib/ReaderTaskEither"
-import * as GameActions from "../codenames-core/main"
-import { CodeNamesGame, Words, WordsBoard } from "../codenames-core/models"
-import * as GameRules from "../codenames-core/rules"
 import { GameMessagingEnvironment } from "../messaging/adapters"
 import * as Messages from "../messaging/messages"
 import { RepositoriesEnvironment } from "../repositories/adapters"
@@ -221,7 +221,7 @@ export const revealWord: DomainPort<Messages.RevealWordInput> = ({ gameId, userI
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
-      chain(checkRules(gameRules.revealWord(row, col, userId))),
+      chain(checkRules(gameRules.revealWord(userId, row, col))),
       chain(game => actionOf(gameActions.revealWord(userId, row, col)(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(

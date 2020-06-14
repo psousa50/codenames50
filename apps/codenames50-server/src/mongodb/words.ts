@@ -1,4 +1,4 @@
-import { Words } from "../codenames-core/models"
+import { Words } from "@psousa50/codenames50-core/lib/models"
 import { MongoEnvironment } from "./adapters"
 
 const WORDS = "Words"

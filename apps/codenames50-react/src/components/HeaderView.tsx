@@ -1,9 +1,9 @@
 import { makeStyles, Theme } from "@material-ui/core"
 import VolumeOff from "@material-ui/icons/VolumeOff"
 import VolumeUp from "@material-ui/icons/VolumeUp"
+import * as GameHelpers from "@psousa50/codenames50-core/lib/helpers"
+import { CodeNamesGame } from "@psousa50/codenames50-core/lib/models"
 import React from "react"
-import * as GameHelpers from "../codenames-core/helpers"
-import { CodeNamesGame } from "../codenames-core/models"
 import { EnvironmentContext } from "../environment"
 import { UserView } from "./UserView"
 

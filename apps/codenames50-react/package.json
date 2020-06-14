@@ -7,6 +7,7 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.53",
     "@material-ui/styles": "^4.9.13",
+    "@psousa50/codenames50-core": "0.1.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -25,7 +26,7 @@
     "react-scripts": "3.4.1",
     "react-spring": "^8.0.27",
     "socket.io-client": "^2.3.0",
-    "typescript": "~3.7.2",
+    "typescript": "^3.7.4",
     "use-sound": "^1.0.2",
     "uuid": "^8.0.0"
   },

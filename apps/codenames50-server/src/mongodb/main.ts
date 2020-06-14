@@ -1,9 +1,7 @@
 import { FilterQuery, MongoClient } from "mongodb"
 
-export const connect = (mongoDbUri: string) => {
-  console.log("mongoDbUri:", mongoDbUri)
-  return MongoClient.connect(mongoDbUri, { useNewUrlParser: true, useUnifiedTopology: true })
-}
+export const connect = (mongoDbUri: string) =>
+  MongoClient.connect(mongoDbUri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 export const disconnect = (client: MongoClient) => client.close()
 

@@ -1,7 +1,7 @@
 import { Button } from "@material-ui/core"
 import { common, grey } from "@material-ui/core/colors"
 import { withStyles } from "@material-ui/styles"
-import { Teams } from "../codenames-core/models"
+import { Teams } from "@psousa50/codenames50-core/lib/models"
 
 export const redColor = "#f8931f"
 export const blueColor = "#1b74ca"

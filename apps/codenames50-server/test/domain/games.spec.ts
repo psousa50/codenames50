@@ -1,6 +1,6 @@
+import { CodeNamesGame, Words } from "@psousa50/codenames50-core/lib/models"
 import moment from "moment"
 import * as R from "ramda"
-import { CodeNamesGame, Words } from "../../src/codenames-core/models"
 import { DomainEnvironment } from "../../src/domain/adapters"
 import { ErrorCodes } from "../../src/domain/errors"
 import * as Games from "../../src/domain/main"
@@ -50,7 +50,7 @@ const buildEnvironment = (partialEnv: DeepPartial<DomainEnvironment>, { game, wo
     },
     currentUtcDateTime: () => timestamp,
   })
-  const domainEnvironment = R.mergeDeepRight(defaultEnvironment, partialEnv)
+  const domainEnvironment = R.mergeDeepRight(defaultEnvironment, partialEnv) as any
 
   return {
     domainEnvironment,

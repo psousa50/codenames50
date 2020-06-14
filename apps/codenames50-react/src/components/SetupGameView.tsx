@@ -12,9 +12,9 @@ import {
   Select,
   Theme,
 } from "@material-ui/core"
+import { CodeNamesGame, GameConfig, GameStates, Teams } from "@psousa50/codenames50-core/lib/models"
+import * as GameRules from "@psousa50/codenames50-core/lib/rules"
 import React from "react"
-import { CodeNamesGame, GameConfig, GameStates, Teams } from "../codenames-core/models"
-import * as GameRules from "../codenames-core/rules"
 import { InvitePlayersDialog } from "./InvitePlayersDialog"
 import { TeamsView } from "./TeamsView"
 
