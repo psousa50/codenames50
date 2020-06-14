@@ -7,6 +7,9 @@
     "src/apps/*"
   ],
   "license": "MIT",
+  "scripts": {
+    "heroku-postbuild": "./scripts/build-all.sh"
+  },
   "devDependencies": {
     "jest": "24.9.0",
     "lerna": "^3.22.1",

@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "heroku-postbuild": "npm run build",
     "prebuild": "npm run clean",
     "postbuild": "npm test",
     "build": "tsc --project tsconfig.dist.json",
