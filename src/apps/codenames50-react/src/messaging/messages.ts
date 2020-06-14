@@ -29,7 +29,7 @@ export type GameMessage<T = {}> = {
   data: T
 }
 
-export const createGameMessage = <T>(type: GameMessageType, data: T) => ({
+export const createGameMessage = <T>(type: GameMessageType, data: T): GameMessage<T> => ({
   type,
   data,
 })

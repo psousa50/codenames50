@@ -16,7 +16,6 @@ const addMessageHandler = (socketsEnvironment: SocketsEnvironment) => <T>(
   messageHandler: SocketHandler<T>,
 ) => {
   const handler = async (data: T) => {
-    console.log("RECEIVED=====>\n", type, data)
     try {
       await run(
         pipe(
@@ -40,9 +39,8 @@ const registerUserHandler: SocketHandler<Messages.RegisterUserSocketInput> = soc
     pipe(adapt(gameMessagingPorts.registerUser({ userId, socketId: socket.id }), gameMessagingEnvironment)),
   )
 
-const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks => {
-  console.log("removeUserFromGame=====>\n", userLinks)
-  return withEnv(({ gamesDomainPorts, domainEnvironment }) => {
+const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
+  withEnv(({ gamesDomainPorts, domainEnvironment }) => {
     return pipe(
       userLinks.length === 1 && userLinks[0].gameId
         ? pipe(
@@ -56,17 +54,15 @@ const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks => {
       map(_ => undefined),
     )
   })
-}
-const disconnectHandler: SocketHandler = socket => () => {
-  console.log("DISCONNECT=====>\n", socket.id)
-  return withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
+
+const disconnectHandler: SocketHandler = socket => () =>
+  withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
     pipe(
       adapt(gameMessagingPorts.unregisterSocket({ socketId: socket.id }), gameMessagingEnvironment),
       chain(removeUserFromGame),
       map(_ => undefined),
     ),
   )
-}
 
 const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ gameId, userId }) =>
   withEnv(({ gamesDomainPorts, domainEnvironment, uuid, gameMessagingPorts, gameMessagingEnvironment }) => {
