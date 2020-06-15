@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prebuild": "npm run clean",
-    "postbuild": "npm test",
+    "prebuild": "npm run clean && npm test",
     "build": "tsc --project tsconfig.dist.json",
     "tsc": "tsc --project tsconfig.json",
     "tsn": "ts-node",
