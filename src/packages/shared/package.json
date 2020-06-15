@@ -5,7 +5,6 @@
   "license": "MIT",
   "scripts": {
     "prebuild": "npm run clean",
-    "postbuild": "npm test",
     "build": "tsc -d -p tsconfig.dist.json",
     "tsn": "ts-node",
     "tsc": "tsc --project tsconfig.json",

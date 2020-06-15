@@ -7,9 +7,6 @@
     "src/apps/*"
   ],
   "license": "MIT",
-  "scripts": {
-    "heroku-postbuild": "./scripts/build-all.sh"
-  },
   "engines": {
     "node": "12.14.1",
     "yarn": "1.21.1"
