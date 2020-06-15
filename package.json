@@ -6,6 +6,9 @@
     "src/packages/*",
     "src/apps/*"
   ],
+  "scripts": {
+    "build": "./scripts/build-all.sh"
+  },
   "license": "MIT",
   "engines": {
     "node": "12.14.1",
