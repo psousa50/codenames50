@@ -7,7 +7,7 @@
     "src/apps/*"
   ],
   "scripts": {
-    "build": "./scripts/build-all.sh"
+    "build": "./scripts/build.sh"
   },
   "license": "MIT",
   "engines": {
