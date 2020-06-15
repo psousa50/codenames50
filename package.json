@@ -10,10 +10,6 @@
     "build": "./scripts/build.sh"
   },
   "license": "MIT",
-  "engines": {
-    "node": "12.14.1",
-    "yarn": "1.21.1"
-  },
   "devDependencies": {
     "jest": "24.9.0",
     "lerna": "^3.22.1",
