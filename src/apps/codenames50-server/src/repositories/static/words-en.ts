@@ -1,6 +1,6 @@
-{
-  "language": "en",
-  "words": [
+export const wordsEn = {
+  language: "en",
+  words: [
     "Accident",
     "Activity",
     "Actor",
@@ -366,6 +366,6 @@
     "World",
     "Writer",
     "Year",
-    "Youth"
-  ]
+    "Youth",
+  ],
 }

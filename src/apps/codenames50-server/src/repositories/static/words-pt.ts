@@ -1,6 +1,6 @@
-{
-  "language": "pt",
-  "words": [
+export const wordsPt = {
+  language: "pt",
+  words: [
     "abertura",
     "academia",
     "acesso",
@@ -800,6 +800,6 @@
     "votação",
     "voto",
     "voz",
-    "zona"
-  ]
+    "zona",
+  ],
 }

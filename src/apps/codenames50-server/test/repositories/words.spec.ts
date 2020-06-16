@@ -25,14 +25,14 @@ it("getByLanguage", async () => {
     words: ["word1", "word2"],
   }
 
-  await getRight(wordsRepositoryPorts.insert(wordsEn)(repositoriesAdapter))()
-  await getRight(wordsRepositoryPorts.insert(wordsPt)(repositoriesAdapter))()
+  await getRight(wordsRepositoryPorts.upsertByLanguage(wordsEn)(repositoriesAdapter))()
+  await getRight(wordsRepositoryPorts.upsertByLanguage(wordsPt)(repositoriesAdapter))()
 
   const wPt = await getRight(wordsRepositoryPorts.getByLanguage("pt")(repositoriesAdapter))()
   const wEn = await getRight(wordsRepositoryPorts.getByLanguage("en")(repositoriesAdapter))()
 
   mongoServer.stop()
 
-  expect(wPt).toEqual(wordsPt)
-  expect(wEn).toEqual(wordsEn)
+  expect(wPt?.language).toEqual("pt")
+  expect(wEn?.language).toEqual("en")
 })

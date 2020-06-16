@@ -10,12 +10,21 @@ import * as MondoDb from "./mongodb/main"
 import { buildSocketsEnvironment } from "./sockets/adapters"
 import { createSocketsApplication, startSocketsApplication } from "./sockets/main"
 import { logDebug } from "./utils/debug"
+import { DomainEnvironment } from "./domain/adapters"
+import { run } from "fp-ts/lib/ReaderTaskEither"
 
 dotenv.config()
 
 const exitProcess = (error: Error) => {
   logDebug("Shutting down app", error.message)
   process.exit(1)
+}
+
+const inititialize = async (domainEnvironment: DomainEnvironment) => {
+  await run(
+    domainEnvironment.repositoriesAdapter.wordsRepositoryPorts.initialize(),
+    domainEnvironment.repositoriesAdapter.repositoriesEnvironment,
+  )
 }
 
 const startApplication = async () => {
@@ -38,8 +47,6 @@ const startApplication = async () => {
     const app = createExpressApp(expressEnvironment)
     app.use(cors())
 
-    // const server = app.listen(appPort + 1)
-
     const socketsEnvironment = buildSocketsEnvironment(
       io,
       domainEnvironment,
@@ -47,14 +54,10 @@ const startApplication = async () => {
       domainEnvironment.gameMessagingAdapter.gameMessagingEnvironment,
       gameMessagingPorts,
     )
-    startSocketsApplication(io, socketsEnvironment)
 
-    // server.on("checkContinue", (__, res) => {
-    //   res.writeContinue()
-    // })
-    // server.once("error", (error: Error) => {
-    //   exitProcess(error)
-    // })
+    await inititialize(domainEnvironment)
+
+    startSocketsApplication(io, socketsEnvironment)
   } catch (error) {
     exitProcess(error)
   }
