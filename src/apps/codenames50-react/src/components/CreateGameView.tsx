@@ -9,7 +9,7 @@ import { Alert, AlertTitle } from "@material-ui/lab"
 import { CodeNamesGame } from "codenames50-core/lib/models"
 import React from "react"
 import { Redirect } from "react-router-dom"
-import * as Messages from "../messaging/messages"
+import * as Messages from "codenames50-messaging/lib/messages"
 import { useSocket } from "../utils/useSocket"
 
 const useStyles = makeStyles(theme => ({

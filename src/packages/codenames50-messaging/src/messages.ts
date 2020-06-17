@@ -7,6 +7,7 @@ export type GameMessageType =
   | "disconnect"
   | "gameCreated"
   | "gameError"
+  | "gameRestarted"
   | "gameStarted"
   | "hintSent"
   | "joinedGame"
@@ -21,6 +22,7 @@ export type GameMessageType =
   | "sendHint"
   | "setSpyMaster"
   | "startGame"
+  | "turnChanged"
   | "turnTimeout"
   | "updateGame"
 
@@ -29,7 +31,46 @@ export type GameMessage<T = {}> = {
   data: T
 }
 
-export const createGameMessage = <T>(type: GameMessageType, data: T) => ({
+export type GameMessageHandlerSpec<T extends GameMessageType, D = any, R = void> = {
+  type: T
+  handler: (data: D) => R
+}
+
+export type GameMessageHandler =
+  | GameMessageHandlerSpec<"changeTurn", ChangeTurnInput>
+  | GameMessageHandlerSpec<"connect">
+  | GameMessageHandlerSpec<"createGame", CreateGameInput>
+  | GameMessageHandlerSpec<"disconnect">
+  | GameMessageHandlerSpec<"gameCreated", CodeNamesGame>
+  | GameMessageHandlerSpec<"gameError", GameErrorInput>
+  | GameMessageHandlerSpec<"gameRestarted">
+  | GameMessageHandlerSpec<"gameStarted", CodeNamesGame>
+  | GameMessageHandlerSpec<"hintSent", HintSentInput>
+  | GameMessageHandlerSpec<"joinedGame", JoinedGameInput>
+  | GameMessageHandlerSpec<"joinGame", JoinGameInput>
+  | GameMessageHandlerSpec<"joinTeam", JoinTeamInput>
+  | GameMessageHandlerSpec<"randomizeTeam">
+  | GameMessageHandlerSpec<"reconnect">
+  | GameMessageHandlerSpec<"registerUserSocket", RegisterUserSocketInput>
+  | GameMessageHandlerSpec<"removePlayer", RemovePlayerInput>
+  | GameMessageHandlerSpec<"restartGame", RestartGameInput>
+  | GameMessageHandlerSpec<"revealWord", RevealWordInput>
+  | GameMessageHandlerSpec<"sendHint", SendHintInput>
+  | GameMessageHandlerSpec<"setSpyMaster", SetSpyMasterInput>
+  | GameMessageHandlerSpec<"startGame", StartGameInput>
+  | GameMessageHandlerSpec<"turnChanged">
+  | GameMessageHandlerSpec<"turnTimeout", TurnTimeoutInput>
+  | GameMessageHandlerSpec<"updateGame", CodeNamesGame>
+
+export const createGameMessagehandler = <T extends GameMessageType, D = any, R = void>(
+  type: T,
+  handler: (data: D) => R,
+): GameMessageHandlerSpec<T, D> => ({
+  type,
+  handler,
+})
+
+export const createGameMessage = <T>(type: GameMessageType, data: T): GameMessage<T> => ({
   type,
   data,
 })
@@ -52,14 +93,14 @@ export interface RandomizeTeamsInput {
   gameId: string
 }
 
-export type UpdateGameInput = CodeNamesGame
-
 export interface JoinedGameInput {
   game: CodeNamesGame
   userId: string
 }
 
-export type GameStartedInput = CodeNamesGame
+export type GameErrorInput = {
+  message: string
+}
 
 export interface RemovePlayerInput {
   gameId: string
@@ -144,5 +185,5 @@ export const turnTimeout = (data: TurnTimeoutInput) => createGameMessage("turnTi
 export const error = (data: ErrorInput) => createGameMessage("gameError", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)
 export const joinedGame = (data: JoinedGameInput) => createGameMessage("joinedGame", data)
-export const updateGame = (data: UpdateGameInput) => createGameMessage("updateGame", data)
-export const gameStarted = (data: GameStartedInput) => createGameMessage("gameStarted", data)
+export const updateGame = (data: CodeNamesGame) => createGameMessage("updateGame", data)
+export const gameStarted = (data: CodeNamesGame) => createGameMessage("gameStarted", data)

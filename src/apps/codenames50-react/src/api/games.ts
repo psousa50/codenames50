@@ -1,5 +1,5 @@
 import { CodeNamesGame } from "codenames50-core/lib/models"
-import * as Messages from "../messaging/messages"
+import * as Messages from "codenames50-messaging/lib/messages"
 import { postJson } from "../utils/fetch"
 import { apiUrl } from "./config"
 

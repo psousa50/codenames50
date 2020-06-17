@@ -33,7 +33,7 @@ const gamesMongoDbPorts = {
 }
 
 const wordsMongoDbPorts = {
-  insert: jest.fn(),
+  upsertByLanguage: jest.fn(),
   getByLanguage: jest.fn(),
 }
 
@@ -44,7 +44,8 @@ const gamesRepositoryPorts = {
 }
 
 const wordsRepositoryPorts = {
-  insert: jest.fn(),
+  initialize: jest.fn(),
+  upsertByLanguage: jest.fn(),
   getByLanguage: jest.fn(),
 }
 

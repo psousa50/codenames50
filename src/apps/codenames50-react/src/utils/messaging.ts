@@ -2,7 +2,7 @@ import * as GameActions from "codenames50-core/lib/main"
 import { CodeNamesGame, GameConfig, GameStates, Teams } from "codenames50-core/lib/models"
 import React from "react"
 import { EmitMessage } from "../components/CodeNamesGameView"
-import * as Messages from "../messaging/messages"
+import * as Messages from "codenames50-messaging/lib/messages"
 import { sounds, usePlaySound } from "./usePlaySounds"
 import { useSocket } from "./useSocket"
 
@@ -22,30 +22,26 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     socket.emit(message.type, message.data)
   }
 
-  const addMessageHandler = <T extends {}>(
-    socket: SocketIOClient.Socket,
-    type: Messages.GameMessageType,
-    handler: (data: T) => void,
-  ) => {
-    socket.on(type, handler)
+  const addMessageHandler = (socket: SocketIOClient.Socket, handler: Messages.GameMessageHandler) => {
+    socket.on(handler.type, handler.handler)
   }
 
   React.useEffect(() => {
     socket.connect()
 
-    addMessageHandler(socket, "changeTurn", endTurnHandler)
-    addMessageHandler(socket, "connect", connectHandler)
-    addMessageHandler(socket, "gameError", errorHandler)
-    addMessageHandler(socket, "gameStarted", gameStartedHandler)
-    addMessageHandler(socket, "hintSent", hintSentHandler)
-    addMessageHandler(socket, "joinedGame", joinedGameHandler)
-    addMessageHandler(socket, "joinTeam", joinTeamHandler)
-    addMessageHandler(socket, "restartGame", restartGameHandler)
-    addMessageHandler(socket, "removePlayer", removePlayerHandler)
-    addMessageHandler(socket, "revealWord", revealWordHandler)
-    addMessageHandler(socket, "setSpyMaster", setSpyMasterHandler)
-    addMessageHandler(socket, "updateGame", updateGameHandler)
-    addMessageHandler(socket, "turnTimeout", turnTimeoutHandler)
+    addMessageHandler(socket, Messages.createGameMessagehandler("connect", connectHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("gameError", errorHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("gameStarted", gameStartedHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("hintSent", hintSentHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("joinedGame", joinedGameHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("joinTeam", joinTeamHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("restartGame", restartGameHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("removePlayer", removePlayerHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("revealWord", revealWordHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("setSpyMaster", setSpyMasterHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("updateGame", updateGameHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("turnChanged", turnChangedHandler))
+    addMessageHandler(socket, Messages.createGameMessagehandler("turnTimeout", turnTimeoutHandler))
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -138,7 +134,7 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     })
   }
 
-  const endTurnHandler = () => {
+  const turnChangedHandler = () => {
     setGame(GameActions.changeTurn)
   }
 

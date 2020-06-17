@@ -1,15 +1,15 @@
 import socketIo from "socket.io"
-import { GameMessage } from "./messages"
+import * as Messages from "codenames50-messaging/lib/messages"
 
 export type MessengerEnvironment = {
   io: socketIo.Server
 }
 
-export const emit = ({ io }: MessengerEnvironment) => (socketId: string, message: GameMessage) => {
+export const emit = ({ io }: MessengerEnvironment) => (socketId: string, message: Messages.GameMessage) => {
   io.sockets.sockets[socketId].emit(message.type, message.data)
 }
 
-export const broadcast = ({ io }: MessengerEnvironment) => (roomId: string, message: GameMessage) => {
+export const broadcast = ({ io }: MessengerEnvironment) => (roomId: string, message: Messages.GameMessage) => {
   io.to(roomId).emit(message.type, message.data)
 }
 

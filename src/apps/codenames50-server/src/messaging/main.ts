@@ -1,6 +1,6 @@
 import { actionOf, withEnv } from "../utils/actions"
 import { GameMessagingPort } from "./adapters"
-import { GameMessage } from "./messages"
+import * as Messages from "codenames50-messaging/lib/messages"
 
 export interface UserSocketLink {
   socketId: string
@@ -28,12 +28,12 @@ export type AddGameToUserInput = {
 type EmitMessageInput = {
   roomId: string
   userId: string
-  message: GameMessage
+  message: Messages.GameMessage
 }
 
 type BrodcastMessageInput = {
   roomId: string
-  message: GameMessage
+  message: Messages.GameMessage
 }
 
 export const registerUser: GameMessagingPort<RegisterUserInput> = input => {

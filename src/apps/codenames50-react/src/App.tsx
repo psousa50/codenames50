@@ -1,5 +1,5 @@
 import { createMuiTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
-import { indigo, teal, blueGrey, common, amber, grey, lightBlue } from "@material-ui/core/colors"
+import { blueGrey, lightBlue } from "@material-ui/core/colors"
 import React, { useState } from "react"
 import { BrowserRouter } from "react-router-dom"
 import { AppRouter } from "./AppRouter"
