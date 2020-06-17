@@ -55,13 +55,29 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
     emitMessage(Messages.revealWord({ gameId, userId, row, col }))
   }
 
+  const playersTeamIsPlaying = () => getPlayer(game, userId)?.team === game.turn
+  const playerIsSpyMaster = () => game.redTeam.spyMaster === userId || game.blueTeam.spyMaster === userId
+  const thereIsAHint = () => game.hintWordCount > 0
+
+  const turnMessageForPlayerTurn = () =>
+    playerIsSpyMaster() && thereIsAHint()
+      ? "Waiting for your Agents..."
+      : playerIsSpyMaster() && !thereIsAHint()
+      ? "Your turn, choose a hint"
+      : !playerIsSpyMaster() && thereIsAHint()
+      ? "Select your words"
+      : "Waiting for Spy Masters' hint..."
+
+  const buildTurnsMessage = () =>
+    playersTeamIsPlaying() ? turnMessageForPlayerTurn() : `${teamName(game.turn)}'s turn`
+
   const canEndTurn = GameRules.changeTurn(userId)(game) === undefined
 
   const hintToView = { word: game.hintWord, count: game.hintWordCount, startedTime: game.hintWordStartedTime }
 
   return (
     <div className={classes.container}>
-      <WordsLeftView game={game} text={`${teamName(game.turn)}'s turn`} team={game.turn} />
+      <WordsLeftView game={game} text={buildTurnsMessage()} team={game.turn} />
       <div style={{ marginTop: 20 }}></div>
       <WordsBoardView userId={userId} game={game} board={game.board} onWordClick={onWordClick} revealWords={false} />
       <div style={{ marginTop: 20 }}></div>
