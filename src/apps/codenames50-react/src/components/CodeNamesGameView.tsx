@@ -34,7 +34,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     position: "absolute",
     right: "10px",
   },
-  content: {
+  expandableRoot: {
+    padding: 0,
+    minHeight: "0.5rem",
+  },
+  expandableContent: {
+    margin: 0,
+    padding: 0,
     justifyContent: "center",
   },
   teams: {
@@ -60,7 +66,7 @@ export interface CodeNamesGameViewProps {
   userId: string
 }
 
-const Separator = () => <div style={{ height: "20px" }}></div>
+const Separator = () => <div style={{ height: "1rem" }}></div>
 
 export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
   const classes = useStyles()
@@ -113,7 +119,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
           <ExpansionPanel expanded={teamsExpanded} onChange={handleTeamsExpanded}>
             <ExpansionPanelSummary
               classes={{
-                content: classes.content,
+                root: classes.expandableRoot,
+                content: classes.expandableContent,
               }}
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel1a-content"
