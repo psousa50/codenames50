@@ -29,6 +29,7 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   React.useEffect(() => {
     socket.connect()
 
+    addMessageHandler(socket, Messages.createGameMessagehandler("changeTurn", changeTurnHandler))
     addMessageHandler(socket, Messages.createGameMessagehandler("connect", connectHandler))
     addMessageHandler(socket, Messages.createGameMessagehandler("gameError", errorHandler))
     addMessageHandler(socket, Messages.createGameMessagehandler("gameStarted", gameStartedHandler))
@@ -40,7 +41,6 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     addMessageHandler(socket, Messages.createGameMessagehandler("revealWord", revealWordHandler))
     addMessageHandler(socket, Messages.createGameMessagehandler("setSpyMaster", setSpyMasterHandler))
     addMessageHandler(socket, Messages.createGameMessagehandler("updateGame", updateGameHandler))
-    addMessageHandler(socket, Messages.createGameMessagehandler("turnChanged", turnChangedHandler))
     addMessageHandler(socket, Messages.createGameMessagehandler("turnTimeout", turnTimeoutHandler))
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,7 +134,7 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
     })
   }
 
-  const turnChangedHandler = () => {
+  const changeTurnHandler = () => {
     setGame(GameActions.changeTurn)
   }
 

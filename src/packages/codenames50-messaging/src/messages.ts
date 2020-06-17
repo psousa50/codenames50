@@ -22,7 +22,6 @@ export type GameMessageType =
   | "sendHint"
   | "setSpyMaster"
   | "startGame"
-  | "turnChanged"
   | "turnTimeout"
   | "updateGame"
 
@@ -58,7 +57,6 @@ export type GameMessageHandler =
   | GameMessageHandlerSpec<"sendHint", SendHintInput>
   | GameMessageHandlerSpec<"setSpyMaster", SetSpyMasterInput>
   | GameMessageHandlerSpec<"startGame", StartGameInput>
-  | GameMessageHandlerSpec<"turnChanged">
   | GameMessageHandlerSpec<"turnTimeout", TurnTimeoutInput>
   | GameMessageHandlerSpec<"updateGame", CodeNamesGame>
 
