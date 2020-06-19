@@ -203,7 +203,7 @@ export const revealWord = (userId: string, row: number, col: number): GameAction
   const updatedGame = act([
     conditionalAction(revealedWord.type === WordType.assassin, endGame(otherTeam(playerTeam))),
     decreaseWordsLeft(revealedWordTeam),
-    conditionalAction(failedGuess || game.wordsRevealedCount >= game.hintWordCount, changeTurn),
+    conditionalAction(failedGuess || game.wordsRevealedCount >= game.hintWordCount, changeTurn()),
     checkWin,
   ])(game)
 
@@ -215,7 +215,7 @@ export const revealWord = (userId: string, row: number, col: number): GameAction
   }
 }
 
-export const changeTurn: GameAction = game => ({
+export const changeTurn = (): GameAction => game => ({
   ...game,
   turn: game.turn === Teams.blue ? Teams.red : Teams.blue,
   hintWord: "",
@@ -224,7 +224,7 @@ export const changeTurn: GameAction = game => ({
   hintWordStartedTime: undefined,
 })
 
-export const turnTimeout: GameAction = changeTurn
+export const turnTimeout = changeTurn
 
 export const endGame = (winner: Teams | undefined): GameAction => game => ({
   ...game,

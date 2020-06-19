@@ -238,7 +238,7 @@ export const changeTurn: DomainPort<Messages.ChangeTurnInput> = ({ gameId, userI
     pipe(
       getGame(gameId),
       chain(checkRules(gameRules.changeTurn(userId))),
-      chain(doAction(gameActions.changeTurn)),
+      chain(doAction(gameActions.changeTurn())),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
@@ -253,7 +253,7 @@ export const turnTimeout: DomainPort<Messages.ChangeTurnInput> = ({ gameId, user
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
       getGame(gameId),
-      chain(doAction(gameActions.turnTimeout)),
+      chain(doAction(gameActions.turnTimeout())),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),

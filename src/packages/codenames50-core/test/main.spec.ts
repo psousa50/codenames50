@@ -781,7 +781,7 @@ describe("changeTurn", () => {
       hintWordStartedTime: undefined,
     }
 
-    expect(GameActions.changeTurn(game as any)).toEqual(expectedGame)
+    expect(GameActions.changeTurn()(game as any)).toEqual(expectedGame)
   })
 
   it("change the team from blue to red", () => {
@@ -798,6 +798,6 @@ describe("changeTurn", () => {
       hintWordStartedTime: undefined,
     }
 
-    expect(GameActions.changeTurn(game as any)).toEqual(expectedGame)
+    expect(GameActions.changeTurn()(game as any)).toEqual(expectedGame)
   })
 })
