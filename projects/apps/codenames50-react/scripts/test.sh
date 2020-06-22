@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JOIN_URL="https://codenames50.netlify.app/join?gameId=75cbd7b0-565c-4bb1-a214-f10982b8015c"
+JOIN_URL="http://localhost:4000/join?gameId=46400fae-b73e-4111-8f98-eff3f12193b4"
 GAME_URL=${JOIN_URL/join/game}
 
 open "$GAME_URL&userId=Carla"

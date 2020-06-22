@@ -14,59 +14,25 @@ import {
 } from "@material-ui/core"
 import * as Models from "codenames50-core/lib/models"
 import * as GameRules from "codenames50-core/lib/rules"
+import * as Messages from "codenames50-messaging/lib/messages"
 import React from "react"
 import { InvitePlayersDialog } from "./InvitePlayersDialog"
 import { Teams } from "./Teams"
+import { EmitMessage } from "../../../utils/types"
 
 const enImage = require("../../../assets/images/en.png")
 const ptImage = require("../../../assets/images/pt.png")
 
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
-  buttons: {
-    width: "100%",
-    display: "flex",
-    flow: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button: {
-    width: "100%",
-    display: "flex",
-    justifyContent: "center",
-    padding: "5px",
-  },
-}))
-
 interface SetupGameProps {
-  userId: string
+  emitMessage: EmitMessage
   game: Models.CodeNamesGame
-  joinTeam: (team: Models.Teams) => void
-  setSpyMaster: (team: Models.Teams) => void
-  randomizeTeams: () => void
-  startGame: (config: Models.GameConfig) => void
-  newGame: () => void
+  userId: string
 }
 
-export const SetupGame: React.FC<SetupGameProps> = ({
-  userId,
-  game,
-  joinTeam,
-  setSpyMaster,
-  randomizeTeams,
-  startGame,
-  newGame,
-}) => {
+export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId }) => {
   const classes = useStyles()
+
+  const gameId = game.gameId
 
   const [invitePlayersOpened, openInvitePlayers] = React.useState(false)
   const [newGameDialogOpened, setNewGameDialogOpened] = React.useState(false)
@@ -76,11 +42,30 @@ export const SetupGame: React.FC<SetupGameProps> = ({
     setConfig(game.config)
   }, [game.config])
 
+  const restartGame = () => {
+    emitMessage(Messages.restartGame({ gameId, userId }))
+  }
+
+  const setSpyMaster = (team: Models.Teams) => {
+    emitMessage(Messages.setSpyMaster({ gameId, userId, team }))
+  }
+
+  const joinTeam = (team: Models.Teams) => {
+    emitMessage(Messages.joinTeam({ gameId, userId, team }))
+  }
+
   const changeResponseTimeOut = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value as number
     setConfig(c => ({ ...c, responseTimeoutSec: value === 0 ? undefined : value }))
   }
 
+  const randomizeTeams = () => {
+    emitMessage(Messages.randomizeTeam({ gameId }))
+  }
+
+  const startGame = (config: Models.GameConfig) => {
+    emitMessage(Messages.startGame({ gameId, userId, config }))
+  }
   const changeLanguage = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value as string
     setConfig(c => ({ ...c, language: value === "" ? undefined : value }))
@@ -89,7 +74,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({
   const closeNewGameDialog = (cancel: boolean) => {
     setNewGameDialogOpened(false)
     if (!cancel) {
-      newGame()
+      restartGame()
     }
   }
 
@@ -206,3 +191,29 @@ const ConfirmNewGameDialog: React.FC<ConfirmNewGameDialogProps> = ({ open, close
     </Dialog>
   )
 }
+
+const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  buttons: {
+    width: "100%",
+    display: "flex",
+    flow: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  button: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    padding: "5px",
+  },
+}))

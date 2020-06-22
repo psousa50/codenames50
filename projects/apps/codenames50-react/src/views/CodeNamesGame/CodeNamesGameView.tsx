@@ -2,100 +2,45 @@ import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar,
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import { Alert, AlertTitle } from "@material-ui/lab"
-import { GameStates } from "codenames50-core/lib/models"
-import React from "react"
+import { CodeNamesGame, GameStates } from "codenames50-core/lib/models"
 import * as Messages from "codenames50-messaging/lib/messages"
-import { useMessaging } from "../../utils/messaging"
+import React from "react"
+import { EmitMessage } from "../../utils/types"
 import { EndedGameView } from "./components/EndedGame"
 import { Header } from "./components/Header"
 import { RunningGame } from "./components/RunningGame"
 import { SetupGame } from "./components/SetupGame"
 
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    alignItems: "center",
-  },
-  game: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "10px",
-  },
-  header: {
-    display: "flex",
-    flex: 1,
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sound: {
-    position: "absolute",
-    right: "10px",
-  },
-  expandableRoot: {
-    padding: 0,
-    minHeight: "0.5rem",
-  },
-  expandableContent: {
-    margin: 0,
-    padding: 0,
-    justifyContent: "center",
-  },
-  teams: {
-    marginTop: "0.5rem",
-    marginBottom: "0.5rem",
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(20),
-    fontWeight: theme.typography.fontWeightMedium,
-    color: theme.palette.secondary.main,
-  },
-  copyId: {
-    fontSize: 10,
-    cursor: "pointer",
-    paddingBottom: "10px",
-  },
-}))
-
-export type EmitMessage = <T extends {}>(message: Messages.GameMessage<T>) => void
-
 export interface CodeNamesGameViewProps {
-  gameId: string
+  emitMessage: EmitMessage
+  error: string
+  game: CodeNamesGame
   userId: string
+  clearError: () => void
 }
 
 const Separator = () => <div style={{ height: "1rem" }}></div>
 
-export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, userId }) => {
+export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
+  emitMessage,
+  error,
+  game,
+  userId,
+  clearError,
+}) => {
   const classes = useStyles()
 
   const [teamsExpanded, setTeamsExpanded] = React.useState(false)
 
-  const onRestartGame = () => {}
+  const gameId = game.gameId
 
-  const onStartGame = () => {}
-
-  const {
-    emitMessage,
-    error,
-    game,
-    joinTeam,
-    randomizeTeams,
-    setError,
-    setSpyMaster,
-    startGame,
-    restartGame,
-  } = useMessaging(gameId, userId, onStartGame, onRestartGame)
+  const restartGame = () => {
+    emitMessage(Messages.restartGame({ gameId, userId }))
+  }
 
   React.useEffect(() => {
     setTeamsExpanded(game.state === GameStates.idle)
   }, [game.state])
-
-  const handleClose = () => {
-    setError("")
-  }
 
   const handleTeamsExpanded = (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
     setTeamsExpanded(isExpanded)
@@ -103,7 +48,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
   return (
     <div className={classes.container}>
-      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
+      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={clearError}>
         <Alert severity="error">
           <AlertTitle>Error</AlertTitle>
           {error}
@@ -129,15 +74,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
               <Typography className={classes.heading}>Game Setup</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>
-              <SetupGame
-                userId={userId}
-                game={game}
-                joinTeam={joinTeam}
-                setSpyMaster={setSpyMaster}
-                randomizeTeams={randomizeTeams}
-                startGame={startGame}
-                newGame={restartGame}
-              />
+              <SetupGame emitMessage={emitMessage} game={game} userId={userId} />
             </ExpansionPanelDetails>
           </ExpansionPanel>
         </div>
@@ -151,3 +88,34 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
     </div>
   )
 }
+
+const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "flex",
+    alignItems: "center",
+  },
+  game: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "10px",
+  },
+  expandableRoot: {
+    padding: 0,
+    minHeight: "0.5rem",
+  },
+  expandableContent: {
+    margin: 0,
+    padding: 0,
+    justifyContent: "center",
+  },
+  teams: {
+    marginTop: "0.5rem",
+    marginBottom: "0.5rem",
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(20),
+    fontWeight: theme.typography.fontWeightMedium,
+    color: theme.palette.secondary.main,
+  },
+}))

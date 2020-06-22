@@ -2,7 +2,7 @@ import { makeStyles, Theme } from "@material-ui/core"
 import * as qs from "qs"
 import React from "react"
 import { Route, Switch, useLocation } from "react-router-dom"
-import { CodeNamesGameView } from "./views/CodeNamesGame/CodeNamesGameView"
+import { CodeNamesGameLoader } from "./views/CodeNamesGame/CodeNamesGameLoader"
 import { CreateGameView } from "./views/CreateGameView"
 import { JoinGameView } from "./views/JoinGameView"
 
@@ -33,7 +33,7 @@ export const AppRouter = () => {
           <CreateGameView userId={userId} />
         </Route>
         <Route path="/join">{gameId && <JoinGameView gameId={gameId} userId={userId || ""} />}</Route>
-        <Route path="/game">{gameId && userId && <CodeNamesGameView gameId={gameId} userId={userId} />}</Route>
+        <Route path="/game">{gameId && userId && <CodeNamesGameLoader gameId={gameId} userId={userId} />}</Route>
       </Switch>
     </div>
   )
