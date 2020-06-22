@@ -2,7 +2,7 @@ import { Grid, makeStyles, Theme } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
 import { CodeNamesGame, Teams } from "codenames50-core/lib/models"
 import React from "react"
-import { teamColor } from "../utils/styles"
+import { teamColor } from "../../../utils/styles"
 import { TeamWordsLeft } from "./TeamWordsLeft"
 
 const useStyles = makeStyles((theme: Theme) => ({

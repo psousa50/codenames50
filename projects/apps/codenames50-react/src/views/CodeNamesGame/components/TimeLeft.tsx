@@ -1,7 +1,7 @@
 import { Typography } from "@material-ui/core"
 import moment from "moment"
 import React from "react"
-import { sounds, usePlaySound } from "../utils/usePlaySounds"
+import { sounds, usePlaySound } from "../../../utils/usePlaySounds"
 
 interface TimeLeftProps {
   started: number

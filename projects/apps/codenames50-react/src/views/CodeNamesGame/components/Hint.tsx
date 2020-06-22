@@ -2,9 +2,9 @@ import { Button, makeStyles, Paper, Theme } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
 import { Teams } from "codenames50-core/lib/models"
 import React from "react"
-import { exists } from "../utils/misc"
-import { calculatedWidth, teamColor } from "../utils/styles"
-import { Hint as HintModel } from "../utils/types"
+import { exists } from "../../../utils/misc"
+import { calculatedWidth, teamColor } from "../../../utils/styles"
+import { Hint as HintModel } from "../../../utils/types"
 import { TimeLeft } from "./TimeLeft"
 
 const useStyles = makeStyles((theme: Theme) => ({

@@ -5,7 +5,7 @@ import * as GameRules from "codenames50-core/lib/rules"
 import * as R from "ramda"
 import React from "react"
 import { animated as a, useSpring } from "react-spring"
-import { blueColor, calculatedHeight, calculatedWidth, inocentColor, redColor } from "../utils/styles"
+import { blueColor, calculatedHeight, calculatedWidth, inocentColor, redColor } from "../../../utils/styles"
 
 export type OnWordClick = (word: Models.BoardWord, row: number, col: number) => void
 

@@ -13,7 +13,7 @@ import Typography from "@material-ui/core/Typography"
 import * as Models from "codenames50-core/lib/models"
 import * as GameRules from "codenames50-core/lib/rules"
 import React from "react"
-import { teamColor } from "../utils/styles"
+import { teamColor } from "../../../utils/styles"
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

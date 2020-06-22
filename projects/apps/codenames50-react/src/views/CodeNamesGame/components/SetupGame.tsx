@@ -18,8 +18,8 @@ import React from "react"
 import { InvitePlayersDialog } from "./InvitePlayersDialog"
 import { Teams } from "./Teams"
 
-const enImage = require("../assets/images/en.png")
-const ptImage = require("../assets/images/pt.png")
+const enImage = require("../../../assets/images/en.png")
+const ptImage = require("../../../assets/images/pt.png")
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {

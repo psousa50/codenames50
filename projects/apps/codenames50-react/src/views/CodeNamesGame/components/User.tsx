@@ -3,7 +3,7 @@ import { common } from "@material-ui/core/colors"
 import Typography from "@material-ui/core/Typography"
 import { Teams } from "codenames50-core/lib/models"
 import React from "react"
-import { teamColor } from "../utils/styles"
+import { teamColor } from "../../../utils/styles"
 
 const useStyles = makeStyles((theme: Theme) => ({
   text: {

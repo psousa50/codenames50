@@ -5,11 +5,11 @@ import { Alert, AlertTitle } from "@material-ui/lab"
 import { GameStates } from "codenames50-core/lib/models"
 import React from "react"
 import * as Messages from "codenames50-messaging/lib/messages"
-import { useMessaging } from "../utils/messaging"
-import { EndedGameView } from "../components/EndedGame"
-import { Header } from "../components/Header"
-import { RunningGame } from "../components/RunningGame"
-import { SetupGame } from "../components/SetupGame"
+import { useMessaging } from "../../utils/messaging"
+import { EndedGameView } from "./components/EndedGame"
+import { Header } from "./components/Header"
+import { RunningGame } from "./components/RunningGame"
+import { SetupGame } from "./components/SetupGame"
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {

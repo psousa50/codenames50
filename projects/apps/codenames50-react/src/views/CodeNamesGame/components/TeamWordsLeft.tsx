@@ -4,7 +4,7 @@ import Typography from "@material-ui/core/Typography"
 import { createStyles, makeStyles } from "@material-ui/styles"
 import { Teams } from "codenames50-core/lib/models"
 import React from "react"
-import { teamColor } from "../utils/styles"
+import { teamColor } from "../../../utils/styles"
 
 interface TeamWordsLeftProps {
   team?: Teams

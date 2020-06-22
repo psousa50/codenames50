@@ -4,7 +4,7 @@ import VolumeUp from "@material-ui/icons/VolumeUp"
 import * as GameHelpers from "codenames50-core/lib/helpers"
 import { CodeNamesGame } from "codenames50-core/lib/models"
 import React from "react"
-import { EnvironmentContext } from "../environment"
+import { EnvironmentContext } from "../../../environment"
 import { User } from "./User"
 
 const useStyles = makeStyles((theme: Theme) => ({

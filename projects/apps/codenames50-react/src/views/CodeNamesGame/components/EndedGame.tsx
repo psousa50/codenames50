@@ -1,7 +1,7 @@
 import { Button, makeStyles, Theme } from "@material-ui/core"
 import { CodeNamesGame } from "codenames50-core/lib/models"
 import React from "react"
-import { teamName } from "../utils/ui"
+import { teamName } from "../../../utils/ui"
 import { WordsBoard } from "./WordsBoard"
 import { WordsLeft } from "./WordsLeft"
 
