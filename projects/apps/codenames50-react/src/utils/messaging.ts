@@ -135,11 +135,11 @@ export const useMessaging = (gameId: string, userId: string, onStartGame: () => 
   }
 
   const changeTurnHandler = () => {
-    setGame(GameActions.changeTurn)
+    setGame(GameActions.changeTurn())
   }
 
   const turnTimeoutHandler = () => {
-    setGame(GameActions.turnTimeout)
+    setGame(GameActions.turnTimeout())
   }
 
   const errorHandler = (e: { message: string }) => {
