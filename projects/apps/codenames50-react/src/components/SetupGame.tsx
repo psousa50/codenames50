@@ -12,11 +12,11 @@ import {
   Select,
   Theme,
 } from "@material-ui/core"
-import { CodeNamesGame, GameConfig, GameStates, Teams } from "codenames50-core/lib/models"
+import * as Models from "codenames50-core/lib/models"
 import * as GameRules from "codenames50-core/lib/rules"
 import React from "react"
 import { InvitePlayersDialog } from "./InvitePlayersDialog"
-import { TeamsView } from "./TeamsView"
+import { Teams } from "./Teams"
 
 const enImage = require("../assets/images/en.png")
 const ptImage = require("../assets/images/pt.png")
@@ -47,17 +47,17 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-interface SetupGameViewProps {
+interface SetupGameProps {
   userId: string
-  game: CodeNamesGame
-  joinTeam: (team: Teams) => void
-  setSpyMaster: (team: Teams) => void
+  game: Models.CodeNamesGame
+  joinTeam: (team: Models.Teams) => void
+  setSpyMaster: (team: Models.Teams) => void
   randomizeTeams: () => void
-  startGame: (config: GameConfig) => void
+  startGame: (config: Models.GameConfig) => void
   newGame: () => void
 }
 
-export const SetupGameView: React.FC<SetupGameViewProps> = ({
+export const SetupGame: React.FC<SetupGameProps> = ({
   userId,
   game,
   joinTeam,
@@ -99,7 +99,7 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
   return (
     <div className={classes.container}>
       <ConfirmNewGameDialog open={newGameDialogOpened} closeNewGameDialog={closeNewGameDialog} />
-      {game.state === GameStates.idle && (
+      {game.state === Models.GameStates.idle && (
         <div>
           <FormControl required className={classes.formControl}>
             <InputLabel id="language">Language</InputLabel>
@@ -126,7 +126,7 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
           </FormControl>
         </div>
       )}
-      <TeamsView userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
+      <Teams userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
       <div className={classes.buttons}>
         <div className={classes.button}>
           <Button
@@ -154,7 +154,7 @@ export const SetupGameView: React.FC<SetupGameViewProps> = ({
       </div>
       <div className={classes.buttons}>
         <div className={classes.button}>
-          {game.state === GameStates.running ? (
+          {game.state === Models.GameStates.running ? (
             <Button
               variant="contained"
               size="small"

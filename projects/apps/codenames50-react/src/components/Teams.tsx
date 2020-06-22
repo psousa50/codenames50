@@ -10,7 +10,7 @@ import {
   Theme,
 } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
-import { CodeNamesGame, Player, TeamConfig, Teams } from "codenames50-core/lib/models"
+import * as Models from "codenames50-core/lib/models"
 import * as GameRules from "codenames50-core/lib/rules"
 import React from "react"
 import { teamColor } from "../utils/styles"
@@ -38,17 +38,17 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 )
 
-interface TeamViewProps {
+interface TeamProps {
   userId: string
-  game: CodeNamesGame
-  team: Teams
-  teamConfig: TeamConfig
-  players: Player[]
-  joinTeam: (team: Teams) => void
-  setSpyMaster: (team: Teams) => void
+  game: Models.CodeNamesGame
+  team: Models.Teams
+  teamConfig: Models.TeamConfig
+  players: Models.Player[]
+  joinTeam: (team: Models.Teams) => void
+  setSpyMaster: (team: Models.Teams) => void
 }
 
-const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, players, joinTeam, setSpyMaster }) => {
+const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, joinTeam, setSpyMaster }) => {
   const classes = useStyles()
   const members = players.filter(p => p.team === team && p.userId !== teamConfig.spyMaster)
 
@@ -125,31 +125,31 @@ const TeamView: React.FC<TeamViewProps> = ({ userId, game, team, teamConfig, pla
   )
 }
 
-interface TeamsViewProps {
+interface TeamsProps {
   userId: string
-  game: CodeNamesGame
-  joinTeam: (team: Teams) => void
-  setSpyMaster: (team: Teams) => void
+  game: Models.CodeNamesGame
+  joinTeam: (team: Models.Teams) => void
+  setSpyMaster: (team: Models.Teams) => void
 }
 
-export const TeamsView: React.FC<TeamsViewProps> = ({ userId, game, joinTeam, setSpyMaster }) => {
+export const Teams: React.FC<TeamsProps> = ({ userId, game, joinTeam, setSpyMaster }) => {
   const classes = useStyles()
 
   return (
     <div className={classes.grid}>
-      <TeamView
+      <Team
         userId={userId}
         game={game}
-        team={Teams.red}
+        team={Models.Teams.red}
         teamConfig={game.redTeam}
         players={game.players}
         joinTeam={joinTeam}
         setSpyMaster={setSpyMaster}
       />
-      <TeamView
+      <Team
         userId={userId}
         game={game}
-        team={Teams.blue}
+        team={Models.Teams.blue}
         teamConfig={game.blueTeam}
         players={game.players}
         joinTeam={joinTeam}

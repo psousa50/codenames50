@@ -4,7 +4,7 @@ import { Teams } from "codenames50-core/lib/models"
 import React from "react"
 import { exists } from "../utils/misc"
 import { calculatedWidth, teamColor } from "../utils/styles"
-import { Hint } from "../utils/types"
+import { Hint as HintModel } from "../utils/types"
 import { TimeLeft } from "./TimeLeft"
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -28,23 +28,16 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-interface HintViewProps {
+interface HintProps {
   team: Teams | undefined
-  hint: Hint
+  hint: HintModel
   responseTimeoutSec: number | undefined
   canEndTurn: boolean
   endTurn: () => void
   onTimeout: () => void
 }
 
-export const HintView: React.FC<HintViewProps> = ({
-  team,
-  hint,
-  responseTimeoutSec,
-  endTurn,
-  canEndTurn,
-  onTimeout,
-}) => {
+export const Hint: React.FC<HintProps> = ({ team, hint, responseTimeoutSec, endTurn, canEndTurn, onTimeout }) => {
   const classes = useStyles()
 
   const styles = {

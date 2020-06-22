@@ -3,13 +3,13 @@ import { CodeNamesGame } from "codenames50-core/lib/models"
 import * as GameRules from "codenames50-core/lib/rules"
 import React from "react"
 import * as Messages from "codenames50-messaging/lib/messages"
-import { Hint } from "../utils/types"
+import { Hint as HintModel } from "../utils/types"
 import { teamName } from "../utils/ui"
-import { EmitMessage } from "./CodeNamesGameView"
-import { HintView } from "./HintView"
-import { SendHintView } from "./SendHintView"
-import { OnWordClick, WordsBoardView } from "./WordsBoardView"
-import { WordsLeftView } from "./WordsLeftView"
+import { EmitMessage } from "../views/CodeNamesGameView"
+import { Hint } from "./Hint"
+import { SendHint } from "./SendHint"
+import { OnWordClick, WordsBoard } from "./WordsBoard"
+import { WordsLeft } from "./WordsLeft"
 
 const getPlayer = (game: CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
@@ -26,17 +26,17 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-interface RunningGameViewProps {
+interface RunningGameProps {
   game: CodeNamesGame
   userId: string
   emitMessage: EmitMessage
 }
 
-export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, emitMessage }) => {
+export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMessage }) => {
   const classes = useStyles()
 
   const gameId = game.gameId
-  const [hint, setHint] = React.useState<Hint>({ word: "", count: 0, startedTime: 0 })
+  const [hint, setHint] = React.useState<HintModel>({ word: "", count: 0, startedTime: 0 })
 
   const endTurn = () => {
     emitMessage(Messages.changeTurn({ gameId, userId }))
@@ -77,17 +77,17 @@ export const RunningGameView: React.FC<RunningGameViewProps> = ({ game, userId, 
 
   return (
     <div className={classes.container}>
-      <WordsLeftView game={game} text={buildTurnsMessage()} team={game.turn} />
+      <WordsLeft game={game} text={buildTurnsMessage()} team={game.turn} />
       <div style={{ marginTop: 20 }}></div>
-      <WordsBoardView userId={userId} game={game} board={game.board} onWordClick={onWordClick} revealWords={false} />
+      <WordsBoard userId={userId} game={game} board={game.board} onWordClick={onWordClick} revealWords={false} />
       <div style={{ marginTop: 20 }}></div>
       <div className={classes.hint}>
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
         game.turn === getPlayer(game, userId)?.team &&
         game.hintWordCount === 0 ? (
-          <SendHintView team={game.turn} hint={hint} onChange={setHint} sendHint={sendHint} />
+          <SendHint team={game.turn} hint={hint} onChange={setHint} sendHint={sendHint} />
         ) : (
-          <HintView
+          <Hint
             team={game.turn}
             hint={hintToView}
             responseTimeoutSec={game.config.responseTimeoutSec}

@@ -1,13 +1,13 @@
 import { common } from "@material-ui/core/colors"
 import { makeStyles, Theme } from "@material-ui/core/styles"
-import { BoardWord, CodeNamesGame, WordsBoard, WordType } from "codenames50-core/lib/models"
+import * as Models from "codenames50-core/lib/models"
 import * as GameRules from "codenames50-core/lib/rules"
 import * as R from "ramda"
 import React from "react"
 import { animated as a, useSpring } from "react-spring"
 import { blueColor, calculatedHeight, calculatedWidth, inocentColor, redColor } from "../utils/styles"
 
-export type OnWordClick = (word: BoardWord, row: number, col: number) => void
+export type OnWordClick = (word: Models.BoardWord, row: number, col: number) => void
 
 const useStyles = makeStyles((theme: Theme) => ({
   rows: {
@@ -63,15 +63,15 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-interface WordsBoardViewProps {
+interface WordsBoardProps {
   userId: string
-  game: CodeNamesGame
-  board: WordsBoard
+  game: Models.CodeNamesGame
+  board: Models.WordsBoard
   revealWords: boolean
   onWordClick?: OnWordClick
 }
 
-export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ userId, game, board, onWordClick, revealWords }) => {
+export const WordsBoard: React.FC<WordsBoardProps> = ({ userId, game, board, onWordClick, revealWords }) => {
   const classes = useStyles()
   const s = 5
 
@@ -102,8 +102,8 @@ export const WordsBoardView: React.FC<WordsBoardViewProps> = ({ userId, game, bo
 
 interface WordViewProps {
   userId: string
-  game: CodeNamesGame
-  word: BoardWord
+  game: Models.CodeNamesGame
+  word: Models.BoardWord
   row: number
   col: number
   revealWords: boolean
@@ -137,42 +137,42 @@ const WordView: React.FC<WordViewProps> = ({
       color: common.black,
     },
     unrevelead_spyMaster: {
-      [WordType.red]: {
+      [Models.WordType.red]: {
         color: common.white,
         border: `5px solid ${redColor}`,
       },
-      [WordType.blue]: {
+      [Models.WordType.blue]: {
         color: common.white,
         border: `5px solid ${blueColor}`,
       },
-      [WordType.inocent]: {
+      [Models.WordType.inocent]: {
         backgroundColor: common.white,
         border: `5px solid ${common.white}`,
         color: common.black,
       },
-      [WordType.assassin]: {
+      [Models.WordType.assassin]: {
         backgroundColor: common.black,
         border: `5px solid ${common.black}`,
         color: common.white,
       },
     },
     revealed: {
-      [WordType.red]: {
+      [Models.WordType.red]: {
         backgroundColor: redColor,
         border: `3px solid ${redColor}`,
         color: common.black,
       },
-      [WordType.blue]: {
+      [Models.WordType.blue]: {
         backgroundColor: blueColor,
         border: `3px solid ${blueColor}`,
         color: common.white,
       },
-      [WordType.inocent]: {
+      [Models.WordType.inocent]: {
         backgroundColor: inocentColor,
         border: `3px solid ${inocentColor}`,
         color: common.black,
       },
-      [WordType.assassin]: {
+      [Models.WordType.assassin]: {
         backgroundColor: common.black,
         border: `3px solid ${common.black}`,
         color: common.white,

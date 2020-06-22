@@ -15,13 +15,13 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-interface UserViewProps {
+interface UserProps {
   userId?: string
   team?: Teams
   spyMaster?: boolean
 }
 
-export const UserView: React.FC<UserViewProps> = ({ userId, team, spyMaster }) => {
+export const User: React.FC<UserProps> = ({ userId, team, spyMaster }) => {
   const classes = useStyles()
   const styles = {
     spyMaster: {

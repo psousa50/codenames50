@@ -5,7 +5,7 @@ import * as GameHelpers from "codenames50-core/lib/helpers"
 import { CodeNamesGame } from "codenames50-core/lib/models"
 import React from "react"
 import { EnvironmentContext } from "../environment"
-import { UserView } from "./UserView"
+import { User } from "./User"
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -49,12 +49,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-interface HeaderViewProps {
+interface HeaderProps {
   game: CodeNamesGame
   userId: string
 }
 
-export const HeaderView: React.FC<HeaderViewProps> = ({ game, userId }) => {
+export const Header: React.FC<HeaderProps> = ({ game, userId }) => {
   const classes = useStyles()
 
   const environment = React.useContext(EnvironmentContext)
@@ -65,7 +65,7 @@ export const HeaderView: React.FC<HeaderViewProps> = ({ game, userId }) => {
 
   return (
     <div className={classes.header}>
-      <UserView
+      <User
         userId={userId}
         team={GameHelpers.getPlayer(game, userId)?.team}
         spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}

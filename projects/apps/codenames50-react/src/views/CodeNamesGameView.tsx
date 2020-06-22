@@ -6,10 +6,10 @@ import { GameStates } from "codenames50-core/lib/models"
 import React from "react"
 import * as Messages from "codenames50-messaging/lib/messages"
 import { useMessaging } from "../utils/messaging"
-import { EndedGameView } from "./EndedGameView"
-import { HeaderView } from "./HeaderView"
-import { RunningGameView } from "./RunningGameView"
-import { SetupGameView } from "./SetupGameView"
+import { EndedGameView } from "../components/EndedGame"
+import { Header } from "../components/Header"
+import { RunningGame } from "../components/RunningGame"
+import { SetupGame } from "../components/SetupGame"
 
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
@@ -111,7 +111,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
       </Snackbar>
 
       <div className={classes.game}>
-        <HeaderView game={game} userId={userId} />
+        <Header game={game} userId={userId} />
 
         <Separator />
 
@@ -129,7 +129,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
               <Typography className={classes.heading}>Game Setup</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>
-              <SetupGameView
+              <SetupGame
                 userId={userId}
                 game={game}
                 joinTeam={joinTeam}
@@ -144,7 +144,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({ gameId, us
 
         <Separator />
 
-        {game.state === GameStates.running && <RunningGameView game={game} userId={userId} emitMessage={emitMessage} />}
+        {game.state === GameStates.running && <RunningGame game={game} userId={userId} emitMessage={emitMessage} />}
 
         {game.state === GameStates.ended && <EndedGameView userId={userId} game={game} newGame={restartGame} />}
       </div>

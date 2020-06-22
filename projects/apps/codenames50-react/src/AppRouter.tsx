@@ -2,9 +2,9 @@ import { makeStyles, Theme } from "@material-ui/core"
 import * as qs from "qs"
 import React from "react"
 import { Route, Switch, useLocation } from "react-router-dom"
-import { CodeNamesGameView } from "./components/CodeNamesGameView"
-import { CreateGameView } from "./components/CreateGameView"
-import { JoinGameView } from "./components/JoinGameView"
+import { CodeNamesGameView } from "./views/CodeNamesGameView"
+import { CreateGameView } from "./views/CreateGameView"
+import { JoinGameView } from "./views/JoinGameView"
 
 const useStyles = makeStyles((theme: Theme) => ({
   app: {

@@ -30,14 +30,14 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-interface SendHintViewProps {
+interface SendHintProps {
   team: Teams | undefined
   hint: Hint
   onChange: (hint: Hint) => void
   sendHint: (hint: Hint) => void
 }
 
-export const SendHintView: React.FC<SendHintViewProps> = ({ team, hint, onChange, sendHint }) => {
+export const SendHint: React.FC<SendHintProps> = ({ team, hint, onChange, sendHint }) => {
   const classes = useStyles()
 
   const styles = {
