@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "src/packages/*",
-    "src/apps/*"
+    "projects/packages/*",
+    "projects/apps/*"
   ],
   "scripts": {
     "build": "./scripts/build.sh"
