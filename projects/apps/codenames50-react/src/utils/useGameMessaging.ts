@@ -55,6 +55,7 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
   }
 
   const onGameCreated = (game: CodeNamesGame) => {
+    setGame(game)
     handlers.onGameCreated && handlers.onGameCreated(game)
   }
 

@@ -6,7 +6,6 @@ import Typography from "@material-ui/core/Typography"
 import AccountCircle from "@material-ui/icons/AccountCircle"
 import NoteAdd from "@material-ui/icons/NoteAdd"
 import { Alert, AlertTitle } from "@material-ui/lab"
-import { CodeNamesGame } from "codenames50-core/lib/models"
 import * as Messages from "codenames50-messaging/lib/messages"
 import React from "react"
 import { Redirect } from "react-router-dom"
@@ -38,13 +37,7 @@ export interface CreateGameViewProps {
 export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialUserId }) => {
   const classes = useStyles()
 
-  const onGameCreated = (game: CodeNamesGame) => {
-    setGameId(game.gameId)
-  }
-
-  const { emitMessage, error, setError } = useGameMessaging({ onGameCreated })
-
-  const [gameId, setGameId] = React.useState<string | undefined>()
+  const { emitMessage, game, error, setError } = useGameMessaging()
   const [userId, setUserId] = React.useState(initialUserId || "")
 
   const createGame = () => {
@@ -54,7 +47,7 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
     }
   }
 
-  const handleClose = () => {
+  const handleErrorClose = () => {
     setError("")
   }
 
@@ -104,11 +97,11 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
     )
   }
 
-  return gameId && userId ? (
-    <Redirect to={`/game?gameId=${gameId}&userId=${userId}`} />
+  return game && userId ? (
+    <Redirect to={`/game?gameId=${game.gameId}&userId=${userId}`} />
   ) : (
     <>
-      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleClose}>
+      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleErrorClose}>
         <Alert severity="error">
           <AlertTitle>Error</AlertTitle>
           {error}
