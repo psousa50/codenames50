@@ -62,7 +62,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
     playerIsSpyMaster() && thereIsAHint()
       ? "Waiting for your Agents..."
       : playerIsSpyMaster() && !thereIsAHint()
-      ? "Your turn, choose a hint"
+      ? "Your turn, choose a hint..."
       : !playerIsSpyMaster() && thereIsAHint()
       ? "Select your words"
       : "Waiting for Spy Masters' hint..."

@@ -4,6 +4,7 @@ import * as Messages from "codenames50-messaging/lib/messages"
 import React from "react"
 import { EmitMessage } from "./types"
 import { useSocket } from "./useSocket"
+import { useGameState } from "./useGameState"
 
 type GameMessagingHandlers = {
   onHintSent?: (game: CodeNamesGame) => void
@@ -12,7 +13,7 @@ type GameMessagingHandlers = {
 
 export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingHandlers = {}) => {
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
-  const [game, setGame] = React.useState<CodeNamesGame | undefined>()
+  const [game, setGame] = useGameState()
 
   const [error, setError] = React.useState("")
 
@@ -46,18 +47,16 @@ export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingH
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const updateGame = (gameAction: GameActions.GameAction) => setGame(g => (g ? gameAction(g) : g))
-
   const onJoinedGame = (input: Messages.JoinedGameInput) => {
     setGame(input.game)
   }
 
   const onRemovePlayer = ({ userId }: Messages.RemovePlayerInput) => {
-    updateGame(GameActions.removePlayer(userId))
+    setGame(GameActions.removePlayer(userId))
   }
 
   const onJoinTeam = ({ userId, team }: Messages.JoinTeamInput) => {
-    updateGame(GameActions.joinTeam(userId, team))
+    setGame(GameActions.joinTeam(userId, team))
   }
 
   const onGameStarted = (game: CodeNamesGame) => {
@@ -65,7 +64,7 @@ export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingH
   }
 
   const onRestartGame = () => {
-    updateGame(GameActions.restartGame)
+    setGame(GameActions.restartGame)
   }
 
   const onUpdateGame = (game: CodeNamesGame) => {
@@ -73,12 +72,12 @@ export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingH
   }
 
   const onSetSpyMaster = ({ userId, team }: Messages.SetSpyMasterInput) => {
-    updateGame(GameActions.setSpyMaster(userId, team))
+    setGame(GameActions.setSpyMaster(userId, team))
   }
 
   const onHintSent = (input: Messages.HintSentInput) => {
     const { hintWord, hintWordCount, hintWordStartedTime } = input
-    updateGame(oldGame => {
+    setGame(oldGame => {
       const newGame = GameActions.sendHint(hintWord, hintWordCount, hintWordStartedTime)(oldGame)
 
       handlers.onHintSent && handlers.onHintSent(newGame)
@@ -88,7 +87,7 @@ export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingH
   }
 
   const onRevealWord = ({ userId, row, col }: Messages.RevealWordInput) => {
-    updateGame(oldGame => {
+    setGame(oldGame => {
       const newGame = GameActions.revealWord(userId, row, col)(oldGame)
 
       handlers.onRevealWord && handlers.onRevealWord(newGame)
@@ -98,11 +97,11 @@ export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingH
   }
 
   const onChangeTurn = () => {
-    updateGame(GameActions.changeTurn())
+    setGame(GameActions.changeTurn())
   }
 
   const onTurnTimeout = () => {
-    updateGame(GameActions.turnTimeout())
+    setGame(GameActions.turnTimeout())
   }
 
   const onError = (e: { message: string }) => {
