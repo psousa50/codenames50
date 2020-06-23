@@ -7,11 +7,13 @@ import { useSocket } from "./useSocket"
 import { useGameState } from "./useGameState"
 
 type GameMessagingHandlers = {
+  onConnect?: () => void
+  onGameCreated?: (game: CodeNamesGame) => void
   onHintSent?: (game: CodeNamesGame) => void
   onRevealWord?: (game: CodeNamesGame) => void
 }
 
-export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingHandlers = {}) => {
+export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
   const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
   const [game, setGame] = useGameState()
 
@@ -32,20 +34,29 @@ export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingH
     addMessageHandler(socket, Messages.createGameMessagehandler("connect", onConnect))
 
     addMessageHandler(socket, Messages.createGameMessagehandler("changeTurn", onChangeTurn))
-    addMessageHandler(socket, Messages.createGameMessagehandler("gameStarted", onGameStarted))
     addMessageHandler(socket, Messages.createGameMessagehandler("gameError", onError))
+    addMessageHandler(socket, Messages.createGameMessagehandler("gameCreated", onGameCreated))
+    addMessageHandler(socket, Messages.createGameMessagehandler("gameStarted", onGameStarted))
     addMessageHandler(socket, Messages.createGameMessagehandler("hintSent", onHintSent))
     addMessageHandler(socket, Messages.createGameMessagehandler("joinedGame", onJoinedGame))
     addMessageHandler(socket, Messages.createGameMessagehandler("joinTeam", onJoinTeam))
-    addMessageHandler(socket, Messages.createGameMessagehandler("restartGame", onRestartGame))
     addMessageHandler(socket, Messages.createGameMessagehandler("removePlayer", onRemovePlayer))
+    addMessageHandler(socket, Messages.createGameMessagehandler("restartGame", onRestartGame))
     addMessageHandler(socket, Messages.createGameMessagehandler("revealWord", onRevealWord))
     addMessageHandler(socket, Messages.createGameMessagehandler("setSpyMaster", onSetSpyMaster))
-    addMessageHandler(socket, Messages.createGameMessagehandler("updateGame", onUpdateGame))
     addMessageHandler(socket, Messages.createGameMessagehandler("turnTimeout", onTurnTimeout))
+    addMessageHandler(socket, Messages.createGameMessagehandler("updateGame", onUpdateGame))
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const onConnect = () => {
+    handlers.onConnect && handlers.onConnect()
+  }
+
+  const onGameCreated = (game: CodeNamesGame) => {
+    handlers.onGameCreated && handlers.onGameCreated(game)
+  }
 
   const onJoinedGame = (input: Messages.JoinedGameInput) => {
     setGame(input.game)

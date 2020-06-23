@@ -47,7 +47,7 @@ export const CodeNamesGameLoader: React.FC<CodeNamesGameLoaderProps> = ({ gameId
     }
   }
 
-  const { emitMessage, error, game, setError } = useGameMessaging(onConnect, { onHintSent, onRevealWord })
+  const { emitMessage, error, game, setError } = useGameMessaging({ onConnect, onHintSent, onRevealWord })
 
   function onConnect() {
     emitMessage(Messages.registerUserSocket({ userId }))

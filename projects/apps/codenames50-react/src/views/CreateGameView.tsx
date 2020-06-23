@@ -7,10 +7,10 @@ import AccountCircle from "@material-ui/icons/AccountCircle"
 import NoteAdd from "@material-ui/icons/NoteAdd"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import { CodeNamesGame } from "codenames50-core/lib/models"
+import * as Messages from "codenames50-messaging/lib/messages"
 import React from "react"
 import { Redirect } from "react-router-dom"
-import * as Messages from "codenames50-messaging/lib/messages"
-import { useSocket } from "../utils/useSocket"
+import { useGameMessaging } from "../utils/useGameMessaging"
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -38,39 +38,21 @@ export interface CreateGameViewProps {
 export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialUserId }) => {
   const classes = useStyles()
 
-  const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
-  const [error, setError] = React.useState("")
+  const onGameCreated = (game: CodeNamesGame) => {
+    setGameId(game.gameId)
+  }
+
+  const { emitMessage, error, setError } = useGameMessaging({ onGameCreated })
+
   const [gameId, setGameId] = React.useState<string | undefined>()
   const [userId, setUserId] = React.useState(initialUserId || "")
 
-  const emitMessage = <T extends {}>(socket: SocketIOClient.Socket, message: Messages.GameMessage<T>) => {
-    setError("")
-    socket.emit(message.type, message.data)
-  }
-
-  const addMessageHandler = <T extends {}>(
-    socket: SocketIOClient.Socket,
-    type: Messages.GameMessageType,
-    handler: (data: T) => void,
-  ) => {
-    socket.on(type, handler)
-  }
-
   const createGame = () => {
     if (userId.trim().length > 0) {
-      emitMessage(socket, Messages.registerUserSocket({ userId }))
-      emitMessage(socket, Messages.createGame({ userId }))
+      emitMessage(Messages.registerUserSocket({ userId }))
+      emitMessage(Messages.createGame({ userId }))
     }
   }
-
-  React.useEffect(() => {
-    socket.connect()
-    const gameCreatedHandler = (game: CodeNamesGame) => {
-      setGameId(game.gameId)
-    }
-
-    addMessageHandler(socket, "gameCreated", gameCreatedHandler)
-  }, [socket])
 
   const handleClose = () => {
     setError("")
