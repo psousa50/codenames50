@@ -1,0 +1,118 @@
+import * as GameActions from "codenames50-core/lib/main"
+import { CodeNamesGame } from "codenames50-core/lib/models"
+import * as Messages from "codenames50-messaging/lib/messages"
+import React from "react"
+import { EmitMessage } from "./types"
+import { useSocket } from "./useSocket"
+
+type GameMessagingHandlers = {
+  onHintSent?: (game: CodeNamesGame) => void
+  onRevealWord?: (game: CodeNamesGame) => void
+}
+
+export const useGameMessaging = (onConnect: () => void, handlers: GameMessagingHandlers = {}) => {
+  const [socket] = useSocket(process.env.REACT_APP_SERVER_URL || "", { autoConnect: false })
+  const [game, setGame] = React.useState<CodeNamesGame | undefined>()
+
+  const [error, setError] = React.useState("")
+
+  const emitMessage = (socket: SocketIOClient.Socket): EmitMessage => message => {
+    setError("")
+    socket.emit(message.type, message.data)
+  }
+
+  const addMessageHandler = (socket: SocketIOClient.Socket, handler: Messages.GameMessageHandler) => {
+    socket.on(handler.type, handler.handler)
+  }
+
+  React.useEffect(() => {
+    socket.connect()
+
+    addMessageHandler(socket, Messages.createGameMessagehandler("connect", onConnect))
+
+    addMessageHandler(socket, Messages.createGameMessagehandler("changeTurn", onChangeTurn))
+    addMessageHandler(socket, Messages.createGameMessagehandler("gameStarted", onGameStarted))
+    addMessageHandler(socket, Messages.createGameMessagehandler("gameError", onError))
+    addMessageHandler(socket, Messages.createGameMessagehandler("hintSent", onHintSent))
+    addMessageHandler(socket, Messages.createGameMessagehandler("joinedGame", onJoinedGame))
+    addMessageHandler(socket, Messages.createGameMessagehandler("joinTeam", onJoinTeam))
+    addMessageHandler(socket, Messages.createGameMessagehandler("restartGame", onRestartGame))
+    addMessageHandler(socket, Messages.createGameMessagehandler("removePlayer", onRemovePlayer))
+    addMessageHandler(socket, Messages.createGameMessagehandler("revealWord", onRevealWord))
+    addMessageHandler(socket, Messages.createGameMessagehandler("setSpyMaster", onSetSpyMaster))
+    addMessageHandler(socket, Messages.createGameMessagehandler("updateGame", onUpdateGame))
+    addMessageHandler(socket, Messages.createGameMessagehandler("turnTimeout", onTurnTimeout))
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const updateGame = (gameAction: GameActions.GameAction) => setGame(g => (g ? gameAction(g) : g))
+
+  const onJoinedGame = (input: Messages.JoinedGameInput) => {
+    setGame(input.game)
+  }
+
+  const onRemovePlayer = ({ userId }: Messages.RemovePlayerInput) => {
+    updateGame(GameActions.removePlayer(userId))
+  }
+
+  const onJoinTeam = ({ userId, team }: Messages.JoinTeamInput) => {
+    updateGame(GameActions.joinTeam(userId, team))
+  }
+
+  const onGameStarted = (game: CodeNamesGame) => {
+    setGame(game)
+  }
+
+  const onRestartGame = () => {
+    updateGame(GameActions.restartGame)
+  }
+
+  const onUpdateGame = (game: CodeNamesGame) => {
+    setGame(game)
+  }
+
+  const onSetSpyMaster = ({ userId, team }: Messages.SetSpyMasterInput) => {
+    updateGame(GameActions.setSpyMaster(userId, team))
+  }
+
+  const onHintSent = (input: Messages.HintSentInput) => {
+    const { hintWord, hintWordCount, hintWordStartedTime } = input
+    updateGame(oldGame => {
+      const newGame = GameActions.sendHint(hintWord, hintWordCount, hintWordStartedTime)(oldGame)
+
+      handlers.onHintSent && handlers.onHintSent(newGame)
+
+      return newGame
+    })
+  }
+
+  const onRevealWord = ({ userId, row, col }: Messages.RevealWordInput) => {
+    updateGame(oldGame => {
+      const newGame = GameActions.revealWord(userId, row, col)(oldGame)
+
+      handlers.onRevealWord && handlers.onRevealWord(newGame)
+
+      return newGame
+    })
+  }
+
+  const onChangeTurn = () => {
+    updateGame(GameActions.changeTurn())
+  }
+
+  const onTurnTimeout = () => {
+    updateGame(GameActions.turnTimeout())
+  }
+
+  const onError = (e: { message: string }) => {
+    setError(e.message)
+  }
+
+  return {
+    emitMessage: emitMessage(socket),
+    error,
+    game,
+    setError,
+  }
+}
