@@ -31,13 +31,22 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface HintProps {
   team: Teams | undefined
   hint: HintModel
+  wordsRevealedCount: number
   responseTimeoutSec: number | undefined
   canEndTurn: boolean
   endTurn: () => void
   onTimeout: () => void
 }
 
-export const Hint: React.FC<HintProps> = ({ team, hint, responseTimeoutSec, endTurn, canEndTurn, onTimeout }) => {
+export const Hint: React.FC<HintProps> = ({
+  team,
+  hint,
+  wordsRevealedCount,
+  responseTimeoutSec,
+  endTurn,
+  canEndTurn,
+  onTimeout,
+}) => {
   const classes = useStyles()
 
   const styles = {
@@ -50,7 +59,11 @@ export const Hint: React.FC<HintProps> = ({ team, hint, responseTimeoutSec, endT
   return (
     <Paper elevation={3} variant="outlined" style={styles.paper} className={classes.container}>
       <Typography variant="h4">{hint.word.toUpperCase()}</Typography>
-      <Typography variant="h4">{hint.count > 0 ? hint.count : ""}</Typography>
+      <Typography variant="h4">
+        {hint.count > 0
+          ? `${hint.count}${wordsRevealedCount > 0 ? ` (${hint.count - wordsRevealedCount} remaining)` : ""}`
+          : ""}
+      </Typography>
       {exists(responseTimeoutSec) && exists(hint.startedTime) ? (
         <TimeLeft started={hint.startedTime!} responseTimeoutSec={responseTimeoutSec!} onTimeout={onTimeout} />
       ) : null}

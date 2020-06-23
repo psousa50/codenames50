@@ -89,6 +89,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
           <Hint
             team={game.turn}
             hint={hintToView}
+            wordsRevealedCount={game.wordsRevealedCount}
             responseTimeoutSec={game.config.responseTimeoutSec}
             canEndTurn={canEndTurn}
             endTurn={endTurn}
