@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "prebuild": "npm run clean",
+    "prebuild": "yarn run clean",
     "build": "tsc -d -p tsconfig.dist.json",
     "tsn": "ts-node",
     "tsc": "tsc --project tsconfig.json",

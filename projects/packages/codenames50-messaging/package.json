@@ -7,7 +7,7 @@
   "license": "ISC",
   "keywords": [],
   "scripts": {
-    "prebuild": "npm run clean",
+    "prebuild": "yarn run clean",
     "build": "tsc -d -p tsconfig.dist.json",
     "tsc": "tsc --project tsconfig.json",
     "clean": "rm -rf lib"

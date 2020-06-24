@@ -1,8 +1,8 @@
 #!/bin/bash
 
-yarn workspace @psousa50/shared exec yarn build
-yarn workspace codenames50-core exec yarn build
-yarn workspace codenames50-messaging exec yarn build
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
+$DIR/build-packages.sh
 
 if [ "$BUILD_ENV" = "api" ]; then
   yarn workspace codenames50-server exec yarn build

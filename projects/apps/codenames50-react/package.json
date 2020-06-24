@@ -18,7 +18,6 @@
     "codenames50-messaging": "0.1.0",
     "copy-to-clipboard": "^3.3.1",
     "fp-ts": "^2.6.0",
-    "jest": "26.0.1",
     "moment": "^2.25.3",
     "qs": "^6.9.4",
     "ramda": "^0.27.0",
