@@ -54,9 +54,22 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
     emitMessage(Messages.joinTeam({ gameId, userId, team }))
   }
 
+  const updateConfig = (config: Partial<Models.GameConfig>) => {
+    setConfig(c => {
+      const newConfig = { ...c, ...config }
+      emitMessage(Messages.updateConfig({ gameId: game.gameId, userId, config: newConfig }))
+      return newConfig
+    })
+  }
+
   const changeResponseTimeOut = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value as number
-    setConfig(c => ({ ...c, responseTimeoutSec: value === 0 ? undefined : value }))
+    updateConfig({ responseTimeoutSec: value === 0 ? undefined : value })
+  }
+
+  const changeLanguage = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const value = event.target.value as string
+    updateConfig({ language: value === "" ? undefined : value })
   }
 
   const randomizeTeams = () => {
@@ -65,10 +78,6 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
 
   const startGame = (config: Models.GameConfig) => {
     emitMessage(Messages.startGame({ gameId, userId, config }))
-  }
-  const changeLanguage = (event: React.ChangeEvent<{ value: unknown }>) => {
-    const value = event.target.value as string
-    setConfig(c => ({ ...c, language: value === "" ? undefined : value }))
   }
 
   const closeNewGameDialog = (cancel: boolean) => {

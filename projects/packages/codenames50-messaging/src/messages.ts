@@ -24,6 +24,7 @@ export type GameMessageType =
   | "startGame"
   | "turnTimeout"
   | "updateGame"
+  | "updateConfig"
 
 export type GameMessage<T = {}> = {
   type: GameMessageType
@@ -59,6 +60,7 @@ export type GameMessageHandler =
   | GameMessageHandlerSpec<"startGame", StartGameInput>
   | GameMessageHandlerSpec<"turnTimeout", TurnTimeoutInput>
   | GameMessageHandlerSpec<"updateGame", CodeNamesGame>
+  | GameMessageHandlerSpec<"updateConfig", UpdateConfigInput>
 
 export const createGameMessagehandler = <T extends GameMessageType, D = any, R = void>(
   type: T,
@@ -154,6 +156,12 @@ export type TurnTimeoutInput = {
   userId: string
 }
 
+export type UpdateConfigInput = {
+  gameId: string
+  userId: string
+  config: GameConfig
+}
+
 export type SetSpyMasterInput = {
   gameId: string
   userId: string
@@ -179,6 +187,7 @@ export const setSpyMaster = (data: SetSpyMasterInput) => createGameMessage("setS
 export const startGame = (data: StartGameInput) => createGameMessage("startGame", data)
 export const restartGame = (data: RestartGameInput) => createGameMessage("restartGame", data)
 export const turnTimeout = (data: TurnTimeoutInput) => createGameMessage("turnTimeout", data)
+export const updateConfig = (data: UpdateConfigInput) => createGameMessage("updateConfig", data)
 
 export const error = (data: ErrorInput) => createGameMessage("gameError", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)

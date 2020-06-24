@@ -74,6 +74,14 @@ const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => input =
     return actionOf(undefined)
   })
 
+const updateConfigHandler: SocketHandler<Messages.UpdateConfigInput> = _ => input =>
+  withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
+    adapt(
+      gameMessagingPorts.broadcastMessage({ roomId: input.gameId, message: Messages.updateConfig(input) }),
+      gameMessagingEnvironment,
+    ),
+  )
+
 const onDomainPort = <I, O>(domainPort: DomainPort<I, O>): SocketHandler<I> => _ => (input: I) =>
   withEnv(({ domainEnvironment }) =>
     pipe(
@@ -112,4 +120,5 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   add(Messages.createGameMessagehandler("setSpyMaster", handler(onDomainPort(env.gamesDomainPorts.setSpyMaster))))
   add(Messages.createGameMessagehandler("startGame", handler(onDomainPort(env.gamesDomainPorts.startGame))))
   add(Messages.createGameMessagehandler("turnTimeout", handler(onDomainPort(env.gamesDomainPorts.turnTimeout))))
+  add(Messages.createGameMessagehandler("updateConfig", handler(updateConfigHandler)))
 }

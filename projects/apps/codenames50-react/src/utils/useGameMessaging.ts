@@ -3,8 +3,8 @@ import { CodeNamesGame } from "codenames50-core/lib/models"
 import * as Messages from "codenames50-messaging/lib/messages"
 import React from "react"
 import { EmitMessage } from "./types"
-import { useSocket } from "./useSocket"
 import { useGameState } from "./useGameState"
+import { useSocket } from "./useSocket"
 
 type GameMessagingHandlers = {
   onConnect?: () => void
@@ -46,6 +46,7 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
     addMessageHandler(socket, Messages.createGameMessagehandler("setSpyMaster", onSetSpyMaster))
     addMessageHandler(socket, Messages.createGameMessagehandler("turnTimeout", onTurnTimeout))
     addMessageHandler(socket, Messages.createGameMessagehandler("updateGame", onUpdateGame))
+    addMessageHandler(socket, Messages.createGameMessagehandler("updateConfig", onUpdateConfig))
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -67,6 +68,10 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
     setGame(GameActions.removePlayer(userId))
   }
 
+  const onSetSpyMaster = ({ userId, team }: Messages.SetSpyMasterInput) => {
+    setGame(GameActions.setSpyMaster(userId, team))
+  }
+
   const onJoinTeam = ({ userId, team }: Messages.JoinTeamInput) => {
     setGame(GameActions.joinTeam(userId, team))
   }
@@ -83,8 +88,8 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
     setGame(game)
   }
 
-  const onSetSpyMaster = ({ userId, team }: Messages.SetSpyMasterInput) => {
-    setGame(GameActions.setSpyMaster(userId, team))
+  const onUpdateConfig = (input: Messages.UpdateConfigInput) => {
+    setGame(g => ({ ...g, config: input.config }))
   }
 
   const onHintSent = (input: Messages.HintSentInput) => {
