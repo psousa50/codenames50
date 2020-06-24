@@ -2,7 +2,6 @@ import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import { Teams } from "codenames50-core/lib/models"
 import * as R from "ramda"
 import React from "react"
-import { exists } from "../../../utils/misc"
 import { calculatedWidth, SmallButton, teamColor } from "../../../utils/styles"
 import { Hint } from "../../../utils/types"
 
@@ -60,7 +59,7 @@ export const SendHint: React.FC<SendHintProps> = ({ team, hint, onChange, sendHi
           />
           <Button
             variant="contained"
-            disabled={hint.word.trim().length === 0 || !exists(hint.count)}
+            disabled={hint.word.trim().length === 0 || hint.count === 0}
             color="primary"
             onClick={() => hint.count > 0 && sendHint(hint)}
           >

@@ -47,7 +47,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
 
   const sendHint = () => {
     setHint({ word: "", count: 0, startedTime: 0 })
-    hint.count && emitMessage(Messages.sendHint({ gameId, userId, hintWord: hint.word, hintWordCount: hint.count }))
+    emitMessage(Messages.sendHint({ gameId, userId, hintWord: hint.word, hintWordCount: hint.count }))
   }
 
   const onWordClick: OnWordClick = (_, row, col) => {
