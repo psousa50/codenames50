@@ -7,7 +7,7 @@ import { actionOf } from "../../src/utils/actions"
 import { getRight, getLeft } from "../helpers"
 import { createGame } from "codenames50-core/lib/main"
 
-const timestamp = moment.utc("2000-01-01")
+const now = 1234567890
 
 const buildEnvironmentForGameAction = (gameActionName: string, gameForAction: any = undefined) => {
   const gameId = "game-id"
@@ -44,7 +44,7 @@ const buildEnvironmentForGameAction = (gameActionName: string, gameForAction: an
     gameRules: {
       [gameActionName]: () => () => undefined,
     },
-    currentUtcDateTime: () => timestamp,
+    currentUtcEpoch: () => now,
   } as any
 
   return {
@@ -85,12 +85,12 @@ describe("create", () => {
       gameActions: {
         createGame,
       },
-      currentUtcDateTime: () => timestamp,
+      currentUtcEpoch: () => now,
     } as any
 
     await getRight(Games.create({ gameId, userId })(domainEnvironment))()
 
-    expect(createGame).toHaveBeenCalledWith(gameId, userId, timestamp.format("YYYY-MM-DD HH:mm:ss"))
+    expect(createGame).toHaveBeenCalledWith(gameId, userId, now)
     expect(insert).toHaveBeenCalledWith(newGame)
 
     expect(emitMessage).toHaveBeenCalledTimes(1)
@@ -208,12 +208,12 @@ describe("revealWord", () => {
     const col = 1
     await getRight(Games.revealWord({ gameId, userId, row, col })(domainEnvironment))()
 
-    expect(gameAction).toHaveBeenCalledWith(userId, row, col)
+    expect(gameAction).toHaveBeenCalledWith(userId, row, col, now)
     expect(gameActionUpdate).toHaveBeenCalledWith(someGame)
     expect(update).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
-      message: Messages.revealWord({ gameId, userId, row, col }),
+      message: Messages.wordRevealed({ gameId, userId, row, col, now }),
     })
   })
 })
@@ -239,7 +239,59 @@ describe("changeTurn", () => {
     expect(update).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
-      message: Messages.changeTurn({ gameId, userId }),
+      message: Messages.turnChanged({ gameId, userId, now }),
     })
+  })
+})
+
+describe("checkTurnTimeout", () => {
+  it("changes the team turn if the turn has timed out", async () => {
+    const {
+      gameId,
+      userId,
+      domainEnvironment,
+      someGame,
+      updatedGame,
+      gameAction,
+      gameActionUpdate,
+      update,
+      broadcastMessage,
+    } = buildEnvironmentForGameAction("changeTurn")
+
+    const domainEnvironmentWithTurnTimedOut = {
+      ...domainEnvironment,
+      gameActions: {
+        ...domainEnvironment.gameActions,
+        checkTurnTimeout: () => () => true,
+      },
+    }
+    await getRight(Games.checkTurnTimeout({ gameId, userId })(domainEnvironmentWithTurnTimedOut))()
+
+    expect(gameAction).toHaveBeenCalled()
+    expect(gameActionUpdate).toHaveBeenCalledWith(someGame)
+    expect(update).toHaveBeenCalledWith(updatedGame)
+    expect(broadcastMessage).toHaveBeenCalledWith({
+      roomId: gameId,
+      message: Messages.turnChanged({ gameId, userId, now }),
+    })
+  })
+
+  it("does not changes the team turn if the turn has not timed out", async () => {
+    const { gameId, userId, domainEnvironment, gameAction, broadcastMessage } = buildEnvironmentForGameAction(
+      "changeTurn",
+    )
+
+    const domainEnvironmentWithTurnNotTimedOut = {
+      ...domainEnvironment,
+      gameActions: {
+        ...domainEnvironment.gameActions,
+        checkTurnTimeout: () => () => false,
+      },
+    }
+
+    await getRight(Games.checkTurnTimeout({ gameId, userId })(domainEnvironmentWithTurnNotTimedOut))()
+
+    expect(gameAction).not.toHaveBeenCalled()
+    expect(broadcastMessage).not.toHaveBeenCalled()
   })
 })

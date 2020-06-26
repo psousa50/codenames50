@@ -12,7 +12,7 @@
     "start": "NODE_ENV=production node dist/index.js",
     "start:dev": "nodemon --exec 'ts-node --files' ./src/index.ts",
     "test": "jest --testPathPattern=test/.+\\.spec\\.ts",
-    "test:watch": "yarn test -- --watch",
+    "test:watch": "yarn test --watch",
     "prettier": "prettier --no-semi --tab-width 2 --print-width 120 --trailing-comma all --parser typescript --list-different \"{src,test}/**/*.ts\"",
     "prettier-fix": "prettier --no-semi --tab-width 2 --print-width 120 --trailing-comma all --parser typescript --write \"{src,test}/**/*.ts\""
   },

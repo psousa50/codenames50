@@ -8,7 +8,7 @@ import { RepositoriesEnvironment } from "../repositories/adapters"
 import { GamesRepositoryPorts } from "../repositories/games"
 import { WordsRepositoryPorts } from "../repositories/words"
 import { Port } from "../utils/adapters"
-import { currentUtcDateTime } from "../utils/dates"
+import { currentUtcEpoch } from "../utils/dates"
 
 export type DomainPort<I = void, R = CodeNamesGame> = Port<DomainEnvironment, I, R>
 
@@ -37,7 +37,7 @@ export const buildDomainEnvironment = (
   },
   gameActions,
   gameRules,
-  currentUtcDateTime,
+  currentUtcEpoch,
 })
 
 export type DomainEnvironment = ReturnType<typeof buildDomainEnvironment>

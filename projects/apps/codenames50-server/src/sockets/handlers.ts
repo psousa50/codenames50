@@ -107,6 +107,9 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   const handler = buildHandler(env, socket)
 
   add(Messages.createGameMessagehandler("changeTurn", handler(onDomainPort(env.gamesDomainPorts.changeTurn))))
+  add(
+    Messages.createGameMessagehandler("checkTurnTimeout", handler(onDomainPort(env.gamesDomainPorts.checkTurnTimeout))),
+  )
   add(Messages.createGameMessagehandler("createGame", handler(createGameHandler)))
   add(Messages.createGameMessagehandler("disconnect", handler(disconnectHandler)))
   add(Messages.createGameMessagehandler("joinGame", handler(joinGameHandler)))
@@ -119,6 +122,5 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   add(Messages.createGameMessagehandler("sendHint", handler(onDomainPort(env.gamesDomainPorts.sendHint))))
   add(Messages.createGameMessagehandler("setSpyMaster", handler(onDomainPort(env.gamesDomainPorts.setSpyMaster))))
   add(Messages.createGameMessagehandler("startGame", handler(onDomainPort(env.gamesDomainPorts.startGame))))
-  add(Messages.createGameMessagehandler("turnTimeout", handler(onDomainPort(env.gamesDomainPorts.turnTimeout))))
   add(Messages.createGameMessagehandler("updateConfig", handler(updateConfigHandler)))
 }

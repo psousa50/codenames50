@@ -1,9 +1,9 @@
 import { makeStyles, Theme } from "@material-ui/core"
 import { CodeNamesGame } from "codenames50-core/lib/models"
 import * as GameRules from "codenames50-core/lib/rules"
-import React from "react"
 import * as Messages from "codenames50-messaging/lib/messages"
-import { Hint as HintModel, EmitMessage } from "../../../utils/types"
+import React from "react"
+import { EmitMessage, Hint as HintModel } from "../../../utils/types"
 import { teamName } from "../../../utils/ui"
 import { Hint } from "./Hint"
 import { SendHint } from "./SendHint"
@@ -42,7 +42,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
   }
 
   const onTimeout = () => {
-    emitMessage(Messages.turnTimeout({ gameId, userId }))
+    emitMessage(Messages.checkTurnTimeout({ gameId, userId }))
   }
 
   const sendHint = () => {
@@ -72,7 +72,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
 
   const canEndTurn = GameRules.changeTurn(userId)(game) === undefined
 
-  const hintToView = { word: game.hintWord, count: game.hintWordCount, startedTime: game.hintWordStartedTime }
+  const hintToView = { word: game.hintWord, count: game.hintWordCount, startedTime: game.turnStartedTime }
 
   return (
     <div className={classes.container}>
@@ -84,7 +84,14 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
         game.turn === getPlayer(game, userId)?.team &&
         game.hintWordCount === 0 ? (
-          <SendHint team={game.turn} hint={hint} onChange={setHint} sendHint={sendHint} />
+          <SendHint
+            team={game.turn}
+            hint={hint}
+            responseTimeoutSec={game.config.responseTimeoutSec}
+            onChange={setHint}
+            sendHint={sendHint}
+            onTimeout={onTimeout}
+          />
         ) : (
           <Hint
             team={game.turn}

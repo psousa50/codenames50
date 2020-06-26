@@ -9,3 +9,4 @@ if [ "$BUILD_ENV" = "api" ]; then
 elif [ "$BUILD_ENV" = "web" ]; then
   yarn workspace codenames50-react exec yarn build
 fi
+yarn workspace codenames50-server start:dev

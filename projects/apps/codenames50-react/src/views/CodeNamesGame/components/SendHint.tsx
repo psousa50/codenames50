@@ -4,39 +4,26 @@ import * as R from "ramda"
 import React from "react"
 import { calculatedWidth, SmallButton, teamColor } from "../../../utils/styles"
 import { Hint } from "../../../utils/types"
-
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    flexGrow: 1,
-    flexDirection: "row",
-    width: calculatedWidth,
-  },
-  hint: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "10px",
-  },
-  numbers: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  number: {
-    margin: "5px",
-  },
-}))
+import { TimeLeft } from "./TimeLeft"
+import { exists } from "../../../utils/misc"
 
 interface SendHintProps {
   team: Teams | undefined
   hint: Hint
+  responseTimeoutSec: number | undefined
   onChange: (hint: Hint) => void
   sendHint: (hint: Hint) => void
+  onTimeout: () => void
 }
 
-export const SendHint: React.FC<SendHintProps> = ({ team, hint, onChange, sendHint }) => {
+export const SendHint: React.FC<SendHintProps> = ({
+  team,
+  hint,
+  responseTimeoutSec,
+  onChange,
+  sendHint,
+  onTimeout,
+}) => {
   const classes = useStyles()
 
   const styles = {
@@ -57,6 +44,9 @@ export const SendHint: React.FC<SendHintProps> = ({ team, hint, onChange, sendHi
             onChange={event => onChange({ ...hint, word: event.target.value })}
             inputProps={{ maxLength: 30 }}
           />
+          {exists(responseTimeoutSec) && exists(hint.startedTime) ? (
+            <TimeLeft started={hint.startedTime!} responseTimeoutSec={responseTimeoutSec!} onTimeout={onTimeout} />
+          ) : null}
           <Button
             variant="contained"
             disabled={hint.word.trim().length === 0 || hint.count === 0}
@@ -110,3 +100,27 @@ const HintCount: React.FC<HintCountProps> = ({ team, count, selected, onChange }
     </SmallButton>
   )
 }
+
+const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "flex",
+    flexGrow: 1,
+    flexDirection: "row",
+    width: calculatedWidth,
+  },
+  hint: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "10px",
+  },
+  numbers: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  number: {
+    margin: "5px",
+  },
+}))

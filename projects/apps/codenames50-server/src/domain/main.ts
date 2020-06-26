@@ -1,15 +1,14 @@
 import * as GameActions from "codenames50-core/lib/main"
 import { CodeNamesGame, Words, WordsBoard } from "codenames50-core/lib/models"
 import * as GameRules from "codenames50-core/lib/rules"
+import * as Messages from "codenames50-messaging/lib/messages"
 import { left, right } from "fp-ts/lib/Either"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, fromEither, map } from "fp-ts/lib/ReaderTaskEither"
 import { GameMessagingEnvironment } from "../messaging/adapters"
-import * as Messages from "codenames50-messaging/lib/messages"
 import { RepositoriesEnvironment } from "../repositories/adapters"
 import { actionErrorOf, actionOf, withEnv } from "../utils/actions"
 import { adapt } from "../utils/adapters"
-import { currentUtcDateTime } from "../utils/dates"
 import { ServiceError } from "../utils/errors"
 import { UUID } from "../utils/types"
 import { DomainEnvironment, DomainPort } from "./adapters"
@@ -85,13 +84,12 @@ const buildBoard: DomainPort<string, WordsBoard> = language =>
   )
 
 export const create: DomainPort<CreateGameInput> = ({ gameId, userId }) =>
-  withEnv(
-    ({ currentUtcDateTime, gameActions, repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
-      pipe(
-        actionOf(gameActions.createGame(gameId, userId, currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"))),
-        chain(game => adapt(gamesRepositoryPorts.insert(game), repositoriesEnvironment)),
-        chain(game => emitMessage(userId, Messages.gameCreated(game))(game)),
-      ),
+  withEnv(({ currentUtcEpoch, gameActions, repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
+    pipe(
+      actionOf(gameActions.createGame(gameId, userId, currentUtcEpoch())),
+      chain(game => adapt(gamesRepositoryPorts.insert(game), repositoriesEnvironment)),
+      chain(game => emitMessage(userId, Messages.gameCreated(game))(game)),
+    ),
   )
 
 export const join: DomainPort<Messages.JoinGameInput> = ({ gameId, userId }) =>
@@ -177,7 +175,7 @@ export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId, config 
       repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment },
       gameActions,
       gameRules,
-      currentUtcDateTime,
+      currentUtcEpoch,
     }) =>
       pipe(
         getGame(gameId),
@@ -185,9 +183,7 @@ export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId, config 
         chain(game =>
           pipe(
             buildBoard(config.language!),
-            chain(board =>
-              actionOf(gameActions.startGame(config, currentUtcDateTime().format("YYYY-MM-DD HH:mm:ss"), board)(game)),
-            ),
+            chain(board => actionOf(gameActions.startGame(config, board, currentUtcEpoch())(game))),
           ),
         ),
         chain(game =>
@@ -200,68 +196,92 @@ export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId, config 
       ),
   )
 
-export const sendHint: DomainPort<Messages.SendHintInput> = ({ gameId, userId, hintWord, hintWordCount }) => {
-  const hintWordStartedTime = currentUtcDateTime().toDate().getTime()
-  return withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
+export const sendHint: DomainPort<Messages.SendHintInput> = ({ gameId, userId, hintWord, hintWordCount }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
     pipe(
       getGame(gameId),
       chain(checkRules(gameRules.sendHint(userId))),
-      chain(game => actionOf(gameActions.sendHint(hintWord, hintWordCount, hintWordStartedTime)(game))),
+      chain(game => actionOf(gameActions.sendHint(hintWord, hintWordCount)(game))),
       chain(game =>
         adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
           gamesRepositoryPorts.update(game),
           repositoriesEnvironment,
         ),
       ),
-      chain(broadcastMessage(Messages.hintSent({ gameId, userId, hintWord, hintWordCount, hintWordStartedTime }))),
+      chain(broadcastMessage(Messages.hintSent({ gameId, userId, hintWord, hintWordCount }))),
     ),
   )
-}
+
 export const revealWord: DomainPort<Messages.RevealWordInput> = ({ gameId, userId, row, col }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
-    pipe(
-      getGame(gameId),
-      chain(checkRules(gameRules.revealWord(userId, row, col))),
-      chain(game => actionOf(gameActions.revealWord(userId, row, col)(game))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
+  withEnv(
+    ({
+      repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment },
+      gameActions,
+      gameRules,
+      currentUtcEpoch,
+    }) => {
+      const now = currentUtcEpoch()
+      return pipe(
+        getGame(gameId),
+        chain(checkRules(gameRules.revealWord(userId, row, col))),
+        chain(game => actionOf(gameActions.revealWord(userId, row, col, now)(game))),
+        chain(game =>
+          adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+            gamesRepositoryPorts.update(game),
+            repositoriesEnvironment,
+          ),
         ),
-      ),
-      chain(broadcastMessage(Messages.revealWord({ gameId, userId, row, col }))),
-    ),
+        chain(broadcastMessage(Messages.wordRevealed({ gameId, userId, row, col, now }))),
+      )
+    },
   )
 
 export const changeTurn: DomainPort<Messages.ChangeTurnInput> = ({ gameId, userId }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, gameRules }) =>
-    pipe(
-      getGame(gameId),
-      chain(checkRules(gameRules.changeTurn(userId))),
-      chain(doAction(gameActions.changeTurn())),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
+  withEnv(
+    ({
+      repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment },
+      gameActions,
+      gameRules,
+      currentUtcEpoch,
+    }) => {
+      const now = currentUtcEpoch()
+      return pipe(
+        getGame(gameId),
+        chain(checkRules(gameRules.changeTurn(userId))),
+        chain(doAction(gameActions.changeTurn(now))),
+        chain(game =>
+          adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+            gamesRepositoryPorts.update(game),
+            repositoriesEnvironment,
+          ),
         ),
-      ),
-      chain(broadcastMessage(Messages.changeTurn({ gameId, userId }))),
-    ),
+        chain(broadcastMessage(Messages.turnChanged({ gameId, userId, now }))),
+      )
+    },
   )
 
-export const turnTimeout: DomainPort<Messages.ChangeTurnInput> = ({ gameId, userId }) =>
-  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
-    pipe(
-      getGame(gameId),
-      chain(doAction(gameActions.turnTimeout())),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
+export const checkTurnTimeout: DomainPort<Messages.ChangeTurnInput> = ({ gameId, userId }) =>
+  withEnv(
+    ({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions, currentUtcEpoch }) => {
+      const now = currentUtcEpoch()
+      return pipe(
+        getGame(gameId),
+        chain(game =>
+          gameActions.checkTurnTimeout(userId, now)(game)
+            ? pipe(
+                doAction(gameActions.changeTurn(now))(game),
+                chain(game =>
+                  adapt<RepositoriesEnvironment, DomainEnvironment, CodeNamesGame>(
+                    gamesRepositoryPorts.update(game),
+                    repositoriesEnvironment,
+                  ),
+                ),
+                chain(broadcastMessage(Messages.turnChanged({ gameId, userId, now }))),
+              )
+            : actionOf(game),
         ),
-      ),
-      chain(broadcastMessage(Messages.turnTimeout({ gameId, userId }))),
-    ),
+      )
+    },
   )
 
 export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput> = ({ gameId, userId, team }) =>
@@ -292,7 +312,7 @@ export const gamesDomainPorts = {
   startGame,
   randomizeTeams,
   restartGame,
-  turnTimeout,
+  checkTurnTimeout,
 }
 
 export type GamesDomainPorts = typeof gamesDomainPorts

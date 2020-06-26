@@ -38,7 +38,8 @@ export interface GameConfig {
 
 export interface CodeNamesGame {
   gameId: string
-  timestamp: string
+  gameCreatedTime: number
+  gameStartedTime: number | undefined
   config: GameConfig
   userId: string
   players: Player[]
@@ -46,7 +47,7 @@ export interface CodeNamesGame {
   redTeam: TeamConfig
   hintWord: string
   hintWordCount: number
-  hintWordStartedTime: number | undefined
+  turnStartedTime: number | undefined
   wordsRevealedCount: number
   state: GameStates
   turn: Teams | undefined

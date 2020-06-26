@@ -33,7 +33,6 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
 
     addMessageHandler(socket, Messages.createGameMessagehandler("connect", onConnect))
 
-    addMessageHandler(socket, Messages.createGameMessagehandler("changeTurn", onChangeTurn))
     addMessageHandler(socket, Messages.createGameMessagehandler("gameError", onError))
     addMessageHandler(socket, Messages.createGameMessagehandler("gameCreated", onGameCreated))
     addMessageHandler(socket, Messages.createGameMessagehandler("gameStarted", onGameStarted))
@@ -42,9 +41,9 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
     addMessageHandler(socket, Messages.createGameMessagehandler("joinTeam", onJoinTeam))
     addMessageHandler(socket, Messages.createGameMessagehandler("removePlayer", onRemovePlayer))
     addMessageHandler(socket, Messages.createGameMessagehandler("restartGame", onRestartGame))
-    addMessageHandler(socket, Messages.createGameMessagehandler("revealWord", onRevealWord))
+    addMessageHandler(socket, Messages.createGameMessagehandler("wordRevealed", onWordRevealed))
     addMessageHandler(socket, Messages.createGameMessagehandler("setSpyMaster", onSetSpyMaster))
-    addMessageHandler(socket, Messages.createGameMessagehandler("turnTimeout", onTurnTimeout))
+    addMessageHandler(socket, Messages.createGameMessagehandler("turnChanged", onTurnChanged))
     addMessageHandler(socket, Messages.createGameMessagehandler("updateGame", onUpdateGame))
     addMessageHandler(socket, Messages.createGameMessagehandler("updateConfig", onUpdateConfig))
 
@@ -93,9 +92,9 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
   }
 
   const onHintSent = (input: Messages.HintSentInput) => {
-    const { hintWord, hintWordCount, hintWordStartedTime } = input
+    const { hintWord, hintWordCount } = input
     setGame(oldGame => {
-      const newGame = GameActions.sendHint(hintWord, hintWordCount, hintWordStartedTime)(oldGame)
+      const newGame = GameActions.sendHint(hintWord, hintWordCount)(oldGame)
 
       handlers.onHintSent && handlers.onHintSent(newGame)
 
@@ -103,9 +102,9 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
     })
   }
 
-  const onRevealWord = ({ userId, row, col }: Messages.RevealWordInput) => {
+  const onWordRevealed = ({ userId, row, col, now }: Messages.WordRevealedInput) => {
     setGame(oldGame => {
-      const newGame = GameActions.revealWord(userId, row, col)(oldGame)
+      const newGame = GameActions.revealWord(userId, row, col, now)(oldGame)
 
       handlers.onRevealWord && handlers.onRevealWord(newGame)
 
@@ -113,12 +112,8 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
     })
   }
 
-  const onChangeTurn = () => {
-    setGame(GameActions.changeTurn())
-  }
-
-  const onTurnTimeout = () => {
-    setGame(GameActions.turnTimeout())
+  const onTurnChanged = ({ now }: Messages.TurnChangedInput) => {
+    setGame(GameActions.changeTurn(now))
   }
 
   const onError = (e: { message: string }) => {

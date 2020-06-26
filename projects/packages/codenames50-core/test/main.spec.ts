@@ -50,18 +50,18 @@ describe("buildBoards", () => {
 })
 
 describe("createGame", () => {
+  const now = 1234567890
   it("creates a new game", () => {
     const gameId = "some-gameId"
     const userId = "some-userId"
-    const timestamp = "some-timestamp"
 
     const expectedGame = {
       gameId,
+      gameCreatedTime: now,
       config: {
         language: undefined,
         responseTimeoutSec: undefined,
       },
-      timestamp,
       userId,
       players: [{ userId, team: Teams.red }],
       redTeam: {},
@@ -73,7 +73,7 @@ describe("createGame", () => {
       board: [],
     }
 
-    const newGame = GameActions.createGame(gameId, userId, timestamp)
+    const newGame = GameActions.createGame(gameId, userId, now)
 
     expect(newGame).toEqual(expectedGame)
   })
@@ -412,7 +412,7 @@ describe("randomizeTeams", () => {
 
 describe("startGame", () => {
   it("sets the rame running", () => {
-    const timestamp = "some-timestamp"
+    const now = 1234567890
     const config = { some: "config" } as any
     const w00 = { word: "w00", type: WordType.blue }
     const w01 = { word: "w01", type: WordType.red }
@@ -434,8 +434,8 @@ describe("startGame", () => {
     }
 
     const expectedGame = {
+      gameStartedTime: now,
       config,
-      timestamp,
       board,
       state: GameStates.running,
       turn: Teams.blue,
@@ -447,9 +447,10 @@ describe("startGame", () => {
         spyMaster: "some-blue-user",
         wordsLeft: 2,
       },
+      turnStartedTime: now,
     }
 
-    expect(GameActions.startGame(config, timestamp, board)(game as any)).toEqual(expectedGame)
+    expect(GameActions.startGame(config, board, now)(game as any)).toEqual(expectedGame)
   })
 })
 
@@ -480,19 +481,18 @@ describe("sendHint", () => {
     const game = {}
     const hintWord = "some-hint"
     const hintWordCount = 3
-    const now = 1234
     const expectedGame = {
       hintWord,
       hintWordCount,
-      hintWordStartedTime: now,
       wordsRevealedCount: 0,
     }
 
-    expect(GameActions.sendHint(hintWord, hintWordCount, now)(game as any)).toEqual(expectedGame)
+    expect(GameActions.sendHint(hintWord, hintWordCount)(game as any)).toEqual(expectedGame)
   })
 })
 
 describe("revealWord", () => {
+  const now = 1234567890
   const userId = "some-user-id"
   const buildGameForRevealWord = (type: WordType, team: Teams) => {
     const w00 = { word: "w00", type, revealed: false }
@@ -515,7 +515,7 @@ describe("revealWord", () => {
     return game as any
   }
 
-  const revealWord = GameActions.revealWord(userId, 0, 0)
+  const revealWord = GameActions.revealWord(userId, 0, 0, now)
 
   it("reveals a word", () => {
     const w00 = { word: "w00" }
@@ -533,7 +533,7 @@ describe("revealWord", () => {
       players: [],
     }
 
-    expect(GameActions.revealWord("some-user-id", 0, 1)(game as any).board[0][1].revealed).toBeTruthy()
+    expect(GameActions.revealWord("some-user-id", 0, 1, now)(game as any).board[0][1].revealed).toBeTruthy()
   })
 
   it("increases words revealed", () => {
@@ -549,7 +549,7 @@ describe("revealWord", () => {
       wordsRevealedCount: 1,
     }
 
-    const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+    const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
 
     expect(updatedGame.wordsRevealedCount).toBe(2)
   })
@@ -572,28 +572,28 @@ describe("revealWord", () => {
 
     it("to success if blue player reveals blue word", () => {
       const game = buildGame(Teams.blue, WordType.blue)
-      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+      const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
 
       expect(updatedGame.turnOutcome).toBe("success")
     })
 
     it("to success if red player reveals red word", () => {
       const game = buildGame(Teams.red, WordType.red)
-      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+      const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
 
       expect(updatedGame.turnOutcome).toBe("success")
     })
 
     it("to failure if player reveals inocent word", () => {
       const game = buildGame(Teams.red, WordType.inocent)
-      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+      const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
 
       expect(updatedGame.turnOutcome).toBe("failure")
     })
 
     it("to assassin if player reveals assassin word", () => {
       const game = buildGame(Teams.red, WordType.assassin)
-      const updatedGame = GameActions.revealWord(userId, 0, 0)(game as any)
+      const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
 
       expect(updatedGame.turnOutcome).toBe("assassin")
     })
@@ -728,7 +728,7 @@ describe("revealWord", () => {
         },
       }
 
-      const updatedGame = GameActions.revealWord(userId, 0, 0)(game)
+      const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game)
       expect(updatedGame.state).toBe(GameStates.ended)
       expect(updatedGame.winner).toBe(Teams.red)
     })
@@ -743,7 +743,7 @@ describe("revealWord", () => {
         },
       }
 
-      const updatedGame = GameActions.revealWord(userId, 0, 0)(game)
+      const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game)
       expect(updatedGame.state).toBe(GameStates.ended)
       expect(updatedGame.winner).toBe(Teams.blue)
     })
@@ -751,7 +751,7 @@ describe("revealWord", () => {
     it("if red reveals the assassin, blue wins", () => {
       const game = buildGameForRevealWord(WordType.assassin, Teams.red)
 
-      const updatedGame = GameActions.revealWord(userId, 0, 0)(game)
+      const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game)
       expect(updatedGame.state).toBe(GameStates.ended)
       expect(updatedGame.winner).toBe(Teams.blue)
     })
@@ -759,7 +759,7 @@ describe("revealWord", () => {
     it("if blue reveals the assassin, red wins", () => {
       const game = buildGameForRevealWord(WordType.assassin, Teams.blue)
 
-      const updatedGame = GameActions.revealWord(userId, 0, 0)(game)
+      const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game)
       expect(updatedGame.state).toBe(GameStates.ended)
       expect(updatedGame.winner).toBe(Teams.red)
     })
@@ -767,10 +767,11 @@ describe("revealWord", () => {
 })
 
 describe("changeTurn", () => {
+  const now = 1234567890
   it("change the team from red to blue", () => {
     const game = {
       turn: Teams.red,
-      hintWordStartedTime: 1234,
+      turnStartedTime: 10,
     }
 
     const expectedGame = {
@@ -778,16 +779,16 @@ describe("changeTurn", () => {
       hintWord: "",
       hintWordCount: 0,
       wordsRevealedCount: 0,
-      hintWordStartedTime: undefined,
+      turnStartedTime: now,
     }
 
-    expect(GameActions.changeTurn()(game as any)).toEqual(expectedGame)
+    expect(GameActions.changeTurn(now)(game as any)).toEqual(expectedGame)
   })
 
   it("change the team from blue to red", () => {
     const game = {
       turn: Teams.blue,
-      hintWordStartedTime: 1234,
+      turnStartedTime: 10,
     }
 
     const expectedGame = {
@@ -795,9 +796,56 @@ describe("changeTurn", () => {
       hintWord: "",
       hintWordCount: 0,
       wordsRevealedCount: 0,
-      hintWordStartedTime: undefined,
+      turnStartedTime: now,
     }
 
-    expect(GameActions.changeTurn()(game as any)).toEqual(expectedGame)
+    expect(GameActions.changeTurn(now)(game as any)).toEqual(expectedGame)
+  })
+})
+
+describe("checkTurnTimeout", () => {
+  const userId = "some-user-id"
+  it("return true if current turn has timed out", () => {
+    const now = 10 * 1000
+    const game = {
+      config: {
+        responseTimeoutSec: 1,
+      },
+      players: [{ userId, team: Teams.blue }],
+      turn: Teams.blue,
+      turnStartedTime: now - 3 * 1000,
+    }
+
+    expect(GameActions.checkTurnTimeout(userId, now)(game as any)).toBeTruthy()
+  })
+
+  it("return false if current turn has timed out but user is not from the current team", () => {
+    const now = 10 * 1000
+    const game = {
+      config: {
+        responseTimeoutSec: 1,
+      },
+      players: [{ userId, team: Teams.red }],
+      turn: Teams.blue,
+      turnStartedTime: now - 3 * 1000,
+    }
+
+    const expectedGame = game
+
+    expect(GameActions.checkTurnTimeout(userId, now)(game as any)).toBeFalsy()
+  })
+
+  it("returns false if current turn has NOT timed out", () => {
+    const now = 10 * 1000
+    const game = {
+      config: {
+        responseTimeoutSec: 5,
+      },
+      players: [{ userId, team: Teams.blue }],
+      turn: Teams.blue,
+      turnStartedTime: now - 3 * 1000,
+    }
+
+    expect(GameActions.checkTurnTimeout(userId, now)(game as any)).toBeFalsy()
   })
 })

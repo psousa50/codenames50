@@ -10,14 +10,17 @@ const nullAction = (game: CodeNamesGame) => game
 const conditionalAction = (v: boolean, action: GameAction) => (v ? action : nullAction)
 const act = (actions: GameAction[]) => (game: CodeNamesGame) => actions.reduce((acc, action) => action(acc), game)
 
-export const createGame = (gameId: string, userId: string, timestamp: string): CodeNamesGame =>
+const isPlayerTurn = (game: CodeNamesGame, userId: string) => getPlayer(game, userId)?.team === game.turn
+
+export const createGame = (gameId: string, userId: string, now: number): CodeNamesGame =>
   addPlayer(userId)({
     gameId,
+    gameCreatedTime: now,
+    gameStartedTime: undefined,
     config: {
       language: undefined,
       responseTimeoutSec: undefined,
     },
-    timestamp,
     userId,
     players: [],
     redTeam: {
@@ -30,7 +33,7 @@ export const createGame = (gameId: string, userId: string, timestamp: string): C
     },
     hintWord: "",
     hintWordCount: 0,
-    hintWordStartedTime: undefined,
+    turnStartedTime: undefined,
     wordsRevealedCount: 0,
     state: GameStates.idle,
     turn: undefined,
@@ -145,11 +148,12 @@ export const randomizeTeams: GameAction = game => {
 
 const countTypes = (board: WordsBoard, type: WordType) => R.flatten(board).filter(w => w.type === type).length
 
-export const startGame = (config: GameConfig, timestamp: string, board: WordsBoard): GameAction => game => {
+export const startGame = (config: GameConfig, board: WordsBoard, now: number): GameAction => game => {
   const redWordsLeft = countTypes(board, WordType.red)
   const blueWordsLeft = countTypes(board, WordType.blue)
   return {
     ...game,
+    gameStartedTime: now,
     config,
     state: GameStates.running,
     turn: redWordsLeft > blueWordsLeft ? Teams.red : Teams.blue,
@@ -161,16 +165,15 @@ export const startGame = (config: GameConfig, timestamp: string, board: WordsBoa
       ...game.blueTeam,
       wordsLeft: blueWordsLeft,
     },
-    timestamp,
+    turnStartedTime: now,
     board,
   }
 }
 
-export const sendHint = (hintWord: string, hintWordCount: number, now: number): GameAction => game => ({
+export const sendHint = (hintWord: string, hintWordCount: number): GameAction => game => ({
   ...game,
   hintWord,
   hintWordCount,
-  hintWordStartedTime: now,
   wordsRevealedCount: 0,
 })
 
@@ -193,7 +196,7 @@ const checkWin = (game: CodeNamesGame) => ({
   winner: game.redTeam.wordsLeft === 0 ? Teams.red : game.blueTeam.wordsLeft === 0 ? Teams.blue : game.winner,
 })
 
-export const revealWord = (userId: string, row: number, col: number): GameAction => game => {
+export const revealWord = (userId: string, row: number, col: number, now: number): GameAction => game => {
   const revealedWord = game.board[row][col]
   const revealedWordTeam =
     revealedWord.type === WordType.blue ? Teams.blue : revealedWord.type === WordType.red ? Teams.red : undefined
@@ -203,7 +206,7 @@ export const revealWord = (userId: string, row: number, col: number): GameAction
   const updatedGame = act([
     conditionalAction(revealedWord.type === WordType.assassin, endGame(otherTeam(playerTeam))),
     decreaseWordsLeft(revealedWordTeam),
-    conditionalAction(failedGuess || game.wordsRevealedCount >= game.hintWordCount, changeTurn()),
+    conditionalAction(failedGuess || game.wordsRevealedCount >= game.hintWordCount, changeTurn(now)),
     checkWin,
   ])(game)
 
@@ -215,16 +218,20 @@ export const revealWord = (userId: string, row: number, col: number): GameAction
   }
 }
 
-export const changeTurn = (): GameAction => game => ({
+export const changeTurn = (now: number): GameAction => game => ({
   ...game,
   turn: game.turn === Teams.blue ? Teams.red : Teams.blue,
   hintWord: "",
   hintWordCount: 0,
   wordsRevealedCount: 0,
-  hintWordStartedTime: undefined,
+  turnStartedTime: now,
 })
 
-export const turnTimeout = changeTurn
+export const checkTurnTimeout = (userId: string, now: number) => (game: CodeNamesGame) =>
+  game.turnStartedTime !== undefined &&
+  game.config.responseTimeoutSec !== undefined &&
+  isPlayerTurn(game, userId) &&
+  now - game.turnStartedTime > game.config.responseTimeoutSec * 1000
 
 export const endGame = (winner: Teams | undefined): GameAction => game => ({
   ...game,
@@ -246,7 +253,7 @@ export const gameActions = {
   setSpyMaster,
   startGame,
   randomizeTeams,
-  turnTimeout,
+  checkTurnTimeout,
 }
 
 export type GameActions = typeof gameActions

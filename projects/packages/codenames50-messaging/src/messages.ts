@@ -2,6 +2,7 @@ import { CodeNamesGame, GameConfig, Teams } from "codenames50-core/lib/models"
 
 export type GameMessageType =
   | "changeTurn"
+  | "checkTurnTimeout"
   | "connect"
   | "createGame"
   | "disconnect"
@@ -22,9 +23,10 @@ export type GameMessageType =
   | "sendHint"
   | "setSpyMaster"
   | "startGame"
-  | "turnTimeout"
+  | "turnChanged"
   | "updateGame"
   | "updateConfig"
+  | "wordRevealed"
 
 export type GameMessage<T = {}> = {
   type: GameMessageType
@@ -58,9 +60,11 @@ export type GameMessageHandler =
   | GameMessageHandlerSpec<"sendHint", SendHintInput>
   | GameMessageHandlerSpec<"setSpyMaster", SetSpyMasterInput>
   | GameMessageHandlerSpec<"startGame", StartGameInput>
-  | GameMessageHandlerSpec<"turnTimeout", TurnTimeoutInput>
+  | GameMessageHandlerSpec<"turnChanged", TurnChangedInput>
+  | GameMessageHandlerSpec<"checkTurnTimeout", CheckTurnTimeoutInput>
   | GameMessageHandlerSpec<"updateGame", CodeNamesGame>
   | GameMessageHandlerSpec<"updateConfig", UpdateConfigInput>
+  | GameMessageHandlerSpec<"wordRevealed", WordRevealedInput>
 
 export const createGameMessagehandler = <T extends GameMessageType, D = any, R = void>(
   type: T,
@@ -91,6 +95,7 @@ export interface JoinGameInput {
 
 export interface RandomizeTeamsInput {
   gameId: string
+  userId: string
 }
 
 export interface JoinedGameInput {
@@ -136,7 +141,6 @@ export type HintSentInput = {
   userId: string
   hintWord: string
   hintWordCount: number
-  hintWordStartedTime: number
 }
 
 export type RevealWordInput = {
@@ -146,12 +150,20 @@ export type RevealWordInput = {
   col: number
 }
 
+export type WordRevealedInput = RevealWordInput & {
+  now: number
+}
+
 export type ChangeTurnInput = {
   gameId: string
   userId: string
 }
 
-export type TurnTimeoutInput = {
+export type TurnChangedInput = ChangeTurnInput & {
+  now: number
+}
+
+export type CheckTurnTimeoutInput = {
   gameId: string
   userId: string
 }
@@ -174,6 +186,7 @@ export interface ErrorInput {
 }
 
 export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTurn", data)
+export const checkTurnTimeout = (data: CheckTurnTimeoutInput) => createGameMessage("checkTurnTimeout", data)
 export const createGame = (data: CreateGameInput) => createGameMessage("createGame", data)
 export const hintSent = (data: HintSentInput) => createGameMessage("hintSent", data)
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
@@ -186,8 +199,9 @@ export const sendHint = (data: SendHintInput) => createGameMessage("sendHint", d
 export const setSpyMaster = (data: SetSpyMasterInput) => createGameMessage("setSpyMaster", data)
 export const startGame = (data: StartGameInput) => createGameMessage("startGame", data)
 export const restartGame = (data: RestartGameInput) => createGameMessage("restartGame", data)
-export const turnTimeout = (data: TurnTimeoutInput) => createGameMessage("turnTimeout", data)
+export const turnChanged = (data: TurnChangedInput) => createGameMessage("turnChanged", data)
 export const updateConfig = (data: UpdateConfigInput) => createGameMessage("updateConfig", data)
+export const wordRevealed = (data: WordRevealedInput) => createGameMessage("wordRevealed", data)
 
 export const error = (data: ErrorInput) => createGameMessage("gameError", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)

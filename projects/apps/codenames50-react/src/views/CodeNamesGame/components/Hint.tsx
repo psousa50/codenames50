@@ -7,27 +7,6 @@ import { calculatedWidth, teamColor } from "../../../utils/styles"
 import { Hint as HintModel } from "../../../utils/types"
 import { TimeLeft } from "./TimeLeft"
 
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    flexGrow: 1,
-    flexDirection: "row",
-    width: calculatedWidth,
-    padding: "5px 10px",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  hintWord: {
-    display: "flex",
-    userSelect: "none",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  number: {
-    margin: "5px",
-  },
-}))
-
 interface HintProps {
   team: Teams | undefined
   hint: HintModel
@@ -79,3 +58,24 @@ interface HintCountProps {
   selected: boolean
   onChange?: (n: number) => void
 }
+
+const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "flex",
+    flexGrow: 1,
+    flexDirection: "row",
+    width: calculatedWidth,
+    padding: "5px 10px",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  hintWord: {
+    display: "flex",
+    userSelect: "none",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  number: {
+    margin: "5px",
+  },
+}))

@@ -73,7 +73,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
   }
 
   const randomizeTeams = () => {
-    emitMessage(Messages.randomizeTeam({ gameId }))
+    emitMessage(Messages.randomizeTeam({ gameId, userId }))
   }
 
   const startGame = (config: Models.GameConfig) => {
