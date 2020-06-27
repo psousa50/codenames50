@@ -1,15 +1,15 @@
-import { DeepPartial } from "@psousa50/shared/types"
+import { Types } from "@psousa50/shared"
 import * as R from "ramda"
 import { CodeNamesGame, GameStates, Teams } from "../src/models"
 import * as GameRules from "../src/rules"
 
 const userId = "some-user-id"
 
-const buildGame = (validGame: DeepPartial<CodeNamesGame>, game: DeepPartial<CodeNamesGame>) =>
+const buildGame = (validGame: Types.DeepPartial<CodeNamesGame>, game: Types.DeepPartial<CodeNamesGame>) =>
   R.mergeDeepRight(validGame, game)
 
 describe("joinTeam", () => {
-  const validIdleGame: DeepPartial<CodeNamesGame> = {}
+  const validIdleGame: Types.DeepPartial<CodeNamesGame> = {}
 
   it("is always valid", () => {
     expect(GameRules.joinTeam(validIdleGame as any)).toBeUndefined()
@@ -17,7 +17,7 @@ describe("joinTeam", () => {
 })
 
 describe("setSpyMaster", () => {
-  const validIdleGame: DeepPartial<CodeNamesGame> = {
+  const validIdleGame: Types.DeepPartial<CodeNamesGame> = {
     state: GameStates.idle,
   }
 
@@ -25,7 +25,7 @@ describe("setSpyMaster", () => {
     expect(GameRules.setSpyMaster(Teams.red)(validIdleGame as any)).toBeUndefined()
   })
 
-  const validRunningGame: DeepPartial<CodeNamesGame> = {
+  const validRunningGame: Types.DeepPartial<CodeNamesGame> = {
     state: GameStates.running,
     redTeam: {},
     blueTeam: {},
@@ -75,7 +75,7 @@ describe("setSpyMaster", () => {
 })
 
 describe("randomizeTeams", () => {
-  const validGame: DeepPartial<CodeNamesGame> = {
+  const validGame: Types.DeepPartial<CodeNamesGame> = {
     state: GameStates.idle,
   }
 
@@ -96,7 +96,7 @@ describe("randomizeTeams", () => {
 })
 
 describe("startGame", () => {
-  const validGame: DeepPartial<CodeNamesGame> = {
+  const validGame: Types.DeepPartial<CodeNamesGame> = {
     state: GameStates.idle,
     players: [
       { userId: "some-user-id-1", team: Teams.red },
@@ -189,7 +189,7 @@ describe("startGame", () => {
 })
 
 describe("sendHint", () => {
-  const validGame: DeepPartial<CodeNamesGame> = {
+  const validGame: Types.DeepPartial<CodeNamesGame> = {
     state: GameStates.running,
     players: [
       {
@@ -283,7 +283,7 @@ describe("sendHint", () => {
 })
 
 describe("changeTurn", () => {
-  const validGame: DeepPartial<CodeNamesGame> = {
+  const validGame: Types.DeepPartial<CodeNamesGame> = {
     state: GameStates.running,
     players: [
       {
@@ -370,7 +370,7 @@ describe("changeTurn", () => {
 })
 
 describe("revealWord", () => {
-  const validGame: DeepPartial<CodeNamesGame> = {
+  const validGame: Types.DeepPartial<CodeNamesGame> = {
     state: GameStates.running,
     players: [
       {

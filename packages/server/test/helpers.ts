@@ -11,7 +11,7 @@ import { buildMessengerEnvironment } from "../src/messaging/messenger"
 import { buildMongoEnvironment } from "../src/mongodb/adapters"
 import { buildRepositoriesEnvironment } from "../src/repositories/adapters"
 import { actionOf } from "../src/utils/actions"
-import { DeepPartial } from "@psousa50/shared/types"
+import { Types } from "@psousa50/shared"
 
 const defaultConfig = {
   mongodb: {
@@ -97,11 +97,11 @@ export const buildTestRepositoriesEnvironment = (dbClient: MongoClient) => {
   return repositoriesEnvironment
 }
 
-export const buildTestDomainEnvironment = (domainEnvironment: DeepPartial<DomainEnvironment> = {}) =>
-  R.mergeDeepRight(buildDefaultTestDomainEnvironment(), domainEnvironment) as any
+export const buildTestDomainEnvironment = (domainEnvironment: Types.DeepPartial<DomainEnvironment> = {}) =>
+  R.mergeDeepRight(buildDefaultTestDomainEnvironment(), domainEnvironment)
 
 export const buildTestExpressEnvironment = (
-  expressEnvironment: DeepPartial<ExpressEnvironment> = {},
+  expressEnvironment: Types.DeepPartial<ExpressEnvironment> = {},
 ): ExpressEnvironment => ({
   ...buildDefaultTestExpressEnvironment(),
   ...(expressEnvironment as any),
