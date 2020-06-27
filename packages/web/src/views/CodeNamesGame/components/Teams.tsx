@@ -1,3 +1,4 @@
+import { GameModels, GameRules } from "@codenames50/core"
 import {
   Button,
   createStyles,
@@ -10,7 +11,6 @@ import {
   Theme,
 } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
-import { GameModels, GameRules } from "@codenames50/core"
 import React from "react"
 import { teamColor } from "../../../utils/styles"
 

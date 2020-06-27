@@ -1,4 +1,4 @@
-import { GameRules, GameModels } from "@codenames50/core"
+import { GameModels, GameRules } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
 import {
   Button,

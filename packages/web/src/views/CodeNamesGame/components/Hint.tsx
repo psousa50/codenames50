@@ -1,6 +1,6 @@
+import { GameModels } from "@codenames50/core"
 import { Button, makeStyles, Paper, Theme } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
-import { GameModels } from "@codenames50/core"
 import React from "react"
 import { exists } from "../../../utils/misc"
 import { calculatedWidth, teamColor } from "../../../utils/styles"

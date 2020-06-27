@@ -1,9 +1,9 @@
 import { GameModels } from "@codenames50/core"
+import { pipe } from "fp-ts/lib/pipeable"
+import { chain } from "fp-ts/lib/ReaderTaskEither"
 import { fromPromise, fromVoidPromise } from "../utils/actions"
 import { RepositoriesPort } from "./adapters"
 import { wordsEn } from "./static/words-en"
-import { pipe } from "fp-ts/lib/pipeable"
-import { chain } from "fp-ts/lib/ReaderTaskEither"
 import { wordsPt } from "./static/words-pt"
 
 const initialize: RepositoriesPort = () =>

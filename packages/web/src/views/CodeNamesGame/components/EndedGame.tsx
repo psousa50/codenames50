@@ -1,5 +1,5 @@
-import { Button, makeStyles, Theme } from "@material-ui/core"
 import { GameModels } from "@codenames50/core"
+import { Button, makeStyles, Theme } from "@material-ui/core"
 import React from "react"
 import { teamName } from "../../../utils/ui"
 import { WordsBoard } from "./WordsBoard"

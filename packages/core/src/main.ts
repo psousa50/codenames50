@@ -1,5 +1,4 @@
-import { Collections } from "@psousa50/shared"
-import { Random } from "@psousa50/shared"
+import { Collections, Random } from "@psousa50/shared"
 import * as R from "ramda"
 import { getPlayer, otherTeam } from "./helpers"
 import { BoardWord, CodeNamesGame, GameConfig, GameStates, Teams, WordsBoard, WordType } from "./models"

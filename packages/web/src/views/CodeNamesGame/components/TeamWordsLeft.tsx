@@ -1,8 +1,8 @@
+import { GameModels } from "@codenames50/core"
 import { Theme } from "@material-ui/core"
 import { common } from "@material-ui/core/colors"
 import Typography from "@material-ui/core/Typography"
 import { createStyles, makeStyles } from "@material-ui/styles"
-import { GameModels } from "@codenames50/core"
 import React from "react"
 import { teamColor } from "../../../utils/styles"
 

@@ -1,11 +1,11 @@
-import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import { GameModels } from "@codenames50/core"
+import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import * as R from "ramda"
 import React from "react"
+import { exists } from "../../../utils/misc"
 import { calculatedWidth, SmallButton, teamColor } from "../../../utils/styles"
 import { Hint } from "../../../utils/types"
 import { TimeLeft } from "./TimeLeft"
-import { exists } from "../../../utils/misc"
 
 interface SendHintProps {
   team: GameModels.Teams | undefined
