@@ -3,16 +3,35 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "projects/packages/*",
-    "projects/apps/*"
+    "packages/**",
+    "tools"
   ],
   "scripts": {
-    "build": "./scripts/build.sh"
+    "start": "npm run build && echo ... to-do",
+    "prebuild": "npm run clean",
+    "build": "lerna run build",
+    "clean": "npm-run-all clean:*",
+    "clean:cache": "rimraf .build-cache",
+    "clean:packages": "lerna run clean",
+    "test": "lerna run test",
+    "test:watch": "lerna run --parallel test:watch",
+    "coverage": "lerna run coverage",
+    "pretty:check": "prettier --list-different \"**/*.{css,html,js,json,md,scss,ts}\"",
+    "pretty:fix": "prettier --write \"**/*.{css,js,html,json,md,scss,ts}\""
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/jest": "^26.0.0",
+    "@types/supertest": "^2.0.9",
     "jest": "24.9.0",
     "lerna": "^3.22.1",
-    "mongodb-memory-server": "^6.6.1"
+    "mongodb-memory-server": "^6.6.1",
+    "nodemon": "^2.0.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.0.5",
+    "supertest": "^4.0.2",
+    "ts-jest": "^24.3.0",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.7.4"
   }
 }

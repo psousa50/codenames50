@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "tsBuildInfoFile": "../../.build-cache/server.tsbuildinfo"
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../shared", "prepend": false },
+    { "path": "../core", "prepend": false },
+    { "path": "../messaging", "prepend": false }
+  ]
+}

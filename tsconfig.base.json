@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2018",
+    "lib": ["es2018", "dom"],
+    "jsx": "react",
+    "moduleResolution": "node",
+    "downlevelIteration": true,
+    "strict": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noImplicitUseStrict": false,
+    "esModuleInterop": true,
+    "preserveConstEnums": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": ".",
+    "baseUrl": "./packages",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noEmit": false,
+    "paths": {
+      "@psousa50/shared/*": ["./shared/src/*"],
+      "@codenames50/core/*": ["./core/src/*"],
+      "@codenames50/messaging/*": ["./messaging/src/*"]
+    }
+  }
+}

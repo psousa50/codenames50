@@ -1,0 +1,23 @@
+{
+  "name": "@codenames50/messaging",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "author": "psousa50",
+  "license": "ISC",
+  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn run build:ts",
+    "build:ts": "tsc -b .",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@codenames50/core": "0.1.0"
+  }
+}

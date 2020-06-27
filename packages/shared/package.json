@@ -1,0 +1,14 @@
+{
+  "name": "@psousa50/shared",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn run build:ts",
+    "build:ts": "tsc -b .",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  }
+}
