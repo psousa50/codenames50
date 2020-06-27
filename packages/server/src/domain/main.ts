@@ -30,10 +30,7 @@ const emitMessage = (
 ): DomainPort<GameModels.CodeNamesGame, GameModels.CodeNamesGame> => game =>
   withEnv(({ gameMessagingAdapter: { gameMessagingPorts, gameMessagingEnvironment } }) =>
     pipe(
-      adapt<GameMessagingEnvironment, DomainEnvironment, void>(
-        gameMessagingPorts.emitMessage({ userId, roomId: game.gameId, message }),
-        gameMessagingEnvironment,
-      ),
+      adapt(gameMessagingPorts.emitMessage({ userId, roomId: game.gameId, message }), gameMessagingEnvironment),
       map(_ => game),
     ),
   )
@@ -54,10 +51,7 @@ const broadcastMessage = (
 const getGame: DomainPort<UUID, GameModels.CodeNamesGame> = gameId =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
-      adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame | null>(
-        gamesRepositoryPorts.getById(gameId),
-        repositoriesEnvironment,
-      ),
+      adapt(gamesRepositoryPorts.getById(gameId), repositoriesEnvironment),
       chain(game =>
         game
           ? actionOf(game)
@@ -74,10 +68,7 @@ const buildBoard: DomainPort<string, GameModels.WordsBoard> = language =>
       repositoriesAdapter: { wordsRepositoryPorts, repositoriesEnvironment },
     }) =>
       pipe(
-        adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.Words | null>(
-          wordsRepositoryPorts.getByLanguage(language),
-          repositoriesEnvironment,
-        ),
+        adapt(wordsRepositoryPorts.getByLanguage(language), repositoriesEnvironment),
         chain(allWords =>
           allWords
             ? actionOf(allWords)
@@ -85,15 +76,17 @@ const buildBoard: DomainPort<string, GameModels.WordsBoard> = language =>
                 new ServiceError(`Language '${language}' not found`, ErrorCodes.LANGUAGE_NOT_FOUND),
               ),
         ),
-        chain(words => actionOf(gameActions.buildBoard(boardWidth, boardHeight, words.words))),
+        map(words => gameActions.buildBoard(boardWidth, boardHeight, words.words)),
       ),
   )
 
 export const create: DomainPort<CreateGameInput> = ({ gameId, userId }) =>
   withEnv(({ currentUtcEpoch, gameActions, repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment } }) =>
     pipe(
-      actionOf(gameActions.createGame(gameId, userId, currentUtcEpoch())),
-      chain(game => adapt(gamesRepositoryPorts.insert(game), repositoriesEnvironment)),
+      adapt(
+        gamesRepositoryPorts.insert(gameActions.createGame(gameId, userId, currentUtcEpoch())),
+        repositoriesEnvironment,
+      ),
       chain(game => emitMessage(userId, Messages.gameCreated(game))(game)),
     ),
   )
@@ -102,13 +95,8 @@ export const join: DomainPort<Messages.JoinGameInput> = ({ gameId, userId }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
       getGame(gameId),
-      chain(game => actionOf(gameActions.addPlayer(userId)(game))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
-        ),
-      ),
+      map(game => gameActions.addPlayer(userId)(game)),
+      chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
       chain(game => broadcastMessage(Messages.joinedGame({ game, userId }))(game)),
     ),
   )
@@ -117,13 +105,8 @@ export const removePlayer: DomainPort<Messages.JoinGameInput> = ({ gameId, userI
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
       getGame(gameId),
-      chain(game => actionOf(gameActions.removePlayer(userId)(game))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
-        ),
-      ),
+      map(game => gameActions.removePlayer(userId)(game)),
+      chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
       chain(game => broadcastMessage(Messages.removePlayer({ gameId, userId }))(game)),
     ),
   )
@@ -132,13 +115,8 @@ export const restartGame: DomainPort<Messages.RestartGameInput> = ({ gameId, use
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gameActions }) =>
     pipe(
       getGame(gameId),
-      chain(game => actionOf(gameActions.restartGame(game))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
-        ),
-      ),
+      map(game => gameActions.restartGame(game)),
+      chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
       chain(game => broadcastMessage(Messages.restartGame({ gameId, userId }))(game)),
     ),
   )
@@ -148,13 +126,8 @@ export const joinTeam: DomainPort<Messages.JoinTeamInput> = ({ gameId, userId, t
     pipe(
       getGame(gameId),
       chain(checkRules(gameRules.joinTeam)),
-      chain(game => actionOf(gameActions.joinTeam(userId, team)(game))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
-        ),
-      ),
+      map(game => gameActions.joinTeam(userId, team)(game)),
+      chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
       chain(game => broadcastMessage(Messages.joinTeam({ gameId, userId, team }))(game)),
     ),
   )
@@ -164,13 +137,8 @@ export const randomizeTeams: DomainPort<Messages.RandomizeTeamsInput> = ({ gameI
     pipe(
       getGame(gameId),
       chain(checkRules(gameRules.randomizeTeams)),
-      chain(game => actionOf(gameActions.randomizeTeams(game))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
-        ),
-      ),
+      map(game => gameActions.randomizeTeams(game)),
+      chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
       chain(game => broadcastMessage(Messages.updateGame(game))(game)),
     ),
   )
@@ -189,15 +157,10 @@ export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId, config 
         chain(game =>
           pipe(
             buildBoard(config.language!),
-            chain(board => actionOf(gameActions.startGame(config, board, currentUtcEpoch())(game))),
+            map(board => gameActions.startGame(config, board, currentUtcEpoch())(game)),
           ),
         ),
-        chain(game =>
-          adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-            gamesRepositoryPorts.update(game),
-            repositoriesEnvironment,
-          ),
-        ),
+        chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
         chain(game => broadcastMessage(Messages.gameStarted(game))(game)),
       ),
   )
@@ -207,13 +170,8 @@ export const sendHint: DomainPort<Messages.SendHintInput> = ({ gameId, userId, h
     pipe(
       getGame(gameId),
       chain(checkRules(gameRules.sendHint(userId))),
-      chain(game => actionOf(gameActions.sendHint(hintWord, hintWordCount)(game))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
-        ),
-      ),
+      map(game => gameActions.sendHint(hintWord, hintWordCount)(game)),
+      chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
       chain(broadcastMessage(Messages.hintSent({ gameId, userId, hintWord, hintWordCount }))),
     ),
   )
@@ -230,13 +188,8 @@ export const revealWord: DomainPort<Messages.RevealWordInput> = ({ gameId, userI
       return pipe(
         getGame(gameId),
         chain(checkRules(gameRules.revealWord(userId, row, col))),
-        chain(game => actionOf(gameActions.revealWord(userId, row, col, now)(game))),
-        chain(game =>
-          adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-            gamesRepositoryPorts.update(game),
-            repositoriesEnvironment,
-          ),
-        ),
+        map(game => gameActions.revealWord(userId, row, col, now)(game)),
+        chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
         chain(broadcastMessage(Messages.wordRevealed({ gameId, userId, row, col, now }))),
       )
     },
@@ -255,12 +208,7 @@ export const changeTurn: DomainPort<Messages.ChangeTurnInput> = ({ gameId, userI
         getGame(gameId),
         chain(checkRules(gameRules.changeTurn(userId))),
         chain(doAction(gameActions.changeTurn(now))),
-        chain(game =>
-          adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-            gamesRepositoryPorts.update(game),
-            repositoriesEnvironment,
-          ),
-        ),
+        chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
         chain(broadcastMessage(Messages.turnChanged({ gameId, userId, now }))),
       )
     },
@@ -276,12 +224,7 @@ export const checkTurnTimeout: DomainPort<Messages.ChangeTurnInput> = ({ gameId,
           gameActions.checkTurnTimeout(userId, now)(game)
             ? pipe(
                 doAction(gameActions.changeTurn(now))(game),
-                chain(game =>
-                  adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-                    gamesRepositoryPorts.update(game),
-                    repositoriesEnvironment,
-                  ),
-                ),
+                chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
                 chain(broadcastMessage(Messages.turnChanged({ gameId, userId, now }))),
               )
             : actionOf(game),
@@ -296,12 +239,7 @@ export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput> = ({ gameId, u
       getGame(gameId),
       chain(checkRules(gameRules.setSpyMaster(team))),
       chain(doAction(gameActions.setSpyMaster(userId, team))),
-      chain(game =>
-        adapt<RepositoriesEnvironment, DomainEnvironment, GameModels.CodeNamesGame>(
-          gamesRepositoryPorts.update(game),
-          repositoriesEnvironment,
-        ),
-      ),
+      chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
       chain(broadcastMessage(Messages.setSpyMaster({ gameId, userId, team }))),
     ),
   )
