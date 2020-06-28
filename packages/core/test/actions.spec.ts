@@ -1,5 +1,5 @@
 import * as R from "ramda"
-import * as GameActions from "../src/main"
+import * as GameActions from "../src/actions"
 import { GameStates, Teams, WordType } from "../src/models"
 
 describe("addPlayer", () => {
@@ -417,14 +417,14 @@ describe("sendHint", () => {
 describe("revealWord", () => {
   const now = 1234567890
   const userId = "some-user-id"
-  const buildGameForRevealWord = (type: WordType, team: Teams) => {
+  const buildGameForRevealWord = (type: WordType, playerTeam: Teams) => {
     const w00 = { word: "w00", type, revealed: false }
     const board = [[w00]] as any
-    const p1 = { userId, team }
+    const p1 = { userId, team: playerTeam }
     const game = {
       board,
       players: [p1],
-      turn: Teams.red,
+      turn: playerTeam,
       hintWordCount: 2,
       wordsRevealedCount: 2,
       redTeam: {
@@ -438,7 +438,7 @@ describe("revealWord", () => {
     return game as any
   }
 
-  const revealWord = GameActions.revealWord(userId, 0, 0, now)
+  const revealWordAt00 = GameActions.revealWord(userId, 0, 0, now)
 
   it("reveals a word", () => {
     const w00 = { word: "w00" }
@@ -533,7 +533,7 @@ describe("revealWord", () => {
         },
       }
 
-      expect(revealWord(game).blueTeam.wordsLeft).toBe(2)
+      expect(revealWordAt00(game).blueTeam.wordsLeft).toBe(2)
     })
 
     it("if word is from the players blue team when red is playing", () => {
@@ -546,7 +546,7 @@ describe("revealWord", () => {
         },
       }
 
-      expect(revealWord(game).blueTeam.wordsLeft).toBe(2)
+      expect(revealWordAt00(game).blueTeam.wordsLeft).toBe(2)
     })
 
     it("if word is from the players blue team and turn finishes", () => {
@@ -559,7 +559,7 @@ describe("revealWord", () => {
         },
       }
 
-      expect(revealWord(game).blueTeam.wordsLeft).toBe(2)
+      expect(revealWordAt00(game).blueTeam.wordsLeft).toBe(2)
     })
 
     it("if word is from the players redteam", () => {
@@ -572,7 +572,7 @@ describe("revealWord", () => {
         },
       }
 
-      expect(revealWord(game).redTeam.wordsLeft).toBe(2)
+      expect(revealWordAt00(game).redTeam.wordsLeft).toBe(2)
     })
 
     it("if word is from the players redteam when blue is playing", () => {
@@ -585,7 +585,7 @@ describe("revealWord", () => {
         },
       }
 
-      expect(revealWord(game).redTeam.wordsLeft).toBe(2)
+      expect(revealWordAt00(game).redTeam.wordsLeft).toBe(2)
     })
 
     it("if word is from the players redteam and turn finishes", () => {
@@ -598,7 +598,7 @@ describe("revealWord", () => {
         },
       }
 
-      expect(revealWord(game).redTeam.wordsLeft).toBe(2)
+      expect(revealWordAt00(game).redTeam.wordsLeft).toBe(2)
     })
   })
 
@@ -606,19 +606,19 @@ describe("revealWord", () => {
     it("if revealed word is from a different team", () => {
       const game = buildGameForRevealWord(WordType.blue, Teams.red)
 
-      expect(revealWord(game).turn).toBe(Teams.blue)
+      expect(revealWordAt00(game).turn).toBe(Teams.blue)
     })
 
     it("if revealed word is from a different team", () => {
       const game = buildGameForRevealWord(WordType.red, Teams.blue)
 
-      expect(revealWord(game).turn).toBe(Teams.blue)
+      expect(revealWordAt00(game).turn).toBe(Teams.red)
     })
 
     it("if revealed word is an inocent", () => {
       const game = buildGameForRevealWord(WordType.inocent, Teams.blue)
 
-      expect(revealWord(game).turn).toBe(Teams.blue)
+      expect(revealWordAt00(game).turn).toBe(Teams.red)
     })
 
     it("if guesses limit reached", () => {
@@ -636,7 +636,7 @@ describe("revealWord", () => {
         turn: Teams.blue,
       } as any
 
-      expect(revealWord(game).turn).toBe(Teams.red)
+      expect(revealWordAt00(game).turn).toBe(Teams.red)
     })
   })
 
@@ -691,13 +691,16 @@ describe("revealWord", () => {
 
 describe("changeTurn", () => {
   const now = 1234567890
-  it("change the team from red to blue", () => {
+  const userId = "some-user-id"
+  it("change the team to the other team", () => {
     const game = {
+      players: [{ userId, team: Teams.red }],
       turn: Teams.red,
       turnStartedTime: 10,
     }
 
     const expectedGame = {
+      ...game,
       turn: Teams.blue,
       hintWord: "",
       hintWordCount: 0,
@@ -705,24 +708,6 @@ describe("changeTurn", () => {
       turnStartedTime: now,
     }
 
-    expect(GameActions.changeTurn(now)(game as any)).toEqual(expectedGame)
-  })
-
-  it("change the team from blue to red", () => {
-    const game = {
-      turn: Teams.blue,
-      turnStartedTime: 10,
-    }
-
-    const expectedGame = {
-      turn: Teams.red,
-      hintWord: "",
-      hintWordCount: 0,
-      wordsRevealedCount: 0,
-      turnStartedTime: now,
-    }
-
-    expect(GameActions.changeTurn(now)(game as any)).toEqual(expectedGame)
+    expect(GameActions.changeTurn(userId, now)(game as any)).toEqual(expectedGame)
   })
 })
-

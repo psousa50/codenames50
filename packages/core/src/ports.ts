@@ -2,7 +2,7 @@ import * as R from "ramda"
 import { Random } from "@psousa50/shared"
 import * as Models from "./models"
 import * as Rules from "./rules"
-import * as Actions from "./main"
+import * as Actions from "./actions"
 import { isPlayerTurn } from "./helpers"
 
 export type GamePort = (game: Models.CodeNamesGame) => Models.CodeNamesGame | Rules.ValidationError
@@ -82,7 +82,10 @@ const sendHint = (userId: string, hintWord: string, hintWordCount: number) =>
 const revealWord = (userId: string, row: number, col: number, now: number) =>
   checkRuleAction(Rules.revealWord(userId, row, col), Actions.revealWord(userId, row, col, now))
 
-const changeTurn = (userId: string, now: number) => checkRuleAction(Rules.changeTurn(userId), Actions.changeTurn(now))
+const changeTurn = (userId: string, now: number) =>
+  checkRuleAction(Rules.changeTurn(userId), Actions.changeTurn(userId, now))
+
+const forceChangeTurn = (userId: string, now: number) => Actions.changeTurn(userId, now)
 
 export const checkTurnTimeout = (userId: string, now: number) => (game: Models.CodeNamesGame) =>
   game.turnStartedTime !== undefined &&
@@ -96,6 +99,7 @@ export const gamePorts = {
   changeTurn,
   checkTurnTimeout,
   createGame,
+  forceChangeTurn,
   joinTeam,
   randomizeTeams,
   removePlayer,

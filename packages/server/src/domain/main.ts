@@ -10,6 +10,7 @@ import { UUID } from "../utils/types"
 import { DomainEnvironment, DomainPort } from "./adapters"
 import { ErrorCodes } from "./errors"
 import { CreateGameInput } from "./models"
+import { chainLogRTE } from "../utils/debug"
 
 const doAction = (action: GamePort): DomainPort<GameModels.CodeNamesGame, GameModels.CodeNamesGame> => game => {
   const result = action(game)
@@ -185,7 +186,7 @@ export const checkTurnTimeout: DomainPort<Messages.ChangeTurnInput> = ({ gameId,
       chain(game =>
         gamePorts.checkTurnTimeout(userId, now)(game)
           ? pipe(
-              doAction(gamePorts.changeTurn(userId, now))(game),
+              doAction(gamePorts.forceChangeTurn(userId, now))(game),
               chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
               chain(broadcastMessage(Messages.turnChanged({ gameId, userId, now }))),
             )

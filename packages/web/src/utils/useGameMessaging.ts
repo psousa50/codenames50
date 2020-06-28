@@ -100,7 +100,7 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
   }
 
   const onTurnChanged = ({ userId, now }: Messages.TurnChangedInput) => {
-    setGame(gamePorts.changeTurn(userId, now))
+    setGame(gamePorts.forceChangeTurn(userId, now))
   }
 
   const onError = (e: { message: string }) => {

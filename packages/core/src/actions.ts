@@ -1,7 +1,7 @@
 import { Collections, Random } from "@psousa50/shared"
 import * as R from "ramda"
-import { BoardWord, CodeNamesGame, GameConfig, GameStates, Teams, WordsBoard, WordType } from "./models"
 import { getPlayer, otherTeam } from "./helpers"
+import { BoardWord, CodeNamesGame, GameConfig, GameStates, Teams, WordsBoard, WordType } from "./models"
 
 export type GameAction = (game: CodeNamesGame) => CodeNamesGame
 
@@ -156,7 +156,7 @@ export const revealWord = (userId: string, row: number, col: number, now: number
   const updatedGame = act([
     conditionalAction(revealedWord.type === WordType.assassin, endGame(otherTeam(playerTeam))),
     decreaseWordsLeft(revealedWordTeam),
-    conditionalAction(failedGuess || game.wordsRevealedCount >= game.hintWordCount, changeTurn(now)),
+    conditionalAction(failedGuess || game.wordsRevealedCount >= game.hintWordCount, changeTurn(userId, now)),
     checkWin,
   ])(game)
 
@@ -168,7 +168,7 @@ export const revealWord = (userId: string, row: number, col: number, now: number
   }
 }
 
-export const changeTurn = (now: number): GameAction => game => ({
+export const changeTurn = (_: string, now: number): GameAction => game => ({
   ...game,
   turn: game.turn === Teams.blue ? Teams.red : Teams.blue,
   hintWord: "",
