@@ -1,3 +1,4 @@
+import { Hint as HintModel } from "../../../utils/types"
 import { GameModels } from "@codenames50/core"
 import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import * as R from "ramda"
@@ -9,22 +10,16 @@ import { TimeLeft } from "./TimeLeft"
 
 interface SendHintProps {
   team: GameModels.Teams | undefined
-  hint: Hint
+  startedTime: number
   responseTimeoutSec: number | undefined
-  onChange: (hint: Hint) => void
   sendHint: (hint: Hint) => void
   onTimeout: () => void
 }
 
-export const SendHint: React.FC<SendHintProps> = ({
-  team,
-  hint,
-  responseTimeoutSec,
-  onChange,
-  sendHint,
-  onTimeout,
-}) => {
+export const SendHint: React.FC<SendHintProps> = ({ team, responseTimeoutSec, startedTime, sendHint, onTimeout }) => {
   const classes = useStyles()
+
+  const [hint, setHint] = React.useState<HintModel>({ word: "", count: 0, startedTime })
 
   const styles = {
     paper: {
@@ -41,7 +36,7 @@ export const SendHint: React.FC<SendHintProps> = ({
             id="hint-word"
             label="Hint Word"
             value={hint.word}
-            onChange={event => onChange({ ...hint, word: event.target.value })}
+            onChange={event => setHint({ ...hint, word: event.target.value })}
             inputProps={{ maxLength: 30 }}
           />
           {exists(responseTimeoutSec) && exists(hint.startedTime) ? (
@@ -63,7 +58,7 @@ export const SendHint: React.FC<SendHintProps> = ({
               team={team}
               count={c}
               selected={c === hint.count}
-              onChange={count => onChange({ ...hint, count })}
+              onChange={count => setHint({ ...hint, count })}
             />
           ))}
         </div>

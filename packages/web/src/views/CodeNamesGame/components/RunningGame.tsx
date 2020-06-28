@@ -34,7 +34,6 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
   const classes = useStyles()
 
   const gameId = game.gameId
-  const [hint, setHint] = React.useState<HintModel>({ word: "", count: 0, startedTime: 0 })
 
   const endTurn = () => {
     emitMessage(Messages.changeTurn({ gameId, userId }))
@@ -44,8 +43,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
     emitMessage(Messages.checkTurnTimeout({ gameId, userId }))
   }
 
-  const sendHint = () => {
-    setHint({ word: "", count: 0, startedTime: 0 })
+  const sendHint = (hint: HintModel) => {
     emitMessage(Messages.sendHint({ gameId, userId, hintWord: hint.word, hintWordCount: hint.count }))
   }
 
@@ -82,12 +80,12 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
       <div className={classes.hint}>
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
         game.turn === getPlayer(game, userId)?.team &&
+        game.turnStartedTime &&
         game.hintWordCount === 0 ? (
           <SendHint
             team={game.turn}
-            hint={hint}
+            startedTime={game.turnStartedTime}
             responseTimeoutSec={game.config.responseTimeoutSec}
-            onChange={setHint}
             sendHint={sendHint}
             onTimeout={onTimeout}
           />
