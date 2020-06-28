@@ -1,4 +1,4 @@
-import { GameActions, GameRules } from "@codenames50/core"
+import { gamePorts } from "@codenames50/core"
 import { pipe } from "fp-ts/lib/pipeable"
 import { task } from "fp-ts/lib/Task"
 import { fold, getOrElse, TaskEither } from "fp-ts/lib/TaskEither"
@@ -80,8 +80,7 @@ export const buildDefaultTestDomainEnvironment = () => {
     wordsRepositoryPorts,
     gameMessagingEnvironment,
     gameMessagingPorts,
-    GameActions,
-    GameRules,
+    gamePorts,
   )
 
   return domainEnvironment
