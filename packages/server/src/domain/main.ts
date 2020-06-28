@@ -39,10 +39,7 @@ const broadcastMessage = (
 ): DomainPort<GameModels.CodeNamesGame, GameModels.CodeNamesGame> => game =>
   withEnv(({ gameMessagingAdapter: { gameMessagingPorts, gameMessagingEnvironment } }) =>
     pipe(
-      adapt<GameMessagingEnvironment, DomainEnvironment, void>(
-        gameMessagingPorts.broadcastMessage({ roomId: game.gameId, message }),
-        gameMessagingEnvironment,
-      ),
+      adapt(gameMessagingPorts.broadcastMessage({ roomId: game.gameId, message }), gameMessagingEnvironment),
       map(_ => game),
     ),
   )
