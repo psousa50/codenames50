@@ -7,7 +7,7 @@ import { buildRepositoriesEnvironment } from "../../src/repositories/adapters"
 import { gamesRepositoryPorts } from "../../src/repositories/games"
 import { getRight } from "../helpers"
 
-it("insert and getById", async () => {
+it.skip("insert and getById", async () => {
   const mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getUri()
 
@@ -31,7 +31,7 @@ it("insert and getById", async () => {
   expect(insertedGame).toMatchObject(gameToInsert)
 })
 
-it("update and getById", async () => {
+it.skip("update and getById", async () => {
   const mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getUri()
 
@@ -64,7 +64,7 @@ it("update and getById", async () => {
   expect(updatedGame).toMatchObject(gameToUpdate)
 })
 
-describe("getById", () => {
+describe.skip("getById", () => {
   it("return null if not found", async () => {
     const mongoServer = new MongoMemoryServer()
     const mongoUri = await mongoServer.getUri()

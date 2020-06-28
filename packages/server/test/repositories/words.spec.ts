@@ -7,7 +7,7 @@ import { buildRepositoriesEnvironment } from "../../src/repositories/adapters"
 import { wordsRepositoryPorts } from "../../src/repositories/words"
 import { getRight } from "../helpers"
 
-it("getByLanguage", async () => {
+it.skip("getByLanguage", async () => {
   const mongoServer = new MongoMemoryServer()
   const mongoUri = await mongoServer.getUri()
 
