@@ -1,4 +1,4 @@
-import { GamePorts } from "@codenames50/core"
+import { GamePorts, gamePorts } from "@codenames50/core"
 import { MongoClient } from "mongodb"
 import socketIo from "socket.io"
 import { AppConfig } from "./config"
@@ -12,7 +12,6 @@ import { WordsMongoDbPorts, wordsMongoDbPorts } from "./mongodb/words"
 import { buildRepositoriesEnvironment } from "./repositories/adapters"
 import { GamesRepositoryPorts, gamesRepositoryPorts } from "./repositories/games"
 import { WordsRepositoryPorts, wordsRepositoryPorts } from "./repositories/words"
-import { gamePorts } from "@codenames50/core/src/ports"
 
 export const buildCompleteDomainEnvironment = (
   config: AppConfig,

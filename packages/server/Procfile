@@ -1,2 +1,2 @@
-web: yarn workspace @codenames50/server start
+web: ./scripts/start-server.sh
 
