@@ -1,4 +1,4 @@
-import { GameActions, GameModels, GameRules } from "@codenames50/core"
+import { GamePorts, GameModels } from "@codenames50/core"
 import { AppConfig } from "../config"
 import { GameMessagingEnvironment } from "../messaging/adapters"
 import { GameMessagingPorts } from "../messaging/main"
@@ -17,8 +17,7 @@ export const buildDomainEnvironment = (
   wordsRepositoryPorts: WordsRepositoryPorts,
   gameMessagingEnvironment: GameMessagingEnvironment,
   gameMessagingPorts: GameMessagingPorts,
-  gameActions: GameActions.GameActions,
-  gameRules: GameRules.GameRules,
+  gamePorts: GamePorts,
 ) => ({
   config: {
     boardWidth,
@@ -33,8 +32,7 @@ export const buildDomainEnvironment = (
     gameMessagingPorts,
     gameMessagingEnvironment,
   },
-  gameActions,
-  gameRules,
+  gamePorts,
   currentUtcEpoch,
 })
 

@@ -1,65 +1,13 @@
 import { Collections, Random } from "@psousa50/shared"
 import * as R from "ramda"
-import { getPlayer, otherTeam } from "./helpers"
 import { BoardWord, CodeNamesGame, GameConfig, GameStates, Teams, WordsBoard, WordType } from "./models"
+import { getPlayer, otherTeam } from "./helpers"
 
 export type GameAction = (game: CodeNamesGame) => CodeNamesGame
 
 const nullAction = (game: CodeNamesGame) => game
 const conditionalAction = (v: boolean, action: GameAction) => (v ? action : nullAction)
 const act = (actions: GameAction[]) => (game: CodeNamesGame) => actions.reduce((acc, action) => action(acc), game)
-
-const isPlayerTurn = (game: CodeNamesGame, userId: string) => getPlayer(game, userId)?.team === game.turn
-
-export const createGame = (gameId: string, userId: string, now: number): CodeNamesGame =>
-  addPlayer(userId)({
-    gameId,
-    gameCreatedTime: now,
-    gameStartedTime: undefined,
-    config: {
-      language: undefined,
-      responseTimeoutSec: undefined,
-    },
-    userId,
-    players: [],
-    redTeam: {
-      spyMaster: undefined,
-      wordsLeft: undefined,
-    },
-    blueTeam: {
-      spyMaster: undefined,
-      wordsLeft: undefined,
-    },
-    hintWord: "",
-    hintWordCount: 0,
-    turnStartedTime: undefined,
-    wordsRevealedCount: 0,
-    state: GameStates.idle,
-    turn: undefined,
-    turnOutcome: undefined,
-    winner: undefined,
-    board: [],
-  })
-
-export const buildBoard = (boardWidth: number, boardHeight: number, words: string[]): WordsBoard => {
-  const numberOfWords = boardWidth * boardHeight
-  const numberOfWordsForTeams = Math.max(0, Math.floor((numberOfWords - 1) / 3))
-  const reds = numberOfWordsForTeams + (Math.random() < 0.5 ? 1 : 0)
-  const blues = numberOfWordsForTeams * 2 + 1 - reds
-  const numberOfWordsForInocents = Math.max(numberOfWords - 1 - reds - blues, 0)
-  const types = Random.shuffle([
-    ...new Array(reds).fill(WordType.red),
-    ...new Array(blues).fill(WordType.blue),
-    ...new Array(numberOfWordsForInocents).fill(WordType.inocent),
-    WordType.assassin,
-  ])
-
-  const boardWords = Random.shuffle(words)
-    .slice(boardWidth * boardHeight)
-    .map((word, i) => ({ word, type: types[i], revealed: false }))
-
-  return R.range(0, boardHeight).map(r => boardWords.slice(r * boardWidth, r * boardWidth + boardWidth))
-}
 
 export const restartGame: GameAction = game => ({
   ...game,
@@ -229,33 +177,8 @@ export const changeTurn = (now: number): GameAction => game => ({
   turnStartedTime: now,
 })
 
-export const checkTurnTimeout = (userId: string, now: number) => (game: CodeNamesGame) =>
-  game.turnStartedTime !== undefined &&
-  game.config.responseTimeoutSec !== undefined &&
-  isPlayerTurn(game, userId) &&
-  now - game.turnStartedTime > game.config.responseTimeoutSec * 1000
-
-export const endGame = (winner: Teams | undefined): GameAction => game => ({
+const endGame = (winner: Teams | undefined): GameAction => game => ({
   ...game,
   state: GameStates.ended,
   winner,
 })
-
-export const gameActions = {
-  addPlayer,
-  buildBoard,
-  changeTurn,
-  createGame,
-  endGame,
-  joinTeam,
-  removePlayer,
-  restartGame,
-  revealWord,
-  sendHint,
-  setSpyMaster,
-  startGame,
-  randomizeTeams,
-  checkTurnTimeout,
-}
-
-export type GameActions = typeof gameActions

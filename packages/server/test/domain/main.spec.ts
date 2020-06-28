@@ -6,15 +6,15 @@ import { getLeft, getRight } from "../helpers"
 
 const now = 1234567890
 
-const buildEnvironmentForGameAction = (gameActionName: string, gameForAction: any = undefined) => {
+const buildEnvironmentForGameAction = (gamePortName: string, gameForAction: any = undefined) => {
   const gameId = "game-id"
   const userId = "user-id"
 
   const someGame = { gameId } as any
   const updatedGame = gameForAction || ({ gameId, some: "update" } as any)
 
-  const gameActionUpdate = jest.fn(() => updatedGame)
-  const gameAction = jest.fn(() => gameActionUpdate) as any
+  const gamePortUpdate = jest.fn(() => updatedGame)
+  const gamePort = jest.fn(() => gamePortUpdate) as any
   const insert = jest.fn(g => actionOf(g)) as any
   const update = jest.fn(g => actionOf(g)) as any
   const getById = jest.fn(() => actionOf(someGame))
@@ -35,11 +35,8 @@ const buildEnvironmentForGameAction = (gameActionName: string, gameForAction: an
         emitMessage,
       },
     },
-    gameActions: {
-      [gameActionName]: gameAction,
-    },
-    gameRules: {
-      [gameActionName]: () => () => undefined,
+    gamePorts: {
+      [gamePortName]: gamePort,
     },
     currentUtcEpoch: () => now,
   } as any
@@ -50,8 +47,8 @@ const buildEnvironmentForGameAction = (gameActionName: string, gameForAction: an
     domainEnvironment,
     someGame,
     updatedGame,
-    gameAction,
-    gameActionUpdate,
+    gamePort,
+    gamePortUpdate,
     insert,
     update,
     broadcastMessage,
@@ -79,7 +76,7 @@ describe("create", () => {
           emitMessage,
         },
       },
-      gameActions: {
+      gamePorts: {
         createGame,
       },
       currentUtcEpoch: () => now,
@@ -119,7 +116,7 @@ describe("join", () => {
           broadcastMessage,
         },
       },
-      gameActions: {
+      gamePorts: {
         addPlayer,
       },
     } as any
@@ -169,16 +166,16 @@ describe("removePlayer", () => {
       domainEnvironment,
       someGame,
       updatedGame,
-      gameAction,
-      gameActionUpdate,
+      gamePort,
+      gamePortUpdate,
       update,
       broadcastMessage,
     } = buildEnvironmentForGameAction("removePlayer")
 
     await getRight(Games.removePlayer({ gameId, userId })(domainEnvironment))()
 
-    expect(gameAction).toHaveBeenCalledWith(userId)
-    expect(gameActionUpdate).toHaveBeenCalledWith(someGame)
+    expect(gamePort).toHaveBeenCalledWith(userId)
+    expect(gamePortUpdate).toHaveBeenCalledWith(someGame)
     expect(update).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
@@ -195,8 +192,8 @@ describe("revealWord", () => {
       domainEnvironment,
       someGame,
       updatedGame,
-      gameAction,
-      gameActionUpdate,
+      gamePort,
+      gamePortUpdate,
       update,
       broadcastMessage,
     } = buildEnvironmentForGameAction("revealWord")
@@ -205,8 +202,8 @@ describe("revealWord", () => {
     const col = 1
     await getRight(Games.revealWord({ gameId, userId, row, col })(domainEnvironment))()
 
-    expect(gameAction).toHaveBeenCalledWith(userId, row, col, now)
-    expect(gameActionUpdate).toHaveBeenCalledWith(someGame)
+    expect(gamePort).toHaveBeenCalledWith(userId, row, col, now)
+    expect(gamePortUpdate).toHaveBeenCalledWith(someGame)
     expect(update).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
@@ -223,16 +220,16 @@ describe("changeTurn", () => {
       domainEnvironment,
       someGame,
       updatedGame,
-      gameAction,
-      gameActionUpdate,
+      gamePort,
+      gamePortUpdate,
       update,
       broadcastMessage,
     } = buildEnvironmentForGameAction("changeTurn")
 
     await getRight(Games.changeTurn({ gameId, userId })(domainEnvironment))()
 
-    expect(gameAction).toHaveBeenCalled()
-    expect(gameActionUpdate).toHaveBeenCalledWith(someGame)
+    expect(gamePort).toHaveBeenCalled()
+    expect(gamePortUpdate).toHaveBeenCalledWith(someGame)
     expect(update).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
@@ -249,23 +246,23 @@ describe("checkTurnTimeout", () => {
       domainEnvironment,
       someGame,
       updatedGame,
-      gameAction,
-      gameActionUpdate,
+      gamePort,
+      gamePortUpdate,
       update,
       broadcastMessage,
     } = buildEnvironmentForGameAction("changeTurn")
 
     const domainEnvironmentWithTurnTimedOut = {
       ...domainEnvironment,
-      gameActions: {
-        ...domainEnvironment.gameActions,
+      gamePorts: {
+        ...domainEnvironment.gamePorts,
         checkTurnTimeout: () => () => true,
       },
     }
     await getRight(Games.checkTurnTimeout({ gameId, userId })(domainEnvironmentWithTurnTimedOut))()
 
-    expect(gameAction).toHaveBeenCalled()
-    expect(gameActionUpdate).toHaveBeenCalledWith(someGame)
+    expect(gamePort).toHaveBeenCalled()
+    expect(gamePortUpdate).toHaveBeenCalledWith(someGame)
     expect(update).toHaveBeenCalledWith(updatedGame)
     expect(broadcastMessage).toHaveBeenCalledWith({
       roomId: gameId,
@@ -274,21 +271,21 @@ describe("checkTurnTimeout", () => {
   })
 
   it("does not changes the team turn if the turn has not timed out", async () => {
-    const { gameId, userId, domainEnvironment, gameAction, broadcastMessage } = buildEnvironmentForGameAction(
+    const { gameId, userId, domainEnvironment, gamePort, broadcastMessage } = buildEnvironmentForGameAction(
       "changeTurn",
     )
 
     const domainEnvironmentWithTurnNotTimedOut = {
       ...domainEnvironment,
-      gameActions: {
-        ...domainEnvironment.gameActions,
+      gamePorts: {
+        ...domainEnvironment.gamePorts,
         checkTurnTimeout: () => () => false,
       },
     }
 
     await getRight(Games.checkTurnTimeout({ gameId, userId })(domainEnvironmentWithTurnNotTimedOut))()
 
-    expect(gameAction).not.toHaveBeenCalled()
+    expect(gamePort).not.toHaveBeenCalled()
     expect(broadcastMessage).not.toHaveBeenCalled()
   })
 })

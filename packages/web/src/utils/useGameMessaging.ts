@@ -1,5 +1,4 @@
-import { GameActions } from "@codenames50/core"
-import { GameModels } from "@codenames50/core"
+import { GameModels, gamePorts } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
 import React from "react"
 import { EmitMessage } from "./types"
@@ -64,15 +63,15 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
   }
 
   const onRemovePlayer = ({ userId }: Messages.RemovePlayerInput) => {
-    setGame(GameActions.removePlayer(userId))
+    setGame(gamePorts.removePlayer(userId))
   }
 
   const onSetSpyMaster = ({ userId, team }: Messages.SetSpyMasterInput) => {
-    setGame(GameActions.setSpyMaster(userId, team))
+    setGame(gamePorts.setSpyMaster(userId, team))
   }
 
   const onJoinTeam = ({ userId, team }: Messages.JoinTeamInput) => {
-    setGame(GameActions.joinTeam(userId, team))
+    setGame(gamePorts.joinTeam(userId, team))
   }
 
   const onGameStarted = (game: GameModels.CodeNamesGame) => {
@@ -80,7 +79,7 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
   }
 
   const onRestartGame = () => {
-    setGame(GameActions.restartGame)
+    setGame(gamePorts.restartGame)
   }
 
   const onUpdateGame = (game: GameModels.CodeNamesGame) => {
@@ -92,28 +91,16 @@ export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
   }
 
   const onHintSent = (input: Messages.HintSentInput) => {
-    const { hintWord, hintWordCount } = input
-    setGame(oldGame => {
-      const newGame = GameActions.sendHint(hintWord, hintWordCount)(oldGame)
-
-      handlers.onHintSent && handlers.onHintSent(newGame)
-
-      return newGame
-    })
+    const { userId, hintWord, hintWordCount } = input
+    setGame(gamePorts.sendHint(userId, hintWord, hintWordCount), handlers.onHintSent)
   }
 
   const onWordRevealed = ({ userId, row, col, now }: Messages.WordRevealedInput) => {
-    setGame(oldGame => {
-      const newGame = GameActions.revealWord(userId, row, col, now)(oldGame)
-
-      handlers.onRevealWord && handlers.onRevealWord(newGame)
-
-      return newGame
-    })
+    setGame(gamePorts.revealWord(userId, row, col, now), handlers.onRevealWord)
   }
 
-  const onTurnChanged = ({ now }: Messages.TurnChangedInput) => {
-    setGame(GameActions.changeTurn(now))
+  const onTurnChanged = ({ userId, now }: Messages.TurnChangedInput) => {
+    setGame(gamePorts.changeTurn(userId, now))
   }
 
   const onError = (e: { message: string }) => {

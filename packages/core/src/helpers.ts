@@ -4,3 +4,5 @@ export const getPlayer = (game: CodeNamesGame, userId: string) => game.players.f
 
 export const otherTeam = (team?: Teams) =>
   team === Teams.red ? Teams.blue : team === Teams.blue ? Teams.red : undefined
+
+export const isPlayerTurn = (game: CodeNamesGame, userId: string) => getPlayer(game, userId)?.team === game.turn
