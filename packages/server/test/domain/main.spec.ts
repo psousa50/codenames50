@@ -250,7 +250,7 @@ describe("checkTurnTimeout", () => {
       gamePortUpdate,
       update,
       broadcastMessage,
-    } = buildEnvironmentForGameAction("changeTurn")
+    } = buildEnvironmentForGameAction("forceChangeTurn")
 
     const domainEnvironmentWithTurnTimedOut = {
       ...domainEnvironment,
@@ -272,7 +272,7 @@ describe("checkTurnTimeout", () => {
 
   it("does not changes the team turn if the turn has not timed out", async () => {
     const { gameId, userId, domainEnvironment, gamePort, broadcastMessage } = buildEnvironmentForGameAction(
-      "changeTurn",
+      "forceChangeTurn",
     )
 
     const domainEnvironmentWithTurnNotTimedOut = {
