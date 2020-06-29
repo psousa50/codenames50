@@ -370,6 +370,7 @@ describe("startGame", () => {
         spyMaster: "some-blue-user",
         wordsLeft: 2,
       },
+      turnCount: 0,
       turnStartedTime: now,
     }
 
@@ -696,6 +697,7 @@ describe("changeTurn", () => {
     const game = {
       players: [{ userId, team: Teams.red }],
       turn: Teams.red,
+      turnCount: 3,
       turnStartedTime: 10,
     }
 
@@ -705,6 +707,7 @@ describe("changeTurn", () => {
       hintWord: "",
       hintWordCount: 0,
       wordsRevealedCount: 0,
+      turnCount: 4,
       turnStartedTime: now,
     }
 
