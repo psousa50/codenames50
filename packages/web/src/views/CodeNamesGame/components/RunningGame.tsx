@@ -85,7 +85,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
           <SendHint
             team={game.turn}
             startedTime={game.turnStartedTime}
-            responseTimeoutSec={game.config.responseTimeoutSec}
+            turnTimeoutSec={game.turnTimeoutSec}
             sendHint={sendHint}
             onTimeout={onTimeout}
           />
@@ -94,7 +94,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
             team={game.turn}
             hint={hintToView}
             wordsRevealedCount={game.wordsRevealedCount}
-            responseTimeoutSec={game.config.responseTimeoutSec}
+            turnTimeoutSec={game.turnTimeoutSec}
             canEndTurn={canEndTurn}
             endTurn={endTurn}
             onTimeout={onTimeout}

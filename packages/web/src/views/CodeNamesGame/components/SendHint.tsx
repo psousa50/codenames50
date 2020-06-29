@@ -11,12 +11,12 @@ import { TimeLeft } from "./TimeLeft"
 interface SendHintProps {
   team: GameModels.Teams | undefined
   startedTime: number
-  responseTimeoutSec: number | undefined
+  turnTimeoutSec: number | undefined
   sendHint: (hint: Hint) => void
   onTimeout: () => void
 }
 
-export const SendHint: React.FC<SendHintProps> = ({ team, responseTimeoutSec, startedTime, sendHint, onTimeout }) => {
+export const SendHint: React.FC<SendHintProps> = ({ team, turnTimeoutSec, startedTime, sendHint, onTimeout }) => {
   const classes = useStyles()
 
   const [hint, setHint] = React.useState<HintModel>({ word: "", count: 0, startedTime })
@@ -39,8 +39,8 @@ export const SendHint: React.FC<SendHintProps> = ({ team, responseTimeoutSec, st
             onChange={event => setHint({ ...hint, word: event.target.value })}
             inputProps={{ maxLength: 30 }}
           />
-          {exists(responseTimeoutSec) && exists(hint.startedTime) ? (
-            <TimeLeft started={hint.startedTime!} responseTimeoutSec={responseTimeoutSec!} onTimeout={onTimeout} />
+          {exists(turnTimeoutSec) && exists(hint.startedTime) ? (
+            <TimeLeft started={hint.startedTime!} turnTimeoutSec={turnTimeoutSec!} onTimeout={onTimeout} />
           ) : null}
           <Button
             variant="contained"

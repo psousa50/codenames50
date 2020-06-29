@@ -14,7 +14,7 @@ export const createGame = (gameId: string, userId: string, now: number): Models.
     gameStartedTime: undefined,
     config: {
       language: undefined,
-      responseTimeoutSec: undefined,
+      turnTimeoutSec: undefined,
     },
     userId,
     players: [],
@@ -32,6 +32,8 @@ export const createGame = (gameId: string, userId: string, now: number): Models.
     wordsRevealedCount: 0,
     state: Models.GameStates.idle,
     turn: undefined,
+    turnCount: undefined,
+    turnTimeoutSec: undefined,
     turnOutcome: undefined,
     winner: undefined,
     board: [],
@@ -89,9 +91,9 @@ const forceChangeTurn = (userId: string, now: number) => Actions.changeTurn(user
 
 export const checkTurnTimeout = (userId: string, now: number) => (game: Models.CodeNamesGame) =>
   game.turnStartedTime !== undefined &&
-  game.config.responseTimeoutSec !== undefined &&
+  game.turnTimeoutSec !== undefined &&
   isPlayerTurn(game, userId) &&
-  now - game.turnStartedTime > game.config.responseTimeoutSec * 1000
+  now - game.turnStartedTime > game.turnTimeoutSec * 1000
 
 export const gamePorts = {
   addPlayer,

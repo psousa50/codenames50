@@ -63,7 +63,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
 
   const changeResponseTimeOut = (event: React.ChangeEvent<{ value: unknown }>) => {
     const value = event.target.value as number
-    updateConfig({ responseTimeoutSec: value === 0 ? undefined : value })
+    updateConfig({ turnTimeoutSec: value === 0 ? undefined : value })
   }
 
   const changeLanguage = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -107,7 +107,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
           </FormControl>
           <FormControl className={classes.formControl}>
             <InputLabel id="response-time-out">Time Limit</InputLabel>
-            <Select labelId="response-time-out" value={config.responseTimeoutSec || 0} onChange={changeResponseTimeOut}>
+            <Select labelId="response-time-out" value={config.turnTimeoutSec || 0} onChange={changeResponseTimeOut}>
               <MenuItem value={0}>
                 <em>No limit</em>
               </MenuItem>

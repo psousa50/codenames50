@@ -33,7 +33,7 @@ export type TurnOutcome = "success" | "failure" | "assassin" | undefined
 
 export interface GameConfig {
   language: string | undefined
-  responseTimeoutSec: number | undefined
+  turnTimeoutSec: number | undefined
 }
 
 export interface CodeNamesGame {
@@ -52,6 +52,7 @@ export interface CodeNamesGame {
   state: GameStates
   turn: Teams | undefined
   turnCount: number | undefined
+  turnTimeoutSec: number | undefined
   turnOutcome: TurnOutcome | undefined
   winner: Teams | undefined
   board: WordsBoard

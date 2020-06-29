@@ -5,12 +5,12 @@ import { sounds, usePlaySound } from "../../../utils/usePlaySounds"
 
 interface TimeLeftProps {
   started: number
-  responseTimeoutSec: number
+  turnTimeoutSec: number
   onTimeout: () => void
 }
 
-export const TimeLeft: React.FC<TimeLeftProps> = ({ started, responseTimeoutSec, onTimeout }) => {
-  const [remaining, setRemaining] = React.useState(responseTimeoutSec)
+export const TimeLeft: React.FC<TimeLeftProps> = ({ started, turnTimeoutSec, onTimeout }) => {
+  const [remaining, setRemaining] = React.useState(turnTimeoutSec)
   const [timedOut, setTimedOut] = React.useState(false)
   const [playTickSound] = usePlaySound(sounds.tick)
   const [playTimeoutSound] = usePlaySound(sounds.timeout)
@@ -21,7 +21,7 @@ export const TimeLeft: React.FC<TimeLeftProps> = ({ started, responseTimeoutSec,
 
   React.useEffect(() => {
     const timer = setInterval(() => {
-      const timeLeftMs = Math.max(0, responseTimeoutSec * 1000 - (Date.now() - started))
+      const timeLeftMs = Math.max(0, turnTimeoutSec * 1000 - (Date.now() - started))
       if (!timedOut) {
         if (timeLeftMs < 10 * 1000) {
           playTickSound()

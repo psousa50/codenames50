@@ -116,6 +116,7 @@ export const startGame = (config: GameConfig, board: WordsBoard, now: number): G
       wordsLeft: blueWordsLeft,
     },
     turnCount: 0,
+    turnTimeoutSec: config.turnTimeoutSec ? config.turnTimeoutSec * 2.5 : undefined,
     turnStartedTime: now,
     board,
   }
@@ -176,6 +177,7 @@ export const changeTurn = (_: string, now: number): GameAction => game => ({
   hintWordCount: 0,
   wordsRevealedCount: 0,
   turnCount: (game.turnCount || 0) + 1,
+  turnTimeoutSec: game.config.turnTimeoutSec,
   turnStartedTime: now,
 })
 

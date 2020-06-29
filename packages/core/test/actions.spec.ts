@@ -336,7 +336,7 @@ describe("randomizeTeams", () => {
 describe("startGame", () => {
   it("sets the rame running", () => {
     const now = 1234567890
-    const config = { some: "config" } as any
+    const config = { some: "config", turnTimeoutSec: 60 } as any
     const w00 = { word: "w00", type: WordType.blue }
     const w01 = { word: "w01", type: WordType.red }
     const w10 = { word: "w10", type: WordType.blue }
@@ -371,6 +371,7 @@ describe("startGame", () => {
         wordsLeft: 2,
       },
       turnCount: 0,
+      turnTimeoutSec: config.turnTimeoutSec * 2.5,
       turnStartedTime: now,
     }
 
@@ -423,6 +424,7 @@ describe("revealWord", () => {
     const board = [[w00]] as any
     const p1 = { userId, team: playerTeam }
     const game = {
+      config: {},
       board,
       players: [p1],
       turn: playerTeam,
@@ -485,6 +487,7 @@ describe("revealWord", () => {
       const board = [[w00]] as any
 
       return {
+        config: {},
         board,
         players: [{ userId, team: playerTeam }],
         blueTeam: {},
@@ -628,6 +631,7 @@ describe("revealWord", () => {
       const board = [[w00]] as any
       const p1 = { userId, team: Teams.blue }
       const game = {
+        config: {},
         board,
         players: [p1],
         blueTeam: {},
@@ -695,6 +699,9 @@ describe("changeTurn", () => {
   const userId = "some-user-id"
   it("change the team to the other team", () => {
     const game = {
+      config: {
+        turnTimeoutSec: 60,
+      },
       players: [{ userId, team: Teams.red }],
       turn: Teams.red,
       turnCount: 3,
@@ -708,6 +715,7 @@ describe("changeTurn", () => {
       hintWordCount: 0,
       wordsRevealedCount: 0,
       turnCount: 4,
+      turnTimeoutSec: game.config.turnTimeoutSec,
       turnStartedTime: now,
     }
 

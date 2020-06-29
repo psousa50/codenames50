@@ -11,7 +11,7 @@ interface HintProps {
   team: GameModels.Teams | undefined
   hint: HintModel
   wordsRevealedCount: number
-  responseTimeoutSec: number | undefined
+  turnTimeoutSec: number | undefined
   canEndTurn: boolean
   endTurn: () => void
   onTimeout: () => void
@@ -21,7 +21,7 @@ export const Hint: React.FC<HintProps> = ({
   team,
   hint,
   wordsRevealedCount,
-  responseTimeoutSec,
+  turnTimeoutSec,
   endTurn,
   canEndTurn,
   onTimeout,
@@ -43,8 +43,8 @@ export const Hint: React.FC<HintProps> = ({
           ? `${hint.count}${wordsRevealedCount > 0 ? ` (${hint.count - wordsRevealedCount} remaining)` : ""}`
           : ""}
       </Typography>
-      {exists(responseTimeoutSec) && exists(hint.startedTime) ? (
-        <TimeLeft started={hint.startedTime!} responseTimeoutSec={responseTimeoutSec!} onTimeout={onTimeout} />
+      {exists(turnTimeoutSec) && exists(hint.startedTime) ? (
+        <TimeLeft started={hint.startedTime!} turnTimeoutSec={turnTimeoutSec!} onTimeout={onTimeout} />
       ) : null}
       <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn()}>
         End Turn

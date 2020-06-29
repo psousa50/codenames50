@@ -113,7 +113,7 @@ describe("startGame", () => {
   }
   const validConfig = {
     language: "some-language",
-    responseTimeoutSec: undefined,
+    turnTimeoutSec: undefined,
   }
   it("is valid for a valid game", () => {
     expect(GameRules.startGame(validConfig)(validGame as any)).toBeUndefined()
@@ -133,7 +133,7 @@ describe("startGame", () => {
       const game = {
         ...validGame,
       }
-      const config = { language: undefined, responseTimeoutSec: undefined }
+      const config = { language: undefined, turnTimeoutSec: undefined }
 
       expect(GameRules.startGame(config)(game as any)).toBe(GameRules.message("missingLanguage"))
     })

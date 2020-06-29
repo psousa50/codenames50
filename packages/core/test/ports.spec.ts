@@ -60,7 +60,7 @@ describe("createGame", () => {
       gameCreatedTime: now,
       config: {
         language: undefined,
-        responseTimeoutSec: undefined,
+        turnTimeoutSec: undefined,
       },
       userId,
       players: [{ userId, team: GameModels.Teams.red }],
@@ -84,11 +84,9 @@ describe("checkTurnTimeout", () => {
   it("return true if current turn has timed out", () => {
     const now = 10 * 1000
     const game = {
-      config: {
-        responseTimeoutSec: 1,
-      },
       players: [{ userId, team: GameModels.Teams.blue }],
       turn: GameModels.Teams.blue,
+      turnTimeoutSec: 1,
       turnStartedTime: now - 3 * 1000,
     }
 
@@ -98,11 +96,9 @@ describe("checkTurnTimeout", () => {
   it("return false if current turn has timed out but user is not from the current team", () => {
     const now = 10 * 1000
     const game = {
-      config: {
-        responseTimeoutSec: 1,
-      },
       players: [{ userId, team: GameModels.Teams.red }],
       turn: GameModels.Teams.blue,
+      turnTimeoutSec: 1,
       turnStartedTime: now - 3 * 1000,
     }
 
@@ -114,11 +110,9 @@ describe("checkTurnTimeout", () => {
   it("returns false if current turn has NOT timed out", () => {
     const now = 10 * 1000
     const game = {
-      config: {
-        responseTimeoutSec: 5,
-      },
       players: [{ userId, team: GameModels.Teams.blue }],
       turn: GameModels.Teams.blue,
+      turnTimeoutSec: 5,
       turnStartedTime: now - 3 * 1000,
     }
 
