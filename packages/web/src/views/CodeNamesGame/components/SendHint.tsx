@@ -1,25 +1,19 @@
-import { Hint as HintModel } from "../../../utils/types"
 import { GameModels } from "@codenames50/core"
 import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import * as R from "ramda"
 import React from "react"
-import { exists } from "../../../utils/misc"
 import { calculatedWidth, SmallButton, teamColor } from "../../../utils/styles"
-import { Hint } from "../../../utils/types"
-import { TimeLeft } from "./TimeLeft"
+import { Hint, Hint as HintModel } from "../../../utils/types"
 
 interface SendHintProps {
   team: GameModels.Teams | undefined
-  startedTime: number
-  turnTimeoutSec: number | undefined
   sendHint: (hint: Hint) => void
-  onTimeout: () => void
 }
 
-export const SendHint: React.FC<SendHintProps> = ({ team, turnTimeoutSec, startedTime, sendHint, onTimeout }) => {
+export const SendHint: React.FC<SendHintProps> = ({ team, sendHint }) => {
   const classes = useStyles()
 
-  const [hint, setHint] = React.useState<HintModel>({ word: "", count: 0, startedTime })
+  const [hint, setHint] = React.useState<HintModel>({ word: "", count: 0 })
 
   const styles = {
     paper: {
@@ -39,9 +33,6 @@ export const SendHint: React.FC<SendHintProps> = ({ team, turnTimeoutSec, starte
             onChange={event => setHint({ ...hint, word: event.target.value })}
             inputProps={{ maxLength: 30 }}
           />
-          {exists(turnTimeoutSec) && exists(hint.startedTime) ? (
-            <TimeLeft started={hint.startedTime!} turnTimeoutSec={turnTimeoutSec!} onTimeout={onTimeout} />
-          ) : null}
           <Button
             variant="contained"
             disabled={hint.word.trim().length === 0 || hint.count === 0}

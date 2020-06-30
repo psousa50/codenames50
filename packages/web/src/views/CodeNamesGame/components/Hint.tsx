@@ -2,30 +2,18 @@ import { GameModels } from "@codenames50/core"
 import { Button, makeStyles, Paper, Theme } from "@material-ui/core"
 import Typography from "@material-ui/core/Typography"
 import React from "react"
-import { exists } from "../../../utils/misc"
 import { calculatedWidth, teamColor } from "../../../utils/styles"
 import { Hint as HintModel } from "../../../utils/types"
-import { TimeLeft } from "./TimeLeft"
 
 interface HintProps {
   team: GameModels.Teams | undefined
   hint: HintModel
   wordsRevealedCount: number
-  turnTimeoutSec: number | undefined
   canEndTurn: boolean
   endTurn: () => void
-  onTimeout: () => void
 }
 
-export const Hint: React.FC<HintProps> = ({
-  team,
-  hint,
-  wordsRevealedCount,
-  turnTimeoutSec,
-  endTurn,
-  canEndTurn,
-  onTimeout,
-}) => {
+export const Hint: React.FC<HintProps> = ({ team, hint, wordsRevealedCount, endTurn, canEndTurn }) => {
   const classes = useStyles()
 
   const styles = {
@@ -43,9 +31,6 @@ export const Hint: React.FC<HintProps> = ({
           ? `${hint.count}${wordsRevealedCount > 0 ? ` (${hint.count - wordsRevealedCount} remaining)` : ""}`
           : ""}
       </Typography>
-      {exists(turnTimeoutSec) && exists(hint.startedTime) ? (
-        <TimeLeft started={hint.startedTime!} turnTimeoutSec={turnTimeoutSec!} onTimeout={onTimeout} />
-      ) : null}
       <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn()}>
         End Turn
       </Button>
