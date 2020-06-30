@@ -24,10 +24,6 @@ export const TimeLeft: React.FC<TimeLeftProps> = ({ started, turnTimeoutSec, onT
   React.useEffect(() => {
     const timer = setInterval(() => {
       const timeLeftMs = calcRemaining()
-      console.log("turnTimeoutSec=====>", turnTimeoutSec)
-      console.log("remaining=====>", remaining)
-      console.log("timedOut=====>", timedOut)
-      console.log("timeLeftMs=====>", timeLeftMs)
       if (!timedOut) {
         if (timeLeftMs < 10 * 1000) {
           playTickSound()
