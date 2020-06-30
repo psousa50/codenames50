@@ -1,1 +1,2 @@
-web: yarn workspace codenames50-react start
+web: ./scripts/start-web.sh
+
