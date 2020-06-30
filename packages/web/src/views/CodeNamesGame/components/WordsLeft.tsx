@@ -8,24 +8,23 @@ import { TeamWordsLeft } from "./TeamWordsLeft"
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  wordsLeftContainer: {
-    display: "flex",
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    width: "100%",
+    paddingLeft: "10px",
+    paddingRight: "10px",
   },
   wordsLeft: {
-    paddingLeft: theme.spacing(10),
-    paddingRight: theme.spacing(10),
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
+    display: "flex",
+    width: "20%",
+    justifyContent: "center",
   },
   text: {
     userSelect: "none",
     fontWeight: "bold",
+    textAlign: "center",
+    width: "60%",
   },
 }))
 
@@ -45,18 +44,16 @@ export const WordsLeft: React.FC<WordsLeftProps> = ({ game, text, team }) => {
   }
 
   return (
-    <Grid container direction="row" justify="space-evenly" alignItems="center">
-      <Grid item>
+    <div className={classes.container}>
+      <div className={classes.wordsLeft}>
         <TeamWordsLeft count={game.redTeam.wordsLeft} team={GameModels.Teams.red} />
-      </Grid>
-      <Grid item>
-        <Typography variant="h4" style={styles.teamColor} className={classes.text}>
-          {text}
-        </Typography>
-      </Grid>
-      <Grid item>
+      </div>
+      <Typography variant="subtitle2" style={styles.teamColor} className={classes.text}>
+        {text}
+      </Typography>
+      <div className={classes.wordsLeft}>
         <TeamWordsLeft count={game.blueTeam.wordsLeft} team={GameModels.Teams.blue} />
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   )
 }
