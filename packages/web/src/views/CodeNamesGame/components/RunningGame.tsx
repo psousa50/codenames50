@@ -82,6 +82,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
         <div style={{ marginTop: 20 }}></div>
       )}
       <WordsBoard userId={userId} game={game} board={game.board} onWordClick={onWordClick} revealWords={false} />
+      <div style={{ marginTop: 10 }}></div>
       <div className={classes.hint}>
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
         game.turn === getPlayer(game, userId)?.team &&
