@@ -7,7 +7,7 @@
     "tools"
   ],
   "scripts": {
-    "heroku-postbuild": "./scripts/build-server.sh",
+    "heroku-postbuild": "./scripts/build-web.sh",
     "start": "yarn run build && echo ... to-do",
     "prebuild": "yarn run clean",
     "build": "lerna run build",
