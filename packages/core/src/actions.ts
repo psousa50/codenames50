@@ -178,7 +178,7 @@ export const changeTurn = (_: string, now: number): GameAction => game => ({
   wordsRevealedCount: 0,
   turnCount: (game.turnCount || 0) + 1,
   turnTimeoutSec: game.config.turnTimeoutSec,
-  turnStartedTime: now + 1 * 1000,
+  turnStartedTime: now,
 })
 
 const endGame = (winner: Teams | undefined): GameAction => game => ({

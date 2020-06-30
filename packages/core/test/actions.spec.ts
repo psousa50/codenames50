@@ -716,7 +716,7 @@ describe("changeTurn", () => {
       wordsRevealedCount: 0,
       turnCount: 4,
       turnTimeoutSec: game.config.turnTimeoutSec,
-      turnStartedTime: now + 1 * 1000,
+      turnStartedTime: now,
     }
 
     expect(GameActions.changeTurn(userId, now)(game as any)).toEqual(expectedGame)
