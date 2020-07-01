@@ -1,5 +1,5 @@
 import { Messages } from "@codenames50/messaging"
-import { Button, InputAdornment, makeStyles, Snackbar, TextField } from "@material-ui/core"
+import { Button, CircularProgress, InputAdornment, makeStyles, Snackbar, TextField } from "@material-ui/core"
 import Avatar from "@material-ui/core/Avatar"
 import Container from "@material-ui/core/Container"
 import CssBaseline from "@material-ui/core/CssBaseline"
@@ -28,6 +28,17 @@ const useStyles = makeStyles(theme => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  wrapper: {
+    margin: theme.spacing(1),
+    position: "relative",
+  },
+  buttonProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
 }))
 
 export interface CreateGameViewProps {
@@ -39,9 +50,11 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
 
   const { emitMessage, game, error, setError } = useGameMessaging()
   const [userId, setUserId] = React.useState(initialUserId || "")
+  const [loading, setLoading] = React.useState(false)
 
   const createGame = () => {
     if (userId.trim().length > 0) {
+      setLoading(true)
       emitMessage(Messages.registerUserSocket({ userId }))
       emitMessage(Messages.createGame({ userId }))
     }
@@ -81,17 +94,21 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
               ),
             }}
           />
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={() => {
-              createGame()
-            }}
-          >
-            Create Game
-          </Button>
+          <div className={classes.wrapper}>
+            <Button
+              fullWidth
+              variant="contained"
+              disabled={loading || userId.trim().length === 0}
+              color="primary"
+              className={classes.submit}
+              onClick={() => {
+                createGame()
+              }}
+            >
+              Create Game
+            </Button>
+            {loading && <CircularProgress size={32} className={classes.buttonProgress} />}
+          </div>
         </div>
       </Container>
     )
