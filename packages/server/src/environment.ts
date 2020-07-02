@@ -1,8 +1,10 @@
 import { gamePorts } from "@codenames50/core"
 import { MongoClient } from "mongodb"
 import socketIo from "socket.io"
+import { buildExpressEnvironment } from "./app/adapters"
 import { AppConfig } from "./config"
 import { buildDomainEnvironment } from "./domain/adapters"
+import { gamesDomainPorts } from "./domain/main"
 import { buildGameMessagingEnvironment } from "./messaging/adapters"
 import { gameMessagingPorts } from "./messaging/main"
 import { buildMessengerEnvironment, messengerPorts } from "./messaging/messenger"
@@ -12,12 +14,9 @@ import { wordsMongoDbPorts } from "./mongodb/words"
 import { buildRepositoriesEnvironment } from "./repositories/adapters"
 import { gamesRepositoryPorts } from "./repositories/games"
 import { wordsRepositoryPorts } from "./repositories/words"
+import { buildSocketsEnvironment } from "./sockets/adapters"
 
-export const buildDomainEnvironmentForExternalServices = (
-  config: AppConfig,
-  dbClient: MongoClient,
-  io: socketIo.Server,
-) => {
+export const buildEnvironments = (config: AppConfig, dbClient: MongoClient, io: socketIo.Server) => {
   const mongoEnvironment = buildMongoEnvironment(dbClient)
   const repositoriesEnvironment = buildRepositoriesEnvironment(mongoEnvironment, gamesMongoDbPorts, wordsMongoDbPorts)
   const messengerEnvironment = buildMessengerEnvironment(io)
@@ -31,6 +30,19 @@ export const buildDomainEnvironmentForExternalServices = (
     gameMessagingPorts,
     gamePorts,
   )
+  const expressEnvironment = buildExpressEnvironment(config, domainEnvironment, gamesDomainPorts)
 
-  return domainEnvironment
+  const socketsEnvironment = buildSocketsEnvironment(
+    io,
+    domainEnvironment,
+    gamesDomainPorts,
+    domainEnvironment.gameMessagingAdapter.gameMessagingEnvironment,
+    gameMessagingPorts,
+  )
+
+  return {
+    domainEnvironment,
+    expressEnvironment,
+    socketsEnvironment,
+  }
 }

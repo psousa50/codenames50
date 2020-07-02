@@ -16,7 +16,7 @@ export const createExpressApp = () => {
   return app
 }
 
-export const setupRoutes = (app: Express, environment: ExpressEnvironment) => {
+export const configureRoutes = (app: Express, environment: ExpressEnvironment) => {
   app.use("/api/v1", root)
   app.use("/api/v1/games", games(environment))
   app.all("*", createNotFoundHandler())

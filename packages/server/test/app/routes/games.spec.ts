@@ -2,7 +2,7 @@ import { GameModels } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
 import request from "supertest"
 import { ErrorCodes } from "../../../src/app/errors"
-import { createExpressApp } from "../../../src/app/main"
+import { createExpressApp, configureRoutes } from "../../../src/app/main"
 import { actionErrorOf, actionOf } from "../../../src/utils/actions"
 import { ServiceError } from "../../../src/utils/errors"
 import { buildTestExpressEnvironment } from "../../helpers"
@@ -21,7 +21,7 @@ describe("games/create", () => {
 
     const userId = "some-user-id"
 
-    const app = createExpressApp(expressAdapter)
+    const app = configureRoutes(createExpressApp(), expressAdapter)
 
     await request(app).post("/api/v1/games/create").send({ userId }).expect(200, createdGame)
     expect(create).toHaveBeenCalledWith({ userId })
@@ -39,7 +39,7 @@ describe("games/create", () => {
       },
     })
 
-    const app = createExpressApp(expressAdapter)
+    const app = configureRoutes(createExpressApp(), expressAdapter)
 
     await request(app).post("/api/v1/games/create").send({ userId: "some-user", language: "en" }).expect(404)
   })
@@ -58,7 +58,7 @@ describe("games/create", () => {
         },
       })
 
-      const app = createExpressApp(expressAdapter)
+      const app = configureRoutes(createExpressApp(), expressAdapter)
 
       await request(app).post("/api/v1/games/join").send({ gameId, userId }).expect(200, game)
       expect(join).toHaveBeenCalledWith({ gameId, userId })
@@ -76,7 +76,7 @@ describe("games/create", () => {
         },
       })
 
-      const app = createExpressApp(expressAdapter)
+      const app = configureRoutes(createExpressApp(), expressAdapter)
 
       await request(app).post("/api/v1/games/join").send({ gameId: "game-id", userId: "user-id" }).expect(404)
     })
