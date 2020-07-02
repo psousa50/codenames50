@@ -21,7 +21,7 @@ export type GameRule = (game: CodeNamesGame) => ValidationError | undefined
 
 export const message = (e: ValidationError) => e
 
-const exists = (v: any) => v !== undefined && v !== null
+const exists = (v: unknown) => v !== undefined && v !== null
 
 const v = (valid: boolean, error: ValidationError) => (valid ? undefined : error)
 

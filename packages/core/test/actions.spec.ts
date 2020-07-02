@@ -607,13 +607,13 @@ describe("revealWord", () => {
   })
 
   describe("ends the turn", () => {
-    it("if revealed word is from a different team", () => {
+    it("if a red user reveals a blue word", () => {
       const game = buildGameForRevealWord(WordType.blue, Teams.red)
 
       expect(revealWordAt00(game).turn).toBe(Teams.blue)
     })
 
-    it("if revealed word is from a different team", () => {
+    it("if a blue user reveals a red word", () => {
       const game = buildGameForRevealWord(WordType.red, Teams.blue)
 
       expect(revealWordAt00(game).turn).toBe(Teams.red)

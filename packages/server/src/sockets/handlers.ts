@@ -15,8 +15,8 @@ const registerUserHandler: SocketHandler<Messages.RegisterUserSocketInput> = soc
   )
 
 const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) => {
-    return pipe(
+  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
+    pipe(
       userLinks.length === 1 && userLinks[0].gameId
         ? pipe(
             adapt(
@@ -25,10 +25,10 @@ const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
             ),
             map(_ => undefined),
           )
-        : actionOf(undefined as any),
+        : actionOf(undefined),
       map(_ => undefined),
-    )
-  })
+    ),
+  )
 
 const disconnectHandler: SocketHandler = socket => () =>
   withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
@@ -42,7 +42,7 @@ const disconnectHandler: SocketHandler = socket => () =>
 const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ gameId, userId }) =>
   withEnv(({ gamesDomainPorts, domainEnvironment, uuid, gameMessagingPorts, gameMessagingEnvironment }) => {
     const newGameId = gameId || uuid()
-    socket.join(newGameId, async (_: any) => {
+    socket.join(newGameId, async (_: unknown) => {
       const h = pipe(
         gamesDomainPorts.create({ gameId: newGameId, userId }),
         chain(game =>
@@ -59,7 +59,7 @@ const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ 
 
 const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => input =>
   withEnv(({ gamesDomainPorts, domainEnvironment, gameMessagingPorts, gameMessagingEnvironment }) => {
-    socket.join(input.gameId, async (_: any) => {
+    socket.join(input.gameId, async (_: unknown) => {
       const h = pipe(
         gamesDomainPorts.join(input),
         chain(game =>
@@ -95,7 +95,9 @@ const buildHandler = (socketsEnvironment: SocketsEnvironment, socket: SocketIO.S
 ) => async (input: I) => {
   try {
     await run(socketHandler(socket)(input), socketsEnvironment)
-  } catch (_) {}
+  } catch (_) {
+    // swallow exception
+  }
 }
 
 const addMessageHandler = (socket: SocketIO.Socket) => (handler: Messages.GameMessageHandler) => {

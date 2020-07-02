@@ -28,12 +28,12 @@ export type GameMessageType =
   | "updateConfig"
   | "wordRevealed"
 
-export type GameMessage<T = {}> = {
+export type GameMessage<T = Record<string, unknown>> = {
   type: GameMessageType
   data: T
 }
 
-export type GameMessageHandlerSpec<T extends GameMessageType, D = any, R = void> = {
+export type GameMessageHandlerSpec<T extends GameMessageType, D = void, R = void> = {
   type: T
   handler: (data: D) => R
 }
@@ -51,7 +51,7 @@ export type GameMessageHandler =
   | GameMessageHandlerSpec<"joinedGame", JoinedGameInput>
   | GameMessageHandlerSpec<"joinGame", JoinGameInput>
   | GameMessageHandlerSpec<"joinTeam", JoinTeamInput>
-  | GameMessageHandlerSpec<"randomizeTeam">
+  | GameMessageHandlerSpec<"randomizeTeam", RandomizeTeamsInput>
   | GameMessageHandlerSpec<"reconnect">
   | GameMessageHandlerSpec<"registerUserSocket", RegisterUserSocketInput>
   | GameMessageHandlerSpec<"removePlayer", RemovePlayerInput>
@@ -66,7 +66,7 @@ export type GameMessageHandler =
   | GameMessageHandlerSpec<"updateConfig", UpdateConfigInput>
   | GameMessageHandlerSpec<"wordRevealed", WordRevealedInput>
 
-export const createGameMessagehandler = <T extends GameMessageType, D = any, R = void>(
+export const createGameMessagehandler = <T extends GameMessageType, D = Record<string, unknown>, R = void>(
   type: T,
   handler: (data: D) => R,
 ): GameMessageHandlerSpec<T, D> => ({
@@ -83,22 +83,22 @@ export type RegisterUserSocketInput = {
   userId: string
 }
 
-export interface CreateGameInput {
+export type CreateGameInput = {
   gameId?: string
   userId: string
 }
 
-export interface JoinGameInput {
+export type JoinGameInput = {
   gameId: string
   userId: string
 }
 
-export interface RandomizeTeamsInput {
+export type RandomizeTeamsInput = {
   gameId: string
   userId: string
 }
 
-export interface JoinedGameInput {
+export type JoinedGameInput = {
   game: CodeNamesGame
   userId: string
 }
@@ -107,24 +107,24 @@ export type GameErrorInput = {
   message: string
 }
 
-export interface RemovePlayerInput {
+export type RemovePlayerInput = {
   gameId: string
   userId: string
 }
 
-export interface JoinTeamInput {
+export type JoinTeamInput = {
   gameId: string
   userId: string
   team: Teams
 }
 
-export interface StartGameInput {
+export type StartGameInput = {
   gameId: string
   userId: string
   config: GameConfig
 }
 
-export interface RestartGameInput {
+export type RestartGameInput = {
   gameId: string
   userId: string
 }
@@ -180,7 +180,7 @@ export type SetSpyMasterInput = {
   team: Teams
 }
 
-export interface ErrorInput {
+export type ErrorInput = {
   code: string
   text: string
 }

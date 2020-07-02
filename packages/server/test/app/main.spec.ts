@@ -2,6 +2,7 @@ import request from "supertest"
 import { createExpressApp } from "../../src/app/main"
 import { buildTestExpressEnvironment } from "../helpers"
 
+// eslint-disable-next-line jest/expect-expect
 it("/health", async () => {
   const app = createExpressApp(buildTestExpressEnvironment())
 

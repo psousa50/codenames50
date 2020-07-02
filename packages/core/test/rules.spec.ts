@@ -173,7 +173,7 @@ describe("startGame", () => {
       expect(GameRules.startGame(validConfig)(game as any)).toBe(GameRules.message("mustHaveTwoPlayers"))
     })
 
-    it("if red team doesn't have two players", () => {
+    it("if blue team doesn't have two players", () => {
       const game = {
         ...validGame,
         players: [

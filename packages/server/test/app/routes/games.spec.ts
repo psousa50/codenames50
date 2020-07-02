@@ -27,6 +27,7 @@ describe("games/create", () => {
     expect(create).toHaveBeenCalledWith({ userId })
   })
 
+  // eslint-disable-next-line jest/expect-expect
   it("gives an error status if domains return an error", async () => {
     const expressAdapter = buildTestExpressEnvironment({
       domainAdapter: {
@@ -63,6 +64,7 @@ describe("games/create", () => {
       expect(join).toHaveBeenCalledWith({ gameId, userId })
     })
 
+    // eslint-disable-next-line jest/expect-expect
     it("gives an error status if domains return an error", async () => {
       const expressAdapter = buildTestExpressEnvironment({
         domainAdapter: {

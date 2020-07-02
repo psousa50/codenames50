@@ -21,7 +21,7 @@ export const errorHandler = (res: Response) => (error: ServiceError) => {
   res.sendStatus(error.errorCode === ErrorCodes.NOT_FOUND ? 404 : 400)
 }
 
-export const okHandler = (res: Response) => (responseBody: any) => {
+export const okHandler = (res: Response) => (responseBody: unknown) => {
   res.contentType("application/json")
   res.status(200)
   res.json(responseBody)

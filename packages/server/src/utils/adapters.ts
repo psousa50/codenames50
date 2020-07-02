@@ -10,9 +10,9 @@ export type Transformer<VI = void, I = VI> = (i: I) => VI
 
 export const buildAdapter = <E = void, VI = void, I = VI, VR = void, R = VR>(
   port: Port<E, VI, VR>,
-  inTransformer: Transformer<VI, I> = i => ((i as I) as any) as VI,
+  inTransformer: Transformer<VI, I> = i => (i as unknown) as VI,
   inValidator: Validator<ServiceError, I> = i => right<ServiceError, I>(i),
-  outTransformer: Transformer<R, VR> = r => ((r as VR) as any) as R,
+  outTransformer: Transformer<R, VR> = r => (r as unknown) as R,
   outValidator: Validator<ServiceError, VR> = r => right<ServiceError, VR>(r),
 ): Port<E, I, R> => (i: I) =>
   pipe(

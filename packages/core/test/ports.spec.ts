@@ -102,8 +102,6 @@ describe("checkTurnTimeout", () => {
       turnStartedTime: now - 3 * 1000,
     }
 
-    const expectedGame = game
-
     expect(checkTurnTimeout(userId, now)(game as any)).toBeFalsy()
   })
 

@@ -10,7 +10,6 @@ import { UUID } from "../utils/types"
 import { DomainEnvironment, DomainPort } from "./adapters"
 import { ErrorCodes } from "./errors"
 import { CreateGameInput } from "./models"
-import { chainLogRTE } from "../utils/debug"
 
 const doAction = (action: GamePort): DomainPort<GameModels.CodeNamesGame, GameModels.CodeNamesGame> => game => {
   const result = action(game)
@@ -137,7 +136,7 @@ export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId, config 
       getGame(gameId),
       chain(game =>
         pipe(
-          buildBoard(config.language!),
+          buildBoard(config.language || "en"),
           chain(board => doAction(gamePorts.startGame(config, board, currentUtcEpoch()))(game)),
         ),
       ),

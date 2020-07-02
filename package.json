@@ -2,10 +2,15 @@
   "name": "codenames50",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "packages/**",
-    "tools"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/**"
+    ],
+    "nohoist": [
+      "**/web",
+      "**/web/**"
+    ]
+  },
   "scripts": {
     "heroku-postbuild": "./scripts/build.sh",
     "start": "yarn run build && echo ... to-do",
@@ -14,6 +19,7 @@
     "clean": "yarn run clean:cache && yarn run clean:packages",
     "clean:cache": "rimraf .build-cache",
     "clean:packages": "lerna run clean",
+    "lint": "eslint packages --ext ts,tsx",
     "test": "lerna run test",
     "test:watch": "lerna run --parallel test:watch",
     "coverage": "lerna run coverage",
@@ -24,6 +30,7 @@
   "devDependencies": {
     "@types/jest": "^26.0.0",
     "@types/supertest": "^2.0.9",
+    "eslint-plugin-jest": "^23.17.1",
     "jest": "24.9.0",
     "lerna": "^3.22.1",
     "mongodb-memory-server": "^6.6.1",
@@ -32,6 +39,19 @@
     "supertest": "^4.0.2",
     "ts-jest": "^24.3.0",
     "ts-node": "^8.3.0",
-    "typescript": "^3.7.4"
+    "typescript": "^3.9.6"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "@typescript-eslint/parser": "^3.5.0",
+    "D": "^1.0.0",
+    "babel-eslint": "10.x",
+    "eslint": "^7.3.1",
+    "eslint-config-react-app": "^5.2.1",
+    "eslint-plugin-flowtype": "2.x",
+    "eslint-plugin-import": "2.x",
+    "eslint-plugin-jsx-a11y": "6.x",
+    "eslint-plugin-react": "7.x",
+    "eslint-plugin-react-hooks": "1.5.0"
   }
 }

@@ -36,7 +36,7 @@ export interface GameConfig {
   turnTimeoutSec: number | undefined
 }
 
-export interface CodeNamesGame {
+export type CodeNamesGame = {
   gameId: string
   gameCreatedTime: number
   gameStartedTime: number | undefined
