@@ -1,13 +1,9 @@
-import cors from "cors"
-import express from "express"
+import { Server } from "http"
 import socketIo from "socket.io"
 import { SocketsEnvironment } from "./adapters"
 import { socketHandler } from "./handlers"
 
-export const createSocketsApplication = (port: number) => {
-  const app = express()
-  app.use(cors())
-  const server = app.listen(port)
+export const createSocketsApplication = (server: Server) => {
   const io = socketIo(server, {})
 
   return io

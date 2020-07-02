@@ -1,17 +1,16 @@
-import cors from "cors"
 import * as dotenv from "dotenv"
+import { run } from "fp-ts/lib/ReaderTaskEither"
 import { buildExpressEnvironment } from "./app/adapters"
-import { createExpressApp } from "./app/main"
+import { createExpressApp, setupRoutes as configureRoutes } from "./app/main"
 import { config as appConfig } from "./config"
+import { DomainEnvironment } from "./domain/adapters"
 import { gamesDomainPorts } from "./domain/main"
-import { buildDomainEnvironmentWithRealPorts } from "./environment"
+import { buildDomainEnvironmentForExternalServices } from "./environment"
 import { gameMessagingPorts } from "./messaging/main"
 import * as MondoDb from "./mongodb/main"
 import { buildSocketsEnvironment } from "./sockets/adapters"
 import { createSocketsApplication, startSocketsApplication } from "./sockets/main"
 import { logDebug } from "./utils/debug"
-import { DomainEnvironment } from "./domain/adapters"
-import { run } from "fp-ts/lib/ReaderTaskEither"
 
 dotenv.config()
 
@@ -36,16 +35,17 @@ const startApplication = async () => {
     const envPort = Number(process.env.PORT)
     const appPort = isNaN(envPort) ? config.port : envPort
 
-    const socketsPort = appPort
-    const io = createSocketsApplication(socketsPort)
+    const app = createExpressApp()
+    const server = app.listen(appPort)
+
+    const io = createSocketsApplication(server)
 
     const dbClient = await MondoDb.connect(mongoUri)
 
-    const domainEnvironment = buildDomainEnvironmentWithRealPorts(config, dbClient, io)
+    const domainEnvironment = buildDomainEnvironmentForExternalServices(config, dbClient, io)
     const expressEnvironment = buildExpressEnvironment(config, domainEnvironment, gamesDomainPorts)
 
-    const app = createExpressApp(expressEnvironment)
-    app.use(cors())
+    configureRoutes(app, expressEnvironment)
 
     const socketsEnvironment = buildSocketsEnvironment(
       io,

@@ -11,7 +11,7 @@ export enum WordType {
   assassin = "assassin",
 }
 
-export interface BoardWord {
+export type BoardWord = {
   word: string
   type: WordType
   revealed: boolean
@@ -24,14 +24,14 @@ export enum Teams {
   blue = "blue",
 }
 
-export interface TeamConfig {
+export type TeamConfig = {
   spyMaster: string | undefined
   wordsLeft: number | undefined
 }
 
 export type TurnOutcome = "success" | "failure" | "assassin" | undefined
 
-export interface GameConfig {
+export type GameConfig = {
   language: string | undefined
   turnTimeoutSec: number | undefined
 }
@@ -58,12 +58,18 @@ export type CodeNamesGame = {
   board: WordsBoard
 }
 
-export interface Player {
+export type Player = {
   userId: string
   team: Teams | undefined
 }
 
-export interface Words {
+export type Words = {
   language: string
   words: string[]
+}
+
+export type TimeoutConfig = {
+  timeoutSec: number
+  timeoutSecFirstTurn: number
+  description: string
 }

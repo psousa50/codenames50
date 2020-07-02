@@ -204,9 +204,32 @@ export const setSpyMaster: DomainPort<Messages.SetSpyMasterInput> = ({ gameId, u
     ),
   )
 
+const timeouts: GameModels.TimeoutConfig[] = [
+  {
+    timeoutSec: 1,
+    timeoutSecFirstTurn: 2,
+    description: "1 minute",
+  },
+  {
+    timeoutSec: 2,
+    timeoutSecFirstTurn: 3,
+    description: "2 minutes",
+  },
+  {
+    timeoutSec: 3,
+    timeoutSecFirstTurn: 4,
+    description: "3 minutes",
+  },
+]
+
+export const getLanguages: DomainPort<void, string[]> = () => actionOf(["en", "pt"])
+export const getTimeouts: DomainPort<void, GameModels.TimeoutConfig[]> = () => actionOf(timeouts)
+
 export const gamesDomainPorts = {
   changeTurn,
   create,
+  getLanguages,
+  getTimeouts,
   join,
   joinTeam,
   removePlayer,

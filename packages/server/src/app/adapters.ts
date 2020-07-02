@@ -7,9 +7,7 @@ export const buildExpressEnvironment = (
   domainEnvironment: DomainEnvironment,
   gamesDomainPorts: GamesDomainPorts,
 ) => ({
-  config: {
-    port: config.port,
-  },
+  config,
   domainAdapter: {
     gamesDomainPorts,
     domainEnvironment,

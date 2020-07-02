@@ -11,7 +11,7 @@ import { currentUtcEpoch } from "../utils/dates"
 export type DomainPort<I = void, R = GameModels.CodeNamesGame> = Port<DomainEnvironment, I, R>
 
 export const buildDomainEnvironment = (
-  { boardWidth, boardHeight }: AppConfig,
+  config: AppConfig,
   repositoriesEnvironment: RepositoriesEnvironment,
   gamesRepositoryPorts: GamesRepositoryPorts,
   wordsRepositoryPorts: WordsRepositoryPorts,
@@ -19,10 +19,7 @@ export const buildDomainEnvironment = (
   gameMessagingPorts: GameMessagingPorts,
   gamePorts: GamePorts,
 ) => ({
-  config: {
-    boardWidth,
-    boardHeight,
-  },
+  config,
   repositoriesAdapter: {
     gamesRepositoryPorts,
     wordsRepositoryPorts,
