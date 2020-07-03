@@ -1,7 +1,3 @@
-import { config } from "../utils/config"
-
-const HOST = config.irnUrl
-const PORT = config.irnPort
-const host = `${HOST}${PORT ? `:${PORT}` : ""}`
+const host = process.env.REACT_APP_SERVER_URL
 
 export const apiUrl = `${host}/api/v1`
