@@ -28,7 +28,15 @@ export const Hint: React.FC<HintProps> = ({ team, hint, wordsRevealedCount, endT
       <Typography variant="h4">{hint.word.toUpperCase()}</Typography>
       <Typography variant="h4">
         {hint.count > 0
-          ? `${hint.count}${wordsRevealedCount > 0 ? ` (${hint.count - wordsRevealedCount} remaining)` : ""}`
+          ? `${hint.count}${
+              wordsRevealedCount > 0
+                ? ` (${
+                    hint.count - wordsRevealedCount > 0
+                      ? `${hint.count - wordsRevealedCount} remaining`
+                      : "one more to try..."
+                  })`
+                : ""
+            }`
           : ""}
       </Typography>
       <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn()}>

@@ -1,4 +1,4 @@
-import { ExpansionPanel, ExpansionPanelDetails, ExpansionPanelSummary, Snackbar, Typography } from "@material-ui/core"
+import { Accordion, AccordionDetails, AccordionSummary, Snackbar, Typography } from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import { Alert, AlertTitle } from "@material-ui/lab"
@@ -61,8 +61,8 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
         <Separator />
 
         <div className={classes.teams}>
-          <ExpansionPanel expanded={teamsExpanded} onChange={handleTeamsExpanded}>
-            <ExpansionPanelSummary
+          <Accordion expanded={teamsExpanded} onChange={handleTeamsExpanded}>
+            <AccordionSummary
               classes={{
                 root: classes.expandableRoot,
                 content: classes.expandableContent,
@@ -72,11 +72,11 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
               id="panel1a-header"
             >
               <Typography className={classes.heading}>Game Setup</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
+            </AccordionSummary>
+            <AccordionDetails>
               <SetupGame emitMessage={emitMessage} game={game} userId={userId} />
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
+            </AccordionDetails>
+          </Accordion>
         </div>
 
         <Separator />
