@@ -4,12 +4,12 @@ import { responseHandler } from "../handlers"
 
 export const games = ({
   domainAdapter: {
-    gamesDomainPorts: { create, join, getLanguages, getTimeouts },
+    gamesDomainPorts: { create, join, getLanguages, getTurnTimeouts },
     domainEnvironment,
   },
 }: ExpressEnvironment) =>
   Router()
     .get("/languages", responseHandler(domainEnvironment, getLanguages))
-    .get("/timeouts", responseHandler(domainEnvironment, getTimeouts))
+    .get("/turnTimeouts", responseHandler(domainEnvironment, getTurnTimeouts))
     .post("/create", responseHandler(domainEnvironment, create))
     .post("/join", responseHandler(domainEnvironment, join))

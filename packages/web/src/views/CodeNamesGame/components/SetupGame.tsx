@@ -14,13 +14,15 @@ import {
   Select,
   Theme,
 } from "@material-ui/core"
+import { pipe } from "fp-ts/lib/pipeable"
+import { task } from "fp-ts/lib/Task"
+import { getOrElse } from "fp-ts/lib/TaskEither"
 import React from "react"
+import * as Api from "../../../api/games"
+import { getFlagImage } from "../../../assets/images"
 import { EmitMessage } from "../../../utils/types"
 import { InvitePlayersDialog } from "./InvitePlayersDialog"
 import { Teams } from "./Teams"
-
-const enImage = require("../../../assets/images/en.png")
-const ptImage = require("../../../assets/images/pt.png")
 
 interface SetupGameProps {
   emitMessage: EmitMessage
@@ -36,6 +38,34 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
   const [invitePlayersOpened, openInvitePlayers] = React.useState(false)
   const [newGameDialogOpened, setNewGameDialogOpened] = React.useState(false)
   const [config, setConfig] = React.useState(game.config)
+  const [languages, setLanguages] = React.useState<string[]>()
+  const [turnTimeouts, setTurnTimeouts] = React.useState<GameModels.TurnTimeoutConfig[]>()
+
+  React.useEffect(() => {
+    const fetch = async () => {
+      const l = await pipe(
+        Api.getLanguages(),
+        getOrElse<Error, string[] | undefined>(_ => task.of(undefined)),
+      )()
+
+      setLanguages(l)
+    }
+
+    fetch()
+  }, [])
+
+  React.useEffect(() => {
+    const fetch = async () => {
+      const tt = await pipe(
+        Api.getTurnTimeouts(),
+        getOrElse<Error, GameModels.TurnTimeoutConfig[] | undefined>(_ => task.of(undefined)),
+      )()
+
+      setTurnTimeouts(tt)
+    }
+
+    fetch()
+  }, [])
 
   React.useEffect(() => {
     setConfig(game.config)
@@ -97,24 +127,30 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
           <FormControl required className={classes.formControl}>
             <InputLabel id="language">Language</InputLabel>
             <Select labelId="language" value={config.language || ""} onChange={changeLanguage}>
-              <MenuItem value={"en"}>
-                <img src={enImage} alt="en" width="30px" style={{ paddingLeft: "5px" }} />
-              </MenuItem>
-              <MenuItem value={"pt"}>
-                <img src={ptImage} alt="pt" width="30px" style={{ paddingLeft: "5px" }} />
-              </MenuItem>
+              {languages ? (
+                languages.map(l => (
+                  <MenuItem key={l} value={l}>
+                    <img src={getFlagImage(l)} alt={l} width="30px" style={{ paddingRight: "5px" }} />
+                    {l}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value={undefined} />
+              )}
             </Select>
           </FormControl>
           <FormControl className={classes.formControl}>
             <InputLabel id="response-time-out">Time Limit</InputLabel>
             <Select labelId="response-time-out" value={config.turnTimeoutSec || 0} onChange={changeResponseTimeOut}>
-              <MenuItem value={0}>
-                <em>No limit</em>
-              </MenuItem>
-              <MenuItem value={60}>1 minute</MenuItem>
-              <MenuItem value={120}>2 minutes</MenuItem>
-              <MenuItem value={180}>3 minutes</MenuItem>
-              <MenuItem value={300}>5 minutes</MenuItem>
+              {turnTimeouts ? (
+                turnTimeouts.map(tt => (
+                  <MenuItem key={tt.timeoutSec} value={tt.timeoutSec}>
+                    {tt.description}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value={undefined} />
+              )}
             </Select>
           </FormControl>
         </div>

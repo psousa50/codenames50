@@ -68,8 +68,7 @@ export type Words = {
   words: string[]
 }
 
-export type TimeoutConfig = {
+export type TurnTimeoutConfig = {
   timeoutSec: number
-  timeoutSecFirstTurn: number
   description: string
 }

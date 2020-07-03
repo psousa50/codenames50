@@ -14,29 +14,6 @@ import Typography from "@material-ui/core/Typography"
 import React from "react"
 import { teamColor } from "../../../utils/styles"
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    grid: {
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "top",
-      justifyContent: "center",
-      padding: "5px",
-    },
-    list: {
-      textAlign: "center",
-      padding: 0,
-    },
-    item: {
-      textAlign: "center",
-      padding: 0,
-    },
-    teamName: {
-      fontWeight: "bold",
-    },
-  }),
-)
-
 interface TeamProps {
   userId: string
   game: GameModels.CodeNamesGame
@@ -66,7 +43,6 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
     <div style={styles.team}>
       <List
         className={classes.list}
-        aria-labelledby="nested-list-subheader"
         subheader={
           <ListSubheader>
             <Button
@@ -106,7 +82,7 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
                 </ListItemText>
               ) : (
                 <ListItemText>
-                  <Typography variant="h6">{"(No SpyMaster)"}</Typography>
+                  <Typography variant="h6">{"---"}</Typography>
                 </ListItemText>
               )
             }
@@ -157,3 +133,26 @@ export const Teams: React.FC<TeamsProps> = ({ userId, game, joinTeam, setSpyMast
     </div>
   )
 }
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    grid: {
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "top",
+      justifyContent: "center",
+      padding: "5px",
+    },
+    list: {
+      textAlign: "center",
+      padding: 0,
+    },
+    item: {
+      textAlign: "center",
+      padding: 0,
+    },
+    teamName: {
+      fontWeight: "bold",
+    },
+  }),
+)

@@ -371,7 +371,7 @@ describe("startGame", () => {
         wordsLeft: 2,
       },
       turnCount: 0,
-      turnTimeoutSec: config.turnTimeoutSec * 2.5,
+      turnTimeoutSec: config.turnTimeoutSec + 60,
       turnStartedTime: now,
     }
 
