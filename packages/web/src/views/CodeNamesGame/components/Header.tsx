@@ -6,6 +6,34 @@ import React from "react"
 import { EnvironmentContext } from "../../../environment"
 import { User } from "./User"
 
+interface HeaderProps {
+  game: GameModels.CodeNamesGame
+  userId: string
+}
+
+export const Header: React.FC<HeaderProps> = ({ game, userId }) => {
+  const classes = useStyles()
+
+  const environment = React.useContext(EnvironmentContext)
+
+  const handleSound = () => {
+    environment.toggleSound()
+  }
+
+  return (
+    <div className={classes.header}>
+      <User
+        userId={userId}
+        team={GameHelpers.getPlayer(game, userId)?.team}
+        spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
+      />
+      <div className={classes.sound} onClick={() => handleSound()}>
+        {environment.config.soundOn ? <VolumeUp /> : <VolumeOff />}
+      </div>
+    </div>
+  )
+}
+
 const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
@@ -47,31 +75,3 @@ const useStyles = makeStyles((theme: Theme) => ({
     paddingBottom: "10px",
   },
 }))
-
-interface HeaderProps {
-  game: GameModels.CodeNamesGame
-  userId: string
-}
-
-export const Header: React.FC<HeaderProps> = ({ game, userId }) => {
-  const classes = useStyles()
-
-  const environment = React.useContext(EnvironmentContext)
-
-  const handleSound = () => {
-    environment.toggleSound()
-  }
-
-  return (
-    <div className={classes.header}>
-      <User
-        userId={userId}
-        team={GameHelpers.getPlayer(game, userId)?.team}
-        spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
-      />
-      <div className={classes.sound} onClick={() => handleSound()}>
-        {environment.soundOn ? <VolumeUp /> : <VolumeOff />}
-      </div>
-    </div>
-  )
-}

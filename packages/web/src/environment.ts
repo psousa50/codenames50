@@ -1,13 +1,21 @@
 import React from "react"
+import { EmitMessage } from "./utils/types"
+import { AddMessageHandler } from "./utils/useSocketMessaging"
+
+export type SocketMessaging = (uri: string, onConnect: () => void) => [EmitMessage, AddMessageHandler]
 
 export interface Environment {
-  soundOn: boolean
+  config: {
+    soundOn: boolean
+  }
   toggleSound: () => void
+  useSocketMessaging: SocketMessaging
 }
 
-const defaultEnvironment: Environment = {
+export const defaultConfig = {
   soundOn: false,
-  toggleSound: () => undefined,
 }
+
+const defaultEnvironment: Environment = {} as any
 
 export const EnvironmentContext = React.createContext(defaultEnvironment)

@@ -43,12 +43,12 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
 
   React.useEffect(() => {
     const fetch = async () => {
-      const l = await pipe(
+      const apiLanguages = await pipe(
         Api.getLanguages(),
         getOrElse<Error, string[] | undefined>(_ => task.of(undefined)),
       )()
 
-      setLanguages(l)
+      setLanguages(apiLanguages)
     }
 
     fetch()
@@ -56,12 +56,12 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
 
   React.useEffect(() => {
     const fetch = async () => {
-      const tt = await pipe(
+      const apiTurnTimeouts = await pipe(
         Api.getTurnTimeouts(),
         getOrElse<Error, GameModels.TurnTimeoutConfig[] | undefined>(_ => task.of(undefined)),
       )()
 
-      setTurnTimeouts(tt)
+      setTurnTimeouts(apiTurnTimeouts)
     }
 
     fetch()
@@ -135,13 +135,17 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
                   </MenuItem>
                 ))
               ) : (
-                <MenuItem value={undefined} />
+                <MenuItem value={""} />
               )}
             </Select>
           </FormControl>
           <FormControl className={classes.formControl}>
             <InputLabel id="response-time-out">Time Limit</InputLabel>
-            <Select labelId="response-time-out" value={config.turnTimeoutSec || 0} onChange={changeResponseTimeOut}>
+            <Select
+              labelId="response-time-out"
+              value={turnTimeouts ? config.turnTimeoutSec || "0" : ""}
+              onChange={changeResponseTimeOut}
+            >
               {turnTimeouts ? (
                 turnTimeouts.map(tt => (
                   <MenuItem key={tt.timeoutSec} value={tt.timeoutSec}>
@@ -149,7 +153,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
                   </MenuItem>
                 ))
               ) : (
-                <MenuItem value={undefined} />
+                <MenuItem value={""} />
               )}
             </Select>
           </FormControl>

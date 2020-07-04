@@ -22,11 +22,11 @@ export const usePlaySound = (url: string) => {
   }
 
   React.useEffect(() => {
-    if (environment.soundOn && playIt) {
+    if (environment.config.soundOn && playIt) {
       playSound()
     }
     setPlayIt(false)
-  }, [environment.soundOn, playSound, playIt])
+  }, [environment.config.soundOn, playSound, playIt])
 
   return [play]
 }

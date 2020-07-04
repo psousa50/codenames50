@@ -2,15 +2,14 @@ import { Messages } from "@codenames50/messaging"
 import { Button, CircularProgress, InputAdornment, makeStyles, Snackbar, TextField } from "@material-ui/core"
 import Avatar from "@material-ui/core/Avatar"
 import Container from "@material-ui/core/Container"
-import CssBaseline from "@material-ui/core/CssBaseline"
 import Typography from "@material-ui/core/Typography"
 import AccountCircle from "@material-ui/icons/AccountCircle"
 import NoteAdd from "@material-ui/icons/NoteAdd"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
 import { Redirect } from "react-router-dom"
-import { useGameMessaging } from "../utils/useGameMessaging"
 import { logoImage } from "../assets/images"
+import { useGameMessaging } from "../utils/useGameMessaging"
 
 export interface CreateGameViewProps {
   userId?: string
@@ -75,6 +74,7 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
                 disabled={loading || userId.trim().length === 0}
                 color="primary"
                 className={classes.submit}
+                data-testid="create-game-button"
               >
                 Create Game
               </Button>
@@ -110,6 +110,7 @@ const useStyles = makeStyles(theme => ({
   },
   logo: {
     padding: "50px",
+    width: "100%",
   },
   margin: {
     margin: theme.spacing(1),

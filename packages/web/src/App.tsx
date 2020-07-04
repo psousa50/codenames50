@@ -3,7 +3,8 @@ import { blueGrey, lightBlue } from "@material-ui/core/colors"
 import React, { useState } from "react"
 import { BrowserRouter } from "react-router-dom"
 import { AppRouter } from "./AppRouter"
-import { Environment, EnvironmentContext } from "./environment"
+import { defaultConfig, Environment, EnvironmentContext } from "./environment"
+import { useSocketMessaging } from "./utils/useSocketMessaging"
 import { ViewportProvider } from "./utils/viewPort"
 
 const darkTheme = responsiveFontSizes(
@@ -17,14 +18,19 @@ const darkTheme = responsiveFontSizes(
 )
 
 export const App = () => {
+  const savedConfig = JSON.parse(localStorage.getItem("config") || "{}")
   const defaultEnvironment: Environment = {
-    soundOn: (localStorage.getItem("soundOn") || "") === "true",
+    config: { ...defaultConfig, ...savedConfig },
     toggleSound: () =>
       setEnvironment(e => {
-        const soundOn = !e.soundOn
-        localStorage.setItem("soundOn", soundOn ? "true" : "false")
-        return { ...e, soundOn }
+        const newConfig = {
+          ...e.config,
+          soundOn: !e.config.soundOn,
+        }
+        localStorage.setItem("config", JSON.stringify(newConfig))
+        return { ...e, config: newConfig }
       }),
+    useSocketMessaging,
   }
 
   const [environment, setEnvironment] = useState(defaultEnvironment)

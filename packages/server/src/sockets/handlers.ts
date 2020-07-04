@@ -95,8 +95,8 @@ const buildHandler = (socketsEnvironment: SocketsEnvironment, socket: SocketIO.S
 ) => async (input: I) => {
   try {
     await run(socketHandler(socket)(input), socketsEnvironment)
-  } catch (_) {
-    // swallow exception
+  } catch (ex) {
+    console.log(`Socket handler exception: ${ex}`)
   }
 }
 

@@ -1,7 +1,6 @@
 import { Button, InputAdornment, makeStyles, TextField } from "@material-ui/core"
 import Avatar from "@material-ui/core/Avatar"
 import Container from "@material-ui/core/Container"
-import CssBaseline from "@material-ui/core/CssBaseline"
 import Typography from "@material-ui/core/Typography"
 import AccountCircle from "@material-ui/icons/AccountCircle"
 import FastForward from "@material-ui/icons/FastForward"
