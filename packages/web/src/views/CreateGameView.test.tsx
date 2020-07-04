@@ -23,7 +23,7 @@ type UseSocketMessagingTestParams = {
   callHandlerFor: string
   with: Record<string, unknown>
 }
-const useSocketMessagingTest = (parameters: UseSocketMessagingTestParams): SocketMessaging => {
+const buildUseSocketMessagingForTest = (parameters: UseSocketMessagingTestParams): SocketMessaging => {
   const useSocketMessaging: SocketMessaging = (_, onConnect) => {
     const [gameCreatedHandler, setGameCreatedHandler] = React.useState<any>()
 
@@ -46,9 +46,37 @@ const useSocketMessagingTest = (parameters: UseSocketMessagingTestParams): Socke
 }
 
 describe("CreateGameView", () => {
-  it("creates a game for a user and redirects to the game page", () => {
-    const game = { gameId: "game-id", some: "game" }
-    const useSocketMessaging = useSocketMessagingTest({ on: "createGame", callHandlerFor: "gameCreated", with: game })
+  const userId = "Some Name"
+  it("emits a message to register the user socket", () => {
+    const emitMessage = jest.fn()
+    const useSocketMessaging = () => [emitMessage]
+
+    const environment: Environment = {
+      useSocketMessaging,
+    } as any
+
+    const { getByTestId, getByRole } = render(
+      <EnvironmentContext.Provider value={environment}>
+        <CreateGameView />
+      </EnvironmentContext.Provider>,
+    )
+
+    fireEvent.change(getByRole("textbox", { name: "Your Name" }), { target: { value: userId } })
+
+    fireEvent.click(getByTestId("create-game-button"))
+
+    expect(emitMessage).toHaveBeenCalledWith(Messages.registerUserSocket({ userId }))
+    expect(emitMessage).toHaveBeenCalledWith(Messages.createGame({ userId }))
+  })
+
+  it("creates a game for the user and redirects to the game page", () => {
+    const gameId = "some-game-id"
+    const game = { gameId, some: "game" }
+    const useSocketMessaging = buildUseSocketMessagingForTest({
+      on: "createGame",
+      callHandlerFor: "gameCreated",
+      with: game,
+    })
 
     const environment: Environment = {
       useSocketMessaging,
@@ -60,10 +88,10 @@ describe("CreateGameView", () => {
       </EnvironmentContext.Provider>,
     )
 
-    fireEvent.change(getByRole("textbox", { name: "Your Name" }), { target: { value: "Some Name" } })
+    fireEvent.change(getByRole("textbox", { name: "Your Name" }), { target: { value: userId } })
 
     fireEvent.click(getByTestId("create-game-button"))
 
-    expect(container.innerHTML).toEqual(expect.stringContaining("/game?gameId=game-id&amp;userId=Some Name"))
+    expect(container.innerHTML).toEqual(expect.stringContaining(`/game?gameId=${gameId}&amp;userId=${userId}`))
   })
 })
