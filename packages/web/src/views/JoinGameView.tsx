@@ -7,25 +7,7 @@ import AccountCircle from "@material-ui/icons/AccountCircle"
 import FastForward from "@material-ui/icons/FastForward"
 import React from "react"
 import { Redirect } from "react-router-dom"
-
-const useStyles = makeStyles(theme => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}))
+import { logoImage } from "../assets/images"
 
 export interface JoinGameViewProps {
   gameId: string
@@ -49,6 +31,7 @@ export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserI
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
+        <img src={logoImage} alt="codenames 50" className={classes.logo} />
         <Avatar className={classes.avatar}>
           <FastForward />
         </Avatar>
@@ -88,3 +71,25 @@ export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserI
     </Container>
   )
 }
+
+const useStyles = makeStyles(theme => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  logo: {
+    padding: "50px",
+  },
+  margin: {
+    margin: theme.spacing(1),
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+}))

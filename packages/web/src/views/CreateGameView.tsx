@@ -10,36 +10,7 @@ import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
 import { Redirect } from "react-router-dom"
 import { useGameMessaging } from "../utils/useGameMessaging"
-
-const useStyles = makeStyles(theme => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  wrapper: {
-    margin: theme.spacing(1),
-    position: "relative",
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-}))
+import { logoImage } from "../assets/images"
 
 export interface CreateGameViewProps {
   userId?: string
@@ -69,6 +40,7 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
+          <img src={logoImage} alt="codenames 50" className={classes.logo} />
           <Avatar className={classes.avatar}>
             <NoteAdd />
           </Avatar>
@@ -128,3 +100,36 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
     </>
   )
 }
+
+const useStyles = makeStyles(theme => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  logo: {
+    padding: "50px",
+  },
+  margin: {
+    margin: theme.spacing(1),
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+  wrapper: {
+    margin: theme.spacing(1),
+    position: "relative",
+  },
+  buttonProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
+}))

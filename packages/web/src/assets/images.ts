@@ -4,3 +4,5 @@ const flagsImages: Record<string, string> = {
 }
 
 export const getFlagImage = (language: string) => flagsImages[language]
+
+export const logoImage = require("./images/logo.png")
