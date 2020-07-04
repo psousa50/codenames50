@@ -21,54 +21,55 @@ export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserI
 
   const canJoin = () => userId.trim().length > 0 && gameId.trim().length > 0
 
-  const joinGame = () => {
+  const joinGame = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     setJoining(true)
   }
 
   return joining ? (
     <Redirect to={`/game?gameId=${gameId || ""}&userId=${userId || ""}`} />
   ) : (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <img src={logoImage} alt="codenames 50" className={classes.logo} />
-        <Avatar className={classes.avatar}>
-          <FastForward />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Join a game
-        </Typography>
-        <TextField
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          className={classes.margin}
-          id="used-id"
-          label="Your Name"
-          value={userId}
-          onChange={event => setUserId(event.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <AccountCircle />
-              </InputAdornment>
-            ),
-          }}
-        />
-        <Button
-          disabled={!canJoin()}
-          fullWidth
-          variant="contained"
-          color="primary"
-          className={classes.submit}
-          onClick={() => {
-            joinGame()
-          }}
-        >
-          Join Game
-        </Button>
-      </div>
-    </Container>
+    <form onSubmit={joinGame}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <img src={logoImage} alt="codenames 50" className={classes.logo} />
+          <Avatar className={classes.avatar}>
+            <FastForward />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Join a game
+          </Typography>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            className={classes.margin}
+            id="used-id"
+            label="Your Name"
+            value={userId}
+            onChange={event => setUserId(event.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <AccountCircle />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Button
+            type="submit"
+            disabled={!canJoin()}
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            Join Game
+          </Button>
+        </div>
+      </Container>
+    </form>
   )
 }
 

@@ -23,7 +23,8 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
   const [userId, setUserId] = React.useState(initialUserId || "")
   const [loading, setLoading] = React.useState(false)
 
-  const createGame = () => {
+  const createGame = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     if (userId.trim().length > 0) {
       setLoading(true)
       emitMessage(Messages.registerUserSocket({ userId }))
@@ -37,52 +38,52 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
 
   function SignIn() {
     return (
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          <img src={logoImage} alt="codenames 50" className={classes.logo} />
-          <Avatar className={classes.avatar}>
-            <NoteAdd />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Create a game
-          </Typography>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            className={classes.margin}
-            id="used-id"
-            label="Your Name"
-            value={userId}
-            onChange={event => setUserId(event.target.value)}
-            autoFocus
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <AccountCircle />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <div className={classes.wrapper}>
-            <Button
+      <form onSubmit={createGame}>
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <div className={classes.paper}>
+            <img src={logoImage} alt="codenames 50" className={classes.logo} />
+            <Avatar className={classes.avatar}>
+              <NoteAdd />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Create a game
+            </Typography>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
               fullWidth
-              variant="contained"
-              disabled={loading || userId.trim().length === 0}
-              color="primary"
-              className={classes.submit}
-              onClick={() => {
-                createGame()
+              className={classes.margin}
+              id="used-id"
+              label="Your Name"
+              value={userId}
+              onChange={event => setUserId(event.target.value)}
+              autoFocus
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AccountCircle />
+                  </InputAdornment>
+                ),
               }}
-            >
-              Create Game
-            </Button>
-            {loading && <CircularProgress size={32} className={classes.buttonProgress} />}
+            />
+            <div className={classes.wrapper}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading || userId.trim().length === 0}
+                color="primary"
+                className={classes.submit}
+              >
+                Create Game
+              </Button>
+              {loading && <CircularProgress size={32} className={classes.buttonProgress} />}
+            </div>
           </div>
-        </div>
-      </Container>
+        </Container>
+      </form>
     )
   }
 
