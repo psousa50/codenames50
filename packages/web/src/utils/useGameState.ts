@@ -15,11 +15,11 @@ export const useGameState = (): [GameModels.CodeNamesGame | undefined, typeof up
     return newGame
   }
 
-  const updateGame = (portOrGame: GamePort | GameModels.CodeNamesGame, callback?: GameCallback) => {
-    if (typeof portOrGame === "function") {
-      setGame(checkResult(portOrGame, callback))
+  const updateGame = (gamePortOrGame: GamePort | GameModels.CodeNamesGame, callback?: GameCallback) => {
+    if (typeof gamePortOrGame === "function") {
+      setGame(checkResult(gamePortOrGame, callback))
     } else {
-      setGame(portOrGame)
+      setGame(gamePortOrGame)
     }
   }
 

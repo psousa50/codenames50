@@ -1,5 +1,4 @@
 import React from "react"
-import useSound from "use-sound"
 import { EnvironmentContext } from "../environment"
 
 export const sounds = {
@@ -13,7 +12,7 @@ export const sounds = {
 }
 
 export const usePlaySound = (url: string) => {
-  const environment = React.useContext(EnvironmentContext)
+  const { config, useSound } = React.useContext(EnvironmentContext)
   const [playSound] = useSound(url)
   const [playIt, setPlayIt] = React.useState(false)
 
@@ -22,11 +21,11 @@ export const usePlaySound = (url: string) => {
   }
 
   React.useEffect(() => {
-    if (environment.config.soundOn && playIt) {
+    if (config.soundOn && playIt) {
       playSound()
     }
     setPlayIt(false)
-  }, [environment.config.soundOn, playSound, playIt])
+  }, [playSound, playIt, config.soundOn])
 
   return [play]
 }

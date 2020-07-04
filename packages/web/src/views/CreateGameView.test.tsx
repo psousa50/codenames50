@@ -47,7 +47,7 @@ const buildUseSocketMessagingForTest = (parameters: UseSocketMessagingTestParams
 
 describe("CreateGameView", () => {
   const userId = "Some Name"
-  it("emits a message to register the user socket", () => {
+  it("emits messages to register the user socket and to create the game", () => {
     const emitMessage = jest.fn()
     const useSocketMessaging = () => [emitMessage]
 

@@ -1,3 +1,4 @@
+import useSound from "use-sound"
 import { createMuiTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
 import { blueGrey, lightBlue } from "@material-ui/core/colors"
 import React, { useState } from "react"
@@ -21,6 +22,7 @@ export const App = () => {
   const savedConfig = JSON.parse(localStorage.getItem("config") || "{}")
   const defaultEnvironment: Environment = {
     config: { ...defaultConfig, ...savedConfig },
+    useSound,
     toggleSound: () =>
       setEnvironment(e => {
         const newConfig = {
