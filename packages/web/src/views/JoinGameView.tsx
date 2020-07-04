@@ -43,7 +43,7 @@ export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserI
             margin="normal"
             fullWidth
             className={classes.margin}
-            id="used-id"
+            id="user-id"
             label="Your Name"
             value={userId}
             onChange={event => setUserId(event.target.value)}
@@ -62,6 +62,7 @@ export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserI
             variant="contained"
             color="primary"
             className={classes.submit}
+            data-testid="join-game-button"
           >
             Join Game
           </Button>

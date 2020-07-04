@@ -53,7 +53,7 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
               required
               fullWidth
               className={classes.margin}
-              id="used-id"
+              id="user-id"
               label="Your Name"
               value={userId}
               onChange={event => setUserId(event.target.value)}

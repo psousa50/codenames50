@@ -1,5 +1,5 @@
 import { Messages } from "@codenames50/messaging"
-import { fireEvent, render, waitFor } from "@testing-library/react"
+import { fireEvent, render } from "@testing-library/react"
 import React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
 import { Environment, EnvironmentContext, SocketMessaging } from "../environment"
@@ -18,12 +18,19 @@ const TestRedirect: React.FC<TestRedirectProps> = ({ ComponentWithRedirection, r
   </BrowserRouter>
 )
 
-const useSocketMessagingTest = (parameters: {}): SocketMessaging => {
+type UseSocketMessagingTestParams = {
+  on: string
+  callHandlerFor: string
+  with: Record<string, unknown>
+}
+const useSocketMessagingTest = (parameters: UseSocketMessagingTestParams): SocketMessaging => {
   const useSocketMessaging: SocketMessaging = (_, onConnect) => {
     const [gameCreatedHandler, setGameCreatedHandler] = React.useState<any>()
 
     const addMessageHandler = jest.fn((messageHandler: Messages.GameMessageHandler) => {
-      setGameCreatedHandler(g => (messageHandler.type === parameters.callHandlerFor ? messageHandler.handler : g))
+      setGameCreatedHandler((handler: any) =>
+        messageHandler.type === parameters.callHandlerFor ? messageHandler.handler : handler,
+      )
     })
     const emitMessage = jest.fn((message: Messages.GameMessage) =>
       message.type === parameters.on && gameCreatedHandler ? gameCreatedHandler(parameters.with) : undefined,
