@@ -31,7 +31,6 @@ export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserI
   ) : (
     <form onSubmit={joinGame}>
       <Container component="main" maxWidth="xs">
-        <CssBaseline />
         <div className={classes.paper}>
           <img src={logoImage} alt="codenames 50" className={classes.logo} />
           <Avatar className={classes.avatar}>

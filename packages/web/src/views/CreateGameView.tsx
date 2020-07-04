@@ -40,7 +40,6 @@ export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialU
     return (
       <form onSubmit={createGame}>
         <Container component="main" maxWidth="xs">
-          <CssBaseline />
           <div className={classes.paper}>
             <img src={logoImage} alt="codenames 50" className={classes.logo} />
             <Avatar className={classes.avatar}>
