@@ -11,18 +11,6 @@ interface TestRedirectProps {
   redirectUrl: string
 }
 
-const TestRedirect: React.FC<TestRedirectProps> = ({ ComponentWithRedirection, redirectUrl }) => (
-  <BrowserRouter>
-    <Switch>
-      <Route path="/" exact={true} render={() => <ComponentWithRedirection />} />
-      <Route
-        path={redirectUrl}
-        render={({ location: { pathname, search } }) => <div data-testid="redirect-url">{`${pathname}${search}`}</div>}
-      />
-    </Switch>
-  </BrowserRouter>
-)
-
 describe("CreateGameView", () => {
   const userId = "Some Name"
 
@@ -39,7 +27,7 @@ describe("CreateGameView", () => {
         },
       }
 
-      const callMessagehandler = (messageType: string) => messageHandlers[messageType]
+      const callMessagehandler = (messageType: Messages.GameMessageType) => messageHandlers[messageType]
 
       const environment: Environment = {
         socketMessaging,
@@ -47,7 +35,19 @@ describe("CreateGameView", () => {
 
       render(
         <EnvironmentContext.Provider value={environment}>
-          <TestRedirect ComponentWithRedirection={CreateGameView} redirectUrl={"/game"} />
+          <BrowserRouter>
+            <Switch>
+              <Route path="/" exact>
+                <CreateGameView />
+              </Route>
+              <Route
+                path={"/game"}
+                render={({ location: { pathname, search } }) => (
+                  <div data-testid="redirect-url">{`${pathname}${search}`}</div>
+                )}
+              />
+            </Switch>
+          </BrowserRouter>
         </EnvironmentContext.Provider>,
       )
 
@@ -71,11 +71,11 @@ describe("CreateGameView", () => {
       const { callMessagehandler } = userTypesNameAndPressesCreateGameButton()
 
       const gameId = "some-game-id"
-      const game = { gameId, some: "game" }
+      const game = { gameId }
       act(() => callMessagehandler("gameCreated")(game))
 
-      const redirect = screen.getByTestId("redirect-url")
-      expect(redirect.innerHTML).toEqual(expect.stringContaining(`/game?gameId=${gameId}&amp;userId=${userId}`))
+      const redirectUrl = screen.getByText(`/game?gameId=${gameId}&userId=${userId}`)
+      expect(redirectUrl).toBeDefined()
     })
   })
 })
