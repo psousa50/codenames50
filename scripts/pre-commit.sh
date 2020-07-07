@@ -6,4 +6,6 @@ yarn build
 yarn workspace @codenames50/server test
 yarn workspace @codenames50/web test
 
+yarn lint
+
 ./scripts/start-server.sh

@@ -1,9 +1,6 @@
-import { Messages } from "@codenames50/messaging"
-import { fireEvent, render, waitFor } from "@testing-library/react"
+import { fireEvent, render } from "@testing-library/react"
 import React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
-import { Environment, EnvironmentContext, SocketMessaging } from "../environment"
-import { CreateGameView } from "./CreateGameView"
 import { JoinGameView } from "./JoinGameView"
 
 interface TestRedirectProps {

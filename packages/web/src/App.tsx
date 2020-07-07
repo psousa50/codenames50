@@ -1,12 +1,12 @@
-import useSound from "use-sound"
 import { createMuiTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
 import { blueGrey, lightBlue } from "@material-ui/core/colors"
 import React, { useState } from "react"
 import { BrowserRouter } from "react-router-dom"
+import useSound from "use-sound"
 import { AppRouter } from "./AppRouter"
 import { defaultConfig, Environment, EnvironmentContext } from "./environment"
-import { useSocketMessaging } from "./utils/useSocketMessaging"
 import { ViewportProvider } from "./utils/viewPort"
+import { socketMessaging } from "./socketMessaging"
 
 const darkTheme = responsiveFontSizes(
   createMuiTheme({
@@ -32,7 +32,7 @@ export const App = () => {
         localStorage.setItem("config", JSON.stringify(newConfig))
         return { ...e, config: newConfig }
       }),
-    useSocketMessaging,
+    socketMessaging,
   }
 
   const [environment, setEnvironment] = useState(defaultEnvironment)

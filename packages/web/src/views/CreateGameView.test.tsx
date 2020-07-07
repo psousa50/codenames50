@@ -1,97 +1,79 @@
 import { Messages } from "@codenames50/messaging"
-import { fireEvent, render } from "@testing-library/react"
+import { act, render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
-import { Environment, EnvironmentContext, SocketMessaging } from "../environment"
+import { Environment, EnvironmentContext } from "../environment"
 import { CreateGameView } from "./CreateGameView"
 
 interface TestRedirectProps {
   ComponentWithRedirection: React.ComponentType
   redirectUrl: string
 }
+
 const TestRedirect: React.FC<TestRedirectProps> = ({ ComponentWithRedirection, redirectUrl }) => (
   <BrowserRouter>
     <Switch>
       <Route path="/" exact={true} render={() => <ComponentWithRedirection />} />
-      <Route path={redirectUrl} render={({ location: { pathname, search } }) => <div>{`${pathname}${search}`}</div>} />
+      <Route
+        path={redirectUrl}
+        render={({ location: { pathname, search } }) => <div data-testid="redirect-url">{`${pathname}${search}`}</div>}
+      />
     </Switch>
   </BrowserRouter>
 )
 
-type UseSocketMessagingTestParams = {
-  on: string
-  callHandlerFor: string
-  with: Record<string, unknown>
-}
-const buildUseSocketMessagingForTest = (parameters: UseSocketMessagingTestParams): SocketMessaging => {
-  const useSocketMessaging: SocketMessaging = (_, onConnect) => {
-    const [gameCreatedHandler, setGameCreatedHandler] = React.useState<any>()
-
-    const addMessageHandler = jest.fn((messageHandler: Messages.GameMessageHandler) => {
-      setGameCreatedHandler((handler: any) =>
-        messageHandler.type === parameters.callHandlerFor ? messageHandler.handler : handler,
-      )
-    })
-    const emitMessage = jest.fn((message: Messages.GameMessage) =>
-      message.type === parameters.on && gameCreatedHandler ? gameCreatedHandler(parameters.with) : undefined,
-    )
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    React.useEffect(() => onConnect(), [])
-
-    return [emitMessage, addMessageHandler]
-  }
-
-  return useSocketMessaging
-}
-
 describe("CreateGameView", () => {
   const userId = "Some Name"
-  it("emits messages to register the user socket and to create the game", () => {
-    const emitMessage = jest.fn()
-    const useSocketMessaging = () => [emitMessage]
 
-    const environment: Environment = {
-      useSocketMessaging,
-    } as any
+  describe("when the user types a name and presses create game button", () => {
+    const userTypesNameAndPressesCreateGameButton = () => {
+      const emitMessage = jest.fn()
+      let messageHandlers = {} as any
+      const socketMessaging = {
+        connect: () => {},
+        disconnect: () => {},
+        emitMessage: jest.fn(() => emitMessage),
+        addMessageHandler: () => (handler: Messages.GameMessageHandler) => {
+          messageHandlers[handler.type] = handler.handler
+        },
+      }
 
-    const { getByTestId, getByRole } = render(
-      <EnvironmentContext.Provider value={environment}>
-        <CreateGameView />
-      </EnvironmentContext.Provider>,
-    )
+      const environment: Environment = {
+        socketMessaging,
+      } as any
 
-    fireEvent.change(getByRole("textbox", { name: "Your Name" }), { target: { value: userId } })
+      render(
+        <EnvironmentContext.Provider value={environment}>
+          <TestRedirect ComponentWithRedirection={CreateGameView} redirectUrl={"/game"} />
+        </EnvironmentContext.Provider>,
+      )
 
-    fireEvent.click(getByTestId("create-game-button"))
+      userEvent.type(screen.getByRole("textbox", { name: "Your Name" }), userId)
+      userEvent.click(screen.getByTestId("create-game-button"))
 
-    expect(emitMessage).toHaveBeenCalledWith(Messages.registerUserSocket({ userId }))
-    expect(emitMessage).toHaveBeenCalledWith(Messages.createGame({ userId }))
-  })
+      return {
+        emitMessage,
+        messageHandlers,
+      }
+    }
 
-  it("creates a game for the user and redirects to the game page", () => {
-    const gameId = "some-game-id"
-    const game = { gameId, some: "game" }
-    const useSocketMessaging = buildUseSocketMessagingForTest({
-      on: "createGame",
-      callHandlerFor: "gameCreated",
-      with: game,
+    it("emits messages to register the user socket and to create the game", () => {
+      const { emitMessage } = userTypesNameAndPressesCreateGameButton()
+
+      expect(emitMessage).toHaveBeenCalledWith(Messages.registerUserSocket({ userId }))
+      expect(emitMessage).toHaveBeenCalledWith(Messages.createGame({ userId }))
     })
 
-    const environment: Environment = {
-      useSocketMessaging,
-    } as any
+    it("redirects to the game page when the game is created", async () => {
+      const { messageHandlers } = userTypesNameAndPressesCreateGameButton()
 
-    const { container, getByTestId, getByRole } = render(
-      <EnvironmentContext.Provider value={environment}>
-        <TestRedirect ComponentWithRedirection={CreateGameView} redirectUrl={"/game"} />
-      </EnvironmentContext.Provider>,
-    )
+      const gameId = "some-game-id"
+      const game = { gameId, some: "game" }
+      act(() => messageHandlers["gameCreated"](game))
 
-    fireEvent.change(getByRole("textbox", { name: "Your Name" }), { target: { value: userId } })
-
-    fireEvent.click(getByTestId("create-game-button"))
-
-    expect(container.innerHTML).toEqual(expect.stringContaining(`/game?gameId=${gameId}&amp;userId=${userId}`))
+      const redirect = screen.getByTestId("redirect-url")
+      expect(redirect.innerHTML).toEqual(expect.stringContaining(`/game?gameId=${gameId}&amp;userId=${userId}`))
+    })
   })
 })

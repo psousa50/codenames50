@@ -26,6 +26,11 @@ export const CodeNamesGameLoader: React.FC<CodeNamesGameLoaderProps> = ({ gameId
   const [playAssassinSound] = usePlaySound(sounds.assassin)
   const [playEndGameSound] = usePlaySound(sounds.endGame)
 
+  const onConnect = () => {
+    emitMessage(Messages.registerUserSocket({ userId }))
+    emitMessage(Messages.joinGame({ gameId, userId }))
+  }
+
   const onHintSent = (game: GameModels.CodeNamesGame) => {
     const teamConfig = game.turn === GameModels.Teams.red ? game.redTeam : game.blueTeam
     if (teamConfig.spyMaster !== userId) {
@@ -48,11 +53,6 @@ export const CodeNamesGameLoader: React.FC<CodeNamesGameLoaderProps> = ({ gameId
   }
 
   const { emitMessage, error, game, setError } = useGameMessaging({ onConnect, onHintSent, onRevealWord })
-
-  function onConnect() {
-    emitMessage(Messages.registerUserSocket({ userId }))
-    emitMessage(Messages.joinGame({ gameId, userId }))
-  }
 
   return game ? (
     <CodeNamesGameView

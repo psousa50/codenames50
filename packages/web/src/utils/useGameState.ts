@@ -23,5 +23,5 @@ export const useGameState = (): [GameModels.CodeNamesGame | undefined, typeof up
     }
   }
 
-  return [game, updateGame]
+  return [game, React.useCallback(updateGame, [])]
 }

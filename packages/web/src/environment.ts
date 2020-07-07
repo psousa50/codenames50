@@ -1,9 +1,6 @@
-import useSound from "use-sound"
 import React from "react"
-import { EmitMessage } from "./utils/types"
-import { AddMessageHandler } from "./utils/useSocketMessaging"
-
-export type SocketMessaging = (uri: string, onConnect: () => void) => [EmitMessage, AddMessageHandler]
+import useSound from "use-sound"
+import { SocketMessaging } from "./socketMessaging"
 
 export interface Environment {
   config: {
@@ -11,7 +8,7 @@ export interface Environment {
   }
   useSound: typeof useSound
   toggleSound: () => void
-  useSocketMessaging: SocketMessaging
+  socketMessaging: SocketMessaging
 }
 
 export const defaultConfig = {

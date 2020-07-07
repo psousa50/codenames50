@@ -2,7 +2,7 @@ import { GameModels, gamePorts } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
 import React from "react"
 import { useGameState } from "./useGameState"
-import { EnvironmentContext } from "../environment"
+import { useSocketMessaging } from "./useSocketMessaging"
 
 type GameMessagingHandlers = {
   onConnect?: () => void
@@ -11,84 +11,90 @@ type GameMessagingHandlers = {
   onRevealWord?: (game: GameModels.CodeNamesGame) => void
 }
 
-export function useGameMessaging(handlers: GameMessagingHandlers = {}) {
-  function onConnect() {
-    addMessageHandler(Messages.createGameMessagehandler("gameCreated", onGameCreated))
-    addMessageHandler(Messages.createGameMessagehandler("gameError", onError))
-    addMessageHandler(Messages.createGameMessagehandler("gameStarted", onGameStarted))
-    addMessageHandler(Messages.createGameMessagehandler("hintSent", onHintSent))
-    addMessageHandler(Messages.createGameMessagehandler("joinedGame", onJoinedGame))
-    addMessageHandler(Messages.createGameMessagehandler("joinTeam", onJoinTeam))
-    addMessageHandler(Messages.createGameMessagehandler("removePlayer", onRemovePlayer))
-    addMessageHandler(Messages.createGameMessagehandler("restartGame", onRestartGame))
-    addMessageHandler(Messages.createGameMessagehandler("setSpyMaster", onSetSpyMaster))
-    addMessageHandler(Messages.createGameMessagehandler("turnChanged", onTurnChanged))
-    addMessageHandler(Messages.createGameMessagehandler("updateConfig", onUpdateConfig))
-    addMessageHandler(Messages.createGameMessagehandler("updateGame", onUpdateGame))
-    addMessageHandler(Messages.createGameMessagehandler("wordRevealed", onWordRevealed))
-
-    handlers.onConnect && handlers.onConnect()
-  }
-
-  const { useSocketMessaging } = React.useContext(EnvironmentContext)
-  const [emitMessage, addMessageHandler] = useSocketMessaging(process.env.REACT_APP_SERVER_URL || "", onConnect)
+export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
+  const [emitMessage, addMessageHandler] = useSocketMessaging(process.env.REACT_APP_SERVER_URL || "")
   const [game, setGame] = useGameState()
 
   const [error, setError] = React.useState("")
 
-  const onGameCreated = (game: GameModels.CodeNamesGame) => {
-    setGame(game)
-    handlers.onGameCreated && handlers.onGameCreated(game)
-  }
+  React.useEffect(() => {
+    const setupMessageHandlers = () => {
+      addMessageHandler(Messages.createGameMessagehandler("connect", onConnect))
+      addMessageHandler(Messages.createGameMessagehandler("gameCreated", onGameCreated))
+      addMessageHandler(Messages.createGameMessagehandler("gameError", onError))
+      addMessageHandler(Messages.createGameMessagehandler("gameStarted", onGameStarted))
+      addMessageHandler(Messages.createGameMessagehandler("hintSent", onHintSent))
+      addMessageHandler(Messages.createGameMessagehandler("joinedGame", onJoinedGame))
+      addMessageHandler(Messages.createGameMessagehandler("joinTeam", onJoinTeam))
+      addMessageHandler(Messages.createGameMessagehandler("removePlayer", onRemovePlayer))
+      addMessageHandler(Messages.createGameMessagehandler("restartGame", onRestartGame))
+      addMessageHandler(Messages.createGameMessagehandler("setSpyMaster", onSetSpyMaster))
+      addMessageHandler(Messages.createGameMessagehandler("turnChanged", onTurnChanged))
+      addMessageHandler(Messages.createGameMessagehandler("updateConfig", onUpdateConfig))
+      addMessageHandler(Messages.createGameMessagehandler("updateGame", onUpdateGame))
+      addMessageHandler(Messages.createGameMessagehandler("wordRevealed", onWordRevealed))
+    }
 
-  const onJoinedGame = (input: Messages.JoinedGameInput) => {
-    setGame(input.game)
-  }
+    const onConnect = () => {
+      handlers.onConnect && handlers.onConnect()
+    }
 
-  const onRemovePlayer = ({ userId }: Messages.RemovePlayerInput) => {
-    setGame(gamePorts.removePlayer(userId))
-  }
+    const onGameCreated = (game: GameModels.CodeNamesGame) => {
+      setGame(game)
+      handlers.onGameCreated && handlers.onGameCreated(game)
+    }
 
-  const onSetSpyMaster = ({ userId, team }: Messages.SetSpyMasterInput) => {
-    setGame(gamePorts.setSpyMaster(userId, team))
-  }
+    const onJoinedGame = (input: Messages.JoinedGameInput) => {
+      setGame(input.game)
+    }
 
-  const onJoinTeam = ({ userId, team }: Messages.JoinTeamInput) => {
-    setGame(gamePorts.joinTeam(userId, team))
-  }
+    const onRemovePlayer = ({ userId }: Messages.RemovePlayerInput) => {
+      setGame(gamePorts.removePlayer(userId))
+    }
 
-  const onGameStarted = (game: GameModels.CodeNamesGame) => {
-    setGame(game)
-  }
+    const onSetSpyMaster = ({ userId, team }: Messages.SetSpyMasterInput) => {
+      setGame(gamePorts.setSpyMaster(userId, team))
+    }
 
-  const onRestartGame = () => {
-    setGame(gamePorts.restartGame)
-  }
+    const onJoinTeam = ({ userId, team }: Messages.JoinTeamInput) => {
+      setGame(gamePorts.joinTeam(userId, team))
+    }
 
-  const onUpdateGame = (game: GameModels.CodeNamesGame) => {
-    setGame(game)
-  }
+    const onGameStarted = (game: GameModels.CodeNamesGame) => {
+      setGame(game)
+    }
 
-  const onUpdateConfig = (input: Messages.UpdateConfigInput) => {
-    setGame(g => ({ ...g, config: input.config }))
-  }
+    const onRestartGame = () => {
+      setGame(gamePorts.restartGame)
+    }
 
-  const onHintSent = (input: Messages.HintSentInput) => {
-    const { userId, hintWord, hintWordCount } = input
-    setGame(gamePorts.sendHint(userId, hintWord, hintWordCount), handlers.onHintSent)
-  }
+    const onUpdateGame = (game: GameModels.CodeNamesGame) => {
+      setGame(game)
+    }
 
-  const onWordRevealed = ({ userId, row, col, now }: Messages.WordRevealedInput) => {
-    setGame(gamePorts.revealWord(userId, row, col, now), handlers.onRevealWord)
-  }
+    const onUpdateConfig = (input: Messages.UpdateConfigInput) => {
+      setGame(g => ({ ...g, config: input.config }))
+    }
 
-  const onTurnChanged = ({ userId, now }: Messages.TurnChangedInput) => {
-    setGame(gamePorts.forceChangeTurn(userId, now))
-  }
+    const onHintSent = (input: Messages.HintSentInput) => {
+      const { userId, hintWord, hintWordCount } = input
+      setGame(gamePorts.sendHint(userId, hintWord, hintWordCount), handlers.onHintSent)
+    }
 
-  const onError = (e: { message: string }) => {
-    setError(e.message)
-  }
+    const onWordRevealed = ({ userId, row, col, now }: Messages.WordRevealedInput) => {
+      setGame(gamePorts.revealWord(userId, row, col, now), handlers.onRevealWord)
+    }
+
+    const onTurnChanged = ({ userId, now }: Messages.TurnChangedInput) => {
+      setGame(gamePorts.forceChangeTurn(userId, now))
+    }
+
+    const onError = (e: { message: string }) => {
+      setError(e.message)
+    }
+
+    setupMessageHandlers()
+  }, [addMessageHandler, handlers, setGame])
 
   return {
     emitMessage,
