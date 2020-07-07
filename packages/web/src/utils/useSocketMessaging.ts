@@ -11,9 +11,9 @@ export const useSocketMessaging = (uri: string): [EmitMessage, AddMessageHandler
     socketMessaging: { connect, disconnect, emitMessage, addMessageHandler },
   } = React.useContext(EnvironmentContext)
 
-  const { current: socket } = useRef(connect(uri, () => {}))
+  const { current: socket } = useRef(connect(uri))
 
-  useEffect(() => () => disconnect(socket))
+  useEffect(() => () => disconnect(socket), [disconnect, socket])
 
   return [React.useCallback(emitMessage(socket), []), React.useCallback(addMessageHandler(socket), [])]
 }
