@@ -29,7 +29,7 @@ describe("CreateGameView", () => {
   describe("when the user types a name and presses create game button", () => {
     const userTypesNameAndPressesCreateGameButton = () => {
       const emitMessage = jest.fn()
-      let messageHandlers = {} as any
+      const messageHandlers = {} as any
       const socketMessaging = {
         connect: () => {},
         disconnect: () => {},
@@ -38,6 +38,8 @@ describe("CreateGameView", () => {
           messageHandlers[handler.type] = handler.handler
         },
       }
+
+      const callMessagehandler = (messageType: string) => messageHandlers[messageType]
 
       const environment: Environment = {
         socketMessaging,
@@ -54,7 +56,7 @@ describe("CreateGameView", () => {
 
       return {
         emitMessage,
-        messageHandlers,
+        callMessagehandler,
       }
     }
 
@@ -66,11 +68,11 @@ describe("CreateGameView", () => {
     })
 
     it("redirects to the game page when the game is created", async () => {
-      const { messageHandlers } = userTypesNameAndPressesCreateGameButton()
+      const { callMessagehandler } = userTypesNameAndPressesCreateGameButton()
 
       const gameId = "some-game-id"
       const game = { gameId, some: "game" }
-      act(() => messageHandlers["gameCreated"](game))
+      act(() => callMessagehandler("gameCreated")(game))
 
       const redirect = screen.getByTestId("redirect-url")
       expect(redirect.innerHTML).toEqual(expect.stringContaining(`/game?gameId=${gameId}&amp;userId=${userId}`))

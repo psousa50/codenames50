@@ -20,6 +20,8 @@ describe("CodeNamesGameLoader", () => {
       },
     }
 
+    const callMessagehandler = (messageType: string) => messageHandlers[messageType]
+
     const environment: Environment = {
       config: {},
       useSound: () => [jest.fn()],
@@ -32,7 +34,7 @@ describe("CodeNamesGameLoader", () => {
       </EnvironmentContext.Provider>,
     )
 
-    act(() => messageHandlers["connect"]())
+    act(() => callMessagehandler("connect")())
 
     expect(emitMessage).toHaveBeenCalledWith(Messages.registerUserSocket({ userId }))
     expect(emitMessage).toHaveBeenCalledWith(Messages.joinGame({ gameId, userId }))
