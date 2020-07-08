@@ -14,6 +14,16 @@ describe("CodeNamesGameView", () => {
     },
   } as any
 
+  const defaultGame = {
+    config: {},
+    gameId: "some-id",
+    players: [],
+    blueTeam: {},
+    redTeam: {},
+    hintWord: "",
+    board: [],
+  }
+
   it("displays the userId", async () => {
     const userId = "Some Name"
 
@@ -41,15 +51,11 @@ describe("CodeNamesGameView", () => {
 
   describe("when game is idle", () => {
     const idleGame = {
+      ...defaultGame,
       state: GameStates.idle,
-      config: {},
-      gameId: "some-id",
-      players: [],
-      blueTeam: {},
-      redTeam: {},
     }
 
-    it("displays game setup", async () => {
+    it("game setup should be expanded", async () => {
       const userId = "Some Name"
 
       const game = idleGame
@@ -66,7 +72,7 @@ describe("CodeNamesGameView", () => {
         </EnvironmentContext.Provider>,
       )
 
-      expect(await screen.findByText("Start Game")).toBeInTheDocument()
+      expect(await screen.findByText("Start Game")).toBeVisible()
     })
 
     it("shouldn't display the board nor the hints", async () => {
@@ -75,7 +81,6 @@ describe("CodeNamesGameView", () => {
       const word = "SomeWord"
       const game = {
         ...idleGame,
-        hintWord: "",
         board: [[{ word }]],
       }
 
@@ -91,8 +96,61 @@ describe("CodeNamesGameView", () => {
         </EnvironmentContext.Provider>,
       )
 
-      await waitFor(() => expect(screen.queryByText(word.toUpperCase())).toBeNull())
+      await waitFor(() => expect(screen.queryByText(word, { exact: false })).toBeNull())
       await waitFor(() => expect(screen.queryByText("End Turn")).toBeNull())
+    })
+  })
+
+  describe("when game is running", () => {
+    const runningGame = {
+      ...defaultGame,
+      state: GameStates.running,
+    }
+
+    it("game setup should be colapsed", async () => {
+      const userId = "Some Name"
+
+      const game = runningGame
+
+      const props = {
+        game,
+        userId,
+        error: "",
+      } as any
+
+      render(
+        <EnvironmentContext.Provider value={defaultEnvironment}>
+          <CodeNamesGameView {...props} />
+        </EnvironmentContext.Provider>,
+      )
+
+      await waitFor(() => expect(screen.queryByText("New Game")).not.toBeVisible())
+    })
+
+    it("board and hint should be visible", async () => {
+      const userId = "Some Name"
+
+      const word = "SomeWord"
+      const game = {
+        ...runningGame,
+        board: [[{ word }]],
+      }
+
+      const props = {
+        game,
+        userId,
+        error: "",
+      } as any
+
+      render(
+        <EnvironmentContext.Provider value={defaultEnvironment}>
+          <CodeNamesGameView {...props} />
+        </EnvironmentContext.Provider>,
+      )
+
+      const words = await screen.findAllByText(word, { exact: false })
+      expect(words.length).toBeGreaterThan(0)
+      expect(await screen.findByText("End Turn")).toBeVisible()
     })
   })
 })
