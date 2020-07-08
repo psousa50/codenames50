@@ -7,6 +7,7 @@ import { AppRouter } from "./AppRouter"
 import { defaultConfig, Environment, EnvironmentContext } from "./environment"
 import { ViewportProvider } from "./utils/viewPort"
 import { socketMessaging } from "./socketMessaging"
+import * as Api from "./api/games"
 
 const darkTheme = responsiveFontSizes(
   createMuiTheme({
@@ -21,6 +22,7 @@ const darkTheme = responsiveFontSizes(
 export const App = () => {
   const savedConfig = JSON.parse(localStorage.getItem("config") || "{}")
   const defaultEnvironment: Environment = {
+    api: Api,
     config: { ...defaultConfig, ...savedConfig },
     useSound,
     toggleSound: () =>

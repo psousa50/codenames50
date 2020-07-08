@@ -42,7 +42,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
     setTeamsExpanded(game.state === GameModels.GameStates.idle)
   }, [game.state])
 
-  const handleTeamsExpanded = (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
+  const handleTeamsExpanded = (_: React.ChangeEvent<{}>, isExpanded: boolean) => {
     setTeamsExpanded(isExpanded)
   }
 
@@ -60,24 +60,13 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
 
         <Separator />
 
-        <div className={classes.teams}>
-          <Accordion expanded={teamsExpanded} onChange={handleTeamsExpanded}>
-            <AccordionSummary
-              classes={{
-                root: classes.expandableRoot,
-                content: classes.expandableContent,
-              }}
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
-            >
-              <Typography className={classes.heading}>Game Setup</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <SetupGame emitMessage={emitMessage} game={game} userId={userId} />
-            </AccordionDetails>
-          </Accordion>
-        </div>
+        <SetupGameAcordion
+          teamsExpanded={teamsExpanded}
+          handleTeamsExpanded={handleTeamsExpanded}
+          emitMessage={emitMessage}
+          game={game}
+          userId={userId}
+        />
 
         <Separator />
 
@@ -89,6 +78,45 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
           <EndedGameView userId={userId} game={game} newGame={restartGame} />
         )}
       </div>
+    </div>
+  )
+}
+
+interface SetupGameAcordionProps {
+  teamsExpanded: boolean
+  handleTeamsExpanded: (_: React.ChangeEvent<{}>, isExpanded: boolean) => void
+  emitMessage: EmitMessage
+  game: GameModels.CodeNamesGame
+  userId: string
+}
+
+const SetupGameAcordion: React.FC<SetupGameAcordionProps> = ({
+  teamsExpanded,
+  handleTeamsExpanded,
+  emitMessage,
+  game,
+  userId,
+}) => {
+  const classes = useStyles()
+
+  return (
+    <div className={classes.teams}>
+      <Accordion expanded={teamsExpanded} onChange={handleTeamsExpanded}>
+        <AccordionSummary
+          classes={{
+            root: classes.expandableRoot,
+            content: classes.expandableContent,
+          }}
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography className={classes.heading}>Game Setup</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <SetupGame emitMessage={emitMessage} game={game} userId={userId} />
+        </AccordionDetails>
+      </Accordion>
     </div>
   )
 }

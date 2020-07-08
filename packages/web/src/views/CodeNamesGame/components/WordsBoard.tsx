@@ -72,7 +72,7 @@ interface WordsBoardProps {
 
 export const WordsBoard: React.FC<WordsBoardProps> = ({ userId, game, board, onWordClick, revealWords }) => {
   const classes = useStyles()
-  const s = 5
+  const s = board.length
 
   const forSpyMaster = game.redTeam.spyMaster === userId || game.blueTeam.spyMaster === userId
 

@@ -14,15 +14,12 @@ import {
   Select,
   Theme,
 } from "@material-ui/core"
-import { pipe } from "fp-ts/lib/pipeable"
-import { task } from "fp-ts/lib/Task"
-import { getOrElse } from "fp-ts/lib/TaskEither"
 import React from "react"
-import * as Api from "../../../api/games"
 import { getFlagImage } from "../../../assets/images"
 import { EmitMessage } from "../../../utils/types"
 import { InvitePlayersDialog } from "./InvitePlayersDialog"
 import { Teams } from "./Teams"
+import { useApi } from "../../../utils/useApi"
 
 interface SetupGameProps {
   emitMessage: EmitMessage
@@ -38,34 +35,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
   const [invitePlayersOpened, openInvitePlayers] = React.useState(false)
   const [newGameDialogOpened, setNewGameDialogOpened] = React.useState(false)
   const [config, setConfig] = React.useState(game.config)
-  const [languages, setLanguages] = React.useState<string[]>()
-  const [turnTimeouts, setTurnTimeouts] = React.useState<GameModels.TurnTimeoutConfig[]>()
-
-  React.useEffect(() => {
-    const fetch = async () => {
-      const apiLanguages = await pipe(
-        Api.getLanguages(),
-        getOrElse<Error, string[] | undefined>(_ => task.of(undefined)),
-      )()
-
-      setLanguages(apiLanguages)
-    }
-
-    fetch()
-  }, [])
-
-  React.useEffect(() => {
-    const fetch = async () => {
-      const apiTurnTimeouts = await pipe(
-        Api.getTurnTimeouts(),
-        getOrElse<Error, GameModels.TurnTimeoutConfig[] | undefined>(_ => task.of(undefined)),
-      )()
-
-      setTurnTimeouts(apiTurnTimeouts)
-    }
-
-    fetch()
-  }, [])
+  const { languages, turnTimeouts } = useApi()
 
   React.useEffect(() => {
     setConfig(game.config)
