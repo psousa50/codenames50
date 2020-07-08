@@ -1,4 +1,5 @@
-import { fireEvent, render } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
 import { JoinGameView } from "./JoinGameView"
@@ -18,17 +19,17 @@ const TestRedirect: React.FC<TestRedirectProps> = ({ ComponentWithRedirection, r
 
 describe("JoinGameView", () => {
   it("join a game for a user and redirects to the game page", () => {
-    const { container, getByTestId, getByRole } = render(
+    render(
       <TestRedirect
         ComponentWithRedirection={() => <JoinGameView gameId="game-id" userId="some-user" />}
         redirectUrl={"/game"}
       />,
     )
 
-    fireEvent.change(getByRole("textbox", { name: "Your Name" }), { target: { value: "Some Name" } })
+    fireEvent.change(screen.getByRole("textbox", { name: "Your Name" }), { target: { value: "Some Name" } })
+    userEvent.click(screen.getByTestId("join-game-button"))
 
-    fireEvent.click(getByTestId("join-game-button"))
-
-    expect(container.innerHTML).toEqual(expect.stringContaining("/game?gameId=game-id&amp;userId=Some Name"))
+    const redirectUrl = screen.getByText("/game?gameId=game-id&userId=Some Name")
+    expect(redirectUrl).toBeDefined()
   })
 })

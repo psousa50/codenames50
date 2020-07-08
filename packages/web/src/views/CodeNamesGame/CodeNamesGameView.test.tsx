@@ -1,18 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react"
-import React from "react"
-import { EnvironmentContext } from "../../environment"
-import { actionOf } from "../../utils/actions"
-import { CodeNamesGameView } from "./CodeNamesGameView"
 import { GameStates } from "@codenames50/core/dist/models"
+import { screen, waitFor } from "@testing-library/react"
+import React from "react"
+import { defaultEnvironment, renderWithEnvironment } from "../../_testHelpers/render"
+import { CodeNamesGameView } from "./CodeNamesGameView"
 
 describe("CodeNamesGameView", () => {
-  const defaultEnvironment = {
-    config: {},
-    api: {
-      getLanguages: () => actionOf([]),
-      getTurnTimeouts: () => actionOf([{ timeoutSec: 0 }]),
-    },
-  } as any
+  const userId = "Some Name"
 
   const defaultGame = {
     config: {},
@@ -24,27 +17,17 @@ describe("CodeNamesGameView", () => {
     board: [],
   }
 
-  it("displays the userId", async () => {
-    const userId = "Some Name"
-
-    const game = {
-      gameId: "some-id",
-      players: [],
-      blueTeam: {},
-      redTeam: {},
-    }
-
-    const props = {
+  const propsFor = (game: any, userId: string = "Some name") =>
+    ({
       game,
       userId,
       error: "",
-    } as any
+    } as any)
 
-    render(
-      <EnvironmentContext.Provider value={defaultEnvironment}>
-        <CodeNamesGameView {...props} />
-      </EnvironmentContext.Provider>,
-    )
+  it("displays the userId", async () => {
+    const props = propsFor(defaultGame, userId)
+
+    renderWithEnvironment(<CodeNamesGameView {...props} />)
 
     expect(await screen.findByText(userId)).toBeInTheDocument()
   })
@@ -58,19 +41,9 @@ describe("CodeNamesGameView", () => {
     it("game setup should be expanded", async () => {
       const userId = "Some Name"
 
-      const game = idleGame
+      const props = propsFor(idleGame, userId)
 
-      const props = {
-        game,
-        userId,
-        error: "",
-      } as any
-
-      render(
-        <EnvironmentContext.Provider value={defaultEnvironment}>
-          <CodeNamesGameView {...props} />
-        </EnvironmentContext.Provider>,
-      )
+      renderWithEnvironment(<CodeNamesGameView {...props} />)
 
       expect(await screen.findByText("Start Game")).toBeVisible()
     })
@@ -84,17 +57,9 @@ describe("CodeNamesGameView", () => {
         board: [[{ word }]],
       }
 
-      const props = {
-        game,
-        userId,
-        error: "",
-      } as any
+      const props = propsFor(game, userId)
 
-      render(
-        <EnvironmentContext.Provider value={defaultEnvironment}>
-          <CodeNamesGameView {...props} />
-        </EnvironmentContext.Provider>,
-      )
+      renderWithEnvironment(<CodeNamesGameView {...props} />)
 
       await waitFor(() => expect(screen.queryByText(word, { exact: false })).toBeNull())
       await waitFor(() => expect(screen.queryByText("End Turn")).toBeNull())
@@ -110,19 +75,9 @@ describe("CodeNamesGameView", () => {
     it("game setup should be colapsed", async () => {
       const userId = "Some Name"
 
-      const game = runningGame
+      const props = propsFor(runningGame, userId)
 
-      const props = {
-        game,
-        userId,
-        error: "",
-      } as any
-
-      render(
-        <EnvironmentContext.Provider value={defaultEnvironment}>
-          <CodeNamesGameView {...props} />
-        </EnvironmentContext.Provider>,
-      )
+      renderWithEnvironment(<CodeNamesGameView {...props} />)
 
       await waitFor(() => expect(screen.queryByText("New Game")).not.toBeVisible())
     })
@@ -136,17 +91,9 @@ describe("CodeNamesGameView", () => {
         board: [[{ word }]],
       }
 
-      const props = {
-        game,
-        userId,
-        error: "",
-      } as any
+      const props = propsFor(game, userId)
 
-      render(
-        <EnvironmentContext.Provider value={defaultEnvironment}>
-          <CodeNamesGameView {...props} />
-        </EnvironmentContext.Provider>,
-      )
+      renderWithEnvironment(<CodeNamesGameView {...props} />)
 
       const words = await screen.findAllByText(word, { exact: false })
       expect(words.length).toBeGreaterThan(0)

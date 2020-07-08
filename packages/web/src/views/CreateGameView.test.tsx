@@ -1,9 +1,10 @@
 import { Messages } from "@codenames50/messaging"
-import { act, render, screen } from "@testing-library/react"
+import { fireEvent, screen, act } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
-import { Environment, EnvironmentContext } from "../environment"
+import { Environment } from "../environment"
+import { defaultEnvironment, renderWithEnvironment } from "../_testHelpers/render"
 import { CreateGameView } from "./CreateGameView"
 
 interface TestRedirectProps {
@@ -30,28 +31,28 @@ describe("CreateGameView", () => {
       const callMessagehandler = (messageType: Messages.GameMessageType) => messageHandlers[messageType]
 
       const environment: Environment = {
+        ...defaultEnvironment,
         socketMessaging,
       } as any
 
-      render(
-        <EnvironmentContext.Provider value={environment}>
-          <BrowserRouter>
-            <Switch>
-              <Route path="/" exact>
-                <CreateGameView />
-              </Route>
-              <Route
-                path={"/game"}
-                render={({ location: { pathname, search } }) => (
-                  <div data-testid="redirect-url">{`${pathname}${search}`}</div>
-                )}
-              />
-            </Switch>
-          </BrowserRouter>
-        </EnvironmentContext.Provider>,
+      renderWithEnvironment(
+        <BrowserRouter>
+          <Switch>
+            <Route path="/" exact>
+              <CreateGameView />
+            </Route>
+            <Route
+              path={"/game"}
+              render={({ location: { pathname, search } }) => (
+                <div data-testid="redirect-url">{`${pathname}${search}`}</div>
+              )}
+            />
+          </Switch>
+        </BrowserRouter>,
+        environment,
       )
 
-      userEvent.type(screen.getByRole("textbox", { name: "Your Name" }), userId)
+      fireEvent.change(screen.getByRole("textbox", { name: "Your Name" }), { target: { value: userId } })
       userEvent.click(screen.getByTestId("create-game-button"))
 
       return {
@@ -71,7 +72,7 @@ describe("CreateGameView", () => {
       const { callMessagehandler } = userTypesNameAndPressesCreateGameButton()
 
       const gameId = "some-game-id"
-      const game = { gameId }
+      const game = { gameId, error: "" }
       act(() => callMessagehandler("gameCreated")(game))
 
       const redirectUrl = screen.getByText(`/game?gameId=${gameId}&userId=${userId}`)

@@ -1,8 +1,9 @@
 import { gamePorts } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
-import { act, render, screen } from "@testing-library/react"
+import { act, screen, waitFor } from "@testing-library/react"
 import React from "react"
-import { Environment, EnvironmentContext } from "../../environment"
+import { Environment } from "../../environment"
+import { renderWithEnvironment, defaultEnvironment } from "../../_testHelpers/render"
 import { CodeNamesGameLoader } from "./CodeNamesGameLoader"
 
 describe("CodeNamesGameLoader", () => {
@@ -24,16 +25,11 @@ describe("CodeNamesGameLoader", () => {
     const callMessagehandler = (messageType: Messages.GameMessageType) => messageHandlers[messageType]
 
     const environment: Environment = {
-      config: {},
-      useSound: () => [jest.fn()],
+      ...defaultEnvironment,
       socketMessaging,
     } as any
 
-    render(
-      <EnvironmentContext.Provider value={environment}>
-        <CodeNamesGameLoader gameId={gameId} userId={userId} />
-      </EnvironmentContext.Provider>,
-    )
+    renderWithEnvironment(<CodeNamesGameLoader gameId={gameId} userId={userId} />, environment)
 
     expect(screen.getByRole("progressbar")).toBeInTheDocument()
     expect(screen.queryByText(userId)).toBeNull()
@@ -46,7 +42,7 @@ describe("CodeNamesGameLoader", () => {
     const game = gamePorts.createGame("game-id", userId, Date.now())
     act(() => callMessagehandler("joinedGame")({ game }))
 
-    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument())
     expect(screen.queryAllByText(userId).length).toBeGreaterThan(0)
   })
 })
