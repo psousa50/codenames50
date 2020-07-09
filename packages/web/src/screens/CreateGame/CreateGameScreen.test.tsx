@@ -4,8 +4,9 @@ import userEvent from "@testing-library/user-event"
 import React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
 import { Environment } from "../../environment"
-import { defaultEnvironment, renderWithEnvironment } from "../../_testHelpers/render"
+import { renderWithEnvironment } from "../../_testHelpers/render"
 import { CreateGameScreen } from "./CreateGameScreen"
+import { defaultEnvironment } from "../../_testHelpers/environment"
 
 interface TestRedirectProps {
   ComponentWithRedirection: React.ComponentType

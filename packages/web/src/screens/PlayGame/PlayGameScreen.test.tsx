@@ -1,48 +1,133 @@
-import { gamePorts } from "@codenames50/core"
+import { GameModels, gamePorts } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
+import { Types } from "@psousa50/shared"
 import { act, screen, waitFor } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import * as R from "ramda"
 import React from "react"
-import { Environment } from "../../environment"
-import { renderWithEnvironment, defaultEnvironment } from "../../_testHelpers/render"
+import { renderWithEnvironment } from "../../_testHelpers/render"
+import { buildEnvironment } from "../../_testHelpers/environment"
 import { PlayGameScreen } from "./PlayGameScreen"
 
 describe("PlayGameScreen", () => {
+  const userId = "Some Name"
+  const gameId = "some-game-id"
+
+  const renderPlayGameScreen = (partialGame: Types.DeepPartial<GameModels.CodeNamesGame>) => {
+    const r = buildEnvironment()
+
+    const game = R.mergeDeepRight(gamePorts.createGame(gameId, userId, Date.now()), partialGame)
+
+    renderWithEnvironment(<PlayGameScreen gameId={gameId} userId={userId} />, r.environment)
+
+    return { ...r, game }
+  }
+
+  const renderPlayGameScreenAndJoinGame = (partialGame: Types.DeepPartial<GameModels.CodeNamesGame>) => {
+    const r = renderPlayGameScreen(partialGame)
+
+    act(() => r.simulateMessageFromServer(Messages.joinedGame({ game: r.game, userId })))
+
+    return r
+  }
+
   it("on server connection emits messages to register the user socket and to join the game", async () => {
-    const userId = "Some Name"
-    const gameId = "some-game-id"
-    const emitMessage = jest.fn()
-
-    const messageHandlers = {} as any
-    const socketMessaging = {
-      connect: () => {},
-      disconnect: () => {},
-      emitMessage: jest.fn(() => emitMessage),
-      addMessageHandler: () => (handler: Messages.GameMessageHandler) => {
-        messageHandlers[handler.type] = handler.handler
-      },
-    }
-
-    const callMessagehandler = (messageType: Messages.GameMessageType) => messageHandlers[messageType]
-
-    const environment: Environment = {
-      ...defaultEnvironment,
-      socketMessaging,
-    } as any
+    const { emitMessage, environment, simulateMessageFromServer } = buildEnvironment()
 
     renderWithEnvironment(<PlayGameScreen gameId={gameId} userId={userId} />, environment)
 
     expect(screen.getByRole("progressbar")).toBeInTheDocument()
     expect(screen.queryByText(userId)).toBeNull()
 
-    act(() => callMessagehandler("connect")())
+    act(() => simulateMessageFromServer({ type: "connect", data: {} }))
 
     expect(emitMessage).toHaveBeenCalledWith(Messages.registerUserSocket({ userId }))
     expect(emitMessage).toHaveBeenCalledWith(Messages.joinGame({ gameId, userId }))
 
-    const game = gamePorts.createGame("game-id", userId, Date.now())
-    act(() => callMessagehandler("joinedGame")({ game }))
+    const game = gamePorts.createGame(gameId, userId, Date.now())
+    act(() => simulateMessageFromServer(Messages.joinedGame({ game, userId })))
 
     await waitFor(() => expect(screen.queryByRole("progressbar")).not.toBeInTheDocument())
     expect(screen.queryAllByText(userId).length).toBeGreaterThan(0)
+  })
+
+  describe("when game is idle", () => {
+    it("game setup should be expanded", async () => {
+      const partialGame = {
+        state: GameModels.GameStates.idle,
+      }
+
+      renderPlayGameScreenAndJoinGame(partialGame)
+
+      expect(await screen.findByText("Start Game")).toBeVisible()
+    })
+
+    it("shouldn't display the board nor the hints", async () => {
+      const word = "SomeWord"
+      const partialGame = {
+        state: GameModels.GameStates.idle,
+        board: [[{ word }]],
+      }
+
+      renderPlayGameScreenAndJoinGame(partialGame)
+
+      await waitFor(() => expect(screen.queryByText(word, { exact: false })).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText("End Turn")).not.toBeInTheDocument())
+    })
+  })
+
+  describe("when the game is running", () => {
+    it("game setup should be colapsed", async () => {
+      const partialGame = {
+        state: GameModels.GameStates.idle,
+      }
+
+      renderPlayGameScreenAndJoinGame(partialGame)
+
+      await waitFor(() => expect(screen.queryByText("New Game")).not.toBeInTheDocument())
+    })
+
+    it("SpyMaster send's a SendHint Message", async () => {
+      const partialGame = {
+        state: GameModels.GameStates.running,
+        redTeam: {
+          spyMaster: userId,
+        },
+        hintWordCount: 0,
+        players: [{ userId, team: GameModels.Teams.red }],
+        turn: GameModels.Teams.red,
+        turnStartedTime: 123,
+      }
+
+      const { emitMessage } = renderPlayGameScreenAndJoinGame(partialGame)
+
+      const hintWord = "SomeHint"
+      userEvent.type(screen.getByRole("textbox", { name: "Hint Word" }), hintWord)
+      userEvent.click(screen.getByRole("button", { name: "2" }))
+      userEvent.click(screen.getByRole("button", { name: "Send Hint" }))
+
+      await waitFor(() =>
+        expect(emitMessage).toHaveBeenCalledWith(Messages.sendHint({ gameId, userId, hintWord, hintWordCount: 2 })),
+      )
+    })
+
+    describe("when a word is clicked", () => {
+      it("should emit a revealWord message", async () => {
+        const partialGame = {
+          state: GameModels.GameStates.running,
+          board: [
+            [{ word: "w00" }, { word: "w00" }],
+            [{ word: "w10" }, { word: "w11" }],
+          ],
+        }
+
+        const { emitMessage } = renderPlayGameScreenAndJoinGame(partialGame)
+
+        const word10 = await screen.findAllByText("w10", { exact: false })
+        userEvent.click(word10[0])
+
+        expect(emitMessage).toHaveBeenCalledWith(Messages.revealWord({ gameId, userId, row: 1, col: 0 }))
+      })
+    })
   })
 })
