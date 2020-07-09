@@ -2,7 +2,7 @@ import { CircularProgress, makeStyles, Theme } from "@material-ui/core"
 import { Messages } from "@codenames50/messaging"
 import React from "react"
 import { useGameMessaging } from "../../utils/useGameMessaging"
-import { CodeNamesGameView } from "./CodeNamesGameView"
+import { PlayGame } from "./components/PlayGame"
 import { GameModels } from "@codenames50/core"
 import { usePlaySound, sounds } from "../../utils/usePlaySounds"
 
@@ -12,12 +12,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }))
 
-interface CodeNamesGameLoaderProps {
+interface PlayGameScreenProps {
   gameId: string
   userId: string
 }
 
-export const CodeNamesGameLoader: React.FC<CodeNamesGameLoaderProps> = ({ gameId, userId }) => {
+export const PlayGameScreen: React.FC<PlayGameScreenProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
   const [playHintAlertSound] = usePlaySound(sounds.hintAlert)
@@ -55,7 +55,7 @@ export const CodeNamesGameLoader: React.FC<CodeNamesGameLoaderProps> = ({ gameId
   const { emitMessage, error, game, setError } = useGameMessaging({ onConnect, onHintSent, onRevealWord })
 
   return game ? (
-    <CodeNamesGameView
+    <PlayGame
       emitMessage={emitMessage}
       error={error}
       game={game}

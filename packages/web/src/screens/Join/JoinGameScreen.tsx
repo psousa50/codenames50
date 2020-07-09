@@ -6,14 +6,14 @@ import AccountCircle from "@material-ui/icons/AccountCircle"
 import FastForward from "@material-ui/icons/FastForward"
 import React from "react"
 import { Redirect } from "react-router-dom"
-import { logoImage } from "../assets/images"
+import { logoImage } from "../../assets/images"
 
-export interface JoinGameViewProps {
+export interface JoinGameScreenProps {
   gameId: string
   userId: string
 }
 
-export const JoinGameView: React.FC<JoinGameViewProps> = ({ userId: initialUserId, gameId }) => {
+export const JoinGameScreen: React.FC<JoinGameScreenProps> = ({ userId: initialUserId, gameId }) => {
   const classes = useStyles()
   const [userId, setUserId] = React.useState(initialUserId || "")
   const [joining, setJoining] = React.useState(false)

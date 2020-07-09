@@ -3,11 +3,11 @@ import { Messages } from "@codenames50/messaging"
 import { screen, waitFor, act } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
-import { defaultEnvironment, renderWithEnvironment } from "../../_testHelpers/render"
-import { CodeNamesGameLoader } from "./CodeNamesGameLoader"
-import { CodeNamesGameView } from "./CodeNamesGameView"
+import { defaultEnvironment, renderWithEnvironment } from "../../../_testHelpers/render"
+import { PlayGameScreen } from "../PlayGameScreen"
+import { PlayGame } from "./PlayGame"
 
-describe("CodeNamesGameView", () => {
+describe("PlayGame", () => {
   const userId = "Some Name"
 
   const defaultGame = {
@@ -30,7 +30,7 @@ describe("CodeNamesGameView", () => {
   it("displays the userId", async () => {
     const props = propsFor(defaultGame, userId)
 
-    renderWithEnvironment(<CodeNamesGameView {...props} />)
+    renderWithEnvironment(<PlayGame {...props} />)
 
     expect(await screen.findByText(userId)).toBeInTheDocument()
   })
@@ -46,7 +46,7 @@ describe("CodeNamesGameView", () => {
 
       const props = propsFor(idleGame, userId)
 
-      renderWithEnvironment(<CodeNamesGameView {...props} />)
+      renderWithEnvironment(<PlayGame {...props} />)
 
       expect(await screen.findByText("Start Game")).toBeVisible()
     })
@@ -62,7 +62,7 @@ describe("CodeNamesGameView", () => {
 
       const props = propsFor(game, userId)
 
-      renderWithEnvironment(<CodeNamesGameView {...props} />)
+      renderWithEnvironment(<PlayGame {...props} />)
 
       await waitFor(() => expect(screen.queryByText(word, { exact: false })).toBeNull())
       await waitFor(() => expect(screen.queryByText("End Turn")).toBeNull())
@@ -80,7 +80,7 @@ describe("CodeNamesGameView", () => {
 
       const props = propsFor(runningGame, userId)
 
-      renderWithEnvironment(<CodeNamesGameView {...props} />)
+      renderWithEnvironment(<PlayGame {...props} />)
 
       await waitFor(() => expect(screen.queryByText("New Game")).not.toBeVisible())
     })
@@ -96,7 +96,7 @@ describe("CodeNamesGameView", () => {
 
       const props = propsFor(game, userId)
 
-      renderWithEnvironment(<CodeNamesGameView {...props} />)
+      renderWithEnvironment(<PlayGame {...props} />)
 
       const words = await screen.findAllByText(word, { exact: false })
       expect(words.length).toBeGreaterThan(0)
@@ -136,7 +136,7 @@ describe("CodeNamesGameView", () => {
           userId,
         }
 
-        renderWithEnvironment(<CodeNamesGameLoader {...props} />, environment)
+        renderWithEnvironment(<PlayGameScreen {...props} />, environment)
 
         act(() => callMessagehandler("joinedGame")({ game }))
 

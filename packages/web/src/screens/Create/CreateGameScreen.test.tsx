@@ -3,16 +3,16 @@ import { fireEvent, screen, act } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
-import { Environment } from "../environment"
-import { defaultEnvironment, renderWithEnvironment } from "../_testHelpers/render"
-import { CreateGameView } from "./CreateGameView"
+import { Environment } from "../../environment"
+import { defaultEnvironment, renderWithEnvironment } from "../../_testHelpers/render"
+import { CreateGameScreen } from "./CreateGameScreen"
 
 interface TestRedirectProps {
   ComponentWithRedirection: React.ComponentType
   redirectUrl: string
 }
 
-describe("CreateGameView", () => {
+describe("CreateGameScreen", () => {
   const userId = "Some Name"
 
   describe("when the user types a name and presses create game button", () => {
@@ -39,7 +39,7 @@ describe("CreateGameView", () => {
         <BrowserRouter>
           <Switch>
             <Route path="/" exact>
-              <CreateGameView />
+              <CreateGameScreen />
             </Route>
             <Route
               path={"/game"}

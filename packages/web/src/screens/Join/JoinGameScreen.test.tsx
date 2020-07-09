@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { BrowserRouter, Route, Switch } from "react-router-dom"
-import { JoinGameView } from "./JoinGameView"
+import { JoinGameScreen } from "./JoinGameScreen"
 
 interface TestRedirectProps {
   ComponentWithRedirection: React.ComponentType
@@ -17,11 +17,11 @@ const TestRedirect: React.FC<TestRedirectProps> = ({ ComponentWithRedirection, r
   </BrowserRouter>
 )
 
-describe("JoinGameView", () => {
+describe("JoinGameScreen", () => {
   it("join a game for a user and redirects to the game page", () => {
     render(
       <TestRedirect
-        ComponentWithRedirection={() => <JoinGameView gameId="game-id" userId="some-user" />}
+        ComponentWithRedirection={() => <JoinGameScreen gameId="game-id" userId="some-user" />}
         redirectUrl={"/game"}
       />,
     )

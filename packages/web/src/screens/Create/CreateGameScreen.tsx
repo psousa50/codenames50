@@ -8,14 +8,14 @@ import NoteAdd from "@material-ui/icons/NoteAdd"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
 import { Redirect } from "react-router-dom"
-import { logoImage } from "../assets/images"
-import { useGameMessaging } from "../utils/useGameMessaging"
+import { logoImage } from "../../assets/images"
+import { useGameMessaging } from "../../utils/useGameMessaging"
 
-export interface CreateGameViewProps {
+export interface CreateGameScreenProps {
   userId?: string
 }
 
-export const CreateGameView: React.FC<CreateGameViewProps> = ({ userId: initialUserId }) => {
+export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: initialUserId }) => {
   const classes = useStyles()
 
   const { emitMessage, game, error, setError } = useGameMessaging()

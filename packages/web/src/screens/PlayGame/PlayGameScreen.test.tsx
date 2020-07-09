@@ -4,9 +4,9 @@ import { act, screen, waitFor } from "@testing-library/react"
 import React from "react"
 import { Environment } from "../../environment"
 import { renderWithEnvironment, defaultEnvironment } from "../../_testHelpers/render"
-import { CodeNamesGameLoader } from "./CodeNamesGameLoader"
+import { PlayGameScreen } from "./PlayGameScreen"
 
-describe("CodeNamesGameLoader", () => {
+describe("PlayGameScreen", () => {
   it("on server connection emits messages to register the user socket and to join the game", async () => {
     const userId = "Some Name"
     const gameId = "some-game-id"
@@ -29,7 +29,7 @@ describe("CodeNamesGameLoader", () => {
       socketMessaging,
     } as any
 
-    renderWithEnvironment(<CodeNamesGameLoader gameId={gameId} userId={userId} />, environment)
+    renderWithEnvironment(<PlayGameScreen gameId={gameId} userId={userId} />, environment)
 
     expect(screen.getByRole("progressbar")).toBeInTheDocument()
     expect(screen.queryByText(userId)).toBeNull()

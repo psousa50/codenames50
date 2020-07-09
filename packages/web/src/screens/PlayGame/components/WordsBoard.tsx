@@ -27,7 +27,7 @@ export const WordsBoard: React.FC<WordsBoardProps> = ({ userId, game, board, onW
       {R.range(0, s).map(row => (
         <div key={row} className={classes.cells}>
           {board[row].map((word, col) => (
-            <WordView
+            <Word
               key={col}
               userId={userId}
               game={game}
@@ -45,7 +45,7 @@ export const WordsBoard: React.FC<WordsBoardProps> = ({ userId, game, board, onW
   )
 }
 
-interface WordViewProps {
+interface WordProps {
   userId: string
   game: GameModels.CodeNamesGame
   word: GameModels.BoardWord
@@ -56,16 +56,7 @@ interface WordViewProps {
   onWordClick: OnWordClick
 }
 
-const WordView: React.FC<WordViewProps> = ({
-  userId,
-  game,
-  word,
-  revealWords,
-  forSpyMaster,
-  onWordClick,
-  row,
-  col,
-}) => {
+const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMaster, onWordClick, row, col }) => {
   const classes = useStyles()
 
   const canReveal = GameRules.revealWord(userId, row, col)(game) === undefined

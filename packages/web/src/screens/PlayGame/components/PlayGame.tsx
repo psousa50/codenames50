@@ -5,13 +5,13 @@ import { Alert, AlertTitle } from "@material-ui/lab"
 import { GameModels } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
 import React from "react"
-import { EmitMessage } from "../../utils/types"
-import { EndedGame } from "./components/EndedGame"
-import { Header } from "./components/Header"
-import { RunningGame } from "./components/RunningGame"
-import { SetupGame } from "./components/SetupGame"
+import { EmitMessage } from "../../../utils/types"
+import { EndedGame } from "./EndedGame"
+import { Header } from "./Header"
+import { RunningGame } from "./RunningGame"
+import { SetupGame } from "./SetupGame"
 
-export interface CodeNamesGameViewProps {
+export interface PlayGameProps {
   emitMessage: EmitMessage
   error: string
   game: GameModels.CodeNamesGame
@@ -21,13 +21,7 @@ export interface CodeNamesGameViewProps {
 
 const Separator = () => <div style={{ height: "1rem" }}></div>
 
-export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
-  emitMessage,
-  error,
-  game,
-  userId,
-  clearError,
-}) => {
+export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, userId, clearError }) => {
   const classes = useStyles()
 
   const [teamsExpanded, setTeamsExpanded] = React.useState(false)

@@ -2,9 +2,9 @@ import { makeStyles, Theme } from "@material-ui/core"
 import * as qs from "qs"
 import React from "react"
 import { Route, Switch, useLocation } from "react-router-dom"
-import { CodeNamesGameLoader } from "./views/CodeNamesGame/CodeNamesGameLoader"
-import { CreateGameView } from "./views/CreateGameView"
-import { JoinGameView } from "./views/JoinGameView"
+import { PlayGameScreen } from "./screens/PlayGame/PlayGameScreen"
+import { CreateGameScreen } from "./screens/Create/CreateGameScreen"
+import { JoinGameScreen } from "./screens/Join/JoinGameScreen"
 
 const useStyles = makeStyles((theme: Theme) => ({
   app: {
@@ -30,10 +30,10 @@ export const AppRouter = () => {
     <div className={classes.app}>
       <Switch>
         <Route path="/" exact>
-          <CreateGameView userId={userId} />
+          <CreateGameScreen userId={userId} />
         </Route>
-        <Route path="/join">{gameId && <JoinGameView gameId={gameId} userId={userId || ""} />}</Route>
-        <Route path="/game">{gameId && userId && <CodeNamesGameLoader gameId={gameId} userId={userId} />}</Route>
+        <Route path="/join">{gameId && <JoinGameScreen gameId={gameId} userId={userId || ""} />}</Route>
+        <Route path="/game">{gameId && userId && <PlayGameScreen gameId={gameId} userId={userId} />}</Route>
       </Switch>
     </div>
   )
