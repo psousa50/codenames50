@@ -1,7 +1,10 @@
 import { GameStates } from "@codenames50/core/dist/models"
-import { screen, waitFor } from "@testing-library/react"
+import { Messages } from "@codenames50/messaging"
+import { screen, waitFor, act } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import React from "react"
 import { defaultEnvironment, renderWithEnvironment } from "../../_testHelpers/render"
+import { CodeNamesGameLoader } from "./CodeNamesGameLoader"
 import { CodeNamesGameView } from "./CodeNamesGameView"
 
 describe("CodeNamesGameView", () => {
@@ -98,6 +101,50 @@ describe("CodeNamesGameView", () => {
       const words = await screen.findAllByText(word, { exact: false })
       expect(words.length).toBeGreaterThan(0)
       expect(await screen.findByText("End Turn")).toBeVisible()
+    })
+
+    describe("when a word is clicked", () => {
+      it("should emit a revealWord message", async () => {
+        const emitMessage = jest.fn()
+        const messageHandlers = {} as any
+        const socketMessaging = {
+          connect: () => {},
+          disconnect: () => {},
+          emitMessage: jest.fn(() => emitMessage),
+          addMessageHandler: () => (handler: Messages.GameMessageHandler) => {
+            messageHandlers[handler.type] = handler.handler
+          },
+        }
+
+        const callMessagehandler = (messageType: Messages.GameMessageType) => messageHandlers[messageType]
+
+        const environment = {
+          ...defaultEnvironment,
+          socketMessaging,
+        } as any
+
+        const game = {
+          ...runningGame,
+          board: [
+            [{ word: "w00" }, { word: "w00" }],
+            [{ word: "w10" }, { word: "w11" }],
+          ],
+        }
+
+        const props = {
+          gameId: game.gameId,
+          userId,
+        }
+
+        renderWithEnvironment(<CodeNamesGameLoader {...props} />, environment)
+
+        act(() => callMessagehandler("joinedGame")({ game }))
+
+        const word10 = await screen.findAllByText("w10", { exact: false })
+        userEvent.click(word10[0])
+
+        expect(emitMessage).toHaveBeenCalledWith(Messages.revealWord({ gameId: game.gameId, userId, row: 1, col: 0 }))
+      })
     })
   })
 })

@@ -8,60 +8,6 @@ import { blueColor, calculatedHeight, calculatedWidth, inocentColor, redColor } 
 
 export type OnWordClick = (word: GameModels.BoardWord, row: number, col: number) => void
 
-const useStyles = makeStyles((theme: Theme) => ({
-  rows: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    width: calculatedWidth,
-    height: calculatedHeight,
-  },
-  cells: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "row",
-  },
-  cellWrapper: {
-    position: "relative",
-    flex: "1 0 auto",
-    alignItems: "center",
-    justifyContent: "center",
-    maxWidth: "200px",
-    maxHeight: "200px",
-    "&:after": {
-      content: "",
-      float: "left",
-      display: "block",
-      paddingTop: "100%",
-    },
-  },
-  cell: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    top: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "2px",
-    fontFamily: "Teko",
-    userSelect: "none",
-    [theme.breakpoints.down(300)]: {
-      fontSize: "10px",
-    },
-    [theme.breakpoints.between(300, 600)]: {
-      fontSize: "14px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "26px",
-    },
-    [theme.breakpoints.up("md")]: {
-      fontSize: "32px",
-    },
-  },
-}))
-
 interface WordsBoardProps {
   userId: string
   game: GameModels.CodeNamesGame
@@ -209,3 +155,57 @@ const WordView: React.FC<WordViewProps> = ({
     </div>
   )
 }
+
+const useStyles = makeStyles((theme: Theme) => ({
+  rows: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "column",
+    width: calculatedWidth,
+    height: calculatedHeight,
+  },
+  cells: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "row",
+  },
+  cellWrapper: {
+    position: "relative",
+    flex: "1 0 auto",
+    alignItems: "center",
+    justifyContent: "center",
+    maxWidth: "200px",
+    maxHeight: "200px",
+    "&:after": {
+      content: "",
+      float: "left",
+      display: "block",
+      paddingTop: "100%",
+    },
+  },
+  cell: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "2px",
+    fontFamily: "Teko",
+    userSelect: "none",
+    [theme.breakpoints.down(300)]: {
+      fontSize: "10px",
+    },
+    [theme.breakpoints.between(300, 600)]: {
+      fontSize: "14px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "26px",
+    },
+    [theme.breakpoints.up("md")]: {
+      fontSize: "32px",
+    },
+  },
+}))

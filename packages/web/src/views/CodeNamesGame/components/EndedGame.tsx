@@ -5,23 +5,13 @@ import { teamName } from "../../../utils/ui"
 import { WordsBoard } from "./WordsBoard"
 import { WordsLeft } from "./WordsLeft"
 
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    flexGrow: 1,
-    flexDirection: "column" as "column",
-    alignItems: "center",
-    padding: "10px 10px",
-  },
-}))
-
 interface EndedGameProps {
   userId: string
   game: GameModels.CodeNamesGame
   newGame: () => void
 }
 
-export const EndedGameView: React.FC<EndedGameProps> = ({ userId, game, newGame }) => {
+export const EndedGame: React.FC<EndedGameProps> = ({ userId, game, newGame }) => {
   const classes = useStyles()
 
   return (
@@ -36,3 +26,13 @@ export const EndedGameView: React.FC<EndedGameProps> = ({ userId, game, newGame 
     </div>
   )
 }
+
+const useStyles = makeStyles((theme: Theme) => ({
+  container: {
+    display: "flex",
+    flexGrow: 1,
+    flexDirection: "column" as "column",
+    alignItems: "center",
+    padding: "10px 10px",
+  },
+}))

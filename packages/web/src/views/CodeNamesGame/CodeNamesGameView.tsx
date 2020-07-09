@@ -6,7 +6,7 @@ import { GameModels } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
 import React from "react"
 import { EmitMessage } from "../../utils/types"
-import { EndedGameView } from "./components/EndedGame"
+import { EndedGame } from "./components/EndedGame"
 import { Header } from "./components/Header"
 import { RunningGame } from "./components/RunningGame"
 import { SetupGame } from "./components/SetupGame"
@@ -74,9 +74,7 @@ export const CodeNamesGameView: React.FC<CodeNamesGameViewProps> = ({
           <RunningGame game={game} userId={userId} emitMessage={emitMessage} />
         )}
 
-        {game.state === GameModels.GameStates.ended && (
-          <EndedGameView userId={userId} game={game} newGame={restartGame} />
-        )}
+        {game.state === GameModels.GameStates.ended && <EndedGame userId={userId} game={game} newGame={restartGame} />}
       </div>
     </div>
   )

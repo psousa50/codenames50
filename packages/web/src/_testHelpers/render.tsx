@@ -1,9 +1,9 @@
 import React from "react"
 import { render } from "@testing-library/react"
-import { EnvironmentContext } from "../environment"
+import { EnvironmentContext, Environment } from "../environment"
 import { actionOf } from "../utils/actions"
 
-export const defaultEnvironment = {
+export const defaultEnvironment: Environment = {
   config: {},
   api: {
     getLanguages: () => actionOf([]),
