@@ -3,8 +3,8 @@ import * as qs from "qs"
 import React from "react"
 import { Route, Switch, useLocation } from "react-router-dom"
 import { PlayGameScreen } from "./screens/PlayGame/PlayGameScreen"
-import { CreateGameScreen } from "./screens/Create/CreateGameScreen"
-import { JoinGameScreen } from "./screens/Join/JoinGameScreen"
+import { CreateGameScreen } from "./screens/CreateGame/CreateGameScreen"
+import { JoinGameScreen } from "./screens/JoinGame/JoinGameScreen"
 
 const useStyles = makeStyles((theme: Theme) => ({
   app: {
