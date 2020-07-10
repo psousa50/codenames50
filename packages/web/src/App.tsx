@@ -3,11 +3,11 @@ import { blueGrey, lightBlue } from "@material-ui/core/colors"
 import React, { useState } from "react"
 import { BrowserRouter } from "react-router-dom"
 import useSound from "use-sound"
-import { AppRouter } from "./AppRouter"
-import { defaultConfig, Environment, EnvironmentContext } from "./environment"
-import { ViewportProvider } from "./utils/viewPort"
-import { socketMessaging } from "./socketMessaging"
 import * as Api from "./api/games"
+import { AppRouter } from "./AppRouter"
+import { defaultEnvironment, EnvironmentContext, readConfig, updateConfig } from "./environment"
+import { socketMessaging } from "./socketMessaging"
+import { ViewportProvider } from "./utils/viewPort"
 
 const darkTheme = responsiveFontSizes(
   createMuiTheme({
@@ -19,25 +19,24 @@ const darkTheme = responsiveFontSizes(
   }),
 )
 
+const setupEnvironment = (toggleSound: () => void) => ({
+  api: Api,
+  config: readConfig(),
+  useSound,
+  toggleSound,
+  socketMessaging,
+})
+
 export const App = () => {
-  const savedConfig = JSON.parse(localStorage.getItem("config") || "{}")
-  const defaultEnvironment: Environment = {
-    api: Api,
-    config: { ...defaultConfig, ...savedConfig },
-    useSound,
-    toggleSound: () =>
-      setEnvironment(e => {
-        const newConfig = {
-          ...e.config,
-          soundOn: !e.config.soundOn,
-        }
-        localStorage.setItem("config", JSON.stringify(newConfig))
-        return { ...e, config: newConfig }
-      }),
-    socketMessaging,
+  const [environment, setEnvironment] = useState(defaultEnvironment)
+
+  const toggleSound = () => {
+    setEnvironment(e => updateConfig({ soundOn: !e.config.soundOn })(e))
   }
 
-  const [environment, setEnvironment] = useState(defaultEnvironment)
+  React.useEffect(() => {
+    setEnvironment(setupEnvironment(toggleSound))
+  }, [])
 
   return (
     <React.StrictMode>
