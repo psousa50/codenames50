@@ -4,7 +4,7 @@ import React from "react"
 import { useGameMessaging } from "../../utils/useGameMessaging"
 import { PlayGame } from "./components/PlayGame"
 import { GameModels } from "@codenames50/core"
-import { usePlaySound, sounds } from "../../utils/usePlaySounds"
+import { usePlaySound, sounds } from "../../utils/usePlaySound"
 
 const useStyles = makeStyles((theme: Theme) => ({
   progress: {
@@ -55,13 +55,7 @@ export const PlayGameScreen: React.FC<PlayGameScreenProps> = ({ gameId, userId }
   const { emitMessage, error, game, setError } = useGameMessaging({ onConnect, onHintSent, onRevealWord })
 
   return game ? (
-    <PlayGame
-      emitMessage={emitMessage}
-      error={error}
-      game={game}
-      userId={userId}
-      clearError={() => setError("")}
-    />
+    <PlayGame emitMessage={emitMessage} error={error} game={game} userId={userId} clearError={() => setError("")} />
   ) : (
     <div className={classes.progress}>
       <CircularProgress />
