@@ -29,7 +29,7 @@ export const updateConfig = (config: EnvironmentConfig) => (environment: Environ
     ...environment,
     config: {
       ...environment.config,
-      config,
+      ...config,
     },
   }
 
