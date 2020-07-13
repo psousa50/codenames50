@@ -19,7 +19,7 @@ const darkTheme = responsiveFontSizes(
   }),
 )
 
-const setupEnvironment = (toggleSound: () => void) => ({
+const buildEnvironment = (toggleSound: () => void) => ({
   api: Api,
   config: readConfig(),
   useSound,
@@ -35,7 +35,7 @@ export const App = () => {
   }
 
   React.useEffect(() => {
-    setEnvironment(setupEnvironment(toggleSound))
+    setEnvironment(buildEnvironment(toggleSound))
   }, [])
 
   return (
