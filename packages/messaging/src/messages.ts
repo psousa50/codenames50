@@ -84,7 +84,6 @@ export type RegisterUserSocketInput = {
 }
 
 export type CreateGameInput = {
-  gameId?: string
   userId: string
 }
 

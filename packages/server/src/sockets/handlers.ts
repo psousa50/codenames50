@@ -39,17 +39,14 @@ const disconnectHandler: SocketHandler = socket => () =>
     ),
   )
 
-const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ gameId, userId }) =>
+const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ userId }) =>
   withEnv(({ gamesDomainPorts, domainEnvironment, uuid, gameMessagingPorts, gameMessagingEnvironment }) => {
-    const newGameId = gameId || uuid()
-    socket.join(newGameId, async (_: unknown) => {
+    const gameId = uuid()
+    socket.join(gameId, async (_: unknown) => {
       const h = pipe(
-        gamesDomainPorts.create({ gameId: newGameId, userId }),
-        chain(game =>
-          adapt(
-            gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId: game.gameId, userId }),
-            gameMessagingEnvironment,
-          ),
+        gamesDomainPorts.create({ gameId, userId }),
+        chain(_ =>
+          adapt(gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId, userId }), gameMessagingEnvironment),
         ),
       )
       await run(h, domainEnvironment)
@@ -57,16 +54,13 @@ const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ 
     return actionOf(undefined)
   })
 
-const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => input =>
+const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => ({ gameId, userId }) =>
   withEnv(({ gamesDomainPorts, domainEnvironment, gameMessagingPorts, gameMessagingEnvironment }) => {
-    socket.join(input.gameId, async (_: unknown) => {
+    socket.join(gameId, async () => {
       const h = pipe(
-        gamesDomainPorts.join(input),
-        chain(game =>
-          adapt(
-            gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId: game.gameId, userId: input.userId }),
-            gameMessagingEnvironment,
-          ),
+        gamesDomainPorts.join({ gameId, userId }),
+        chain(_ =>
+          adapt(gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId, userId }), gameMessagingEnvironment),
         ),
       )
       await run(h, domainEnvironment)
