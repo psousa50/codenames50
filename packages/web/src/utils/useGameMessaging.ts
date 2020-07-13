@@ -1,8 +1,8 @@
 import { GameModels, gamePorts } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
-import React from "react"
+import React, { useContext } from "react"
+import { EnvironmentContext } from "../environment"
 import { useGameState } from "./useGameState"
-import { useSocketMessaging } from "./useSocketMessaging"
 
 type GameMessagingHandlers = {
   onConnect?: () => void
@@ -12,7 +12,9 @@ type GameMessagingHandlers = {
 }
 
 export const useGameMessaging = (handlers: GameMessagingHandlers = {}) => {
-  const [emitMessage, addMessageHandler] = useSocketMessaging(process.env.REACT_APP_SERVER_URL || "")
+  const {
+    socketMessaging: { emitMessage, addMessageHandler },
+  } = useContext(EnvironmentContext)
   const [game, setGame] = useGameState()
 
   const [error, setError] = React.useState("")

@@ -1,13 +1,13 @@
 import React from "react"
 import useSound from "use-sound"
 import * as Api from "./api/games"
-import { socketMessaging } from "./socketMessaging"
+import { Messages } from "@codenames50/messaging"
 
-type EnvironmentConfig = {
+export type EnvironmentConfig = {
   soundOn: boolean
 }
 
-export const defaultConfig = {
+export const defaultConfig: EnvironmentConfig = {
   soundOn: false,
 }
 
@@ -19,7 +19,10 @@ export const defaultEnvironment = {
   config: defaultConfig,
   useSound,
   toggleSound: () => {},
-  socketMessaging,
+  socketMessaging: {
+    emitMessage: (message: Messages.GameMessage) => {},
+    addMessageHandler: (handler: Messages.GameMessageHandler) => {},
+  },
 }
 
 export type Environment = typeof defaultEnvironment

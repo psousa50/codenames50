@@ -17,13 +17,15 @@ export const buildEnvironment = () => {
   const socketMessaging = {
     connect: () => {},
     disconnect: () => {},
-    emitMessage: jest.fn(() => emitMessage),
-    addMessageHandler: () => (handler: Messages.GameMessageHandler) => {
+    emitMessage,
+    addMessageHandler: (handler: Messages.GameMessageHandler) => {
       messageHandlers[handler.type] = handler.handler
     },
   }
 
-  const simulateMessageFromServer = (message: Messages.GameMessage) => messageHandlers[message.type](message.data)
+  const simulateMessageFromServer = <T>(message: Messages.GameMessage<T>) => {
+    messageHandlers[message.type](message.data)
+  }
 
   const environment = {
     ...defaultEnvironment,

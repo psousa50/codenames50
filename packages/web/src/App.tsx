@@ -5,8 +5,9 @@ import { BrowserRouter } from "react-router-dom"
 import useSound from "use-sound"
 import * as Api from "./api/games"
 import { AppRouter } from "./AppRouter"
-import { defaultEnvironment, EnvironmentContext, readConfig, updateConfig } from "./environment"
-import { socketMessaging } from "./socketMessaging"
+import { defaultEnvironment, EnvironmentContext, readConfig, updateConfig, EnvironmentConfig } from "./environment"
+import { EmitMessage } from "./utils/types"
+import { useSocketMessaging, AddMessageHandler } from "./utils/useSocketMessaging"
 import { ViewportProvider } from "./utils/viewPort"
 
 const darkTheme = responsiveFontSizes(
@@ -19,24 +20,34 @@ const darkTheme = responsiveFontSizes(
   }),
 )
 
-const buildEnvironment = (toggleSound: () => void) => ({
+const buildEnvironment = (
+  config: EnvironmentConfig,
+  toggleSound: () => void,
+  emitMessage: EmitMessage,
+  addMessageHandler: AddMessageHandler,
+) => ({
   api: Api,
-  config: readConfig(),
+  config,
   useSound,
   toggleSound,
-  socketMessaging,
+  socketMessaging: {
+    emitMessage,
+    addMessageHandler,
+  },
 })
 
 export const App = () => {
   const [environment, setEnvironment] = useState(defaultEnvironment)
+  const [emitMessage, addMessageHandler] = useSocketMessaging(process.env.REACT_APP_SERVER_URL || "")
 
   const toggleSound = () => {
     setEnvironment(e => updateConfig({ soundOn: !e.config.soundOn })(e))
   }
 
   React.useEffect(() => {
-    setEnvironment(buildEnvironment(toggleSound))
-  }, [])
+    const config = readConfig()
+    setEnvironment(buildEnvironment(config, toggleSound, emitMessage, addMessageHandler))
+  }, [addMessageHandler, emitMessage])
 
   return (
     <React.StrictMode>
