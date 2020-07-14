@@ -39,8 +39,6 @@ describe("PlayGameScreen", () => {
     expect(screen.getByRole("progressbar")).toBeInTheDocument()
     expect(screen.queryByText(userId)).toBeNull()
 
-    act(() => simulateMessageFromServer({ type: "connect", data: {} }))
-
     expect(emitMessage).toHaveBeenCalledWith(Messages.registerUserSocket({ userId }))
     expect(emitMessage).toHaveBeenCalledWith(Messages.joinGame({ gameId, userId }))
 

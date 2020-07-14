@@ -1,3 +1,4 @@
+import { GameModels } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
 import { Button, CircularProgress, InputAdornment, makeStyles, Snackbar, TextField } from "@material-ui/core"
 import Avatar from "@material-ui/core/Avatar"
@@ -18,9 +19,21 @@ export interface CreateGameScreenProps {
 export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: initialUserId }) => {
   const classes = useStyles()
 
-  const { emitMessage, game, error, setError } = useGameMessaging()
+  const { emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
   const [userId, setUserId] = React.useState(initialUserId || "")
   const [loading, setLoading] = React.useState(false)
+
+  React.useEffect(() => {
+    const onGameCreated = (game: GameModels.CodeNamesGame) => {
+      setGame(game)
+    }
+
+    const setupMessageHandlers = () => {
+      addMessageHandler(Messages.createGameMessagehandler("gameCreated", onGameCreated))
+    }
+
+    setupMessageHandlers()
+  }, [addMessageHandler, setGame])
 
   const createGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -29,10 +42,6 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
       emitMessage(Messages.registerUserSocket({ userId }))
       emitMessage(Messages.createGame({ userId }))
     }
-  }
-
-  const handleErrorClose = () => {
-    setError("")
   }
 
   function SignIn() {
@@ -90,7 +99,7 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
     <Redirect to={`/game?gameId=${game.gameId}&userId=${userId}`} />
   ) : (
     <>
-      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={handleErrorClose}>
+      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={() => clearError()}>
         <Alert severity="error">
           <AlertTitle>Error</AlertTitle>
           {error}

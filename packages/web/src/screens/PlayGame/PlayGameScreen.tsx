@@ -1,10 +1,8 @@
-import { CircularProgress, makeStyles, Theme } from "@material-ui/core"
 import { Messages } from "@codenames50/messaging"
+import { CircularProgress, makeStyles, Theme } from "@material-ui/core"
 import React from "react"
-import { useGameMessaging } from "../../utils/useGameMessaging"
+import { usePlayGameMessaging } from "../../utils/usePlayGameMessaging"
 import { PlayGame } from "./components/PlayGame"
-import { GameModels } from "@codenames50/core"
-import { usePlaySound, sounds } from "../../utils/usePlaySound"
 
 const useStyles = makeStyles((theme: Theme) => ({
   progress: {
@@ -20,42 +18,15 @@ interface PlayGameScreenProps {
 export const PlayGameScreen: React.FC<PlayGameScreenProps> = ({ gameId, userId }) => {
   const classes = useStyles()
 
-  const [playHintAlertSound] = usePlaySound(sounds.hintAlert)
-  const [playSuccessSound] = usePlaySound(sounds.success)
-  const [playFailureSound] = usePlaySound(sounds.failure)
-  const [playAssassinSound] = usePlaySound(sounds.assassin)
-  const [playEndGameSound] = usePlaySound(sounds.endGame)
+  const { emitMessage, game, error, clearError } = usePlayGameMessaging(userId)
 
-  const onConnect = () => {
+  React.useEffect(() => {
     emitMessage(Messages.registerUserSocket({ userId }))
     emitMessage(Messages.joinGame({ gameId, userId }))
-  }
-
-  const onHintSent = (game: GameModels.CodeNamesGame) => {
-    const teamConfig = game.turn === GameModels.Teams.red ? game.redTeam : game.blueTeam
-    if (teamConfig.spyMaster !== userId) {
-      playHintAlertSound()
-    }
-  }
-
-  const onRevealWord = (game: GameModels.CodeNamesGame) => {
-    if (game.turnOutcome === "success") {
-      playSuccessSound()
-    }
-    if (game.turnOutcome === "failure") {
-      playFailureSound()
-    }
-    if (game.state === GameModels.GameStates.ended) {
-      if (game.turnOutcome === "assassin") {
-        playAssassinSound()
-      } else playEndGameSound()
-    }
-  }
-
-  const { emitMessage, error, game, setError } = useGameMessaging({ onConnect, onHintSent, onRevealWord })
+  }, [emitMessage, gameId, userId])
 
   return game ? (
-    <PlayGame emitMessage={emitMessage} error={error} game={game} userId={userId} clearError={() => setError("")} />
+    <PlayGame emitMessage={emitMessage} game={game} userId={userId} error={error} clearError={clearError} />
   ) : (
     <div className={classes.progress}>
       <CircularProgress />
