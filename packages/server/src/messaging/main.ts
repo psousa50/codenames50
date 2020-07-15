@@ -13,16 +13,11 @@ let userSocketLinks: UserSocketLink[] = []
 export type RegisterUserInput = {
   userId: string
   socketId: string
+  gameId: string
 }
 
 export type UnregisterSocketInput = {
   socketId: string
-}
-
-export type AddGameToUserInput = {
-  socketId: string
-  userId: string
-  gameId: string
 }
 
 type EmitMessageInput = {
@@ -50,14 +45,6 @@ export const unregisterSocket: GameMessagingPort<UnregisterSocketInput, UserSock
   return actionOf(userGames)
 }
 
-export const addGameToUser: GameMessagingPort<AddGameToUserInput> = ({ socketId, gameId }) => {
-  const userLink = userSocketLinks.find(u => u.socketId === socketId)
-  if (userLink) {
-    userSocketLinks = [...userSocketLinks.filter(u => u.socketId !== socketId), { ...userLink, gameId }]
-  }
-  return actionOf(undefined)
-}
-
 export const emitMessage: GameMessagingPort<EmitMessageInput> = ({ userId, roomId, message }) =>
   withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
     const socketIds = messengerPorts.getSocketIdsForRoomId(messengerEnvironment)(roomId)
@@ -78,7 +65,6 @@ export const gameMessagingPorts = {
   emitMessage,
   registerUser,
   unregisterSocket,
-  addGameToUser,
   broadcastMessage,
 }
 

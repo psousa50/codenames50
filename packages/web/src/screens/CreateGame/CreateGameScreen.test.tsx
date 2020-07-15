@@ -24,10 +24,10 @@ describe("CreateGameScreen", () => {
       return r
     }
 
-    it("emits messages to register the user socket and to create the game", () => {
+    it("emits a message to create the game", () => {
       const { emitMessage } = userTypesNameAndPressesCreateGameButton()
 
-      expect(emitMessage).toHaveBeenCalledWith(Messages.registerUserSocket({ userId }))
+      expect(emitMessage).toHaveBeenCalledTimes(1)
       expect(emitMessage).toHaveBeenCalledWith(Messages.createGame({ userId }))
     })
 

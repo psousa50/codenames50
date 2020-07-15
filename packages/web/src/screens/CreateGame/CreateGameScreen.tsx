@@ -39,7 +39,6 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
     e.preventDefault()
     if (userId.trim().length > 0) {
       setLoading(true)
-      emitMessage(Messages.registerUserSocket({ userId }))
       emitMessage(Messages.createGame({ userId }))
     }
   }

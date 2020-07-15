@@ -2,10 +2,12 @@ import * as GameMessaging from "../../src/messaging/main"
 import { getRight } from "../helpers"
 
 describe("messaging", () => {
+  const gameId = "game-id"
+  const userId = "some-user-id"
+  const roomId = "some-room-id"
+  const socketId = "some-socketId-id"
+
   it("emits a message to the specified user socket", async () => {
-    const userId = "some-user-id"
-    const roomId = "some-room-id"
-    const socketId = "some-socketId-id"
     const data = { some: "data" }
     const message = { type: "some-type" as any, data }
     const emit = jest.fn()
@@ -22,8 +24,8 @@ describe("messaging", () => {
       },
     }
 
-    GameMessaging.registerUser({ userId, socketId })
-    GameMessaging.registerUser({ userId: "another-user", socketId: "another-socket-id" })
+    GameMessaging.registerUser({ userId, gameId, socketId })
+    GameMessaging.registerUser({ userId: "another-user", gameId, socketId: "another-socket-id" })
 
     await getRight(GameMessaging.emitMessage({ userId, roomId, message })(environment))()
 
@@ -49,14 +51,11 @@ describe("messaging", () => {
       },
     }
 
-    const userId = "some-user-id"
-    const roomId = "some-room-id"
-    const socketId = "some-socketId-id"
     const data = { some: "data" }
     const message = { type: "some-type" as any, data }
 
-    GameMessaging.registerUser({ userId, socketId })
-    GameMessaging.registerUser({ userId: "another-user", socketId: "another-socket-id" })
+    GameMessaging.registerUser({ userId, gameId, socketId })
+    GameMessaging.registerUser({ userId: "another-user", gameId, socketId: "another-socket-id" })
 
     await getRight(GameMessaging.broadcastMessage({ roomId, message })(environment))()
 
@@ -82,14 +81,11 @@ describe("messaging", () => {
       },
     }
 
-    const userId = "some-user-id"
-    const roomId = "some-room-id"
-    const socketId = "some-socketId-id"
     const data = { some: "data" }
     const message = { type: "some-type" as any, data }
 
-    GameMessaging.registerUser({ userId, socketId })
-    GameMessaging.registerUser({ userId: "another-user", socketId: "another-socket-id" })
+    GameMessaging.registerUser({ userId, gameId, socketId })
+    GameMessaging.registerUser({ userId: "another-user", gameId, socketId: "another-socket-id" })
     GameMessaging.unregisterSocket({ socketId })
 
     await getRight(GameMessaging.emitMessage({ userId, roomId, message })(environment))()

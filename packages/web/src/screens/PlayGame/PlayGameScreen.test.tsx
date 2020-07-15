@@ -31,7 +31,7 @@ describe("PlayGameScreen", () => {
     return r
   }
 
-  it("on server connection emits messages to register the user socket and to join the game", async () => {
+  it("on server connection emits messages to join the game", async () => {
     const { emitMessage, environment, simulateMessageFromServer } = buildEnvironment()
 
     renderWithEnvironment(<PlayGameScreen gameId={gameId} userId={userId} />, environment)
@@ -39,7 +39,7 @@ describe("PlayGameScreen", () => {
     expect(screen.getByRole("progressbar")).toBeInTheDocument()
     expect(screen.queryByText(userId)).toBeNull()
 
-    expect(emitMessage).toHaveBeenCalledWith(Messages.registerUserSocket({ userId }))
+    expect(emitMessage).toHaveBeenCalledTimes(1)
     expect(emitMessage).toHaveBeenCalledWith(Messages.joinGame({ gameId, userId }))
 
     const game = gamePorts.createGame(gameId, userId, Date.now())

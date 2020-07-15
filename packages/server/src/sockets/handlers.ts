@@ -9,11 +9,6 @@ import { SocketsEnvironment, SocketsPort } from "./adapters"
 
 type SocketHandler<T = void> = (socket: SocketIO.Socket) => SocketsPort<T, void>
 
-const registerUserHandler: SocketHandler<Messages.RegisterUserSocketInput> = socket => ({ userId }) =>
-  withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
-    pipe(adapt(gameMessagingPorts.registerUser({ userId, socketId: socket.id }), gameMessagingEnvironment)),
-  )
-
 const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
   withEnv(({ gamesDomainPorts, domainEnvironment }) =>
     pipe(
@@ -44,10 +39,8 @@ const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ 
     const gameId = uuid()
     socket.join(gameId, async (_: unknown) => {
       const h = pipe(
-        gamesDomainPorts.create({ gameId, userId }),
-        chain(_ =>
-          adapt(gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId, userId }), gameMessagingEnvironment),
-        ),
+        adapt(gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), gameMessagingEnvironment),
+        chain(_ => gamesDomainPorts.create({ gameId, userId })),
       )
       await run(h, domainEnvironment)
     })
@@ -58,10 +51,8 @@ const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => ({ game
   withEnv(({ gamesDomainPorts, domainEnvironment, gameMessagingPorts, gameMessagingEnvironment }) => {
     socket.join(gameId, async () => {
       const h = pipe(
-        gamesDomainPorts.join({ gameId, userId }),
-        chain(_ =>
-          adapt(gameMessagingPorts.addGameToUser({ socketId: socket.id, gameId, userId }), gameMessagingEnvironment),
-        ),
+        adapt(gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), gameMessagingEnvironment),
+        chain(_ => gamesDomainPorts.join({ gameId, userId })),
       )
       await run(h, domainEnvironment)
     })
@@ -111,7 +102,6 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   add(Messages.createGameMessagehandler("joinGame", handler(joinGameHandler)))
   add(Messages.createGameMessagehandler("joinTeam", handler(onDomainPort(env.gamesDomainPorts.joinTeam))))
   add(Messages.createGameMessagehandler("randomizeTeam", handler(onDomainPort(env.gamesDomainPorts.randomizeTeams))))
-  add(Messages.createGameMessagehandler("registerUserSocket", handler(registerUserHandler)))
   add(Messages.createGameMessagehandler("removePlayer", handler(onDomainPort(env.gamesDomainPorts.removePlayer))))
   add(Messages.createGameMessagehandler("restartGame", handler(onDomainPort(env.gamesDomainPorts.restartGame))))
   add(Messages.createGameMessagehandler("revealWord", handler(onDomainPort(env.gamesDomainPorts.revealWord))))

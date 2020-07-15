@@ -21,7 +21,6 @@ export const PlayGameScreen: React.FC<PlayGameScreenProps> = ({ gameId, userId }
   const { emitMessage, game, error, clearError } = usePlayGameMessaging(userId)
 
   React.useEffect(() => {
-    emitMessage(Messages.registerUserSocket({ userId }))
     emitMessage(Messages.joinGame({ gameId, userId }))
   }, [emitMessage, gameId, userId])
 
