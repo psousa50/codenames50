@@ -120,7 +120,7 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
   })
 
   return (
-    <div className={classes.cellWrapper} onClick={() => onWordClick(word, row, col)}>
+    <div className={classes.cellWrapper} onClick={() => canReveal && onWordClick(word, row, col)}>
       <a.div
         style={{
           opacity: opacity.interpolate(o => 1 - (typeof o === "number" ? o : Number.parseInt(o || "0"))),
