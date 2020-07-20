@@ -8,6 +8,7 @@ import React from "react"
 import { renderWithEnvironment } from "../../_testHelpers/render"
 import { buildEnvironment } from "../../_testHelpers/environment"
 import { PlayGameScreen } from "./PlayGameScreen"
+import { Teams } from "./components/Teams"
 
 describe("PlayGameScreen", () => {
   const userId = "Some Name"
@@ -110,9 +111,13 @@ describe("PlayGameScreen", () => {
     })
 
     describe("when a word is clicked", () => {
-      it("should emit a revealWord message", async () => {
+      it.only("should emit a revealWord message", async () => {
         const partialGame = {
           state: GameModels.GameStates.running,
+          players: [{ userId, team: GameModels.Teams.red }],
+          turn: GameModels.Teams.red,
+          hintWord: "SomeWord",
+          hintWordCount: 2,
           board: [
             [{ word: "w00" }, { word: "w00" }],
             [{ word: "w10" }, { word: "w11" }],
