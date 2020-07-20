@@ -50,6 +50,8 @@ export const emitMessage: GameMessagingPort<EmitMessageInput> = ({ userId, roomI
     const socketIds = messengerPorts.getSocketIdsForRoomId(messengerEnvironment)(roomId)
     const userLinks = userSocketLinks.filter(u => u.userId === userId && socketIds.includes(u.socketId))
 
+    console.log("emitMessage", userLinks)
+
     userLinks.forEach(ul => messengerPorts.emit(messengerEnvironment)(ul.socketId, message))
 
     return actionOf(undefined)

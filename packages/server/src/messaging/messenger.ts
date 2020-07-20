@@ -6,10 +6,12 @@ export type MessengerEnvironment = {
 }
 
 export const emit = ({ io }: MessengerEnvironment) => (socketId: string, message: Messages.GameMessage) => {
+  console.log("EMIT:", message.type)
   io.sockets.sockets[socketId].emit(message.type, message.data)
 }
 
 export const broadcast = ({ io }: MessengerEnvironment) => (roomId: string, message: Messages.GameMessage) => {
+  console.log("BROADCAST:", message.type)
   io.to(roomId).emit(message.type, message.data)
 }
 

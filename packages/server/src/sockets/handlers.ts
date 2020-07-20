@@ -86,12 +86,17 @@ const buildHandler = (socketsEnvironment: SocketsEnvironment, socket: SocketIO.S
 }
 
 const addMessageHandler = (socket: SocketIO.Socket) => (handler: Messages.GameMessageHandler) => {
-  socket.on(handler.type, handler.handler)
+  socket.on(handler.type, data => {
+    console.log("RECEIVED:", handler.type)
+    handler.handler(data)
+  })
 }
 
 export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Socket) => {
   const add = addMessageHandler(socket)
   const handler = buildHandler(env, socket)
+
+  socket.on("connect", () => console.log("Connect=====>\n"))
 
   add(Messages.createGameMessagehandler("changeTurn", handler(onDomainPort(env.gamesDomainPorts.changeTurn))))
   add(
