@@ -3,7 +3,7 @@ import useSound from "use-sound"
 import * as Api from "./api/games"
 import { buildSocketMessaging } from "./utils/socketMessaging"
 
-export type EnvironmentConfig = {
+type EnvironmentConfig = {
   soundOn: boolean
 }
 
@@ -11,22 +11,20 @@ const defaultConfig: EnvironmentConfig = {
   soundOn: false,
 }
 
-export const readConfig = () => JSON.parse(localStorage.getItem("config") || JSON.stringify(defaultConfig))
-export const writeConfig = (config: EnvironmentConfig) => localStorage.setItem("config", JSON.stringify(config))
+const readConfig = () => JSON.parse(localStorage.getItem("config") || JSON.stringify(defaultConfig))
+const writeConfig = (config: EnvironmentConfig) => localStorage.setItem("config", JSON.stringify(config))
 
-export const buildEnvironment = (config: EnvironmentConfig, toggleSound: () => void) => ({
+const buildEnvironment = () => ({
   api: Api,
-  config,
+  config: readConfig(),
   useSound,
-  toggleSound,
+  toggleSound: () => {},
   socketMessaging: {
     ...buildSocketMessaging(process.env.REACT_APP_SERVER_URL || ""),
   },
 })
 
-export type Environment = ReturnType<typeof buildEnvironment>
-
-export const updateConfig = (config: EnvironmentConfig) => (environment: Environment) => {
+const updateConfig = (config: EnvironmentConfig) => (environment: Environment) => {
   const newEnvironment = {
     ...environment,
     config: {
@@ -40,4 +38,19 @@ export const updateConfig = (config: EnvironmentConfig) => (environment: Environ
   return newEnvironment
 }
 
-export const EnvironmentContext = React.createContext<Environment>({} as Environment)
+export const useEnvironment = () => {
+  const [environment, setEnvironment] = React.useState(buildEnvironment())
+
+  const toggleSound = () => {
+    setEnvironment(env => updateConfig({ soundOn: !env.config.soundOn })(env))
+  }
+
+  return {
+    ...environment,
+    toggleSound,
+  }
+}
+
+export type Environment = ReturnType<typeof buildEnvironment>
+
+export const EnvironmentContext = React.createContext({} as Environment)

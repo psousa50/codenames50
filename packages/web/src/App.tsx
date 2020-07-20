@@ -1,9 +1,9 @@
-import { createMuiTheme, CssBaseline, responsiveFontSizes, ThemeProvider, CircularProgress } from "@material-ui/core"
+import { createMuiTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
 import { blueGrey, lightBlue } from "@material-ui/core/colors"
-import React, { useState } from "react"
+import React from "react"
 import { BrowserRouter } from "react-router-dom"
 import { AppRouter } from "./AppRouter"
-import { EnvironmentContext, readConfig, updateConfig, Environment, buildEnvironment } from "./environment"
+import { EnvironmentContext, useEnvironment } from "./environment"
 import { ViewportProvider } from "./utils/viewPort"
 
 const darkTheme = responsiveFontSizes(
@@ -17,18 +17,9 @@ const darkTheme = responsiveFontSizes(
 )
 
 export const App = () => {
-  const [environment, setEnvironment] = useState<Environment>()
+  const environment = useEnvironment()
 
-  const toggleSound = () => {
-    setEnvironment(e => e && updateConfig({ soundOn: !e.config.soundOn })(e))
-  }
-
-  React.useEffect(() => {
-    const config = readConfig()
-    setEnvironment(buildEnvironment(config, toggleSound))
-  }, [])
-
-  return environment ? (
+  return (
     <React.StrictMode>
       <ViewportProvider>
         <EnvironmentContext.Provider value={environment}>
@@ -41,7 +32,5 @@ export const App = () => {
         </EnvironmentContext.Provider>
       </ViewportProvider>
     </React.StrictMode>
-  ) : (
-    <CircularProgress />
   )
 }

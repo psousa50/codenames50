@@ -2,7 +2,7 @@ import { Messages } from "@codenames50/messaging"
 import io from "socket.io-client"
 
 const connect = (uri: string) => {
-  console.log("Connecting=====>\n")
+  console.log("Connecting=====>", uri)
   return io(uri, { autoConnect: true })
 }
 
@@ -24,6 +24,7 @@ const addMessageHandler = (socket: SocketIOClient.Socket) => (handler: Messages.
     handler.handler(data)
   })
 }
+
 export const buildSocketMessaging = (uri: string) => {
   const socket = connect(uri)
 
