@@ -12,7 +12,10 @@ export const sounds = {
 }
 
 export const usePlaySound = (url: string) => {
-  const { config, useSound } = React.useContext(EnvironmentContext)
+  const {
+    config: { soundOn },
+    useSound,
+  } = React.useContext(EnvironmentContext)
   const [playSound] = useSound(url)
   const [playIt, setPlayIt] = React.useState(false)
 
@@ -21,11 +24,11 @@ export const usePlaySound = (url: string) => {
   }
 
   React.useEffect(() => {
-    if (config.soundOn && playIt) {
+    if (soundOn && playIt) {
       playSound()
     }
     setPlayIt(false)
-  }, [playSound, playIt, config.soundOn])
+  }, [playIt, playSound, soundOn])
 
-  return [play]
+  return play
 }

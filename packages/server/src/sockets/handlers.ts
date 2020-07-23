@@ -96,7 +96,20 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   const add = addMessageHandler(socket)
   const handler = buildHandler(env, socket)
 
-  socket.on("connect", () => console.log("Connect=====>\n"))
+  socket.on("connect", () => console.log("connect"))
+  socket.on("connect_error", () => console.log("connect_error"))
+  socket.on("connect_timeout", () => console.log("connect_timeout"))
+  socket.on("error", () => console.log("error"))
+  socket.on("disconnect", () => console.log("disconnect"))
+  socket.on("disconnecting", () => console.log("disconnecting"))
+  socket.on("newListener", () => console.log("newListener"))
+  socket.on("reconnect_attempt", () => console.log("reconnect_attempt"))
+  socket.on("reconnecting", () => console.log("reconnecting"))
+  socket.on("reconnect_error", () => console.log("reconnect_error"))
+  socket.on("reconnect_failed", () => console.log("reconnect_failed"))
+  socket.on("removeListener", () => console.log("removeListener"))
+  socket.on("ping", () => console.log("ping"))
+  socket.on("pong", () => console.log("pong"))
 
   add(Messages.createGameMessagehandler("changeTurn", handler(onDomainPort(env.gamesDomainPorts.changeTurn))))
   add(

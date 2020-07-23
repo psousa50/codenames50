@@ -4,17 +4,22 @@ import React from "react"
 import { useGameMessaging } from "./useGameMessaging"
 import { sounds, usePlaySound } from "./usePlaySound"
 
-export const usePlayGameMessaging = (userId: string) => {
-  const [playHintAlertSound] = usePlaySound(sounds.hintAlert)
-  const [playSuccessSound] = usePlaySound(sounds.success)
-  const [playFailureSound] = usePlaySound(sounds.failure)
-  const [playAssassinSound] = usePlaySound(sounds.assassin)
-  const [playEndGameSound] = usePlaySound(sounds.endGame)
+export const usePlayGameMessaging = (gameId: string, userId: string) => {
+  const playHintAlertSound = usePlaySound(sounds.hintAlert)
+  const playSuccessSound = usePlaySound(sounds.success)
+  const playFailureSound = usePlaySound(sounds.failure)
+  const playAssassinSound = usePlaySound(sounds.assassin)
+  const playEndGameSound = usePlaySound(sounds.endGame)
 
-  const { emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
+  const { connect, emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
+
+  React.useEffect(() => {
+    connect()
+  }, [connect])
 
   React.useEffect(() => {
     const setupMessageHandlers = () => {
+      addMessageHandler(Messages.createGameMessagehandler("connect", onConnect))
       addMessageHandler(Messages.createGameMessagehandler("gameStarted", onGameStarted))
       addMessageHandler(Messages.createGameMessagehandler("hintSent", onHintSent))
       addMessageHandler(Messages.createGameMessagehandler("joinedGame", onJoinedGame))
@@ -26,6 +31,10 @@ export const usePlayGameMessaging = (userId: string) => {
       addMessageHandler(Messages.createGameMessagehandler("updateConfig", onUpdateConfig))
       addMessageHandler(Messages.createGameMessagehandler("updateGame", onUpdateGame))
       addMessageHandler(Messages.createGameMessagehandler("wordRevealed", onWordRevealed))
+    }
+
+    const onConnect = () => {
+      emitMessage(Messages.joinGame({ gameId, userId }))
     }
 
     const onJoinedGame = (input: Messages.JoinedGameInput) => {
@@ -98,6 +107,7 @@ export const usePlayGameMessaging = (userId: string) => {
   }, [
     addMessageHandler,
     emitMessage,
+    gameId,
     playAssassinSound,
     playEndGameSound,
     playFailureSound,

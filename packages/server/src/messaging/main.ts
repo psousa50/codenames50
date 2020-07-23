@@ -59,6 +59,8 @@ export const emitMessage: GameMessagingPort<EmitMessageInput> = ({ userId, roomI
 
 export const broadcastMessage: GameMessagingPort<BrodcastMessageInput> = ({ roomId, message }) =>
   withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
+    const socketIds = messengerPorts.getSocketIdsForRoomId(messengerEnvironment)(roomId)
+    console.log("broadcast", socketIds)
     messengerPorts.broadcast(messengerEnvironment)(roomId, message)
     return actionOf(undefined)
   })

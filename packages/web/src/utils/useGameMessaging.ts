@@ -1,12 +1,10 @@
 import { Messages } from "@codenames50/messaging"
-import React, { useContext } from "react"
+import React from "react"
 import { EnvironmentContext } from "../environment"
 import { useGameState } from "./useGameState"
 
 export const useGameMessaging = () => {
-  const {
-    socketMessaging: { emitMessage, addMessageHandler },
-  } = useContext(EnvironmentContext)
+  const { socketMessaging } = React.useContext(EnvironmentContext)
   const [game, setGame] = useGameState()
 
   const [error, setError] = React.useState("")
@@ -14,9 +12,10 @@ export const useGameMessaging = () => {
   const clearError = () => {
     setError("")
   }
+
   React.useEffect(() => {
     const setupMessageHandlers = () => {
-      addMessageHandler(Messages.createGameMessagehandler("gameError", onError))
+      socketMessaging.addMessageHandler(Messages.createGameMessagehandler("gameError", onError))
     }
 
     const onError = (e: { message: string }) => {
@@ -24,11 +23,10 @@ export const useGameMessaging = () => {
     }
 
     setupMessageHandlers()
-  }, [addMessageHandler])
+  }, [socketMessaging])
 
   return {
-    emitMessage,
-    addMessageHandler,
+    ...socketMessaging,
     error,
     clearError,
     game,

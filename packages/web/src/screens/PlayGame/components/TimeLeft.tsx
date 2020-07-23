@@ -14,8 +14,8 @@ export const TimeLeft: React.FC<TimeLeftProps> = ({ started, turnTimeoutSec, onT
 
   const [remaining, setRemaining] = React.useState(calcRemaining())
   const [timedOut, setTimedOut] = React.useState(false)
-  const [playTickSound] = usePlaySound(sounds.tick)
-  const [playTimeoutSound] = usePlaySound(sounds.timeout)
+  const playTickSound = usePlaySound(sounds.tick)
+  const playTimeoutSound = usePlaySound(sounds.timeout)
 
   React.useEffect(() => {
     setTimedOut(false)
