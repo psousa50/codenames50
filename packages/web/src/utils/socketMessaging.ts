@@ -1,12 +1,14 @@
 import { Messages } from "@codenames50/messaging"
 import io from "socket.io-client"
 
-const connect = (socket: SocketIOClient.Socket) => () => {
+const connect = (socket: SocketIOClient.Socket) => (onConnect: () => void = () => {}) => {
   if (!socket.connected) {
     console.log("Connecting=====>")
+    socket.on("connect", onConnect)
     socket.connect()
   } else {
     console.log("Already connected=====>")
+    onConnect()
   }
 }
 

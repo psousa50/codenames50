@@ -19,11 +19,13 @@ export interface CreateGameScreenProps {
 export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: initialUserId }) => {
   const classes = useStyles()
 
-  const { emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
+  const { connect, emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
   const [userId, setUserId] = React.useState(initialUserId || "")
   const [loading, setLoading] = React.useState(false)
 
   React.useEffect(() => {
+    connect()
+
     const onGameCreated = (game: GameModels.CodeNamesGame) => {
       setGame(game)
     }
@@ -33,7 +35,7 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
     }
 
     setupMessageHandlers()
-  }, [addMessageHandler, setGame])
+  }, [addMessageHandler, connect, setGame])
 
   const createGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

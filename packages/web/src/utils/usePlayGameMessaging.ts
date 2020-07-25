@@ -14,12 +14,15 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
   const { connect, emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
 
   React.useEffect(() => {
-    connect()
-  }, [connect])
+    const onConnect = () => {
+      emitMessage(Messages.joinGame({ gameId, userId }))
+    }
+
+    connect(onConnect)
+  }, [connect, emitMessage, gameId, userId])
 
   React.useEffect(() => {
     const setupMessageHandlers = () => {
-      addMessageHandler(Messages.createGameMessagehandler("connect", onConnect))
       addMessageHandler(Messages.createGameMessagehandler("gameStarted", onGameStarted))
       addMessageHandler(Messages.createGameMessagehandler("hintSent", onHintSent))
       addMessageHandler(Messages.createGameMessagehandler("joinedGame", onJoinedGame))
@@ -31,10 +34,6 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
       addMessageHandler(Messages.createGameMessagehandler("updateConfig", onUpdateConfig))
       addMessageHandler(Messages.createGameMessagehandler("updateGame", onUpdateGame))
       addMessageHandler(Messages.createGameMessagehandler("wordRevealed", onWordRevealed))
-    }
-
-    const onConnect = () => {
-      emitMessage(Messages.joinGame({ gameId, userId }))
     }
 
     const onJoinedGame = (input: Messages.JoinedGameInput) => {
