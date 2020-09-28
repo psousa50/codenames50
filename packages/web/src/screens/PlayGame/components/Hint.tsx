@@ -1,6 +1,5 @@
 import { GameModels } from "@codenames50/core"
 import { Button, makeStyles, Paper, Theme } from "@material-ui/core"
-import Typography from "@material-ui/core/Typography"
 import React from "react"
 import { calculatedWidth, teamColor } from "../../../utils/styles"
 import { Hint as HintModel } from "../../../utils/types"
@@ -25,8 +24,8 @@ export const Hint: React.FC<HintProps> = ({ team, hint, wordsRevealedCount, endT
 
   return (
     <Paper elevation={3} variant="outlined" style={styles.paper} className={classes.container}>
-      <Typography variant="h4">{hint.word.toUpperCase()}</Typography>
-      <Typography variant="h4">
+      <div className={classes.hintWord}>{hint.word.toUpperCase()}</div>
+      <div className={classes.hintWord}>
         {hint.count > 0
           ? `${hint.count}${
               wordsRevealedCount > 0
@@ -38,18 +37,18 @@ export const Hint: React.FC<HintProps> = ({ team, hint, wordsRevealedCount, endT
                 : ""
             }`
           : ""}
-      </Typography>
-      <Button variant="contained" disabled={!canEndTurn} color="primary" onClick={() => endTurn()}>
+      </div>
+      <Button
+        className={classes.button}
+        variant="contained"
+        disabled={!canEndTurn}
+        color="primary"
+        onClick={() => endTurn()}
+      >
         End Turn
       </Button>
     </Paper>
   )
-}
-
-interface HintCountProps {
-  count: number
-  selected: boolean
-  onChange?: (n: number) => void
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -63,12 +62,34 @@ const useStyles = makeStyles((theme: Theme) => ({
     justifyContent: "space-between",
   },
   hintWord: {
-    display: "flex",
-    userSelect: "none",
-    alignItems: "center",
-    justifyContent: "center",
+    overflowWrap: "anywhere",
+    padding: "3px 8px",
+    [theme.breakpoints.down(300)]: {
+      fontSize: "10px",
+    },
+    [theme.breakpoints.between(300, 600)]: {
+      fontSize: "14px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "20px",
+    },
+    [theme.breakpoints.up("md")]: {
+      fontSize: "30px",
+    },
   },
-  number: {
-    margin: "5px",
+  button: {
+    padding: "3px 8px",
+    [theme.breakpoints.down(300)]: {
+      fontSize: "8px",
+    },
+    [theme.breakpoints.between(300, 600)]: {
+      fontSize: "10px",
+    },
+    [theme.breakpoints.up("sm")]: {
+      fontSize: "12px",
+    },
+    [theme.breakpoints.up("md")]: {
+      fontSize: "14px",
+    },
   },
 }))
