@@ -150,7 +150,6 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
 const useStyles = makeStyles((theme: Theme) => ({
   rows: {
     display: "flex",
-    flex: 1,
     flexDirection: "column",
     width: calculatedWidth,
     height: calculatedHeight,
