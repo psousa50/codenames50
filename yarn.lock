@@ -13250,11 +13250,6 @@ shallow-clone@^3.0.0:
   dependencies:
     kind-of "^6.0.2"
 
-shared2@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/shared2/-/shared2-1.0.2.tgz#cd172430206c9a5a16880c0e71fadc2baa05e283"
-  integrity sha512-JtudPR++mUNjJifY9IN8NVPt6354F55t9eaNckY7JOA/f/TJp+0FhTHygNWTJ86Hi03rOUFar/eAIReVHgRdyQ==
-
 shebang-command@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/shebang-command/-/shebang-command-1.2.0.tgz#44aac65b695b03398968c39f363fee5deafdf1ea"
