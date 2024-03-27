@@ -1,6 +1,6 @@
 import { GameModels, gamePorts } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
-import React from "react"
+import React, { useState } from "react"
 import { useGameMessaging } from "./useGameMessaging"
 import { sounds, usePlaySound } from "./usePlaySound"
 
@@ -12,6 +12,7 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
   const playEndGameSound = usePlaySound(sounds.endGame)
 
   const { connect, emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
+  const [messageHistory, setMessageHistory] = useState<string[]>([])
 
   React.useEffect(() => {
     const onConnect = () => {
@@ -34,6 +35,7 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
       addMessageHandler(Messages.createGameMessagehandler("updateConfig", onUpdateConfig))
       addMessageHandler(Messages.createGameMessagehandler("updateGame", onUpdateGame))
       addMessageHandler(Messages.createGameMessagehandler("wordRevealed", onWordRevealed))
+      addMessageHandler(Messages.createGameMessagehandler("chatMessage", onChatMessageReceived))
     }
 
     const onJoinedGame = (input: Messages.JoinedGameInput) => {
@@ -102,6 +104,10 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
       }
     }
 
+    const onChatMessageReceived = (chatMessage: Messages.ChatMessageInput) => {
+      setMessageHistory(prevMessages => [...prevMessages, chatMessage.message])
+    }
+
     setupMessageHandlers()
   }, [
     addMessageHandler,
@@ -116,10 +122,16 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
     userId,
   ])
 
+  const sendChatMessage = (message: string, toUserId?: string) => {
+    emitMessage(Messages.chatMessage({ gameId, fromUserId: userId, message, toUserId }))
+  }
+
   return {
     emitMessage,
     error,
     clearError,
     game,
+    sendChatMessage,
+    messageHistory,
   }
 }

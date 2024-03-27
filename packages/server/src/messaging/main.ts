@@ -31,6 +31,13 @@ type BrodcastMessageInput = {
   message: Messages.GameMessage
 }
 
+export type ChatMessageInput = {
+  gameId: string
+  fromUserId: string
+  message: string
+  toUserId?: string // Optional, for direct messages
+}
+
 export const registerUser: GameMessagingPort<RegisterUserInput> = input => {
   userSocketLinks = [...userSocketLinks.filter(u => u.socketId !== input.socketId), input]
   return actionOf(undefined)
@@ -65,11 +72,25 @@ export const broadcastMessage: GameMessagingPort<BrodcastMessageInput> = ({ room
     return actionOf(undefined)
   })
 
+export const handleChatMessage: GameMessagingPort<ChatMessageInput> = ({ gameId, fromUserId, message, toUserId }) =>
+  withEnv(() => {
+    const chatMessage = Messages.chatMessage({ gameId, fromUserId, message, toUserId })
+    if (toUserId) {
+      // Send to a specific user
+      emitMessage({ userId: toUserId, roomId: gameId, message: chatMessage })
+    } else {
+      // Broadcast to all users in the game
+      broadcastMessage({ roomId: gameId, message: chatMessage })
+    }
+    return actionOf(undefined)
+  })
+
 export const gameMessagingPorts = {
   emitMessage,
   registerUser,
   unregisterSocket,
   broadcastMessage,
+  handleChatMessage,
 }
 
 export type GameMessagingPorts = typeof gameMessagingPorts

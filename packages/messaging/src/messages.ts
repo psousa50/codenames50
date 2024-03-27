@@ -27,6 +27,7 @@ export type GameMessageType =
   | "updateGame"
   | "updateConfig"
   | "wordRevealed"
+  | "chatMessage"
 
 export type GameMessage<T = Record<string, unknown>> = {
   type: GameMessageType
@@ -65,6 +66,7 @@ export type GameMessageHandler =
   | GameMessageHandlerSpec<"updateGame", CodeNamesGame>
   | GameMessageHandlerSpec<"updateConfig", UpdateConfigInput>
   | GameMessageHandlerSpec<"wordRevealed", WordRevealedInput>
+  | GameMessageHandlerSpec<"chatMessage", ChatMessageInput>
 
 export const createGameMessagehandler = <T extends GameMessageType, D = Record<string, unknown>, R = void>(
   type: T,
@@ -184,6 +186,13 @@ export type ErrorInput = {
   text: string
 }
 
+export type ChatMessageInput = {
+  gameId: string
+  fromUserId: string
+  message: string
+  toUserId?: string // Optional, for direct messages
+}
+
 export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTurn", data)
 export const checkTurnTimeout = (data: CheckTurnTimeoutInput) => createGameMessage("checkTurnTimeout", data)
 export const createGame = (data: CreateGameInput) => createGameMessage("createGame", data)
@@ -201,6 +210,7 @@ export const restartGame = (data: RestartGameInput) => createGameMessage("restar
 export const turnChanged = (data: TurnChangedInput) => createGameMessage("turnChanged", data)
 export const updateConfig = (data: UpdateConfigInput) => createGameMessage("updateConfig", data)
 export const wordRevealed = (data: WordRevealedInput) => createGameMessage("wordRevealed", data)
+export const chatMessage = (data: ChatMessageInput) => createGameMessage("chatMessage", data)
 
 export const error = (data: ErrorInput) => createGameMessage("gameError", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)

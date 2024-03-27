@@ -1,11 +1,12 @@
-import { Accordion, AccordionDetails, AccordionSummary, Snackbar, Typography } from "@material-ui/core"
-import { makeStyles, Theme } from "@material-ui/core/styles"
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
-import { Alert, AlertTitle } from "@material-ui/lab"
 import { GameModels } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
+import { Accordion, AccordionDetails, AccordionSummary, Grid, Snackbar, Typography } from "@material-ui/core"
+import { Theme, makeStyles } from "@material-ui/core/styles"
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
+import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
 import { EmitMessage } from "../../../utils/types"
+import Chat from "./Chat"
 import { EndedGame } from "./EndedGame"
 import { Header } from "./Header"
 import { RunningGame } from "./RunningGame"
@@ -41,36 +42,43 @@ export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, us
   }
 
   return (
-    <div className={classes.container}>
-      <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={clearError}>
-        <Alert severity="error">
-          <AlertTitle>Error</AlertTitle>
-          {error}
-        </Alert>
-      </Snackbar>
+    <Grid container className={classes.container}>
+      <Grid item xs={9} className={classes.gameContainer}>
+        <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={clearError}>
+          <Alert severity="error">
+            <AlertTitle>Error</AlertTitle>
+            {error}
+          </Alert>
+        </Snackbar>
 
-      <div className={classes.game}>
-        <Header game={game} userId={userId} />
+        <div className={classes.game}>
+          <Header game={game} userId={userId} />
 
-        <Separator />
+          <Separator />
 
-        <SetupGameAcordion
-          teamsExpanded={teamsExpanded}
-          handleTeamsExpanded={handleTeamsExpanded}
-          emitMessage={emitMessage}
-          game={game}
-          userId={userId}
-        />
+          <SetupGameAcordion
+            teamsExpanded={teamsExpanded}
+            handleTeamsExpanded={handleTeamsExpanded}
+            emitMessage={emitMessage}
+            game={game}
+            userId={userId}
+          />
 
-        <Separator />
+          <Separator />
 
-        {game.state === GameModels.GameStates.running && (
-          <RunningGame game={game} userId={userId} emitMessage={emitMessage} />
-        )}
+          {game.state === GameModels.GameStates.running && (
+            <RunningGame game={game} userId={userId} emitMessage={emitMessage} />
+          )}
 
-        {game.state === GameModels.GameStates.ended && <EndedGame userId={userId} game={game} newGame={restartGame} />}
-      </div>
-    </div>
+          {game.state === GameModels.GameStates.ended && (
+            <EndedGame userId={userId} game={game} newGame={restartGame} />
+          )}
+        </div>
+      </Grid>
+      <Grid item xs={3} className={classes.chatContainer}>
+        <Chat gameId={gameId} userId={userId} />
+      </Grid>
+    </Grid>
   )
 }
 
@@ -117,11 +125,15 @@ const useStyles = makeStyles((theme: Theme) => ({
   container: {
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
   },
-  game: {
+  gameContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    padding: "10px",
+  },
+  chatContainer: {
     padding: "10px",
   },
   expandableRoot: {
@@ -141,5 +153,15 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontSize: theme.typography.pxToRem(20),
     fontWeight: theme.typography.fontWeightMedium,
     color: theme.palette.secondary.main,
+  },
+  game: {
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: "4px",
+    padding: "1rem",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    transition: "background-color 0.3s ease",
+    "&:hover": {
+      backgroundColor: theme.palette.background.default,
+    },
   },
 }))
