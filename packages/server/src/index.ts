@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv"
 import { run } from "fp-ts/lib/ReaderTaskEither"
-import { createExpressApp, configureRoutes } from "./app/main"
+import { configureRoutes, createExpressApp } from "./app/main"
 import { config as appConfig } from "./config"
 import { DomainEnvironment } from "./domain/adapters"
 import { buildEnvironments } from "./environment"
@@ -46,7 +46,8 @@ const startApplication = async () => {
 
     startSocketsApplication(io, socketsEnvironment)
   } catch (error) {
-    exitProcess(error)
+    const err = error instanceof Error ? error : new Error(String(error))
+    exitProcess(err)
   }
 }
 

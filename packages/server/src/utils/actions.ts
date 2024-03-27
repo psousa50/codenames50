@@ -1,8 +1,8 @@
 import { fold, left, right } from "fp-ts/lib/Either"
-import { pipe } from "fp-ts/lib/pipeable"
 import { ask as askReader } from "fp-ts/lib/Reader"
-import { chain, fromEither, fromTaskEither, map, ReaderTaskEither, rightReader } from "fp-ts/lib/ReaderTaskEither"
+import { ReaderTaskEither, chain, fromEither, fromTaskEither, map, rightReader } from "fp-ts/lib/ReaderTaskEither"
 import { tryCatch } from "fp-ts/lib/TaskEither"
+import { pipe } from "fp-ts/lib/pipeable"
 import { logDebug } from "./debug"
 import { ServiceError } from "./errors"
 
@@ -42,7 +42,7 @@ export const toAction = <E, I, R>(f: (i: I) => R): ((i: I) => ActionResult<E, R>
   try {
     return actionOf(f(i))
   } catch (error) {
-    return fromEither(left(error))
+    return fromEither(left(error instanceof Error ? error : new Error(String(error))))
   }
 }
 
