@@ -191,7 +191,7 @@ export const hintSent = (data: HintSentInput) => createGameMessage("hintSent", d
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
 export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)
 export const randomizeTeam = (data: RandomizeTeamsInput) => createGameMessage("randomizeTeam", data)
-export const registerUserSocket = (userId: RegisterUserSocketInput) => createGameMessage("registerUserSocket", userId)
+export const registerUserSocket = (data: RegisterUserSocketInput) => createGameMessage("registerUserSocket", data)
 export const removePlayer = (data: RemovePlayerInput) => createGameMessage("removePlayer", data)
 export const revealWord = (data: RevealWordInput) => createGameMessage("revealWord", data)
 export const sendHint = (data: SendHintInput) => createGameMessage("sendHint", data)
@@ -201,7 +201,6 @@ export const restartGame = (data: RestartGameInput) => createGameMessage("restar
 export const turnChanged = (data: TurnChangedInput) => createGameMessage("turnChanged", data)
 export const updateConfig = (data: UpdateConfigInput) => createGameMessage("updateConfig", data)
 export const wordRevealed = (data: WordRevealedInput) => createGameMessage("wordRevealed", data)
-
 export const error = (data: ErrorInput) => createGameMessage("gameError", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)
 export const joinedGame = (data: JoinedGameInput) => createGameMessage("joinedGame", data)
