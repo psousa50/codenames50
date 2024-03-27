@@ -1,5 +1,5 @@
 import { left, right } from "fp-ts/lib/Either"
-import { chain, fromEither, TaskEither } from "fp-ts/lib/TaskEither"
+import { TaskEither, chain, fromEither } from "fp-ts/lib/TaskEither"
 import { logDebug } from "./debug"
 
 export type ActionResult<R = void> = TaskEither<Error, R>
@@ -11,7 +11,7 @@ export const toAction = <I, R>(f: (i: I) => R): ((i: I) => ActionResult<R>) => i
   try {
     return actionOf(f(i))
   } catch (error) {
-    return fromEither(left(error))
+    return fromEither(left(error instanceof Error ? error : new Error(String(error))))
   }
 }
 
