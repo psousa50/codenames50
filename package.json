@@ -13,7 +13,7 @@
   },
   "scripts": {
     "heroku-postbuild": "./scripts/build.sh",
-    "start": "yarn run build && echo ... to-do",
+    "start": "yarn && yarn run build && echo ... to-do",
     "prebuild": "yarn run clean",
     "build": "lerna run build",
     "clean": "yarn run clean:cache && yarn run clean:packages",
