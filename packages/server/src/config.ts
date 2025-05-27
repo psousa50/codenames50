@@ -25,7 +25,7 @@ export const config = convict<AppConfig>({
     format: ["production", "development", "test"],
   },
   port: {
-    default: 5000,
+    default: 3001,
     doc: "",
     env: "PORT",
     format: "port",
