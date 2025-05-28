@@ -11,6 +11,7 @@ export type GameMessageType =
   | "gameRestarted"
   | "gameStarted"
   | "hintSent"
+  | "interceptWord"
   | "joinedGame"
   | "joinGame"
   | "joinTeam"
@@ -26,6 +27,7 @@ export type GameMessageType =
   | "turnChanged"
   | "updateGame"
   | "updateConfig"
+  | "wordIntercepted"
   | "wordRevealed"
 
 export type GameMessage<T = Record<string, unknown>> = {
@@ -48,6 +50,7 @@ export type GameMessageHandler =
   | GameMessageHandlerSpec<"gameRestarted">
   | GameMessageHandlerSpec<"gameStarted", CodeNamesGame>
   | GameMessageHandlerSpec<"hintSent", HintSentInput>
+  | GameMessageHandlerSpec<"interceptWord", InterceptWordInput>
   | GameMessageHandlerSpec<"joinedGame", JoinedGameInput>
   | GameMessageHandlerSpec<"joinGame", JoinGameInput>
   | GameMessageHandlerSpec<"joinTeam", JoinTeamInput>
@@ -64,6 +67,7 @@ export type GameMessageHandler =
   | GameMessageHandlerSpec<"checkTurnTimeout", CheckTurnTimeoutInput>
   | GameMessageHandlerSpec<"updateGame", CodeNamesGame>
   | GameMessageHandlerSpec<"updateConfig", UpdateConfigInput>
+  | GameMessageHandlerSpec<"wordIntercepted", WordInterceptedInput>
   | GameMessageHandlerSpec<"wordRevealed", WordRevealedInput>
 
 export const createGameMessagehandler = <T extends GameMessageType, D = Record<string, unknown>, R = void>(
@@ -149,6 +153,18 @@ export type RevealWordInput = {
   col: number
 }
 
+export type InterceptWordInput = {
+  gameId: string
+  userId: string
+  row: number
+  col: number
+}
+
+export type WordInterceptedInput = InterceptWordInput & {
+  now: number
+  success: boolean
+}
+
 export type WordRevealedInput = RevealWordInput & {
   now: number
 }
@@ -188,6 +204,7 @@ export const changeTurn = (data: ChangeTurnInput) => createGameMessage("changeTu
 export const checkTurnTimeout = (data: CheckTurnTimeoutInput) => createGameMessage("checkTurnTimeout", data)
 export const createGame = (data: CreateGameInput) => createGameMessage("createGame", data)
 export const hintSent = (data: HintSentInput) => createGameMessage("hintSent", data)
+export const interceptWord = (data: InterceptWordInput) => createGameMessage("interceptWord", data)
 export const joinGame = (data: JoinGameInput) => createGameMessage("joinGame", data)
 export const joinTeam = (data: JoinTeamInput) => createGameMessage("joinTeam", data)
 export const randomizeTeam = (data: RandomizeTeamsInput) => createGameMessage("randomizeTeam", data)
@@ -200,6 +217,7 @@ export const startGame = (data: StartGameInput) => createGameMessage("startGame"
 export const restartGame = (data: RestartGameInput) => createGameMessage("restartGame", data)
 export const turnChanged = (data: TurnChangedInput) => createGameMessage("turnChanged", data)
 export const updateConfig = (data: UpdateConfigInput) => createGameMessage("updateConfig", data)
+export const wordIntercepted = (data: WordInterceptedInput) => createGameMessage("wordIntercepted", data)
 export const wordRevealed = (data: WordRevealedInput) => createGameMessage("wordRevealed", data)
 export const error = (data: ErrorInput) => createGameMessage("gameError", data)
 export const gameCreated = (data: CodeNamesGame) => createGameMessage("gameCreated", data)

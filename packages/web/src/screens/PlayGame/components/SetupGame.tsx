@@ -35,7 +35,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
   const [invitePlayersOpened, openInvitePlayers] = React.useState(false)
   const [newGameDialogOpened, setNewGameDialogOpened] = React.useState(false)
   const [config, setConfig] = React.useState(game.config)
-  const { languages, turnTimeouts } = useApi()
+  const { languages, turnTimeouts, variants } = useApi()
 
   React.useEffect(() => {
     setConfig(game.config)
@@ -71,6 +71,11 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
     updateConfig({ language: value === "" ? undefined : value })
   }
 
+  const changeVariant = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const value = event.target.value as string
+    updateConfig({ variant: value as GameModels.GameVariant })
+  }
+
   const randomizeTeams = () => {
     emitMessage(Messages.randomizeTeam({ gameId, userId }))
   }
@@ -94,6 +99,20 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
       <ConfirmNewGameDialog open={newGameDialogOpened} closeNewGameDialog={closeNewGameDialog} />
       {game.state === GameModels.GameStates.idle && (
         <div>
+          <FormControl required className={classes.formControl}>
+            <InputLabel id="variant">Game Variant</InputLabel>
+            <Select labelId="variant" value={config.variant || GameModels.GameVariant.classic} onChange={changeVariant}>
+              {variants ? (
+                variants.map(v => (
+                  <MenuItem key={v.name} value={v.name}>
+                    {v.displayName}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem value={GameModels.GameVariant.classic}>Classic</MenuItem>
+              )}
+            </Select>
+          </FormControl>
           <FormControl required className={classes.formControl}>
             <InputLabel id="language">Language</InputLabel>
             <Select labelId="language" value={config.language || ""} onChange={changeLanguage}>

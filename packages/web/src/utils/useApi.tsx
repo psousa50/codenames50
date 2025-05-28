@@ -4,11 +4,13 @@ import { task } from "fp-ts/lib/Task"
 import { getOrElse } from "fp-ts/lib/TaskEither"
 import React from "react"
 import { EnvironmentContext } from "../environment"
+import { GameVariantConfig } from "../api/games"
 
 export const useApi = () => {
   const { api } = React.useContext(EnvironmentContext)
   const [languages, setLanguages] = React.useState<string[]>()
   const [turnTimeouts, setTurnTimeouts] = React.useState<GameModels.TurnTimeoutConfig[]>()
+  const [variants, setVariants] = React.useState<GameVariantConfig[]>()
 
   React.useEffect(() => {
     const fetch = async () => {
@@ -36,5 +38,18 @@ export const useApi = () => {
     fetch()
   }, [api])
 
-  return { languages, turnTimeouts }
+  React.useEffect(() => {
+    const fetch = async () => {
+      const apiVariants = await pipe(
+        api.getVariants(),
+        getOrElse<Error, GameVariantConfig[] | undefined>(_ => task.of(undefined)),
+      )()
+
+      setVariants(apiVariants)
+    }
+
+    fetch()
+  }, [api])
+
+  return { languages, turnTimeouts, variants }
 }

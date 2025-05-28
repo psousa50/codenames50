@@ -27,13 +27,20 @@ export enum Teams {
 export type TeamConfig = {
   spyMaster: string | undefined
   wordsLeft: number | undefined
+  score: number
 }
 
 export type TurnOutcome = "success" | "failure" | "assassin" | undefined
 
+export enum GameVariant {
+  classic = "classic",
+  interception = "interception",
+}
+
 export type GameConfig = {
   language: string | undefined
   turnTimeoutSec: number | undefined
+  variant: GameVariant
 }
 
 export type CodeNamesGame = {
@@ -56,6 +63,9 @@ export type CodeNamesGame = {
   turnOutcome: TurnOutcome | undefined
   winner: Teams | undefined
   board: WordsBoard
+  interceptPhase: boolean
+  interceptUsed: boolean
+  interceptingTeam: Teams | undefined
 }
 
 export type Player = {

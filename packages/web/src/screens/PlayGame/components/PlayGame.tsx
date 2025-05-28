@@ -17,11 +17,13 @@ export interface PlayGameProps {
   game: GameModels.CodeNamesGame
   userId: string
   clearError: () => void
+  interceptResult?: { success: boolean; message: string }
+  clearInterceptResult?: () => void
 }
 
 const Separator = () => <div style={{ height: "1rem" }}></div>
 
-export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, userId, clearError }) => {
+export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, userId, clearError, interceptResult, clearInterceptResult }) => {
   const classes = useStyles()
 
   const [teamsExpanded, setTeamsExpanded] = React.useState(false)
@@ -48,6 +50,15 @@ export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, us
           {error}
         </Alert>
       </Snackbar>
+
+      {interceptResult && clearInterceptResult && (
+        <Snackbar open={true} autoHideDuration={3000} onClose={clearInterceptResult}>
+          <Alert severity={interceptResult.success ? "success" : "warning"}>
+            <AlertTitle>{interceptResult.success ? "Intercept Success!" : "Intercept Failed"}</AlertTitle>
+            {interceptResult.message}
+          </Alert>
+        </Snackbar>
+      )}
 
       <div className={classes.game}>
         <Header game={game} userId={userId} />

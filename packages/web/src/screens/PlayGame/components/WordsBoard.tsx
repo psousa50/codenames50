@@ -60,12 +60,16 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
   const classes = useStyles()
 
   const canReveal = GameRules.revealWord(userId, row, col)(game) === undefined
+  const canIntercept = (GameRules as any).interceptWord ? (GameRules as any).interceptWord(userId, row, col)(game) === undefined : false
+  const isClickable = canReveal || canIntercept
 
   const rw = revealWords || word.revealed
 
   const styles = {
     base: {
-      cursor: canReveal ? "pointer" : undefined,
+      cursor: isClickable ? "pointer" : undefined,
+      border: canIntercept ? "3px solid orange" : undefined,
+      boxShadow: canIntercept ? "0 0 10px orange" : undefined,
     },
     unrevelead: {
       backgroundColor: common.white,
@@ -120,7 +124,7 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
   })
 
   return (
-    <div className={classes.cellWrapper} onClick={() => canReveal && onWordClick(word, row, col)}>
+    <div className={classes.cellWrapper} onClick={() => isClickable && onWordClick(word, row, col)}>
       <a.div
         style={{
           opacity: opacity.interpolate(o => 1 - (typeof o === "number" ? o : Number.parseInt(o || "0"))),

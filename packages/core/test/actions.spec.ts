@@ -394,6 +394,15 @@ describe("restartGame", () => {
       hintWord: "",
       hintWordCount: 0,
       wordsRevealedCount: 0,
+      interceptPhase: false,
+      interceptUsed: false,
+      interceptingTeam: undefined,
+      redTeam: {
+        score: 0,
+      },
+      blueTeam: {
+        score: 0,
+      },
       something: "else",
     }
 
@@ -403,13 +412,17 @@ describe("restartGame", () => {
 
 describe("sendHint", () => {
   it("sets the hint for the turn", () => {
-    const game = {}
+    const game = { turn: Teams.blue }
     const hintWord = "some-hint"
     const hintWordCount = 3
     const expectedGame = {
+      turn: Teams.blue,
       hintWord,
       hintWordCount,
       wordsRevealedCount: 0,
+      interceptPhase: true,
+      interceptUsed: false,
+      interceptingTeam: Teams.red,
     }
 
     expect(GameActions.sendHint(hintWord, hintWordCount)(game as any)).toEqual(expectedGame)
@@ -457,6 +470,7 @@ describe("revealWord", () => {
       blueTeam: {},
       redTeam: {},
       players: [],
+      config: { variant: "classic" },
     }
 
     expect(GameActions.revealWord("some-user-id", 0, 1, now)(game as any).board[0][1].revealed).toBeTruthy()
@@ -473,6 +487,7 @@ describe("revealWord", () => {
       redTeam: {},
       hintWordCount: 2,
       wordsRevealedCount: 1,
+      config: { variant: "classic" },
     }
 
     const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
@@ -717,8 +732,111 @@ describe("changeTurn", () => {
       turnCount: 4,
       turnTimeoutSec: game.config.turnTimeoutSec,
       turnStartedTime: now,
+      interceptPhase: false,
+      interceptUsed: false,
+      interceptingTeam: undefined,
     }
 
     expect(GameActions.changeTurn(userId, now)(game as any)).toEqual(expectedGame)
+  })
+})
+
+describe("interception variant", () => {
+  const userId = "some-user-id"
+
+  it("increases score on correct intercept", () => {
+    const w00 = { word: "w00", type: WordType.red, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.blue }],
+      blueTeam: { score: 0 },
+      redTeam: { score: 0, wordsLeft: 1 },
+      turn: Teams.red,
+      config: { variant: "interception" },
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.blueTeam.score).toBe(1) // Correct intercept: blue team gets point
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+  })
+
+  it("increases other team score on incorrect intercept", () => {
+    const w00 = { word: "w00", type: WordType.blue, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.blue }],
+      blueTeam: { score: 0 },
+      redTeam: { score: 0, wordsLeft: 1 },
+      turn: Teams.red,
+      config: { variant: "interception" },
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.redTeam.score).toBe(1) // Incorrect intercept: red team gets point
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+  })
+
+  it("ends game when no words left and determines winner by score", () => {
+    const w00 = { word: "w00", type: WordType.red, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.blue }],
+      blueTeam: { score: 2, wordsLeft: 0 },
+      redTeam: { score: 1, wordsLeft: 1 },
+      turn: Teams.red,
+      config: { variant: "interception" },
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.state).toBe(GameStates.ended)
+    expect(updatedGame.winner).toBe(Teams.blue) // Blue wins with higher score
+  })
+
+  it("increases score when revealing team word normally", () => {
+    const now = 1234567890
+    const w00 = { word: "w00", type: WordType.red, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.red }],
+      blueTeam: { score: 0 },
+      redTeam: { score: 0, wordsLeft: 1 },
+      turn: Teams.red,
+      config: { variant: "interception" },
+      hintWordCount: 1,
+      wordsRevealedCount: 0,
+    }
+
+    const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
+
+    expect(updatedGame.redTeam.score).toBe(1) // Red team gets point for revealing their word
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+  })
+
+  it("increases score when revealing opponent word normally", () => {
+    const now = 1234567890
+    const w00 = { word: "w00", type: WordType.blue, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.red }],
+      blueTeam: { score: 0, wordsLeft: 1 },
+      redTeam: { score: 0 },
+      turn: Teams.red,
+      config: { variant: "interception" },
+      hintWordCount: 1,
+      wordsRevealedCount: 0,
+    }
+
+    const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
+
+    expect(updatedGame.blueTeam.score).toBe(1) // Blue team gets point even though red revealed it
+    expect(updatedGame.board[0][0].revealed).toBe(true)
   })
 })

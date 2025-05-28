@@ -102,6 +102,7 @@ export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Sock
   )
   add(Messages.createGameMessagehandler("createGame", handler(createGameHandler)))
   add(Messages.createGameMessagehandler("disconnect", handler(disconnectHandler)))
+  add(Messages.createGameMessagehandler("interceptWord", handler(onDomainPort(env.gamesDomainPorts.interceptWord))))
   add(Messages.createGameMessagehandler("joinGame", handler(joinGameHandler)))
   add(Messages.createGameMessagehandler("joinTeam", handler(onDomainPort(env.gamesDomainPorts.joinTeam))))
   add(Messages.createGameMessagehandler("randomizeTeam", handler(onDomainPort(env.gamesDomainPorts.randomizeTeams))))

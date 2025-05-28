@@ -47,6 +47,22 @@ describe("buildBoards", () => {
 
     expect(redDiffSum).toBeGreaterThan(redTypesIndexes.length - 1)
   })
+
+  it("creates correct distribution for interception variant", () => {
+    const board = buildBoard(5, 5, words, GameModels.GameVariant.interception)
+
+    const flattenBoard = R.flatten(board)
+    const reds = flattenBoard.filter(b => b.type === GameModels.WordType.red).length
+    const blues = flattenBoard.filter(b => b.type === GameModels.WordType.blue).length
+    const innocents = flattenBoard.filter(b => b.type === GameModels.WordType.inocent).length
+    const assassins = flattenBoard.filter(b => b.type === GameModels.WordType.assassin).length
+
+    expect(reds).toBe(8)
+    expect(blues).toBe(8)
+    expect(innocents).toBe(8) // 25 - 8 - 8 - 1 = 8
+    expect(assassins).toBe(1)
+    expect(flattenBoard.filter(b => b.revealed).length).toBe(0)
+  })
 })
 
 describe("createGame", () => {
@@ -58,19 +74,38 @@ describe("createGame", () => {
     const expectedGame = {
       gameId,
       gameCreatedTime: now,
+      gameStartedTime: undefined,
       config: {
         language: undefined,
         turnTimeoutSec: undefined,
+        variant: GameModels.GameVariant.classic,
       },
       userId,
       players: [{ userId, team: GameModels.Teams.red }],
-      redTeam: {},
-      blueTeam: {},
+      redTeam: {
+        spyMaster: undefined,
+        wordsLeft: undefined,
+        score: 0,
+      },
+      blueTeam: {
+        spyMaster: undefined,
+        wordsLeft: undefined,
+        score: 0,
+      },
       hintWord: "",
       hintWordCount: 0,
+      turnStartedTime: undefined,
       wordsRevealedCount: 0,
       state: GameModels.GameStates.idle,
+      turn: undefined,
+      turnCount: undefined,
+      turnTimeoutSec: undefined,
+      turnOutcome: undefined,
+      winner: undefined,
       board: [],
+      interceptPhase: false,
+      interceptUsed: false,
+      interceptingTeam: undefined,
     }
 
     const newGame = createGame(gameId, userId, now)

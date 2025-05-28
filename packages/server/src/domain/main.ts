@@ -49,7 +49,7 @@ const getGame: DomainPort<UUID, GameModels.CodeNamesGame> = gameId =>
     ),
   )
 
-const buildBoard: DomainPort<string, GameModels.WordsBoard> = language =>
+const buildBoard: DomainPort<{ language: string; variant: GameModels.GameVariant }, GameModels.WordsBoard> = ({ language, variant }) =>
   withEnv(
     ({
       config: { boardWidth, boardHeight },
@@ -65,7 +65,7 @@ const buildBoard: DomainPort<string, GameModels.WordsBoard> = language =>
                 new ServiceError(`Language '${language}' not found`, ErrorCodes.LANGUAGE_NOT_FOUND),
               ),
         ),
-        map(words => gamePorts.buildBoard(boardWidth, boardHeight, words.words)),
+        map(words => gamePorts.buildBoard(boardWidth, boardHeight, words.words, variant)),
       ),
   )
 
@@ -136,7 +136,7 @@ export const startGame: DomainPort<Messages.StartGameInput> = ({ gameId, config 
       getGame(gameId),
       chain(game =>
         pipe(
-          buildBoard(config.language || "en"),
+          buildBoard({ language: config.language || "en", variant: config.variant }),
           chain(board => doAction(gamePorts.startGame(config, board, currentUtcEpoch()))(game)),
         ),
       ),
@@ -154,6 +154,31 @@ export const sendHint: DomainPort<Messages.SendHintInput> = ({ gameId, userId, h
       chain(broadcastMessage(Messages.hintSent({ gameId, userId, hintWord, hintWordCount }))),
     ),
   )
+
+export const interceptWord: DomainPort<Messages.InterceptWordInput> = ({ gameId, userId, row, col }) =>
+  withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gamePorts, currentUtcEpoch }) => {
+    const now = currentUtcEpoch()
+    return pipe(
+      getGame(gameId),
+      chain(game => {
+        const revealedWord = game.board[row][col]
+        const revealedWordTeam =
+          revealedWord.type === GameModels.WordType.blue ? GameModels.Teams.blue : 
+          revealedWord.type === GameModels.WordType.red ? GameModels.Teams.red : undefined
+        const activeTeam = game.turn
+        const success = revealedWordTeam === activeTeam
+        
+        return pipe(
+          doAction(gamePorts.interceptWord(userId, row, col))(game),
+          chain(game => adapt(gamesRepositoryPorts.update(game), repositoriesEnvironment)),
+          chain(game => pipe(
+            broadcastMessage(Messages.wordIntercepted({ gameId, userId, row, col, now, success }))(game),
+            chain(() => broadcastMessage(Messages.updateGame(game))(game))
+          )),
+        )
+      }),
+    )
+  })
 
 export const revealWord: DomainPort<Messages.RevealWordInput> = ({ gameId, userId, row, col }) =>
   withEnv(({ repositoriesAdapter: { gamesRepositoryPorts, repositoriesEnvironment }, gamePorts, currentUtcEpoch }) => {
@@ -226,11 +251,34 @@ const timeouts: GameModels.TurnTimeoutConfig[] = [
 export const getLanguages: DomainPort<void, string[]> = () => actionOf(["en", "pt"])
 export const getTurnTimeouts: DomainPort<void, GameModels.TurnTimeoutConfig[]> = () => actionOf(timeouts)
 
+export type GameVariantConfig = {
+  name: string
+  displayName: string
+  description: string
+}
+
+const variants: GameVariantConfig[] = [
+  {
+    name: GameModels.GameVariant.classic,
+    displayName: "Classic",
+    description: "Standard Codenames rules with assassin word"
+  },
+  {
+    name: GameModels.GameVariant.interception,
+    displayName: "Interception",
+    description: "Equal teams, both teams can intercept, scoring-based victory"
+  }
+]
+
+export const getVariants: DomainPort<void, GameVariantConfig[]> = () => actionOf(variants)
+
 export const gamesDomainPorts = {
   changeTurn,
   create,
   getLanguages,
   getTurnTimeouts,
+  getVariants,
+  interceptWord,
   join,
   joinTeam,
   removePlayer,

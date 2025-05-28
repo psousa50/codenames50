@@ -16,6 +16,9 @@ export type ValidationError =
   | "playerMustHaveTeam"
   | "spyMasterAlreadySet"
   | "tooMuchGuesses"
+  | "notInterceptPhase"
+  | "interceptAlreadyUsed"
+  | "notInterceptingTeam"
 
 export type GameRule = (game: CodeNamesGame) => ValidationError | undefined
 
@@ -77,6 +80,13 @@ const hasMoreGuesses: GameRule = game => v(game.wordsRevealedCount < game.hintWo
 const wordIsNotRevealed = (row: number, col: number): GameRule => game =>
   v(!game.board[row][col].revealed, "alreadyRevealed")
 
+const inInterceptPhase: GameRule = game => v(game.interceptPhase, "notInterceptPhase")
+
+const interceptNotUsed: GameRule = game => v(!game.interceptUsed, "interceptAlreadyUsed")
+
+const isInterceptingTeam = (userId: string): GameRule => game =>
+  v(getPlayer(game, userId)?.team === game.interceptingTeam, "notInterceptingTeam")
+
 export const joinTeam = validIfAll([])
 
 const configIsValid = (config: GameConfig): GameRule => _ => v(exists(config.language), "missingLanguage")
@@ -94,6 +104,16 @@ export const sendHint = (userId: string) =>
 export const changeTurn = (userId: string) =>
   validIfAll([running, hasHint, isPlayersTurn(userId), playerIsNotSpyMaster(userId), hasAtLeastOneGuess])
 
+export const interceptWord = (userId: string, row: number, col: number) =>
+  validIfAll([
+    running,
+    inInterceptPhase,
+    interceptNotUsed,
+    isInterceptingTeam(userId),
+    playerIsNotSpyMaster(userId),
+    wordIsNotRevealed(row, col),
+  ])
+
 export const revealWord = (userId: string, row: number, col: number) =>
   validIfAll([
     running,
@@ -106,6 +126,7 @@ export const revealWord = (userId: string, row: number, col: number) =>
 
 export const gameRules = {
   changeTurn,
+  interceptWord,
   joinTeam,
   revealWord,
   sendHint,

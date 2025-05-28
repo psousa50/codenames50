@@ -15,16 +15,19 @@ export const createGame = (gameId: string, userId: string, now: number): Models.
     config: {
       language: undefined,
       turnTimeoutSec: undefined,
+      variant: Models.GameVariant.classic,
     },
     userId,
     players: [],
     redTeam: {
       spyMaster: undefined,
       wordsLeft: undefined,
+      score: 0,
     },
     blueTeam: {
       spyMaster: undefined,
       wordsLeft: undefined,
+      score: 0,
     },
     hintWord: "",
     hintWordCount: 0,
@@ -37,19 +40,34 @@ export const createGame = (gameId: string, userId: string, now: number): Models.
     turnOutcome: undefined,
     winner: undefined,
     board: [],
+    interceptPhase: false,
+    interceptUsed: false,
+    interceptingTeam: undefined,
   })
 
-export const buildBoard = (boardWidth: number, boardHeight: number, words: string[]): Models.WordsBoard => {
+export const buildBoard = (boardWidth: number, boardHeight: number, words: string[], variant: Models.GameVariant = Models.GameVariant.classic): Models.WordsBoard => {
   const numberOfWords = boardWidth * boardHeight
-  const numberOfWordsForTeams = Math.max(0, Math.floor((numberOfWords - 1) / 3))
-  const reds = numberOfWordsForTeams + (Math.random() < 0.5 ? 1 : 0)
-  const blues = numberOfWordsForTeams * 2 + 1 - reds
-  const numberOfWordsForInocents = Math.max(numberOfWords - 1 - reds - blues, 0)
+  
+  let reds: number, blues: number, numberOfWordsForInocents: number
+  
+  if (variant === Models.GameVariant.interception) {
+    // Interception: 8 words each team, 1 assassin, rest innocents
+    reds = 8
+    blues = 8
+    numberOfWordsForInocents = numberOfWords - 1 - reds - blues // 1 for assassin
+  } else {
+    // Classic: standard distribution with assassin
+    const numberOfWordsForTeams = Math.max(0, Math.floor((numberOfWords - 1) / 3))
+    reds = numberOfWordsForTeams + (Math.random() < 0.5 ? 1 : 0)
+    blues = numberOfWordsForTeams * 2 + 1 - reds
+    numberOfWordsForInocents = Math.max(numberOfWords - 1 - reds - blues, 0)
+  }
+  
   const types = Random.shuffle([
     ...new Array(reds).fill(Models.WordType.red),
     ...new Array(blues).fill(Models.WordType.blue),
     ...new Array(numberOfWordsForInocents).fill(Models.WordType.inocent),
-    Models.WordType.assassin,
+    Models.WordType.assassin, // Both variants have assassin
   ])
 
   const boardWords = Random.shuffle(words)
@@ -81,6 +99,9 @@ const startGame = (config: Models.GameConfig, board: Models.WordsBoard, now: num
 const sendHint = (userId: string, hintWord: string, hintWordCount: number) =>
   checkRuleAction(Rules.sendHint(userId), Actions.sendHint(hintWord, hintWordCount))
 
+const interceptWord = (userId: string, row: number, col: number) =>
+  checkRuleAction(Rules.interceptWord(userId, row, col), Actions.interceptWord(userId, row, col))
+
 const revealWord = (userId: string, row: number, col: number, now: number) =>
   checkRuleAction(Rules.revealWord(userId, row, col), Actions.revealWord(userId, row, col, now))
 
@@ -102,6 +123,7 @@ export const gamePorts = {
   checkTurnTimeout,
   createGame,
   forceChangeTurn,
+  interceptWord,
   joinTeam,
   randomizeTeams,
   removePlayer,
