@@ -22,8 +22,6 @@ const startApplication = async () => {
   try {
     const config = appConfig.get()
 
-    console.log("Server starting with allowed origins:", config.allowedOrigins)
-
     const mongoUri = process.env.MONGODB_URI || config.mongodb.uri || ""
 
     const dbClient = await MondoDb.connect(mongoUri)
