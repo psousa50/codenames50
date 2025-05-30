@@ -14,8 +14,10 @@
   "scripts": {
     "heroku-postbuild": "./scripts/build.sh",
     "start": "yarn && yarn run build && echo ... to-do",
+    "start:server": "cd packages/server && yarn start",
     "prebuild": "yarn run clean",
     "build": "lerna run build",
+    "build:deps": "lerna run build --scope=@psousa50/shared --scope=@codenames50/core --scope=@codenames50/messaging",
     "clean": "yarn run clean:cache && yarn run clean:packages",
     "clean:cache": "rimraf .build-cache",
     "clean:packages": "lerna run clean",
