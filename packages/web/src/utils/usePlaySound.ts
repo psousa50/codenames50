@@ -1,14 +1,21 @@
 import React from "react"
 import { EnvironmentContext } from "../environment"
+import successSound from "../assets/sounds/success.mp3"
+import failureSound from "../assets/sounds/failure.mp3"
+import hintAlertSound from "../assets/sounds/hintAlert.mp3"
+import assassinSound from "../assets/sounds/assassin.mp3"
+import endGameSound from "../assets/sounds/endGame.mp3"
+import tickSound from "../assets/sounds/tick.mp3"
+import timeoutSound from "../assets/sounds/timeout.mp3"
 
 export const sounds = {
-  success: require("../assets/sounds/success.mp3"),
-  failure: require("../assets/sounds/failure.mp3"),
-  hintAlert: require("../assets/sounds/hintAlert.mp3"),
-  assassin: require("../assets/sounds/assassin.mp3"),
-  endGame: require("../assets/sounds/endGame.mp3"),
-  tick: require("../assets/sounds/tick.mp3"),
-  timeout: require("../assets/sounds/timeout.mp3"),
+  success: successSound,
+  failure: failureSound,
+  hintAlert: hintAlertSound,
+  assassin: assassinSound,
+  endGame: endGameSound,
+  tick: tickSound,
+  timeout: timeoutSound,
 }
 
 export const usePlaySound = (url: string) => {

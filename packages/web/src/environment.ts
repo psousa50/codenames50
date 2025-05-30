@@ -20,7 +20,7 @@ const buildEnvironment = () => ({
   useSound,
   toggleSound: () => {},
   socketMessaging: {
-    ...buildSocketMessaging(process.env.REACT_APP_SERVER_URL || ""),
+    ...buildSocketMessaging(import.meta.env.VITE_SERVER_URL || ""),
   },
 })
 

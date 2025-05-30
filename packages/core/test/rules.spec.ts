@@ -1,6 +1,6 @@
 import { Types } from "@psousa50/shared"
 import * as R from "ramda"
-import { CodeNamesGame, GameStates, Teams } from "../src/models"
+import { CodeNamesGame, GameStates, GameVariant, Teams } from "../src/models"
 import * as GameRules from "../src/rules"
 
 const userId = "some-user-id"
@@ -114,6 +114,7 @@ describe("startGame", () => {
   const validConfig = {
     language: "some-language",
     turnTimeoutSec: undefined,
+    variant: GameVariant.classic,
   }
   it("is valid for a valid game", () => {
     expect(GameRules.startGame(validConfig)(validGame as any)).toBeUndefined()
@@ -133,7 +134,7 @@ describe("startGame", () => {
       const game = {
         ...validGame,
       }
-      const config = { language: undefined, turnTimeoutSec: undefined }
+      const config = { language: undefined, turnTimeoutSec: undefined, variant: GameVariant.classic }
 
       expect(GameRules.startGame(config)(game as any)).toBe(GameRules.message("missingLanguage"))
     })

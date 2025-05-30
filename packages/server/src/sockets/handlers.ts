@@ -4,19 +4,19 @@ import { chain, map, run } from "fp-ts/lib/ReaderTaskEither"
 import { DomainPort } from "../domain/adapters"
 import { UserSocketLink } from "../messaging/main"
 import { actionOf, withEnv } from "../utils/actions"
-import { adapt } from "../utils/adapters"
+import { adaptDomainToSocket, adaptMessagingToSocket } from "../utils/adapters"
 import { SocketsEnvironment, SocketsPort } from "./adapters"
 
 type SocketHandler<T = void> = (socket: SocketIO.Socket) => SocketsPort<T, void>
 
 const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
-  withEnv(({ gamesDomainPorts, domainEnvironment }) =>
+  withEnv((env) =>
     pipe(
       userLinks.length === 1 && userLinks[0].gameId
         ? pipe(
-            adapt(
-              gamesDomainPorts.removePlayer({ gameId: userLinks[0].gameId, userId: userLinks[0].userId }),
-              domainEnvironment,
+            adaptDomainToSocket(
+              env.gamesDomainPorts.removePlayer({ gameId: userLinks[0].gameId, userId: userLinks[0].userId }),
+              env,
             ),
             map(_ => undefined),
           )
@@ -26,51 +26,51 @@ const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
   )
 
 const disconnectHandler: SocketHandler = socket => () =>
-  withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
+  withEnv((env) =>
     pipe(
-      adapt(gameMessagingPorts.unregisterSocket({ socketId: socket.id }), gameMessagingEnvironment),
+      adaptMessagingToSocket(env.gameMessagingPorts.unregisterSocket({ socketId: socket.id }), env),
       chain(removeUserFromGame),
       map(_ => undefined),
     ),
   )
 
 const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ userId }) =>
-  withEnv(({ gamesDomainPorts, domainEnvironment, uuid, gameMessagingPorts, gameMessagingEnvironment }) => {
-    const gameId = uuid()
+  withEnv((env) => {
+    const gameId = env.uuid()
     socket.join(gameId, async (_: unknown) => {
       const h = pipe(
-        adapt(gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), gameMessagingEnvironment),
-        chain(_ => gamesDomainPorts.create({ gameId, userId })),
+        adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
+        chain(_ => adaptDomainToSocket(env.gamesDomainPorts.create({ gameId, userId }), env)),
       )
-      await run(h, domainEnvironment)
+      await run(h, env)
     })
     return actionOf(undefined)
   })
 
 const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => ({ gameId, userId }) =>
-  withEnv(({ gamesDomainPorts, domainEnvironment, gameMessagingPorts, gameMessagingEnvironment }) => {
+  withEnv((env) => {
     socket.join(gameId, async () => {
       const h = pipe(
-        adapt(gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), gameMessagingEnvironment),
-        chain(_ => gamesDomainPorts.join({ gameId, userId })),
+        adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
+        chain(_ => adaptDomainToSocket(env.gamesDomainPorts.join({ gameId, userId }), env)),
       )
-      await run(h, domainEnvironment)
+      await run(h, env)
     })
     return actionOf(undefined)
   })
 
 const updateConfigHandler: SocketHandler<Messages.UpdateConfigInput> = _ => input =>
-  withEnv(({ gameMessagingPorts, gameMessagingEnvironment }) =>
-    adapt(
-      gameMessagingPorts.broadcastMessage({ roomId: input.gameId, message: Messages.updateConfig(input) }),
-      gameMessagingEnvironment,
+  withEnv((env) =>
+    adaptMessagingToSocket(
+      env.gameMessagingPorts.broadcastMessage({ roomId: input.gameId, message: Messages.updateConfig(input) }),
+      env,
     ),
   )
 
 const onDomainPort = <I, O>(domainPort: DomainPort<I, O>): SocketHandler<I> => _ => (input: I) =>
-  withEnv(({ domainEnvironment }) =>
+  withEnv((env) =>
     pipe(
-      adapt(domainPort(input), domainEnvironment),
+      adaptDomainToSocket(domainPort(input), env),
       map(_ => undefined),
     ),
   )

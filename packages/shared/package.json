@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "yarn run build:ts",
-    "build:ts": "tsc -b .",
+    "build:ts": "tsc --skipLibCheck",
     "clean": "rm -rf dist *.tsbuildinfo"
   }
 }

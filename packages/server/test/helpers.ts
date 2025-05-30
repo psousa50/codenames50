@@ -25,28 +25,28 @@ const defaultConfig = {
 
 const voidAction = jest.fn(() => actionOf(undefined))
 
-const gamesMongoDbPorts = {
+export const gamesMongoDbPorts = {
   insert: jest.fn(),
   update: jest.fn(),
   getById: jest.fn(),
 }
 
-const wordsMongoDbPorts = {
+export const wordsMongoDbPorts = {
   upsertByLanguage: jest.fn(),
   getByLanguage: jest.fn(),
 }
 
 const gamesRepositoryPorts = {
-  insert: jest.fn(),
-  update: jest.fn(),
-  getById: jest.fn(),
-}
+  insert: jest.fn((game: any) => actionOf(game)),
+  update: jest.fn((game: any) => actionOf(game)),
+  getById: jest.fn((_id: any) => actionOf(undefined as any)), // Default: game not found
+};
 
 const wordsRepositoryPorts = {
-  initialize: jest.fn(),
-  upsertByLanguage: jest.fn(),
-  getByLanguage: jest.fn(),
-}
+  initialize: jest.fn(() => actionOf(undefined as any)),
+  upsertByLanguage: jest.fn((_wl: any) => actionOf(undefined as any)),
+  getByLanguage: jest.fn((_lang: any) => actionOf(undefined as any)), // Default: language not found
+};
 
 export const messengerPorts = {
   emit: jest.fn(),

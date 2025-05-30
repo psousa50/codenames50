@@ -1,8 +1,12 @@
+import enFlag from "./images/en.png"
+import ptFlag from "./images/pt.png"
+import logoImg from "./images/logo.png"
+
 const flagsImages: Record<string, string> = {
-  en: require("./images/en.png"),
-  pt: require("./images/pt.png"),
+  en: enFlag,
+  pt: ptFlag,
 }
 
 export const getFlagImage = (language: string) => flagsImages[language]
 
-export const logoImage = require("./images/logo.png")
+export const logoImage = logoImg
