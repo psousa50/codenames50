@@ -43,11 +43,11 @@
     "vitest": "^3.1.4"
   },
   "scripts": {
-    "start": "NODE_OPTIONS=--openssl-legacy-provider VITE_SERVER_URL=https://codenames50.onrender.com vite",
-    "start:dev": "NODE_OPTIONS=--openssl-legacy-provider VITE_SERVER_URL=http://localhost:3001 VITE_PORT=4000 vite",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider vite build",
+    "start": "VITE_SERVER_URL=https://codenames50.onrender.com vite",
+    "start:dev": "VITE_SERVER_URL=http://localhost:3001 VITE_PORT=4000 vite",
+    "build": "vite build",
     "preview": "vite preview",
-    "test:watch": "NODE_OPTIONS=--openssl-legacy-provider vitest",
-    "test": "NODE_OPTIONS=--openssl-legacy-provider vitest run"
+    "test:watch": "vitest",
+    "test": "vitest run"
   }
 }
