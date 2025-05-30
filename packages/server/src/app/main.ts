@@ -11,7 +11,7 @@ export const createExpressApp = () => {
 
   app.use(
     cors({
-      origin: ["https://codenames50.netlify.app", "http://localhost:4000", "http://localhost:3000"],
+      origin: ["https://codenames50.netlify.app", "http://localhost:4000"],
       credentials: true,
     }),
   )
