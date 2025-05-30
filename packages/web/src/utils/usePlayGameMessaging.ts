@@ -10,6 +10,7 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
   const playFailureSound = usePlaySound(sounds.failure)
   const playAssassinSound = usePlaySound(sounds.assassin)
   const playEndGameSound = usePlaySound(sounds.endGame)
+  const playStealSound = usePlaySound(sounds.steal)
 
   const { connect, emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
 
@@ -34,6 +35,7 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
       addMessageHandler(Messages.createGameMessagehandler("updateConfig", onUpdateConfig))
       addMessageHandler(Messages.createGameMessagehandler("updateGame", onUpdateGame))
       addMessageHandler(Messages.createGameMessagehandler("wordRevealed", onWordRevealed))
+      addMessageHandler(Messages.createGameMessagehandler("wordIntercepted", onWordIntercepted))
     }
 
     const onJoinedGame = (input: Messages.JoinedGameInput) => {
@@ -81,6 +83,10 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
       setGame(gamePorts.forceChangeTurn(userId, now))
     }
 
+    const onWordIntercepted = ({ userId, row, col, now, success }: Messages.WordInterceptedInput) => {
+      setGame(gamePorts.revealWord(userId, row, col, now), game => wordInterceptedSound(game, row, col, success))
+    }
+
     const hintSentSound = (game: GameModels.CodeNamesGame) => {
       const teamConfig = game.turn === GameModels.Teams.red ? game.redTeam : game.blueTeam
       if (teamConfig.spyMaster !== userId) {
@@ -102,6 +108,19 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
       }
     }
 
+    const wordInterceptedSound = (game: GameModels.CodeNamesGame, row: number, col: number, success: boolean) => {
+      const revealedWord = game.board[row][col]
+
+      // Check if the intercepted word was the assassin
+      if (revealedWord.type === GameModels.WordType.assassin) {
+        playAssassinSound()
+      } else if (success) {
+        playStealSound()
+      } else {
+        playFailureSound()
+      }
+    }
+
     setupMessageHandlers()
   }, [
     addMessageHandler,
@@ -111,6 +130,7 @@ export const usePlayGameMessaging = (gameId: string, userId: string) => {
     playEndGameSound,
     playFailureSound,
     playHintAlertSound,
+    playStealSound,
     playSuccessSound,
     setGame,
     userId,

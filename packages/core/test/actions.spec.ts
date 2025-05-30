@@ -707,6 +707,96 @@ describe("revealWord", () => {
       expect(updatedGame.winner).toBe(Teams.red)
     })
   })
+
+  it("increases score when revealing opponent word normally", () => {
+    const now = 1234567890
+    const w00 = { word: "w00", type: WordType.blue, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.red }],
+      blueTeam: { score: 0, wordsLeft: 1 },
+      redTeam: { score: 0 },
+      turn: Teams.red,
+      config: { variant: "interception" },
+      hintWordCount: 1,
+      wordsRevealedCount: 0,
+    }
+
+    const updatedGame = GameActions.revealWord(userId, 0, 0, now)(game as any)
+
+    expect(updatedGame.blueTeam.score).toBe(1) // Blue team gets point even though red revealed it
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+  })
+
+  it("ends game immediately when intercepting assassin - red team intercepts", () => {
+    const w00 = { word: "w00", type: WordType.assassin, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.red }],
+      blueTeam: { score: 0 },
+      redTeam: { score: 0 },
+      turn: Teams.blue,
+      config: { variant: "interception" },
+      interceptPhase: true,
+      interceptingTeam: Teams.red,
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.state).toBe(GameStates.ended)
+    expect(updatedGame.winner).toBe(Teams.blue) // Blue wins because red intercepted assassin
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+    expect(updatedGame.interceptPhase).toBe(false)
+    expect(updatedGame.interceptUsed).toBe(true)
+  })
+
+  it("ends game immediately when intercepting assassin - blue team intercepts", () => {
+    const w00 = { word: "w00", type: WordType.assassin, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.blue }],
+      blueTeam: { score: 0 },
+      redTeam: { score: 0 },
+      turn: Teams.red,
+      config: { variant: "interception" },
+      interceptPhase: true,
+      interceptingTeam: Teams.blue,
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.state).toBe(GameStates.ended)
+    expect(updatedGame.winner).toBe(Teams.red) // Red wins because blue intercepted assassin
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+    expect(updatedGame.interceptPhase).toBe(false)
+    expect(updatedGame.interceptUsed).toBe(true)
+  })
+
+  it("ends game immediately when intercepting assassin - classic variant", () => {
+    const w00 = { word: "w00", type: WordType.assassin, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.red }],
+      blueTeam: { wordsLeft: 3 },
+      redTeam: { wordsLeft: 2 },
+      turn: Teams.blue,
+      config: { variant: "classic" },
+      interceptPhase: true,
+      interceptingTeam: Teams.red,
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.state).toBe(GameStates.ended)
+    expect(updatedGame.winner).toBe(Teams.blue) // Blue wins because red intercepted assassin
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+    expect(updatedGame.interceptPhase).toBe(false)
+    expect(updatedGame.interceptUsed).toBe(true)
+  })
 })
 
 describe("changeTurn", () => {
@@ -838,5 +928,74 @@ describe("interception variant", () => {
 
     expect(updatedGame.blueTeam.score).toBe(1) // Blue team gets point even though red revealed it
     expect(updatedGame.board[0][0].revealed).toBe(true)
+  })
+
+  it("ends game immediately when intercepting assassin - red team intercepts", () => {
+    const w00 = { word: "w00", type: WordType.assassin, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.red }],
+      blueTeam: { score: 0 },
+      redTeam: { score: 0 },
+      turn: Teams.blue,
+      config: { variant: "interception" },
+      interceptPhase: true,
+      interceptingTeam: Teams.red,
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.state).toBe(GameStates.ended)
+    expect(updatedGame.winner).toBe(Teams.blue) // Blue wins because red intercepted assassin
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+    expect(updatedGame.interceptPhase).toBe(false)
+    expect(updatedGame.interceptUsed).toBe(true)
+  })
+
+  it("ends game immediately when intercepting assassin - blue team intercepts", () => {
+    const w00 = { word: "w00", type: WordType.assassin, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.blue }],
+      blueTeam: { score: 0 },
+      redTeam: { score: 0 },
+      turn: Teams.red,
+      config: { variant: "interception" },
+      interceptPhase: true,
+      interceptingTeam: Teams.blue,
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.state).toBe(GameStates.ended)
+    expect(updatedGame.winner).toBe(Teams.red) // Red wins because blue intercepted assassin
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+    expect(updatedGame.interceptPhase).toBe(false)
+    expect(updatedGame.interceptUsed).toBe(true)
+  })
+
+  it("ends game immediately when intercepting assassin - classic variant", () => {
+    const w00 = { word: "w00", type: WordType.assassin, revealed: false }
+    const board = [[w00]] as any
+    const game = {
+      board,
+      players: [{ userId, team: Teams.red }],
+      blueTeam: { wordsLeft: 3 },
+      redTeam: { wordsLeft: 2 },
+      turn: Teams.blue,
+      config: { variant: "classic" },
+      interceptPhase: true,
+      interceptingTeam: Teams.red,
+    }
+
+    const updatedGame = GameActions.interceptWord(userId, 0, 0)(game as any)
+
+    expect(updatedGame.state).toBe(GameStates.ended)
+    expect(updatedGame.winner).toBe(Teams.blue) // Blue wins because red intercepted assassin
+    expect(updatedGame.board[0][0].revealed).toBe(true)
+    expect(updatedGame.interceptPhase).toBe(false)
+    expect(updatedGame.interceptUsed).toBe(true)
   })
 })

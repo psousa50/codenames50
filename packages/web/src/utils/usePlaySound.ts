@@ -7,6 +7,7 @@ import assassinSound from "../assets/sounds/assassin.mp3"
 import endGameSound from "../assets/sounds/endGame.mp3"
 import tickSound from "../assets/sounds/tick.mp3"
 import timeoutSound from "../assets/sounds/timeout.mp3"
+import stealSound from "../assets/sounds/steal.mp3"
 
 export const sounds = {
   success: successSound,
@@ -16,6 +17,7 @@ export const sounds = {
   endGame: endGameSound,
   tick: tickSound,
   timeout: timeoutSound,
+  steal: stealSound,
 }
 
 export const usePlaySound = (url: string) => {
