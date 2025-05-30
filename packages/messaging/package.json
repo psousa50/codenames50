@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "yarn run build:ts",
-    "build:ts": "tsc --skipLibCheck",
+    "build:ts": "tsc",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {

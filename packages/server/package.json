@@ -9,7 +9,7 @@
   "scripts": {
     "prebuild": "yarn",
     "build": "yarn run build:ts",
-    "build:ts": "tsc --skipLibCheck --noEmit false --noEmitOnError true",
+    "build:ts": "tsc",
     "clean": "rm -rf dist *.tsbuildinfo",
     "test": "vitest run",
     "test:watch": "vitest",
