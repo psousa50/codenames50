@@ -9,7 +9,12 @@ import { ExpressEnvironment } from "./adapters"
 export const createExpressApp = () => {
   const app: Express = express()
 
-  app.use(cors())
+  app.use(
+    cors({
+      origin: ["https://codenames50.netlify.app", "http://localhost:4000", "http://localhost:3000"],
+      credentials: true,
+    }),
+  )
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: true }))
 

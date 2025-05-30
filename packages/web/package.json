@@ -43,7 +43,7 @@
     "vitest": "^3.1.4"
   },
   "scripts": {
-    "start": "NODE_OPTIONS=--openssl-legacy-provider VITE_SERVER_URL=https://codenames50-api.herokuapp.com vite",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider VITE_SERVER_URL=https://codenames50.onrender.com vite",
     "start:dev": "NODE_OPTIONS=--openssl-legacy-provider VITE_SERVER_URL=http://localhost:3001 VITE_PORT=4000 vite",
     "build": "NODE_OPTIONS=--openssl-legacy-provider vite build",
     "preview": "vite preview",
