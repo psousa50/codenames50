@@ -1,7 +1,7 @@
 import { makeStyles, Theme } from "@material-ui/core"
 import * as qs from "qs"
 import React from "react"
-import { Route, Switch, useLocation } from "react-router-dom"
+import { Routes, Route, useLocation } from "react-router-dom"
 import { PlayGameScreen } from "./screens/PlayGame/PlayGameScreen"
 import { CreateGameScreen } from "./screens/CreateGame/CreateGameScreen"
 import { JoinGameScreen } from "./screens/JoinGame/JoinGameScreen"
@@ -28,13 +28,19 @@ export const AppRouter = () => {
 
   return (
     <div className={classes.app}>
-      <Switch>
-        <Route path="/" exact>
-          <CreateGameScreen userId={userId} />
-        </Route>
-        <Route path="/join">{gameId && <JoinGameScreen gameId={gameId} userId={userId || ""} />}</Route>
-        <Route path="/game">{gameId && userId && <PlayGameScreen gameId={gameId} userId={userId} />}</Route>
-      </Switch>
+      <Routes>
+        <Route path="/" element={<CreateGameScreen userId={userId} />} />
+        <Route
+          path="/join"
+          element={gameId ? <JoinGameScreen gameId={gameId} userId={userId || ""} /> : <div>No gameId provided</div>}
+        />
+        <Route
+          path="/game"
+          element={
+            gameId && userId ? <PlayGameScreen gameId={gameId} userId={userId} /> : <div>Missing gameId or userId</div>
+          }
+        />
+      </Routes>
     </div>
   )
 }

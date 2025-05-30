@@ -8,7 +8,7 @@ import AccountCircle from "@material-ui/icons/AccountCircle"
 import NoteAdd from "@material-ui/icons/NoteAdd"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import React from "react"
-import { Redirect } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 import { logoImage } from "../../assets/images"
 import { useGameMessaging } from "../../utils/useGameMessaging"
 
@@ -97,7 +97,7 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
   }
 
   return game && userId ? (
-    <Redirect to={`/game?gameId=${game.gameId}&userId=${userId}`} />
+    <Navigate to={`/game?gameId=${game.gameId}&userId=${userId}`} replace />
   ) : (
     <>
       <Snackbar open={error.length > 0} autoHideDuration={2000} onClose={() => clearError()}>

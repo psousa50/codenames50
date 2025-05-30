@@ -5,8 +5,13 @@ import Typography from "@material-ui/core/Typography"
 import AccountCircle from "@material-ui/icons/AccountCircle"
 import FastForward from "@material-ui/icons/FastForward"
 import React from "react"
-import { Redirect } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 import { logoImage } from "../../assets/images"
+import { GameModels } from "@codenames50/core"
+import { Messages } from "@codenames50/messaging"
+import { CircularProgress, Snackbar } from "@material-ui/core"
+import { Alert, AlertTitle } from "@material-ui/lab"
+import { useGameMessaging } from "../../utils/useGameMessaging"
 
 export interface JoinGameScreenProps {
   gameId: string
@@ -17,6 +22,8 @@ export const JoinGameScreen: React.FC<JoinGameScreenProps> = ({ userId: initialU
   const classes = useStyles()
   const [userId, setUserId] = React.useState(initialUserId || "")
   const [joining, setJoining] = React.useState(false)
+  const [game, setGame] = React.useState<GameModels.CodeNamesGame | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
 
   const canJoin = () => userId.trim().length > 0 && gameId.trim().length > 0
 
@@ -25,8 +32,8 @@ export const JoinGameScreen: React.FC<JoinGameScreenProps> = ({ userId: initialU
     setJoining(true)
   }
 
-  return joining ? (
-    <Redirect to={`/game?gameId=${gameId || ""}&userId=${userId || ""}`} />
+  return game ? (
+    <Navigate to={`/game?gameId=${gameId || ""}&userId=${userId || ""}`} replace />
   ) : (
     <form onSubmit={joinGame}>
       <Container component="main" maxWidth="xs">
