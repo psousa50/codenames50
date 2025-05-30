@@ -1,6 +1,7 @@
 import { actionOf, withEnv } from "../utils/actions"
 import { GameMessagingPort } from "./adapters"
 import { Messages } from "@codenames50/messaging"
+import { log } from "../utils/logger"
 
 export interface UserSocketLink {
   socketId: string
@@ -50,7 +51,7 @@ export const emitMessage: GameMessagingPort<EmitMessageInput> = ({ userId, roomI
     const socketIds = messengerPorts.getSocketIdsForRoomId(messengerEnvironment)(roomId)
     const userLinks = userSocketLinks.filter(u => u.userId === userId && socketIds.includes(u.socketId))
 
-    console.log("emitMessage", userLinks)
+    log.debug("emitMessage", { userId, roomId, messageType: message.type, userLinks })
 
     userLinks.forEach(ul => messengerPorts.emit(messengerEnvironment)(ul.socketId, message))
 
@@ -60,7 +61,7 @@ export const emitMessage: GameMessagingPort<EmitMessageInput> = ({ userId, roomI
 export const broadcastMessage: GameMessagingPort<BrodcastMessageInput> = ({ roomId, message }) =>
   withEnv(({ adapters: { messengerPorts, messengerEnvironment } }) => {
     const socketIds = messengerPorts.getSocketIdsForRoomId(messengerEnvironment)(roomId)
-    console.log("broadcast", socketIds)
+    log.debug("broadcast", { roomId, messageType: message.type, socketIds })
     messengerPorts.broadcast(messengerEnvironment)(roomId, message)
     return actionOf(undefined)
   })

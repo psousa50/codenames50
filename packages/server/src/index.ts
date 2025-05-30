@@ -6,7 +6,7 @@ import { DomainEnvironment } from "./domain/adapters"
 import { buildEnvironments } from "./environment"
 import * as MondoDb from "./mongodb/main"
 import { createSocketsApplication, startSocketsApplication } from "./sockets/main"
-import { logDebug } from "./utils/debug"
+import { log } from "./utils/logger"
 
 dotenv.config()
 
@@ -14,7 +14,7 @@ const inititialize = (env: DomainEnvironment) =>
   run(env.repositoriesAdapter.wordsRepositoryPorts.initialize(), env.repositoriesAdapter.repositoriesEnvironment)
 
 const exitProcess = (error: Error) => {
-  console.error(error.message)
+  log.error(error.message, { stack: error.stack })
   process.exit(1)
 }
 
@@ -29,6 +29,13 @@ const startApplication = async () => {
     const envPort = Number(process.env.PORT)
     const appPort = isNaN(envPort) ? config.port : envPort
 
+    log.info("Server starting with configuration", {
+      port: appPort,
+      allowedOrigins: config.allowedOrigins,
+      nodeEnv: process.env.NODE_ENV,
+      logLevel: process.env.LOG_LEVEL || "info",
+    })
+
     const app = createExpressApp(config.allowedOrigins)
     const server = app.listen(appPort)
 
@@ -41,6 +48,8 @@ const startApplication = async () => {
     await inititialize(domainEnvironment)
 
     startSocketsApplication(io, socketsEnvironment)
+
+    log.info("Server started successfully", { port: appPort })
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error))
     exitProcess(err)
@@ -48,6 +57,6 @@ const startApplication = async () => {
 }
 
 startApplication().then(
-  () => logDebug("App Started"),
-  e => logDebug(`Error: ${e.message}`),
+  () => log.info("App initialization completed"),
+  e => log.error(`App initialization failed: ${e.message}`, { error: e }),
 )

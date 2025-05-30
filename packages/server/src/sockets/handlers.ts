@@ -6,11 +6,12 @@ import { UserSocketLink } from "../messaging/main"
 import { actionOf, withEnv } from "../utils/actions"
 import { adaptDomainToSocket, adaptMessagingToSocket } from "../utils/adapters"
 import { SocketsEnvironment, SocketsPort } from "./adapters"
+import { log } from "../utils/logger"
 
 type SocketHandler<T = void> = (socket: SocketIO.Socket) => SocketsPort<T, void>
 
 const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
-  withEnv((env) =>
+  withEnv(env =>
     pipe(
       userLinks.length === 1 && userLinks[0].gameId
         ? pipe(
@@ -26,7 +27,7 @@ const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
   )
 
 const disconnectHandler: SocketHandler = socket => () =>
-  withEnv((env) =>
+  withEnv(env =>
     pipe(
       adaptMessagingToSocket(env.gameMessagingPorts.unregisterSocket({ socketId: socket.id }), env),
       chain(removeUserFromGame),
@@ -34,60 +35,68 @@ const disconnectHandler: SocketHandler = socket => () =>
     ),
   )
 
-const createGameHandler: SocketHandler<Messages.CreateGameInput> = socket => ({ userId }) =>
-  withEnv((env) => {
-    const gameId = env.uuid()
-    socket.join(gameId, async (_: unknown) => {
-      const h = pipe(
-        adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
-        chain(_ => adaptDomainToSocket(env.gamesDomainPorts.create({ gameId, userId }), env)),
-      )
-      await run(h, env)
+const createGameHandler: SocketHandler<Messages.CreateGameInput> =
+  socket =>
+  ({ userId }) =>
+    withEnv(env => {
+      const gameId = env.uuid()
+      socket.join(gameId, async (_: unknown) => {
+        const h = pipe(
+          adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
+          chain(_ => adaptDomainToSocket(env.gamesDomainPorts.create({ gameId, userId }), env)),
+        )
+        await run(h, env)
+      })
+      return actionOf(undefined)
     })
-    return actionOf(undefined)
-  })
 
-const joinGameHandler: SocketHandler<Messages.JoinGameInput> = socket => ({ gameId, userId }) =>
-  withEnv((env) => {
-    socket.join(gameId, async () => {
-      const h = pipe(
-        adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
-        chain(_ => adaptDomainToSocket(env.gamesDomainPorts.join({ gameId, userId }), env)),
-      )
-      await run(h, env)
+const joinGameHandler: SocketHandler<Messages.JoinGameInput> =
+  socket =>
+  ({ gameId, userId }) =>
+    withEnv(env => {
+      socket.join(gameId, async () => {
+        const h = pipe(
+          adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
+          chain(_ => adaptDomainToSocket(env.gamesDomainPorts.join({ gameId, userId }), env)),
+        )
+        await run(h, env)
+      })
+      return actionOf(undefined)
     })
-    return actionOf(undefined)
-  })
 
 const updateConfigHandler: SocketHandler<Messages.UpdateConfigInput> = _ => input =>
-  withEnv((env) =>
+  withEnv(env =>
     adaptMessagingToSocket(
       env.gameMessagingPorts.broadcastMessage({ roomId: input.gameId, message: Messages.updateConfig(input) }),
       env,
     ),
   )
 
-const onDomainPort = <I, O>(domainPort: DomainPort<I, O>): SocketHandler<I> => _ => (input: I) =>
-  withEnv((env) =>
-    pipe(
-      adaptDomainToSocket(domainPort(input), env),
-      map(_ => undefined),
-    ),
-  )
+const onDomainPort =
+  <I, O>(domainPort: DomainPort<I, O>): SocketHandler<I> =>
+  _ =>
+  (input: I) =>
+    withEnv(env =>
+      pipe(
+        adaptDomainToSocket(domainPort(input), env),
+        map(_ => undefined),
+      ),
+    )
 
-const buildHandler = (socketsEnvironment: SocketsEnvironment, socket: SocketIO.Socket) => <I>(
-  socketHandler: SocketHandler<I>,
-) => async (input: I) => {
-  try {
-    await run(socketHandler(socket)(input), socketsEnvironment)
-  } catch (ex) {
-    console.log(`Socket handler exception: ${ex}`)
+const buildHandler =
+  (socketsEnvironment: SocketsEnvironment, socket: SocketIO.Socket) =>
+  <I>(socketHandler: SocketHandler<I>) =>
+  async (input: I) => {
+    try {
+      await run(socketHandler(socket)(input), socketsEnvironment)
+    } catch (ex) {
+      log.error(`Socket handler exception: ${ex}`, { socketId: socket.id, error: ex })
+    }
   }
-}
 
 const addMessageHandler = (socket: SocketIO.Socket) => (handler: Messages.GameMessageHandler) => {
   socket.on(handler.type, data => {
-    console.log("RECEIVED:", handler.type)
+    log.debug("RECEIVED:", { type: handler.type, socketId: socket.id, data })
     handler.handler(data)
   })
 }

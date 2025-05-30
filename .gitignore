@@ -4,6 +4,7 @@ dist
 data
 build
 tmp
+logs
 
 .build-cache
 *.tsbuildinfo

@@ -3,7 +3,7 @@ import { ask as askReader } from "fp-ts/lib/Reader"
 import { ReaderTaskEither, chain, fromEither, fromTaskEither, map, rightReader } from "fp-ts/lib/ReaderTaskEither"
 import { tryCatch } from "fp-ts/lib/TaskEither"
 import { pipe } from "fp-ts/lib/pipeable"
-import { logDebug } from "./debug"
+import { log } from "./logger"
 import { ServiceError } from "./errors"
 
 export type ActionResult<E, R = void> = ReaderTaskEither<E, ServiceError, R>
@@ -16,35 +16,38 @@ export function ask<E>() {
 export const withEnv = <E, R>(f: (env: E) => ActionResult<E, R>) => pipe(ask<E>(), chain(f))
 export const transform = <E, R = void, T = void>(action: ActionResult<E, R>, t: (r: R) => T) => pipe(action, map(t))
 
-export const delay = <E, A, R>(env: E) => (
-  millis: number,
-): ((rte: ReaderTaskEither<E, A, R>) => ReaderTaskEither<E, A, R>) => rte => {
-  const promiseDelay = new Promise<R>((resolve, reject) => {
-    setTimeout(() => {
-      rte(env)().then(fold(reject, resolve))
-    }, millis)
-  })
+export const delay =
+  <E, A, R>(env: E) =>
+  (millis: number): ((rte: ReaderTaskEither<E, A, R>) => ReaderTaskEither<E, A, R>) =>
+  rte => {
+    const promiseDelay = new Promise<R>((resolve, reject) => {
+      setTimeout(() => {
+        rte(env)().then(fold(reject, resolve))
+      }, millis)
+    })
 
-  return fromTaskEither(
-    tryCatch(
-      () => promiseDelay,
-      e => e as A,
-    ),
-  )
-}
+    return fromTaskEither(
+      tryCatch(
+        () => promiseDelay,
+        e => e as A,
+      ),
+    )
+  }
 
 export const actionOf = <E, R>(v: R): ActionResult<E, R> => fromEither(right(v))
 export function actionErrorOf<E, R>(error: ServiceError): ActionResult<E, R> {
   return fromEither(left<ServiceError, R>(error))
 }
 
-export const toAction = <E, I, R>(f: (i: I) => R): ((i: I) => ActionResult<E, R>) => i => {
-  try {
-    return actionOf(f(i))
-  } catch (error) {
-    return fromEither(left(error instanceof Error ? error : new Error(String(error))))
+export const toAction =
+  <E, I, R>(f: (i: I) => R): ((i: I) => ActionResult<E, R>) =>
+  i => {
+    try {
+      return actionOf(f(i))
+    } catch (error) {
+      return fromEither(left(error instanceof Error ? error : new Error(String(error))))
+    }
   }
-}
 
 export const fromPromise = <E, T>(lazyPromise: (env: E) => Promise<T>) =>
   pipe(
@@ -54,7 +57,7 @@ export const fromPromise = <E, T>(lazyPromise: (env: E) => Promise<T>) =>
         tryCatch(
           () => lazyPromise(env),
           e => {
-            logDebug(`ERROR: ${(e as Error).message}`)
+            log.error(`Promise rejected: ${(e as Error).message}`, { error: e })
             return new ServiceError((e as Error).message)
           },
         ),
