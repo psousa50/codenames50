@@ -10,7 +10,6 @@ export default defineConfig({
       reporter: ["text", "json", "html"],
     },
     globals: true,
-    setupFiles: ["./test/setup.ts"],
   },
   resolve: {
     alias: {
