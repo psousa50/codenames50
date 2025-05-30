@@ -6,12 +6,12 @@ import cors from "cors"
 import bodyParser from "body-parser"
 import { ExpressEnvironment } from "./adapters"
 
-export const createExpressApp = () => {
+export const createExpressApp = (allowedOrigins: string[]) => {
   const app: Express = express()
 
   app.use(
     cors({
-      origin: ["https://codenames50.netlify.app", "http://localhost:4000"],
+      origin: allowedOrigins,
       credentials: true,
     }),
   )

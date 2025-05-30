@@ -3,9 +3,9 @@ import socketIo from "socket.io"
 import { SocketsEnvironment } from "./adapters"
 import { socketHandler } from "./handlers"
 
-export const createSocketsApplication = (server: Server) => {
+export const createSocketsApplication = (server: Server, allowedOrigins: string[]) => {
   const io = socketIo(server, {
-    origins: ["https://codenames50.netlify.app", "http://localhost:4000"],
+    origins: allowedOrigins,
   })
 
   return io
