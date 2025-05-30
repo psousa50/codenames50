@@ -5,7 +5,16 @@ import { socketHandler } from "./handlers"
 
 export const createSocketsApplication = (server: Server, allowedOrigins: string[]) => {
   const io = socketIo(server, {
-    origins: "*:*",
+    origins: allowedOrigins,
+    handlePreflightRequest: (req, res) => {
+      res.writeHead(200, {
+        "Access-Control-Allow-Origin": req.headers.origin || "*",
+        "Access-Control-Allow-Methods": "GET,POST",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Credentials": "true",
+      })
+      res.end()
+    },
   })
 
   return io

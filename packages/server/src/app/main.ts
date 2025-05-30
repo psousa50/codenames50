@@ -9,12 +9,17 @@ import { ExpressEnvironment } from "./adapters"
 export const createExpressApp = (allowedOrigins: string[]) => {
   const app: Express = express()
 
-  app.use(
+  // Apply CORS only to non-Socket.io routes
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/socket.io/")) {
+      return next()
+    }
     cors({
       origin: allowedOrigins,
       credentials: true,
-    }),
-  )
+    })(req, res, next)
+  })
+
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: true }))
 
