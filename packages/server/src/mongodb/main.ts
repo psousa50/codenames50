@@ -4,12 +4,7 @@ type Stringable = {
   toString: () => string
 }
 
-export const connect = (mongoDbUri: string) =>
-  MongoClient.connect(mongoDbUri, {
-    tls: true,
-    tlsAllowInvalidCertificates: false,
-    tlsAllowInvalidHostnames: false,
-  })
+export const connect = (mongoDbUri: string) => MongoClient.connect(mongoDbUri)
 
 export const disconnect = (client: MongoClient) => client.close()
 
