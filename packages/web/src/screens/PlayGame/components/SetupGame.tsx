@@ -48,9 +48,10 @@ interface SetupGameProps {
   emitMessage: EmitMessage
   game: GameModels.CodeNamesGame
   userId: string
+  isDialog?: boolean
 }
 
-export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId }) => {
+export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId, isDialog = false }) => {
   const classes = useStyles()
 
   const gameId = game.gameId
@@ -118,19 +119,22 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
   const canRandomizeTeams = GameRules.randomizeTeams(game) === undefined
 
   return (
-    <div className={classes.container}>
+    <div className={isDialog ? classes.dialogContainer : classes.container}>
       <ConfirmNewGameDialog open={newGameDialogOpened} closeNewGameDialog={closeNewGameDialog} />
 
-      <Box className={classes.header}>
-        <Typography variant="h4" className={classes.title}>
-          Game Setup
-        </Typography>
-        <Chip
-          label={game.state === GameModels.GameStates.running ? "Game In Progress" : "Setting Up"}
-          color={game.state === GameModels.GameStates.running ? "secondary" : "primary"}
-          variant="outlined"
-        />
-      </Box>
+      {!isDialog && (
+        <Box className={classes.header}>
+          <Typography variant="h4" className={classes.title}>
+            Game Setup
+          </Typography>
+          <Chip
+            label={game.state === GameModels.GameStates.running ? "Game In Progress" : "Setting Up"}
+            color={game.state === GameModels.GameStates.running ? "secondary" : "primary"}
+            variant="outlined"
+            className={classes.statusChip}
+          />
+        </Box>
+      )}
 
       <Grid container spacing={3} className={classes.gridContainer}>
         {/* Game Configuration */}
@@ -146,7 +150,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId 
                 </Box>
                 <Divider className={classes.divider} />
 
-                <Grid container spacing={2}>
+                <Grid container spacing={2} className={classes.radioGroupContainer}>
                   <Grid item xs={12} md={4}>
                     <FormControl component="fieldset" className={classes.formControl}>
                       <FormLabel component="legend" className={classes.radioGroupLabel}>
@@ -384,20 +388,33 @@ const useStyles = makeStyles((theme: Theme) => ({
     margin: "0 auto",
     padding: theme.spacing(2),
   },
+  dialogContainer: {
+    width: "100%",
+    padding: 0,
+  },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: theme.spacing(3),
+    width: "100%",
     [theme.breakpoints.down("sm")]: {
       flexDirection: "column",
       gap: theme.spacing(1),
-      alignItems: "flex-start",
+      alignItems: "center",
+      textAlign: "center",
     },
   },
   title: {
     fontWeight: 600,
     color: theme.palette.primary.main,
+    margin: 0,
+    lineHeight: 1.2,
+  },
+  statusChip: {
+    flexShrink: 0,
+    alignSelf: "center",
+    transform: "translateY(-1px)",
   },
   gridContainer: {
     width: "100%",
@@ -424,7 +441,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: theme.palette.text.primary,
   },
   divider: {
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(1),
+  },
+  radioGroupContainer: {
+    marginTop: theme.spacing(1),
   },
   formControl: {
     width: "100%",
@@ -433,6 +453,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   radioGroupLabel: {
     fontWeight: 500,
     color: theme.palette.text.primary,
+    marginTop: 0,
     marginBottom: theme.spacing(1),
     "& .MuiFormLabel-root": {
       color: theme.palette.text.primary,
@@ -457,8 +478,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
   },
   inputIcon: {
-    fontSize: 18,
+    fontSize: 20,
     marginRight: theme.spacing(0.5),
+    marginLeft: theme.spacing(0.5),
+    verticalAlign: "middle",
   },
   actionButton: {
     height: 48,

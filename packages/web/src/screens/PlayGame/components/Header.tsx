@@ -1,7 +1,8 @@
 import { GameHelpers, GameModels } from "@codenames50/core"
-import { makeStyles, Theme } from "@material-ui/core"
+import { makeStyles, Theme, IconButton, Tooltip } from "@material-ui/core"
 import VolumeOff from "@material-ui/icons/VolumeOff"
 import VolumeUp from "@material-ui/icons/VolumeUp"
+import SettingsIcon from "@material-ui/icons/Settings"
 import React from "react"
 import { EnvironmentContext } from "../../../environment"
 import { User } from "./User"
@@ -9,9 +10,10 @@ import { User } from "./User"
 interface HeaderProps {
   game: GameModels.CodeNamesGame
   userId: string
+  onSetupClick?: () => void
 }
 
-export const Header: React.FC<HeaderProps> = ({ game, userId }) => {
+export const Header: React.FC<HeaderProps> = ({ game, userId, onSetupClick }) => {
   const classes = useStyles()
 
   const environment = React.useContext(EnvironmentContext)
@@ -27,8 +29,17 @@ export const Header: React.FC<HeaderProps> = ({ game, userId }) => {
         team={GameHelpers.getPlayer(game, userId)?.team}
         spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
       />
-      <div className={classes.sound} onClick={() => handleSound()}>
-        {environment.config.soundOn ? <VolumeUp /> : <VolumeOff />}
+      <div className={classes.controls}>
+        {onSetupClick && (
+          <Tooltip title="Game Setup">
+            <IconButton onClick={onSetupClick} className={classes.setupButton}>
+              <SettingsIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+        <IconButton onClick={handleSound} className={classes.soundButton}>
+          {environment.config.soundOn ? <VolumeUp /> : <VolumeOff />}
+        </IconButton>
       </div>
     </div>
   )
@@ -52,10 +63,20 @@ const useStyles = makeStyles((theme: Theme) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
-  sound: {
+  controls: {
     position: "absolute",
     right: "10px",
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+  },
+  setupButton: {
+    color: theme.palette.primary.main,
+  },
+  soundButton: {
+    cursor: "pointer",
   },
   content: {
     justifyContent: "center",
@@ -66,7 +87,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   heading: {
     fontSize: theme.typography.pxToRem(20),
-    fontWeight: theme.typography.fontWeightMedium,
+    fontWeight: 500,
     color: theme.palette.secondary.main,
   },
   copyId: {

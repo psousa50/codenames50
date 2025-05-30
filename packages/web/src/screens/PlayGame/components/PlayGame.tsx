@@ -1,6 +1,6 @@
-import { Accordion, AccordionDetails, AccordionSummary, Snackbar, Typography } from "@material-ui/core"
+import { Snackbar, Typography, Dialog, DialogContent, DialogTitle, IconButton } from "@material-ui/core"
 import { makeStyles, Theme } from "@material-ui/core/styles"
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
+import CloseIcon from "@material-ui/icons/Close"
 import { Alert, AlertTitle } from "@material-ui/lab"
 import { GameModels } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
@@ -23,10 +23,18 @@ export interface PlayGameProps {
 
 const Separator = () => <div style={{ height: "1rem" }}></div>
 
-export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, userId, clearError, interceptResult, clearInterceptResult }) => {
+export const PlayGame: React.FC<PlayGameProps> = ({
+  emitMessage,
+  error,
+  game,
+  userId,
+  clearError,
+  interceptResult,
+  clearInterceptResult,
+}) => {
   const classes = useStyles()
 
-  const [teamsExpanded, setTeamsExpanded] = React.useState(false)
+  const [setupDialogOpen, setSetupDialogOpen] = React.useState(false)
 
   const gameId = game.gameId
 
@@ -34,13 +42,16 @@ export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, us
     emitMessage(Messages.restartGame({ gameId, userId }))
   }
 
-  React.useEffect(() => {
-    setTeamsExpanded(game.state === GameModels.GameStates.idle)
-  }, [game.state])
-
-  const handleTeamsExpanded = (_: React.ChangeEvent<{}>, isExpanded: boolean) => {
-    setTeamsExpanded(isExpanded)
+  const handleSetupDialogToggle = () => {
+    setSetupDialogOpen(!setupDialogOpen)
   }
+
+  // Close setup dialog when game starts
+  React.useEffect(() => {
+    if (game.state === GameModels.GameStates.running) {
+      setSetupDialogOpen(false)
+    }
+  }, [game.state])
 
   return (
     <div className={classes.container}>
@@ -61,17 +72,25 @@ export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, us
       )}
 
       <div className={classes.game}>
-        <Header game={game} userId={userId} />
+        <Header
+          game={game}
+          userId={userId}
+          onSetupClick={game.state === GameModels.GameStates.running ? handleSetupDialogToggle : undefined}
+        />
 
         <Separator />
 
-        <SetupGameAcordion
-          teamsExpanded={teamsExpanded}
-          handleTeamsExpanded={handleTeamsExpanded}
-          emitMessage={emitMessage}
-          game={game}
-          userId={userId}
-        />
+        {game.state === GameModels.GameStates.idle ? (
+          <SetupGame emitMessage={emitMessage} game={game} userId={userId} />
+        ) : (
+          <SetupGameDialog
+            open={setupDialogOpen}
+            onClose={() => setSetupDialogOpen(false)}
+            emitMessage={emitMessage}
+            game={game}
+            userId={userId}
+          />
+        )}
 
         <Separator />
 
@@ -85,42 +104,26 @@ export const PlayGame: React.FC<PlayGameProps> = ({ emitMessage, error, game, us
   )
 }
 
-interface SetupGameAcordionProps {
-  teamsExpanded: boolean
-  handleTeamsExpanded: (_: React.ChangeEvent<{}>, isExpanded: boolean) => void
+interface SetupGameDialogProps {
+  open: boolean
+  onClose: () => void
   emitMessage: EmitMessage
   game: GameModels.CodeNamesGame
   userId: string
 }
 
-const SetupGameAcordion: React.FC<SetupGameAcordionProps> = ({
-  teamsExpanded,
-  handleTeamsExpanded,
-  emitMessage,
-  game,
-  userId,
-}) => {
+const SetupGameDialog: React.FC<SetupGameDialogProps> = ({ open, onClose, emitMessage, game, userId }) => {
   const classes = useStyles()
 
   return (
-    <div className={classes.teams}>
-      <Accordion expanded={teamsExpanded} onChange={handleTeamsExpanded}>
-        <AccordionSummary
-          classes={{
-            root: classes.expandableRoot,
-            content: classes.expandableContent,
-          }}
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-        >
-          <Typography className={classes.heading}>Game Setup</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <SetupGame emitMessage={emitMessage} game={game} userId={userId} />
-        </AccordionDetails>
-      </Accordion>
-    </div>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth className={classes.setupDialog}>
+      <IconButton onClick={onClose} className={classes.closeButton}>
+        <CloseIcon />
+      </IconButton>
+      <DialogContent className={classes.dialogContent}>
+        <SetupGame emitMessage={emitMessage} game={game} userId={userId} isDialog={true} />
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -135,22 +138,31 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
     padding: "10px",
   },
-  expandableRoot: {
-    padding: 0,
-    minHeight: "0.5rem",
+  setupDialog: {
+    "& .MuiDialog-paper": {
+      maxHeight: "90vh",
+      position: "relative",
+      marginTop: "4vh",
+    },
+    "& .MuiDialog-container": {
+      alignItems: "flex-start",
+      paddingTop: "8vh",
+    },
   },
-  expandableContent: {
-    margin: 0,
-    padding: 0,
-    justifyContent: "center",
+  dialogContent: {
+    padding: theme.spacing(3),
+    "&:first-child": {
+      paddingTop: theme.spacing(3),
+    },
   },
-  teams: {
-    marginTop: "0.5rem",
-    marginBottom: "0.5rem",
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(20),
-    fontWeight: theme.typography.fontWeightMedium,
-    color: theme.palette.secondary.main,
+  closeButton: {
+    position: "absolute",
+    top: theme.spacing(1),
+    right: theme.spacing(1),
+    color: theme.palette.grey[500],
+    zIndex: 1,
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
   },
 }))
