@@ -1,8 +1,8 @@
 import { Messages } from "@codenames50/messaging"
-import io from "socket.io-client"
+import { io, Socket } from "socket.io-client"
 
 const connect =
-  (socket: SocketIOClient.Socket) =>
+  (socket: Socket) =>
   (onConnect: () => void = () => {}) => {
     if (!socket.connected) {
       console.log("Connecting=====>")
@@ -14,18 +14,18 @@ const connect =
     }
   }
 
-const disconnect = (socket: SocketIOClient.Socket) => () => {
+const disconnect = (socket: Socket) => () => {
   console.log("Disconnecting=====>")
   socket.removeAllListeners()
   socket.close()
 }
 
-const emitMessage = (socket: SocketIOClient.Socket) => (message: Messages.GameMessage) => {
+const emitMessage = (socket: Socket) => (message: Messages.GameMessage) => {
   console.log("EMIT:", message.type)
   socket.emit(message.type, message.data)
 }
 
-const addMessageHandler = (socket: SocketIOClient.Socket) => (handler: Messages.GameMessageHandler) => {
+const addMessageHandler = (socket: Socket) => (handler: Messages.GameMessageHandler) => {
   socket.removeListener(handler.type)
 
   socket.on(handler.type, (data: unknown) => {

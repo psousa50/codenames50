@@ -1,16 +1,21 @@
-import socketIo from "socket.io"
+import { Server } from "socket.io"
 import { Messages } from "@codenames50/messaging"
 import { log } from "../utils/logger"
 
 export type MessengerEnvironment = {
-  io: socketIo.Server
+  io: Server
 }
 
 export const emit =
   ({ io }: MessengerEnvironment) =>
   (socketId: string, message: Messages.GameMessage) => {
     log.debug("EMIT:", { type: message.type, socketId })
-    io.sockets.sockets[socketId].emit(message.type, message.data)
+    const socket = io.sockets.sockets.get(socketId)
+    if (socket) {
+      socket.emit(message.type, message.data)
+    } else {
+      log.warn("Socket not found for emission", { socketId, messageType: message.type })
+    }
   }
 
 export const broadcast =
@@ -22,13 +27,17 @@ export const broadcast =
 
 export const getSocketIdsForRoomId =
   ({ io }: MessengerEnvironment) =>
-  (roomId: string) =>
-    Object.keys(io.sockets.sockets).filter(socketId => {
-      const rooms = io.sockets.sockets[socketId].rooms
-      return Object.keys(rooms).includes(roomId)
+  (roomId: string) => {
+    const socketIds: string[] = []
+    io.sockets.sockets.forEach((socket, socketId) => {
+      if (socket.rooms.has(roomId)) {
+        socketIds.push(socketId)
+      }
     })
+    return socketIds
+  }
 
-export const buildMessengerEnvironment = (io: socketIo.Server) => ({
+export const buildMessengerEnvironment = (io: Server) => ({
   io,
 })
 

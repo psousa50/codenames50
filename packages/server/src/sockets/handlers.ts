@@ -1,6 +1,7 @@
 import { Messages } from "@codenames50/messaging"
 import { pipe } from "fp-ts/lib/pipeable"
 import { chain, map, run } from "fp-ts/lib/ReaderTaskEither"
+import { Socket } from "socket.io"
 import { DomainPort } from "../domain/adapters"
 import { UserSocketLink } from "../messaging/main"
 import { actionOf, withEnv } from "../utils/actions"
@@ -8,7 +9,7 @@ import { adaptDomainToSocket, adaptMessagingToSocket } from "../utils/adapters"
 import { SocketsEnvironment, SocketsPort } from "./adapters"
 import { log } from "../utils/logger"
 
-type SocketHandler<T = void> = (socket: SocketIO.Socket) => SocketsPort<T, void>
+type SocketHandler<T = void> = (socket: Socket) => SocketsPort<T, void>
 
 const removeUserFromGame: SocketsPort<UserSocketLink[]> = userLinks =>
   withEnv(env =>
@@ -40,13 +41,30 @@ const createGameHandler: SocketHandler<Messages.CreateGameInput> =
   ({ userId }) =>
     withEnv(env => {
       const gameId = env.uuid()
-      socket.join(gameId, async (_: unknown) => {
-        const h = pipe(
-          adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
-          chain(_ => adaptDomainToSocket(env.gamesDomainPorts.create({ gameId, userId }), env)),
-        )
-        await run(h, env)
-      })
+
+      const executeGameCreation = async () => {
+        try {
+          const h = pipe(
+            adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
+            chain(_ => adaptDomainToSocket(env.gamesDomainPorts.create({ gameId, userId }), env)),
+          )
+          await run(h, env)
+        } catch (error) {
+          log.error(`Error in createGameHandler pipeline: ${error}`, { socketId: socket.id, gameId, userId, error })
+        }
+      }
+
+      // Handle socket.join return value (could be void or Promise<void>)
+      const joinResult = socket.join(gameId)
+      if (joinResult && typeof joinResult.then === "function") {
+        joinResult.then(executeGameCreation).catch(error => {
+          log.error(`Error joining game room: ${error}`, { socketId: socket.id, gameId, userId, error })
+        })
+      } else {
+        // Synchronous join, execute immediately
+        executeGameCreation()
+      }
+
       return actionOf(undefined)
     })
 
@@ -54,13 +72,29 @@ const joinGameHandler: SocketHandler<Messages.JoinGameInput> =
   socket =>
   ({ gameId, userId }) =>
     withEnv(env => {
-      socket.join(gameId, async () => {
-        const h = pipe(
-          adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
-          chain(_ => adaptDomainToSocket(env.gamesDomainPorts.join({ gameId, userId }), env)),
-        )
-        await run(h, env)
-      })
+      const executeGameJoin = async () => {
+        try {
+          const h = pipe(
+            adaptMessagingToSocket(env.gameMessagingPorts.registerUser({ socketId: socket.id, gameId, userId }), env),
+            chain(_ => adaptDomainToSocket(env.gamesDomainPorts.join({ gameId, userId }), env)),
+          )
+          await run(h, env)
+        } catch (error) {
+          log.error(`Error in joinGameHandler pipeline: ${error}`, { socketId: socket.id, gameId, userId, error })
+        }
+      }
+
+      // Handle socket.join return value (could be void or Promise<void>)
+      const joinResult = socket.join(gameId)
+      if (joinResult && typeof joinResult.then === "function") {
+        joinResult.then(executeGameJoin).catch(error => {
+          log.error(`Error joining game room: ${error}`, { socketId: socket.id, gameId, userId, error })
+        })
+      } else {
+        // Synchronous join, execute immediately
+        executeGameJoin()
+      }
+
       return actionOf(undefined)
     })
 
@@ -84,7 +118,7 @@ const onDomainPort =
     )
 
 const buildHandler =
-  (socketsEnvironment: SocketsEnvironment, socket: SocketIO.Socket) =>
+  (socketsEnvironment: SocketsEnvironment, socket: Socket) =>
   <I>(socketHandler: SocketHandler<I>) =>
   async (input: I) => {
     try {
@@ -94,14 +128,14 @@ const buildHandler =
     }
   }
 
-const addMessageHandler = (socket: SocketIO.Socket) => (handler: Messages.GameMessageHandler) => {
+const addMessageHandler = (socket: Socket) => (handler: Messages.GameMessageHandler) => {
   socket.on(handler.type, data => {
     log.debug("RECEIVED:", { type: handler.type, socketId: socket.id, data })
     handler.handler(data)
   })
 }
 
-export const socketHandler = (env: SocketsEnvironment) => (socket: SocketIO.Socket) => {
+export const socketHandler = (env: SocketsEnvironment) => (socket: Socket) => {
   const add = addMessageHandler(socket)
   const handler = buildHandler(env, socket)
 
