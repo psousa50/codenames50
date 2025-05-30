@@ -1,4 +1,5 @@
 import { Messages } from "@codenames50/messaging"
+import { vi } from "vitest"
 import { ErrorCodes } from "../../src/domain/errors"
 import * as Games from "../../src/domain/main"
 import { actionOf, fromPromise } from "../../src/utils/actions"
@@ -6,20 +7,14 @@ import { getLeft, getRight, buildTestDomainEnvironment, gamesMongoDbPorts, words
 
 const now = 1234567890
 
-beforeEach(() => {
-  jest.clearAllMocks()
-})
-// NOTE: buildEnvironmentForGameAction and all manual env setup are removed.
-// Use buildTestDomainEnvironment for all test envs.
-
 describe("create", () => {
   it("creates a game in idle state with one player and an empty board", async () => {
     const gameId = "game-id"
     const userId = "user-id"
     const newGame = { some: "game" }
-    const insert = jest.fn(g => actionOf(g))
-    const createGame = jest.fn(() => newGame)
-    const emitMessage = jest.fn(() => actionOf(undefined)) as any
+    const insert = vi.fn(g => actionOf(g))
+    const createGame = vi.fn(() => newGame)
+    const emitMessage = vi.fn(() => actionOf(undefined)) as any
 
     const domainEnvironment = buildTestDomainEnvironment({
       repositoriesAdapter: {
@@ -60,11 +55,11 @@ describe("join", () => {
     const someGame = { gameId } as any
     const updatedGame = { gameId, some: "update" } as any
 
-    const update = jest.fn(g => actionOf(g)) as any
-    const getById = jest.fn(() => actionOf(someGame))
-    const addPlayerAction = jest.fn(() => updatedGame)
-    const addPlayer = jest.fn(() => addPlayerAction) as any
-    const broadcastMessage = jest.fn(() => actionOf(undefined)) as any
+    const update = vi.fn(g => actionOf(g)) as any
+    const getById = vi.fn(() => actionOf(someGame))
+    const addPlayerAction = vi.fn(() => updatedGame)
+    const addPlayer = vi.fn(() => addPlayerAction) as any
+    const broadcastMessage = vi.fn(() => actionOf(undefined)) as any
 
     const domainEnvironment = buildTestDomainEnvironment({
       repositoriesAdapter: {
@@ -104,12 +99,12 @@ describe("join", () => {
   it("gives an error if the game does not exist", async () => {
     const gameId = "some-unexistant-id"
     const userId = "user-id"
-    const emitMessage = jest.fn(() => actionOf(undefined)) as any
+    const emitMessage = vi.fn(() => actionOf(undefined)) as any
 
     const domainEnvironment = buildTestDomainEnvironment({
       repositoriesAdapter: {
         gamesRepositoryPorts: {
-          getById: jest.fn(() => actionOf(null)),
+          getById: vi.fn(() => actionOf(null)),
         },
         repositoriesEnvironment: {
           mongoAdapter: {
@@ -140,11 +135,11 @@ describe("removePlayer", () => {
     const userId = "user-id"
     const someGame = { gameId, config: { turnTimeoutSec: 60 } } as any
     const updatedGame = { gameId, some: "update" } as any
-    const gamePortUpdate = jest.fn(() => updatedGame)
-    const gamePort = jest.fn(() => gamePortUpdate)
-    const update = jest.fn(() => fromPromise(() => Promise.resolve(updatedGame)))
-    const getById = jest.fn(() => fromPromise(() => Promise.resolve(someGame)))
-    const broadcastMessage = jest.fn(() => fromPromise(() => Promise.resolve(undefined)))
+    const gamePortUpdate = vi.fn(() => updatedGame)
+    const gamePort = vi.fn(() => gamePortUpdate)
+    const update = vi.fn(() => fromPromise(() => Promise.resolve(updatedGame)))
+    const getById = vi.fn(() => fromPromise(() => Promise.resolve(someGame)))
+    const broadcastMessage = vi.fn(() => fromPromise(() => Promise.resolve(undefined)))
     const domainEnvironment = buildTestDomainEnvironment({
       gamePorts: { removePlayer: gamePort },
       repositoriesAdapter: { gamesRepositoryPorts: { update, getById } },
@@ -167,11 +162,11 @@ describe("revealWord", () => {
     const userId = "user-id"
     const someGame = { gameId, config: { turnTimeoutSec: 60 } } as any
     const updatedGame = { gameId, some: "update" } as any
-    const gamePortUpdate = jest.fn(() => updatedGame)
-    const gamePort = jest.fn(() => gamePortUpdate)
-    const update = jest.fn(() => fromPromise(() => Promise.resolve(updatedGame)))
-    const getById = jest.fn(() => fromPromise(() => Promise.resolve(someGame)))
-    const broadcastMessage = jest.fn(() => fromPromise(() => Promise.resolve(undefined)))
+    const gamePortUpdate = vi.fn(() => updatedGame)
+    const gamePort = vi.fn(() => gamePortUpdate)
+    const update = vi.fn(() => fromPromise(() => Promise.resolve(updatedGame)))
+    const getById = vi.fn(() => fromPromise(() => Promise.resolve(someGame)))
+    const broadcastMessage = vi.fn(() => fromPromise(() => Promise.resolve(undefined)))
     const domainEnvironment = buildTestDomainEnvironment({
       gamePorts: { revealWord: gamePort },
       repositoriesAdapter: { gamesRepositoryPorts: { update, getById } },
@@ -196,11 +191,11 @@ describe("changeTurn", () => {
     const userId = "user-id"
     const someGame = { gameId, config: { turnTimeoutSec: 60 } } as any
     const updatedGame = { gameId, some: "update" } as any
-    const gamePortUpdate = jest.fn(() => updatedGame)
-    const gamePort = jest.fn(() => gamePortUpdate)
-    const update = jest.fn(() => fromPromise(() => Promise.resolve(updatedGame)))
-    const getById = jest.fn(() => fromPromise(() => Promise.resolve(someGame)))
-    const broadcastMessage = jest.fn(() => fromPromise(() => Promise.resolve(undefined)))
+    const gamePortUpdate = vi.fn(() => updatedGame)
+    const gamePort = vi.fn(() => gamePortUpdate)
+    const update = vi.fn(() => fromPromise(() => Promise.resolve(updatedGame)))
+    const getById = vi.fn(() => fromPromise(() => Promise.resolve(someGame)))
+    const broadcastMessage = vi.fn(() => fromPromise(() => Promise.resolve(undefined)))
     const domainEnvironment = buildTestDomainEnvironment({
       gamePorts: { changeTurn: gamePort },
       repositoriesAdapter: { gamesRepositoryPorts: { update, getById } },
@@ -223,11 +218,11 @@ describe("checkTurnTimeout", () => {
     const userId = "user-id"
     const someGame = { gameId, config: { turnTimeoutSec: 60 } } as any
     const updatedGame = { gameId, some: "update" } as any
-    const gamePortUpdate = jest.fn(() => updatedGame)
-    const forceChangeTurnPort = jest.fn(() => gamePortUpdate)
-    const update = jest.fn(() => fromPromise(() => Promise.resolve(updatedGame)))
-    const getById = jest.fn(() => fromPromise(() => Promise.resolve(someGame)))
-    const broadcastMessage = jest.fn(() => fromPromise(() => Promise.resolve(undefined)))
+    const gamePortUpdate = vi.fn(() => updatedGame)
+    const forceChangeTurnPort = vi.fn(() => gamePortUpdate)
+    const update = vi.fn(() => fromPromise(() => Promise.resolve(updatedGame)))
+    const getById = vi.fn(() => fromPromise(() => Promise.resolve(someGame)))
+    const broadcastMessage = vi.fn(() => fromPromise(() => Promise.resolve(undefined)))
     const domainEnvironment = buildTestDomainEnvironment({
       gamePorts: { forceChangeTurn: forceChangeTurnPort, checkTurnTimeout: () => () => true },
       repositoriesAdapter: { gamesRepositoryPorts: { update, getById } },
@@ -249,9 +244,9 @@ describe("checkTurnTimeout", () => {
     const gameId = "game-id"
     const userId = "user-id"
     const someGame = { gameId, config: { turnTimeoutSec: 60 } } as any
-    const getById = jest.fn(() => fromPromise(() => Promise.resolve(someGame)))
-    const forceChangeTurnPort = jest.fn()
-    const broadcastMessage = jest.fn(() => fromPromise(() => Promise.resolve(undefined)))
+    const getById = vi.fn(() => fromPromise(() => Promise.resolve(someGame)))
+    const forceChangeTurnPort = vi.fn()
+    const broadcastMessage = vi.fn(() => fromPromise(() => Promise.resolve(undefined)))
     const domainEnvironment = buildTestDomainEnvironment({
       gamePorts: { forceChangeTurn: forceChangeTurnPort, checkTurnTimeout: () => () => false },
       repositoriesAdapter: { gamesRepositoryPorts: { getById } },

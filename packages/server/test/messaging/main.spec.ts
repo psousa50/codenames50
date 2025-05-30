@@ -1,3 +1,4 @@
+import { vi } from "vitest"
 import * as GameMessaging from "../../src/messaging/main"
 import { getRight } from "../helpers"
 
@@ -10,17 +11,17 @@ describe("messaging", () => {
   it("emits a message to the specified user socket", async () => {
     const data = { some: "data" }
     const message = { type: "some-type" as any, data }
-    const emit = jest.fn()
-    const getSocketIdsForRoomId = jest.fn(() => [socketId]) as any
+    const emit = vi.fn()
+    const getSocketIdsForRoomId = vi.fn(() => [socketId]) as any
 
     const environment = {
       adapters: {
         messengerPorts: {
-          emit: jest.fn(_ => emit) as any,
-          broadcast: () => undefined as any,
-          getSocketIdsForRoomId: jest.fn(_ => getSocketIdsForRoomId),
+          emit: vi.fn(_ => emit) as any,
+          broadcast: vi.fn(),
+          getSocketIdsForRoomId: vi.fn(_ => getSocketIdsForRoomId),
         },
-        messengerEnvironment: { io: jest.fn() as any },
+        messengerEnvironment: { io: vi.fn() as any },
       },
     }
 
@@ -34,8 +35,8 @@ describe("messaging", () => {
   })
 
   it("broadcasts a message to the all the users", async () => {
-    const broadcast = jest.fn()
-    const getSocketIdsForRoomId = jest.fn(() => [
+    const broadcast = vi.fn()
+    const getSocketIdsForRoomId = vi.fn(() => [
       {
         socketId: "",
       },
@@ -43,11 +44,11 @@ describe("messaging", () => {
     const environment = {
       adapters: {
         messengerPorts: {
-          emit: () => undefined as any,
-          broadcast: jest.fn(_ => broadcast),
-          getSocketIdsForRoomId: jest.fn(_ => getSocketIdsForRoomId),
+          emit: vi.fn(),
+          broadcast: vi.fn(_ => broadcast),
+          getSocketIdsForRoomId: vi.fn(_ => getSocketIdsForRoomId),
         },
-        messengerEnvironment: { io: jest.fn() as any },
+        messengerEnvironment: { io: vi.fn() as any },
       },
     }
 
@@ -64,8 +65,8 @@ describe("messaging", () => {
   })
 
   it("unregisters a socket", async () => {
-    const emit = jest.fn()
-    const getSocketIdsForRoomId = jest.fn(() => [
+    const emit = vi.fn()
+    const getSocketIdsForRoomId = vi.fn(() => [
       {
         socketId: "",
       },
@@ -73,11 +74,11 @@ describe("messaging", () => {
     const environment = {
       adapters: {
         messengerPorts: {
-          emit: jest.fn(_ => emit) as any,
-          broadcast: () => undefined as any,
-          getSocketIdsForRoomId: jest.fn(_ => getSocketIdsForRoomId),
+          emit: vi.fn(_ => emit) as any,
+          broadcast: vi.fn(),
+          getSocketIdsForRoomId: vi.fn(_ => getSocketIdsForRoomId),
         },
-        messengerEnvironment: { io: jest.fn() as any },
+        messengerEnvironment: { io: vi.fn() as any },
       },
     }
 

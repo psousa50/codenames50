@@ -37,7 +37,6 @@
     "@types/socket.io-client": "^1.4.32",
     "@types/uuid": "^8.0.0",
     "@vitejs/plugin-react": "^4.5.0",
-    "jest-environment-jsdom-sixteen": "^1.0.3",
     "jsdom": "^26.1.0",
     "terser": "^5.40.0",
     "vite": "^6.3.5",
@@ -50,20 +49,5 @@
     "preview": "vite preview",
     "test:watch": "NODE_OPTIONS=--openssl-legacy-provider vitest",
     "test": "NODE_OPTIONS=--openssl-legacy-provider vitest run"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }

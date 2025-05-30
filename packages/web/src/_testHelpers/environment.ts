@@ -1,3 +1,4 @@
+import { vi } from "vitest"
 import { Messages } from "@codenames50/messaging"
 import { Environment } from "../environment"
 import { actionOf } from "../utils/actions"
@@ -7,16 +8,24 @@ export const defaultEnvironment: Environment = {
   api: {
     getLanguages: () => actionOf([]),
     getTurnTimeouts: () => actionOf([{ timeoutSec: 0 }]),
+    getVariants: () =>
+      actionOf([
+        {
+          name: "classic",
+          displayName: "Classic",
+          description: "The classic Codenames game",
+        },
+      ]),
   },
-  useSound: () => [jest.fn()],
+  useSound: () => [vi.fn()],
 } as any
 
 export const buildEnvironment = () => {
   const messageHandlers = {} as any
-  const emitMessage = jest.fn()
+  const emitMessage = vi.fn()
   const socketMessaging = {
-    connect: () => {},
-    disconnect: () => {},
+    connect: vi.fn(),
+    disconnect: vi.fn(),
     emitMessage,
     addMessageHandler: (handler: Messages.GameMessageHandler) => {
       messageHandlers[handler.type] = handler.handler

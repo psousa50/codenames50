@@ -1,4 +1,4 @@
-import { createMuiTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
+import { createTheme, CssBaseline, responsiveFontSizes, ThemeProvider } from "@material-ui/core"
 import { blueGrey, lightBlue } from "@material-ui/core/colors"
 import React from "react"
 import { BrowserRouter } from "react-router-dom"
@@ -7,7 +7,7 @@ import { EnvironmentContext, useEnvironment } from "./environment"
 import { ViewportProvider } from "./utils/viewPort"
 
 const darkTheme = responsiveFontSizes(
-  createMuiTheme({
+  createTheme({
     palette: {
       type: "dark",
       primary: lightBlue,

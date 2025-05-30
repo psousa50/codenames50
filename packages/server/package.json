@@ -11,9 +11,9 @@
     "build": "yarn run build:ts",
     "build:ts": "tsc --skipLibCheck --noEmit false --noEmitOnError true",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "coverage": "jest --coverage",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
     "start": "NODE_ENV=production node dist/index.js",
     "start:dev": "nodemon --exec 'ts-node --files' ./src/index.ts"
   },
@@ -47,6 +47,8 @@
     "@types/socket.io": "^2.1.4",
     "@types/socket.io-client": "^1.4.33",
     "@types/uuid": "^8.0.0",
-    "mongodb-memory-server": "^6.6.1"
+    "mongodb-memory-server": "^6.6.1",
+    "vitest": "^3.1.4",
+    "@vitest/coverage-v8": "^3.1.4"
   }
 }

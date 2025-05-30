@@ -12,10 +12,7 @@
   "scripts": {
     "build": "yarn run build:ts",
     "build:ts": "tsc --skipLibCheck",
-    "clean": "rm -rf dist *.tsbuildinfo",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "coverage": "jest --coverage"
+    "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
     "@codenames50/core": "0.1.0"

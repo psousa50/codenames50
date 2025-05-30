@@ -4,6 +4,7 @@ import { task } from "fp-ts/lib/Task"
 import { fold, getOrElse, TaskEither } from "fp-ts/lib/TaskEither"
 import { MongoClient } from "mongodb"
 import * as R from "ramda"
+import { vi } from "vitest"
 import { buildExpressEnvironment, ExpressEnvironment } from "../src/app/adapters"
 import { buildDomainEnvironment, DomainEnvironment } from "../src/domain/adapters"
 import { buildGameMessagingEnvironment } from "../src/messaging/adapters"
@@ -23,47 +24,47 @@ const defaultConfig = {
   boardHeight: 5,
 }
 
-const voidAction = jest.fn(() => actionOf(undefined))
+const voidAction = vi.fn(() => actionOf(undefined))
 
 export const gamesMongoDbPorts = {
-  insert: jest.fn(),
-  update: jest.fn(),
-  getById: jest.fn(),
+  insert: vi.fn(),
+  update: vi.fn(),
+  getById: vi.fn(),
 }
 
 export const wordsMongoDbPorts = {
-  upsertByLanguage: jest.fn(),
-  getByLanguage: jest.fn(),
+  upsertByLanguage: vi.fn(),
+  getByLanguage: vi.fn(),
 }
 
 const gamesRepositoryPorts = {
-  insert: jest.fn((game: any) => actionOf(game)),
-  update: jest.fn((game: any) => actionOf(game)),
-  getById: jest.fn((_id: any) => actionOf(undefined as any)), // Default: game not found
-};
+  insert: vi.fn((game: any) => actionOf(game)),
+  update: vi.fn((game: any) => actionOf(game)),
+  getById: vi.fn((_id: any) => actionOf(undefined as any)), // Default: game not found
+}
 
 const wordsRepositoryPorts = {
-  initialize: jest.fn(() => actionOf(undefined as any)),
-  upsertByLanguage: jest.fn((_wl: any) => actionOf(undefined as any)),
-  getByLanguage: jest.fn((_lang: any) => actionOf(undefined as any)), // Default: language not found
-};
+  initialize: vi.fn(() => actionOf(undefined as any)),
+  upsertByLanguage: vi.fn((_wl: any) => actionOf(undefined as any)),
+  getByLanguage: vi.fn((_lang: any) => actionOf(undefined as any)), // Default: language not found
+}
 
 export const messengerPorts = {
-  emit: jest.fn(),
-  broadcast: jest.fn(),
-  getSocketIdsForRoomId: jest.fn(),
+  emit: vi.fn(),
+  broadcast: vi.fn(),
+  getSocketIdsForRoomId: vi.fn(),
 }
 
 export const gameMessagingPorts = {
   emitMessage: voidAction,
-  registerUser: jest.fn(),
-  unregisterSocket: jest.fn(),
-  addGameToUser: jest.fn(),
+  registerUser: vi.fn(),
+  unregisterSocket: vi.fn(),
+  addGameToUser: vi.fn(),
   broadcastMessage: voidAction,
 }
 
 export const buildDefaultTestDomainEnvironment = () => {
-  const dbClient = jest.fn(() => Promise.resolve(undefined)) as any
+  const dbClient = vi.fn(() => Promise.resolve(undefined)) as any
   const mongoEnvironment = buildMongoEnvironment(dbClient)
   const io = {
     sockets: {

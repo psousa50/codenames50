@@ -1,6 +1,7 @@
 import { GameModels } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
 import request from "supertest"
+import { vi } from "vitest"
 import { ErrorCodes } from "../../../src/app/errors"
 import { createExpressApp, configureRoutes } from "../../../src/app/main"
 import { actionErrorOf, actionOf } from "../../../src/utils/actions"
@@ -10,7 +11,7 @@ import { buildTestExpressEnvironment } from "../../helpers"
 describe("games/create", () => {
   it("creates a game", async () => {
     const createdGame = {} as GameModels.CodeNamesGame
-    const create = jest.fn((_: Messages.CreateGameInput) => actionOf(createdGame))
+    const create = vi.fn((_: Messages.CreateGameInput) => actionOf(createdGame))
     const expressAdapter = buildTestExpressEnvironment({
       domainAdapter: {
         gamesDomainPorts: {
@@ -32,7 +33,7 @@ describe("games/create", () => {
     const expressAdapter = buildTestExpressEnvironment({
       domainAdapter: {
         gamesDomainPorts: {
-          create: jest.fn((_: Messages.CreateGameInput) =>
+          create: vi.fn((_: Messages.CreateGameInput) =>
             actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
           ),
         },
@@ -49,7 +50,7 @@ describe("games/create", () => {
       const gameId = "some-game-id"
       const userId = "some-user-id"
       const game = {} as GameModels.CodeNamesGame
-      const join = jest.fn((_: Messages.JoinGameInput) => actionOf(game))
+      const join = vi.fn((_: Messages.JoinGameInput) => actionOf(game))
       const expressAdapter = buildTestExpressEnvironment({
         domainAdapter: {
           gamesDomainPorts: {
@@ -69,9 +70,7 @@ describe("games/create", () => {
       const expressAdapter = buildTestExpressEnvironment({
         domainAdapter: {
           gamesDomainPorts: {
-            join: jest.fn((_: Messages.JoinGameInput) =>
-              actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND)),
-            ),
+            join: vi.fn((_: Messages.JoinGameInput) => actionErrorOf(new ServiceError("error", ErrorCodes.NOT_FOUND))),
           },
         },
       })
