@@ -11,7 +11,9 @@ export const useGameState = (): [GameModels.CodeNamesGame | undefined, typeof up
   const checkResult = (port: GamePort, callback?: GameCallback) => (game: CodeNamesGame | undefined) => {
     const updatedGame = game ? port(game) : game
     const newGame = typeof updatedGame === "string" ? game : updatedGame
-    callback && newGame && callback(newGame)
+    if (callback && newGame) {
+      callback(newGame)
+    }
     return newGame
   }
 

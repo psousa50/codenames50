@@ -8,7 +8,6 @@ import React from "react"
 import { renderWithEnvironment } from "../../_testHelpers/render"
 import { buildEnvironment } from "../../_testHelpers/environment"
 import { PlayGameScreen } from "./PlayGameScreen"
-import { Teams } from "./components/Teams"
 
 describe("PlayGameScreen", () => {
   const userId = "Some Name"

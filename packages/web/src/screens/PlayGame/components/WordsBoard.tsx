@@ -60,7 +60,12 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
   const classes = useStyles()
 
   const canReveal = GameRules.revealWord(userId, row, col)(game) === undefined
-  const canIntercept = (GameRules as any).interceptWord ? (GameRules as any).interceptWord(userId, row, col)(game) === undefined : false
+  const extendedGameRules = GameRules as typeof GameRules & {
+    interceptWord?: (userId: string, row: number, col: number) => (game: GameModels.CodeNamesGame) => string | undefined
+  }
+  const canIntercept = extendedGameRules.interceptWord
+    ? extendedGameRules.interceptWord(userId, row, col)(game) === undefined
+    : false
   const isClickable = canReveal || canIntercept
 
   const rw = revealWords || word.revealed

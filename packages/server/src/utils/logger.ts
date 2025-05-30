@@ -41,14 +41,14 @@ if (process.env.NODE_ENV === "production") {
 
 // Export logger methods
 export const log = {
-  error: (message: string, meta?: any) => logger.error(message, meta),
-  warn: (message: string, meta?: any) => logger.warn(message, meta),
-  info: (message: string, meta?: any) => logger.info(message, meta),
-  debug: (message: string, meta?: any) => logger.debug(message, meta),
+  error: (message: string, meta?: Record<string, unknown>) => logger.error(message, meta),
+  warn: (message: string, meta?: Record<string, unknown>) => logger.warn(message, meta),
+  info: (message: string, meta?: Record<string, unknown>) => logger.info(message, meta),
+  debug: (message: string, meta?: Record<string, unknown>) => logger.debug(message, meta),
 }
 
 // For backward compatibility with existing logDebug function
-export const logDebug = (message: string, data?: any) => {
+export const logDebug = (message: string, data?: Record<string, unknown>) => {
   if (data) {
     logger.debug(message, data)
   } else {

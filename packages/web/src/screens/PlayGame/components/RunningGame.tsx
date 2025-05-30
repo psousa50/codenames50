@@ -51,10 +51,13 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
 
   const onWordClick: OnWordClick = (_, row, col) => {
     const userTeam = getPlayer(game, userId)?.team
-    const gameWithIntercept = game as any
 
-    if (gameWithIntercept.interceptPhase && gameWithIntercept.interceptingTeam === userTeam) {
-      emitMessage((Messages as any).interceptWord({ gameId, userId, row, col }))
+    if (game.interceptPhase && game.interceptingTeam === userTeam) {
+      // Type assertion for Messages with intercept functionality
+      const extendedMessages = Messages as typeof Messages & {
+        interceptWord: (params: { gameId: string; userId: string; row: number; col: number }) => Messages.GameMessage
+      }
+      emitMessage(extendedMessages.interceptWord({ gameId, userId, row, col }))
     } else {
       emitMessage(Messages.revealWord({ gameId, userId, row, col }))
     }
@@ -65,30 +68,24 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
   const thereIsAHint = () => game.hintWordCount > 0
 
   const turnMessageForPlayerTurn = () => {
-    const gameWithIntercept = game as any
     const userTeam = getPlayer(game, userId)?.team
     const isSpyMaster = playerIsSpyMaster()
-    const isInterceptingTeam = gameWithIntercept.interceptingTeam === userTeam
+    const isInterceptingTeam = game.interceptingTeam === userTeam
 
-    if (gameWithIntercept.interceptPhase && isInterceptingTeam && !isSpyMaster) {
+    if (game.interceptPhase && isInterceptingTeam && !isSpyMaster) {
       return "Intercept opportunity! Click a word you think matches their hint"
     }
     return isSpyMaster && thereIsAHint()
       ? "Waiting for your Agents..."
       : isSpyMaster && !thereIsAHint()
-      ? "Your turn, choose a hint"
-      : !isSpyMaster && thereIsAHint()
-      ? "Select your words"
-      : "Waiting for Spy Masters' hint..."
+        ? "Your turn, choose a hint"
+        : !isSpyMaster && thereIsAHint()
+          ? "Select your words"
+          : "Waiting for Spy Masters' hint..."
   }
 
   const buildTurnsMessage = () => {
-    const gameWithIntercept = game as any
-    if (
-      gameWithIntercept.interceptPhase &&
-      gameWithIntercept.interceptingTeam === getPlayer(game, userId)?.team &&
-      !playerIsSpyMaster()
-    ) {
+    if (game.interceptPhase && game.interceptingTeam === getPlayer(game, userId)?.team && !playerIsSpyMaster()) {
       return turnMessageForPlayerTurn()
     }
     return playersTeamIsPlaying() ? turnMessageForPlayerTurn() : `${teamName(game.turn)}'s turn`

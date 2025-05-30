@@ -2,13 +2,13 @@
 // allows you to do things like:
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom"
 
 // Set up Vitest globals
-import { expect, afterEach } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { afterEach } from "vitest"
+import { cleanup } from "@testing-library/react"
 
 // Run cleanup after each test case
 afterEach(() => {
-  cleanup();
-});
+  cleanup()
+})

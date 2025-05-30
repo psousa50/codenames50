@@ -32,10 +32,12 @@ log.debug('Socket message received', { type: 'createGame', socketId: 'abc123' })
 - `NODE_ENV`: When set to 'production', enables file logging
 
 ### Development
+
 - Logs to console with colors and timestamps
 - Format: `2024-01-15 10:30:45 [info]: Server started { port: 3000 }`
 
 ### Production
+
 - Logs to console (for cloud platforms like Render)
 - Logs to files:
   - `logs/error.log`: Only error messages
@@ -63,4 +65,4 @@ log.info(`User ${userId} created game ${gameId}`)
 log.info('User created game', { userId, gameId })
 ```
 
-This makes logs searchable and easier to parse by log aggregation tools. 
+This makes logs searchable and easier to parse by log aggregation tools.

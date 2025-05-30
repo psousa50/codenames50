@@ -38,7 +38,7 @@ describe("CreateGameScreen", () => {
       const game = { gameId, error: "" }
       act(() => simulateMessageFromServer(Messages.gameCreated(game)))
 
-      const redirectUrl = screen.getByText(`/game?gameId=${gameId}&userId=${userId}`)
+      const redirectUrl = screen.getByText(`/game?gameId=${gameId}&userId=${encodeURIComponent(userId)}`)
       expect(redirectUrl).toBeDefined()
     })
   })

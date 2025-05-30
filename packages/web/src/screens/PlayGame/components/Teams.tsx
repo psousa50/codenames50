@@ -1,4 +1,4 @@
-import { GameModels, GameRules } from "@codenames50/core"
+import { GameModels } from "@codenames50/core"
 import {
   Button,
   makeStyles,
@@ -39,7 +39,6 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
   const teamMembers = players.filter(p => p.team === team)
   const regularMembers = teamMembers.filter(p => p.userId !== teamConfig.spyMaster)
 
-  const canSetSpyMaster = GameRules.setSpyMaster(team)(game) === undefined
   const isUserOnThisTeam = teamMembers.some(p => p.userId === userId)
   const isUserSpyMaster = teamConfig.spyMaster === userId
   const canJoinTeam = !isUserOnThisTeam

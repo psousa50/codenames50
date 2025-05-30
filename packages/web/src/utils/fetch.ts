@@ -63,14 +63,14 @@ export const extractText = (response: Response): ActionResult<string> =>
     e => new Errors.BadResponseError((e as Error).message),
   )
 
-export const extractJson = (response: Response): ActionResult<any> =>
+export const extractJson = <T = unknown>(response: Response): ActionResult<T> =>
   tryCatch(
-    () => response.json(),
+    () => response.json() as Promise<T>,
     e => new Errors.BadResponseError((e as Error).message),
   )
 
 export function fetchJson<T>(input: Request | string, init?: RequestInit): ActionResult<T> {
-  return pipe(fetchAction(input, init), chain(extractJson))
+  return pipe(fetchAction(input, init), chain(extractJson<T>))
 }
 
 export function postJson<T>(input: Request | string, init?: RequestInit): ActionResult<T> {
@@ -83,6 +83,6 @@ export function postJson<T>(input: Request | string, init?: RequestInit): Action
         "Content-Type": "application/json",
       },
     }),
-    chain(extractJson),
+    chain(extractJson<T>),
   )
 }

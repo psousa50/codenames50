@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react"
 import React from "react"
-import { BrowserRouter, Route, Switch } from "react-router-dom"
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom"
 import { EnvironmentContext } from "../environment"
 import { defaultEnvironment } from "./environment"
 
@@ -14,9 +14,14 @@ interface TestRedirectProps {
 
 export const TestRedirect: React.FC<TestRedirectProps> = ({ ComponentWithRedirection, redirectUrl }) => (
   <BrowserRouter>
-    <Switch>
-      <Route path="/" exact={true} render={() => <ComponentWithRedirection />} />
-      <Route path={redirectUrl} render={({ location: { pathname, search } }) => <div>{`${pathname}${search}`}</div>} />
-    </Switch>
+    <Routes>
+      <Route path="/" element={<ComponentWithRedirection />} />
+      <Route path={redirectUrl} element={<RedirectDisplay />} />
+    </Routes>
   </BrowserRouter>
 )
+
+const RedirectDisplay: React.FC = () => {
+  const location = useLocation()
+  return <div>{`${location.pathname}${location.search}`}</div>
+}

@@ -1,1 +1,1 @@
-export const exists = (v: any) => v !== undefined && v !== null
+export const exists = (v: unknown) => v !== undefined && v !== null

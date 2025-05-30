@@ -2,8 +2,7 @@ import request from "supertest"
 import { createExpressApp, configureRoutes } from "../../src/app/main"
 import { buildTestExpressEnvironment } from "../helpers"
 
-// eslint-disable-next-line jest/expect-expect
-it("/health", async () => {
+it("should return 200 OK for /health endpoint", async () => {
   const app = createExpressApp()
   configureRoutes(app, buildTestExpressEnvironment())
 

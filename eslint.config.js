@@ -30,7 +30,7 @@ module.exports = [
     },
   },
   {
-    files: ["**/test/**"],
+    files: ["**/test/**", "**/*.test.*", "**/*.spec.*", "**/*testHelpers/**", "**/_testHelpers/**"],
     rules: {
       "@typescript-eslint/no-explicit-any": ["off"],
     },
