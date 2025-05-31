@@ -15,6 +15,30 @@ interface WordsBoardProps {
   onWordClick?: OnWordClick
 }
 
+// Hook to get responsive font size based on screen width
+const useResponsiveFontSize = () => {
+  const [fontSize, setFontSize] = React.useState("14px")
+
+  React.useEffect(() => {
+    const updateFontSize = () => {
+      const width = window.innerWidth
+      if (width >= 960) {
+        setFontSize("30px") // Desktop
+      } else if (width >= 600) {
+        setFontSize("20px") // Tablet
+      } else {
+        setFontSize("14px") // Mobile
+      }
+    }
+
+    updateFontSize()
+    window.addEventListener("resize", updateFontSize)
+    return () => window.removeEventListener("resize", updateFontSize)
+  }, [])
+
+  return fontSize
+}
+
 const componentStyles = {
   rows: {
     display: "flex",
@@ -47,7 +71,6 @@ const componentStyles = {
     margin: "2px",
     fontFamily: "Teko",
     userSelect: "none" as const,
-    fontSize: "30px",
     fontWeight: "500",
   },
 }
@@ -92,6 +115,7 @@ interface WordProps {
 }
 
 const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMaster, onWordClick, row, col }) => {
+  const fontSize = useResponsiveFontSize()
   const canReveal = GameRules.revealWord(userId, row, col)(game) === undefined
   const extendedGameRules = GameRules as typeof GameRules & {
     interceptWord?: (userId: string, row: number, col: number) => (game: GameModels.CodeNamesGame) => string | undefined
@@ -170,6 +194,7 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
           ...styles.base,
           ...unrevealedStyles,
           ...componentStyles.cell,
+          fontSize,
         }}
       >
         {word.word.toUpperCase()}
@@ -181,6 +206,7 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
           ...styles.base,
           ...styles.revealed[word.type],
           ...componentStyles.cell,
+          fontSize,
         }}
       >
         {word.word.toUpperCase()}
