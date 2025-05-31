@@ -40,21 +40,27 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           // Split chunks by module for better caching
-          manualChunks: id => {
-            // Create separate chunks for major dependencies
-            if (id.includes("node_modules")) {
-              if (id.includes("@material-ui")) {
-                return "vendor-material-ui"
-              }
-              if (id.includes("react") || id.includes("react-dom")) {
-                return "vendor-react"
-              }
-              if (id.includes("socket.io")) {
-                return "vendor-socketio"
-              }
-              return "vendor" // all other dependencies
-            }
-            return null // return null for non-node_modules files
+          manualChunks: {
+            // Group React and React DOM together
+            "vendor-react": ["react", "react-dom"],
+            // Group Material-UI components
+            "vendor-mui": ["@mui/material", "@mui/icons-material", "@mui/lab", "@emotion/react", "@emotion/styled"],
+            // Group Socket.IO
+            "vendor-socketio": ["socket.io-client"],
+            // Group other vendor libraries
+            "vendor-misc": [
+              "ramda",
+              "fp-ts",
+              "moment",
+              "qs",
+              "uuid",
+              "copy-to-clipboard",
+              "use-sound",
+              "react-spring",
+              "styled-components",
+            ],
+            // Group router libraries
+            "vendor-router": ["react-router-dom"],
           },
         },
       },
