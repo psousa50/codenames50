@@ -29,10 +29,10 @@
     "vite-plugin-svgr": "^4.2.0"
   },
   "devDependencies": {
-    "@testing-library/dom": "^7.31.2",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^10.2.1",
-    "@testing-library/user-event": "^12.0.11",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
     "@types/jest": "^26.0.0",
     "@types/qs": "^6.9.16",
     "@types/ramda": "^0.27.4",

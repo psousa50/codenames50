@@ -100,9 +100,9 @@ describe("PlayGameScreen", () => {
       const { emitMessage } = renderPlayGameScreenAndJoinGame(partialGame)
 
       const hintWord = "SomeHint"
-      userEvent.type(screen.getByRole("textbox", { name: "Hint Word" }), hintWord)
-      userEvent.click(screen.getByRole("button", { name: "2" }))
-      userEvent.click(screen.getByRole("button", { name: "Send Hint" }))
+      await userEvent.type(screen.getByRole("textbox", { name: "Hint Word" }), hintWord)
+      await userEvent.click(screen.getByRole("button", { name: "2" }))
+      await userEvent.click(screen.getByRole("button", { name: "Send Hint" }))
 
       await waitFor(() =>
         expect(emitMessage).toHaveBeenCalledWith(Messages.sendHint({ gameId, userId, hintWord, hintWordCount: 2 })),
@@ -110,7 +110,7 @@ describe("PlayGameScreen", () => {
     })
 
     describe("when a word is clicked", () => {
-      it.only("should emit a revealWord message", async () => {
+      it("should emit a revealWord message", async () => {
         const partialGame = {
           state: GameModels.GameStates.running,
           players: [{ userId, team: GameModels.Teams.red }],
@@ -126,7 +126,7 @@ describe("PlayGameScreen", () => {
         const { emitMessage } = renderPlayGameScreenAndJoinGame(partialGame)
 
         const word10 = await screen.findAllByText("w10", { exact: false })
-        userEvent.click(word10[0])
+        await userEvent.click(word10[0])
 
         expect(emitMessage).toHaveBeenCalledWith(Messages.revealWord({ gameId, userId, row: 1, col: 0 }))
       })

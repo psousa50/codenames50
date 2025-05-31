@@ -24,7 +24,11 @@ export const buildEnvironment = () => {
   const messageHandlers = {} as any
   const emitMessage = vi.fn()
   const socketMessaging = {
-    connect: vi.fn(),
+    connect: vi.fn((onConnect?: () => void) => {
+      if (onConnect) {
+        onConnect()
+      }
+    }),
     disconnect: vi.fn(),
     emitMessage,
     addMessageHandler: (handler: Messages.GameMessageHandler) => {
