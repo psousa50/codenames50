@@ -22,9 +22,12 @@ graph TB
     subgraph "Setup Components"
         SetupGame --> Teams[Teams]
         SetupGame --> User[User]
+        SetupGame --> GameSetupDialog[Game Setup Dialog]
         Teams --> TeamDisplay[Team Member Display]
         User --> JoinTeamButton[Join Team Button]
         User --> SpyMasterToggle[SpyMaster Toggle]
+        GameSetupDialog --> GameVariantSelector[Game Variant Selector]
+        GameSetupDialog --> InterceptionSettings[Interception Settings]
     end
     
     subgraph "Running Game Components"
@@ -41,6 +44,19 @@ graph TB
     subgraph "Header Components"
         Header --> GameInfo[Game Info]
         Header --> InviteDialog[Invite Players Dialog]
+        Header --> SettingsButton[Settings Button]
+        Header --> SoundToggle[Sound Toggle]
+    end
+    
+    subgraph "Audio System"
+        SoundHook[usePlaySound Hook]
+        SoundEffects[Sound Effects Library]
+        StealSound[Steal Sound Effect]
+        GameSounds[Game Event Sounds]
+        
+        SoundHook --> SoundEffects
+        SoundEffects --> StealSound
+        SoundEffects --> GameSounds
     end
     
     classDef screen fill:#e8f5e8
@@ -51,7 +67,7 @@ graph TB
     class CreateGame,JoinGame,PlayGame screen
     class SetupGame,Teams,User,TeamDisplay,JoinTeamButton,SpyMasterToggle setup
     class RunningGame,Hint,SendHint,WordsBoard,TimeLeft,TeamWordsLeft,WordCard,WordButton running
-    class Header,GameInfo,InviteDialog header
+    class Header,GameInfo,InviteDialog,SettingsButton,SoundToggle header
 ```
 
 ## State Management Architecture
@@ -97,55 +113,62 @@ graph TB
     class CoreLogic,SocketIO,LocalStorage external
 ```
 
-## Material-UI Integration
+## Material-UI v7 Integration
 
 ```mermaid
 graph LR
-    subgraph "Material-UI Theme"
+    subgraph "Material-UI v7 Theme System"
         ThemeProvider[ThemeProvider]
-        CustomTheme[Custom Theme]
+        CustomTheme[Custom Theme v7]
         TeamColors[Team Color Palette]
-        Typography[Typography System]
-        Spacing[Spacing System]
+        Typography[Typography System v7]
+        Spacing[Spacing System v7]
+        ColorSchemes[Color Schemes Support]
     end
     
-    subgraph "Core Components"
-        Button[Button]
-        Card[Card]
-        Dialog[Dialog]
-        Grid[Grid]
-        Typography2[Typography]
-        AppBar[AppBar]
-        Chip[Chip]
-        Avatar[Avatar]
+    subgraph "Enhanced v7 Components"
+        Button[Button v7]
+        Card[Card v7]
+        Dialog[Dialog v7]
+        Grid[Grid v2]
+        Typography2[Typography v7]
+        AppBar[AppBar v7]
+        Chip[Chip v7]
+        Avatar[Avatar v7]
+        RadioGroup[RadioGroup v7]
+        Stack[Stack Component]
     end
     
     subgraph "Custom Styled Components"
-        TeamCard[Team Card]
-        WordCard[Word Card]
-        GameBoard[Game Board]
-        PlayerChip[Player Chip]
-        HintDisplay[Hint Display]
+        TeamCard[Team Card v7]
+        WordCard[Word Card v7]
+        GameBoard[Game Board v7]
+        PlayerChip[Player Chip v7]
+        HintDisplay[Hint Display v7]
+        SetupDialog[Game Setup Dialog v7]
     end
     
     ThemeProvider --> CustomTheme
     CustomTheme --> TeamColors
     CustomTheme --> Typography
     CustomTheme --> Spacing
+    CustomTheme --> ColorSchemes
     
     Button --> TeamCard
     Card --> WordCard
     Grid --> GameBoard
     Chip --> PlayerChip
     Typography2 --> HintDisplay
+    Dialog --> SetupDialog
+    RadioGroup --> SetupDialog
     
     classDef theme fill:#e8f5e8
     classDef mui fill:#e1f5fe
     classDef custom fill:#f3e5f5
     
-    class ThemeProvider,CustomTheme,TeamColors,Typography,Spacing theme
-    class Button,Card,Dialog,Grid,Typography2,AppBar,Chip,Avatar mui
-    class TeamCard,WordCard,GameBoard,PlayerChip,HintDisplay custom
+    class ThemeProvider,CustomTheme,TeamColors,Typography,Spacing,ColorSchemes theme
+    class Button,Card,Dialog,Grid,Typography2,AppBar,Chip,Avatar,RadioGroup,Stack mui
+    class TeamCard,WordCard,GameBoard,PlayerChip,HintDisplay,SetupDialog custom
 ```
 
 ## Custom Hooks Deep Dive
@@ -442,19 +465,4 @@ graph TB
 
 ### Game Components (`packages/web/src/screens/PlayGame/components/`)
 - **`WordsBoard.tsx`** - Main game board with word cards
-- **`Teams.tsx`** - Team management and display
-- **`SendHint.tsx`** - SpyMaster hint input form
-- **`Header.tsx`** - Game information and controls
-
-### Custom Hooks (`packages/web/src/utils/`)
-- **`useGameState.ts`** - Game state management hook
-- **`usePlayGameMessaging.ts`** - WebSocket messaging integration
-- **`usePlaySound.ts`** - Sound effects management
-- **`useApi.tsx`** - HTTP API communication
-
-### Utilities (`packages/web/src/utils/`)
-- **`styles.ts`** - Shared styling utilities
-- **`actions.ts`** - Action helper functions
-- **`types.ts`** - TypeScript type definitions
-
-This frontend architecture provides a responsive, real-time multiplayer game interface with comprehensive state management, error handling, and performance optimization.
+- **`

@@ -274,22 +274,76 @@ graph LR
 ## Key Implementation Files
 
 ### `models.ts` - Type Definitions
+
 - `CodeNamesGame`: Main game state interface
 - `WordsBoard`: 2D array of `BoardWord` objects
 - `GameStates`: Enum for game lifecycle
 - `WordType`: Enum for word categories
 
 ### `actions.ts` - State Transformations
+
 - Pure functions for all game state changes
 - Ramda-based immutable updates
 - Function composition for complex operations
 
 ### `rules.ts` - Validation Logic
+
 - Composable validation functions
 - Type-safe error messages
 - Context-aware rule checking
 
 ### `ports.ts` - Public API
+
 - Main entry points for game operations
 - Integration between actions and rules
 - Clean interface for external packages
+
+## Game Variants
+
+### Standard Codenames
+
+The classic game where teams compete to identify their words first while avoiding the assassin.
+
+### Interception Variant
+
+A new game variant that adds interception mechanics and scoring:
+
+```mermaid
+flowchart TD
+    StandardGame[Standard Codenames Rules] --> InterceptionLayer[+ Interception Mechanics]
+    
+    InterceptionLayer --> Scoring[Scoring System]
+    InterceptionLayer --> Intercepts[Interception Actions]
+    InterceptionLayer --> SoundEffects[Sound Effects]
+    
+    subgraph "Interception Mechanics"
+        InterceptAction[Intercept Opponent Move]
+        StealPoints[Steal Points]
+        AssassinReveal[Assassin Reveal Interception]
+        TimingBonus[Timing-based Bonuses]
+    end
+    
+    subgraph "Scoring System"
+        TeamPoints[Team Points]
+        IndividualScore[Individual Player Scores]
+        InterceptionBonus[Interception Bonuses]
+        GameEndBonus[Game Completion Bonuses]
+    end
+    
+    Intercepts --> InterceptAction
+    Intercepts --> StealPoints
+    Intercepts --> AssassinReveal
+    Intercepts --> TimingBonus
+    
+    Scoring --> TeamPoints
+    Scoring --> IndividualScore
+    Scoring --> InterceptionBonus
+    Scoring --> GameEndBonus
+```
+
+#### Interception Rules
+
+1. **Intercept Moves**: Players can intercept opponent team actions under certain conditions
+2. **Score System**: Points awarded for successful interceptions and game completion
+3. **Sound Feedback**: Audio cues for interception events (steal sound effect)
+4. **Enhanced Strategy**: Adds tactical depth to the standard game

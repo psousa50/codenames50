@@ -33,34 +33,38 @@ graph TB
 ```mermaid
 graph LR
     subgraph "Frontend"
-        React[React 16.13]
-        MUI[Material-UI 4.9]
-        TS1[TypeScript 3.7]
-        SocketClient[Socket.IO Client]
+        React[React 18.3]
+        MUI[Material-UI v7]
+        TS1[TypeScript 5.6]
+        SocketClient[Socket.IO Client 4.7.5]
+        Router[React Router v6]
+        Vite[Vite Build System]
     end
     
     subgraph "Backend"
         Express[Express.js 4.17]
-        SocketServer[Socket.IO 2.3]
-        Node[Node.js 14+]
-        TS2[TypeScript 3.9]
+        SocketServer[Socket.IO 4.7.5]
+        Node[Node.js 20+]
+        TS2[TypeScript 5.6]
     end
     
     subgraph "Data Layer"
-        MongoDB[MongoDB 3.5]
+        MongoDB[MongoDB 6.0]
         Atlas[MongoDB Atlas<br/>Production]
     end
     
-    subgraph "Build System"
-        Lerna[Lerna 3.22]
+    subgraph "Build & Testing System"
+        Lerna[Lerna 8.1]
         Yarn[Yarn Workspaces]
         TSProject[TS Project References]
+        Vitest[Vitest Testing]
+        ESLint9[ESLint v9]
     end
     
     Frontend <-->|Real-time| Backend
     Backend <-->|Persistence| Data Layer
-    Build System -.->|Manages| Frontend
-    Build System -.->|Manages| Backend
+    Build & Testing System -.->|Manages| Frontend
+    Build & Testing System -.->|Manages| Backend
 ```
 
 ## Package Dependencies

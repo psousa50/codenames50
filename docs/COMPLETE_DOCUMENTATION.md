@@ -30,31 +30,36 @@ Codenames50 is a TypeScript-based implementation of the popular Codenames board 
 - **Real-time Multiplayer**: Up to 8 players per game with live synchronization
 - **Cross-platform**: Web-based interface accessible on desktop and mobile
 - **Multiple Languages**: Support for English and Portuguese word sets
-- **Audio Feedback**: Contextual sound effects for game events
+- **Game Variants**: Standard Codenames and new Interception variant with scoring
+- **Audio Feedback**: Contextual sound effects for game events including steal sounds
+- **Enhanced UI**: Modern Material-UI v7 interface with improved game setup
 - **Responsive Design**: Optimized for various screen sizes
 - **Clean Architecture**: Modular design with clear separation of concerns
 
 ### Technology Stack
 
 **Frontend:**
-- React 16.13 with TypeScript
-- Material-UI 4.9 for components
-- Socket.IO Client for real-time communication
-- React Spring for animations
+- React 18.3 with TypeScript 5.6
+- Material-UI v7 for components and theming
+- Socket.IO Client 4.7.5 for real-time communication
+- React Router v6 for navigation
+- Vite for build system and development server
+- Vitest for testing
 - Use-Sound for audio effects
 
 **Backend:**
-- Node.js with Express.js 4.17
-- Socket.IO 2.3 for WebSocket server
-- MongoDB 3.5 for data persistence
-- TypeScript with strict configuration
+- Node.js 20+ with Express.js 4.17
+- Socket.IO 4.7.5 for WebSocket server
+- MongoDB 6.0 for data persistence
+- TypeScript 5.6 with strict configuration
 - FP-TS for functional programming patterns
 
 **Development:**
-- Lerna for monorepo management
+- Lerna 8.1 for monorepo management
 - Yarn Workspaces for dependency management
-- Jest for testing across all packages
-- ESLint + Prettier for code quality
+- Vitest for testing across all packages
+- ESLint v9 + Prettier for code quality
+- Vite for fast builds and hot module replacement
 
 ---
 

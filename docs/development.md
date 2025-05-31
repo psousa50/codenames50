@@ -18,7 +18,7 @@ flowchart TD
     
     subgraph "Development Tools"
         ServerDev --> Nodemon[Nodemon + ts-node]
-        WebDev --> CRA[Create React App]
+        WebDev --> Vite[Vite Development Server]
         BothDev --> TypeScriptWatch[TypeScript Watch Mode]
     end
     
@@ -145,13 +145,13 @@ graph TB
     E2ETests --> ErrorHandling
     
     subgraph "Testing Tools"
-        Jest[Jest Test Runner]
+        Vitest[Vitest Test Runner]
         RTL[React Testing Library]
         Supertest[Supertest API Testing]
         MemoryDB[MongoDB Memory Server]
     end
     
-    CoreUnit --> Jest
+    CoreUnit --> Vitest
     ComponentUnit --> RTL
     APITests --> Supertest
     DatabaseTests --> MemoryDB
@@ -455,6 +455,7 @@ mindmap
 ## Key Development Commands
 
 ### Package Management
+
 ```bash
 yarn install                    # Install all dependencies
 yarn workspace @codenames50/server add lodash    # Add dependency to specific package
@@ -462,6 +463,7 @@ yarn workspace @codenames50/web remove old-lib  # Remove dependency
 ```
 
 ### Development Servers
+
 ```bash
 ./scripts/start-server-dev.sh   # Start server with hot reload
 ./scripts/start-web-dev.sh      # Start web app with dev server
@@ -470,6 +472,7 @@ yarn workspace @codenames50/web start:dev       # Alternative web start
 ```
 
 ### Building & Testing
+
 ```bash
 yarn build                      # Build all packages
 yarn test                       # Run all tests
@@ -480,6 +483,7 @@ yarn pretty:fix                 # Format code with Prettier
 ```
 
 ### Package-Specific Commands
+
 ```bash
 yarn workspace @codenames50/core test           # Test core package
 yarn workspace @codenames50/server build        # Build server
