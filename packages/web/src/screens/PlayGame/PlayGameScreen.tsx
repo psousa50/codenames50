@@ -1,29 +1,31 @@
-import { CircularProgress, makeStyles, Theme } from "@material-ui/core"
+import { CircularProgress, Box } from "@mui/material"
 import React from "react"
 import { usePlayGameMessaging } from "../../utils/usePlayGameMessaging"
 import { PlayGame } from "./components/PlayGame"
 
-const useStyles = makeStyles((theme: Theme) => ({
-  progress: {
-    marginTop: "10rem",
-  },
-}))
-
-interface PlayGameScreenProps {
+export interface PlayGameScreenProps {
   gameId: string
   userId: string
 }
 
 export const PlayGameScreen: React.FC<PlayGameScreenProps> = ({ gameId, userId }) => {
-  const classes = useStyles()
-
   const { emitMessage, game, error, clearError } = usePlayGameMessaging(gameId, userId)
 
-  return game ? (
-    <PlayGame emitMessage={emitMessage} game={game} userId={userId} error={error} clearError={clearError} />
-  ) : (
-    <div className={classes.progress}>
-      <CircularProgress />
-    </div>
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flex: 1,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {game ? (
+        <PlayGame emitMessage={emitMessage} game={game} userId={userId} error={error} clearError={clearError} />
+      ) : (
+        <CircularProgress />
+      )}
+    </Box>
   )
 }

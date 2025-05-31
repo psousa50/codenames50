@@ -1,5 +1,5 @@
 import { GameModels } from "@codenames50/core"
-import { Button, makeStyles, Theme } from "@material-ui/core"
+import { Button, Box } from "@mui/material"
 import React from "react"
 import { teamName } from "../../../utils/ui"
 import { WordsBoard } from "./WordsBoard"
@@ -12,27 +12,23 @@ interface EndedGameProps {
 }
 
 export const EndedGame: React.FC<EndedGameProps> = ({ userId, game, newGame }) => {
-  const classes = useStyles()
-
   return (
-    <div className={classes.container}>
+    <Box
+      sx={{
+        display: "flex",
+        flexGrow: 1,
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "10px 10px",
+      }}
+    >
       <WordsLeft game={game} text={`${teamName(game.winner)} Wins!`} team={game.winner} />
-      <div style={{ marginTop: 20 }}></div>
+      <Box sx={{ marginTop: "20px" }} />
       <WordsBoard userId={userId} game={game} board={game.board} revealWords={true} />
-      <div style={{ marginTop: 20 }}></div>
+      <Box sx={{ marginTop: "20px" }} />
       <Button variant="contained" size="small" color="primary" onClick={() => newGame()}>
         New Game
       </Button>
-    </div>
+    </Box>
   )
 }
-
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    flexGrow: 1,
-    flexDirection: "column" as const,
-    alignItems: "center",
-    padding: "10px 10px",
-  },
-}))

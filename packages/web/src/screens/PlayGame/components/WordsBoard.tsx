@@ -1,6 +1,5 @@
 import { GameRules, GameModels } from "@codenames50/core"
-import { common } from "@material-ui/core/colors"
-import { makeStyles, Theme } from "@material-ui/core/styles"
+import { common } from "@mui/material/colors"
 import * as R from "ramda"
 import React from "react"
 import { animated as a, useSpring } from "react-spring"
@@ -16,16 +15,52 @@ interface WordsBoardProps {
   onWordClick?: OnWordClick
 }
 
+const componentStyles = {
+  rows: {
+    display: "flex",
+    flexDirection: "column" as const,
+    width: calculatedWidth,
+    height: calculatedHeight,
+  },
+  cells: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "row" as const,
+  },
+  cellWrapper: {
+    position: "relative" as const,
+    flex: "1 0 auto",
+    alignItems: "center",
+    justifyContent: "center",
+    maxWidth: "200px",
+    maxHeight: "200px",
+  },
+  cell: {
+    position: "absolute" as const,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "2px",
+    fontFamily: "Teko",
+    userSelect: "none" as const,
+    fontSize: "30px",
+    fontWeight: "500",
+  },
+}
+
 export const WordsBoard: React.FC<WordsBoardProps> = ({ userId, game, board, onWordClick, revealWords }) => {
-  const classes = useStyles()
   const s = board.length
 
   const forSpyMaster = game.redTeam.spyMaster === userId || game.blueTeam.spyMaster === userId
 
   return (
-    <div className={classes.rows}>
+    <div style={componentStyles.rows}>
       {R.range(0, s).map(row => (
-        <div key={row} className={classes.cells}>
+        <div key={row} style={componentStyles.cells}>
           {board[row].map((word, col) => (
             <Word
               key={col}
@@ -57,8 +92,6 @@ interface WordProps {
 }
 
 const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMaster, onWordClick, row, col }) => {
-  const classes = useStyles()
-
   const canReveal = GameRules.revealWord(userId, row, col)(game) === undefined
   const extendedGameRules = GameRules as typeof GameRules & {
     interceptWord?: (userId: string, row: number, col: number) => (game: GameModels.CodeNamesGame) => string | undefined
@@ -129,15 +162,15 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
   })
 
   return (
-    <div className={classes.cellWrapper} onClick={() => isClickable && onWordClick(word, row, col)}>
+    <div style={componentStyles.cellWrapper} onClick={() => isClickable && onWordClick(word, row, col)}>
       <a.div
         style={{
           opacity: opacity.interpolate(o => 1 - (typeof o === "number" ? o : Number.parseInt(o || "0"))),
           transform,
           ...styles.base,
           ...unrevealedStyles,
+          ...componentStyles.cell,
         }}
-        className={classes.cell}
       >
         {word.word.toUpperCase()}
       </a.div>
@@ -147,64 +180,11 @@ const Word: React.FC<WordProps> = ({ userId, game, word, revealWords, forSpyMast
           transform: transform.interpolate(t => `${t} rotateX(180deg)`),
           ...styles.base,
           ...styles.revealed[word.type],
+          ...componentStyles.cell,
         }}
-        className={classes.cell}
       >
         {word.word.toUpperCase()}
       </a.div>
     </div>
   )
 }
-
-const useStyles = makeStyles((theme: Theme) => ({
-  rows: {
-    display: "flex",
-    flexDirection: "column",
-    width: calculatedWidth,
-    height: calculatedHeight,
-  },
-  cells: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "row",
-  },
-  cellWrapper: {
-    position: "relative",
-    flex: "1 0 auto",
-    alignItems: "center",
-    justifyContent: "center",
-    maxWidth: "200px",
-    maxHeight: "200px",
-    "&:after": {
-      content: "",
-      float: "left",
-      display: "block",
-      paddingTop: "100%",
-    },
-  },
-  cell: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    top: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "2px",
-    fontFamily: "Teko",
-    userSelect: "none",
-    [theme.breakpoints.down(300)]: {
-      fontSize: "10px",
-    },
-    [theme.breakpoints.between(300, 600)]: {
-      fontSize: "14px",
-    },
-    [theme.breakpoints.up("sm")]: {
-      fontSize: "26px",
-    },
-    [theme.breakpoints.up("md")]: {
-      fontSize: "32px",
-    },
-  },
-}))

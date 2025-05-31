@@ -8,20 +8,16 @@ import {
   DialogContentText,
   DialogTitle,
   FormControl,
-  makeStyles,
-  Theme,
-  Grid,
   Typography,
   Divider,
   Box,
   Card,
   CardContent,
-  Chip,
   RadioGroup,
   FormControlLabel,
   Radio,
   FormLabel,
-} from "@material-ui/core"
+} from "@mui/material"
 import {
   Settings as SettingsIcon,
   People as PeopleIcon,
@@ -31,8 +27,8 @@ import {
   Refresh as RefreshIcon,
   Language as LanguageIcon,
   Schedule as ScheduleIcon,
-  GamepadOutlined as GamepadIcon,
-} from "@material-ui/icons"
+  SportsEsports as GamepadIcon,
+} from "@mui/icons-material"
 import React from "react"
 import { getFlagImage } from "../../../assets/images"
 import { EmitMessage } from "../../../utils/types"
@@ -48,8 +44,6 @@ interface SetupGameProps {
 }
 
 export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId, isDialog = false }) => {
-  const classes = useStyles()
-
   const gameId = game.gameId
 
   const [invitePlayersOpened, openInvitePlayers] = React.useState(false)
@@ -115,50 +109,60 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId,
   const canRandomizeTeams = GameRules.randomizeTeams(game) === undefined
 
   return (
-    <div className={isDialog ? classes.dialogContainer : classes.container}>
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: isDialog ? "100%" : 800,
+        margin: isDialog ? 0 : "0 auto",
+        padding: 2,
+      }}
+    >
       <ConfirmNewGameDialog open={newGameDialogOpened} closeNewGameDialog={closeNewGameDialog} />
 
-      {!isDialog && (
-        <Box className={classes.header}>
-          <Typography variant="h4" className={classes.title}>
-            Game Setup
-          </Typography>
-          <Chip
-            label={game.state === GameModels.GameStates.running ? "Game In Progress" : "Setting Up"}
-            color={game.state === GameModels.GameStates.running ? "secondary" : "primary"}
-            variant="outlined"
-            className={classes.statusChip}
-          />
-        </Box>
-      )}
-
-      <Grid container spacing={3} className={classes.gridContainer}>
-        {/* Game Configuration */}
-        {game.state === GameModels.GameStates.idle && (
-          <Grid item xs={12}>
-            <Card className={classes.card} elevation={2}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 3, width: "100%" }}>
+          {/* Game Configuration */}
+          {game.state === GameModels.GameStates.idle && (
+            <Card
+              sx={{ borderRadius: 2, transition: "all 0.3s ease", "&:hover": { transform: "translateY(-2px)" } }}
+              elevation={2}
+            >
               <CardContent>
-                <Box className={classes.sectionHeader}>
-                  <SettingsIcon className={classes.sectionIcon} />
-                  <Typography variant="h6" className={classes.sectionTitle}>
+                <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+                  <SettingsIcon sx={{ marginRight: 1, color: "primary.main" }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Game Configuration
                   </Typography>
                 </Box>
-                <Divider className={classes.divider} />
+                <Divider sx={{ marginBottom: 2 }} />
 
-                <Grid container spacing={2} className={classes.radioGroupContainer}>
-                  <Grid item xs={12} md={4}>
-                    <FormControl component="fieldset" className={classes.formControl}>
-                      <FormLabel component="legend" className={classes.radioGroupLabel}>
-                        <Box display="flex" alignItems="center">
-                          <GamepadIcon className={classes.inputIcon} />
-                          Game Variant
-                        </Box>
+                <Box sx={{ display: "flex", gap: 2, flexWrap: { xs: "wrap", md: "nowrap" } }}>
+                  <Box sx={{ flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: "200px" }}>
+                    <FormControl component="fieldset" sx={{ width: "100%", marginBottom: 1 }}>
+                      <FormLabel
+                        component="legend"
+                        sx={{
+                          fontWeight: 500,
+                          color: "text.primary",
+                          marginTop: 0,
+                          marginBottom: 1,
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <GamepadIcon sx={{ marginRight: 1 }} />
+                        Game Variant
                       </FormLabel>
                       <RadioGroup
                         value={config.variant || GameModels.GameVariant.classic}
                         onChange={changeVariant}
-                        className={classes.radioGroup}
+                        sx={{ marginTop: 1 }}
                       >
                         {variants ? (
                           variants.map(v => (
@@ -167,7 +171,7 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId,
                               value={v.name}
                               control={<Radio color="primary" />}
                               label={v.displayName}
-                              className={classes.radioOption}
+                              sx={{ marginBottom: 0.5 }}
                             />
                           ))
                         ) : (
@@ -175,181 +179,227 @@ export const SetupGame: React.FC<SetupGameProps> = ({ emitMessage, game, userId,
                             value={GameModels.GameVariant.classic}
                             control={<Radio color="primary" />}
                             label="Classic"
-                            className={classes.radioOption}
+                            sx={{ marginBottom: 0.5 }}
                           />
                         )}
                       </RadioGroup>
                     </FormControl>
-                  </Grid>
+                  </Box>
 
-                  <Grid item xs={12} md={4}>
-                    <FormControl component="fieldset" className={classes.formControl}>
-                      <FormLabel component="legend" className={classes.radioGroupLabel}>
-                        <Box display="flex" alignItems="center">
-                          <LanguageIcon className={classes.inputIcon} />
-                          Language
-                        </Box>
-                      </FormLabel>
-                      <RadioGroup
-                        value={config.language || ""}
-                        onChange={changeLanguage}
-                        className={classes.radioGroup}
+                  <Box sx={{ flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: "200px" }}>
+                    <FormControl component="fieldset" sx={{ width: "100%", marginBottom: 1 }}>
+                      <FormLabel
+                        component="legend"
+                        sx={{
+                          fontWeight: 500,
+                          color: "text.primary",
+                          marginTop: 0,
+                          marginBottom: 1,
+                          display: "flex",
+                          alignItems: "center",
+                        }}
                       >
-                        {languages ? (
-                          languages.map(l => (
-                            <FormControlLabel
-                              key={l}
-                              value={l}
-                              control={<Radio color="primary" />}
-                              label={
-                                <Box display="flex" alignItems="center">
-                                  <img src={getFlagImage(l)} alt={l} width="20px" style={{ paddingRight: "8px" }} />
-                                  {l}
-                                </Box>
-                              }
-                              className={classes.radioOption}
-                            />
-                          ))
-                        ) : (
-                          <FormControlLabel
-                            value=""
-                            control={<Radio color="primary" />}
-                            label="Loading..."
-                            className={classes.radioOption}
-                            disabled
-                          />
-                        )}
+                        <LanguageIcon sx={{ marginRight: 1 }} />
+                        Language
+                      </FormLabel>
+                      <RadioGroup value={config.language || ""} onChange={changeLanguage} sx={{ marginTop: 1 }}>
+                        {languages
+                          ? languages.map(l => (
+                              <FormControlLabel
+                                key={l}
+                                value={l}
+                                control={<Radio color="primary" />}
+                                label={
+                                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                                    <Box
+                                      component="img"
+                                      src={getFlagImage(l)}
+                                      alt={`${l} flag`}
+                                      sx={{ width: 20, height: 15, marginRight: 1, borderRadius: 0.5 }}
+                                    />
+                                    {l}
+                                  </Box>
+                                }
+                                sx={{ marginBottom: 0.5 }}
+                              />
+                            ))
+                          : null}
                       </RadioGroup>
                     </FormControl>
-                  </Grid>
+                  </Box>
 
-                  <Grid item xs={12} md={4}>
-                    <FormControl component="fieldset" className={classes.formControl}>
-                      <FormLabel component="legend" className={classes.radioGroupLabel}>
-                        <Box display="flex" alignItems="center">
-                          <ScheduleIcon className={classes.inputIcon} />
-                          Time Limit
-                        </Box>
+                  <Box sx={{ flex: { xs: "1 1 100%", md: "1 1 0" }, minWidth: "200px" }}>
+                    <FormControl component="fieldset" sx={{ width: "100%", marginBottom: 1 }}>
+                      <FormLabel
+                        component="legend"
+                        sx={{
+                          fontWeight: 500,
+                          color: "text.primary",
+                          marginTop: 0,
+                          marginBottom: 1,
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <ScheduleIcon sx={{ marginRight: 1 }} />
+                        Time Limit
                       </FormLabel>
                       <RadioGroup
-                        value={turnTimeouts ? config.turnTimeoutSec?.toString() || "0" : ""}
+                        value={config.turnTimeoutSec || 0}
                         onChange={changeResponseTimeOut}
-                        className={classes.radioGroup}
+                        sx={{ marginTop: 1 }}
                       >
                         {turnTimeouts ? (
-                          turnTimeouts.map(tt => (
+                          turnTimeouts.map(t => (
                             <FormControlLabel
-                              key={tt.timeoutSec}
-                              value={tt.timeoutSec.toString()}
+                              key={t.timeoutSec}
+                              value={t.timeoutSec}
                               control={<Radio color="primary" />}
-                              label={tt.description}
-                              className={classes.radioOption}
+                              label={t.description}
+                              sx={{ marginBottom: 0.5 }}
                             />
                           ))
                         ) : (
-                          <FormControlLabel
-                            value=""
-                            control={<Radio color="primary" />}
-                            label="Loading..."
-                            className={classes.radioOption}
-                            disabled
-                          />
+                          <>
+                            <FormControlLabel
+                              value={0}
+                              control={<Radio color="primary" />}
+                              label="No limit"
+                              sx={{ marginBottom: 0.5 }}
+                            />
+                            <FormControlLabel
+                              value={60}
+                              control={<Radio color="primary" />}
+                              label="1 minute"
+                              sx={{ marginBottom: 0.5 }}
+                            />
+                            <FormControlLabel
+                              value={120}
+                              control={<Radio color="primary" />}
+                              label="2 minutes"
+                              sx={{ marginBottom: 0.5 }}
+                            />
+                            <FormControlLabel
+                              value={180}
+                              control={<Radio color="primary" />}
+                              label="3 minutes"
+                              sx={{ marginBottom: 0.5 }}
+                            />
+                          </>
                         )}
                       </RadioGroup>
                     </FormControl>
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
               </CardContent>
             </Card>
-          </Grid>
-        )}
+          )}
 
-        {/* Teams Section */}
-        <Grid item xs={12}>
-          <Card className={classes.card} elevation={2}>
+          {/* Teams Section */}
+          <Card
+            sx={{ borderRadius: 2, transition: "all 0.3s ease", "&:hover": { transform: "translateY(-2px)" } }}
+            elevation={2}
+          >
             <CardContent>
-              <Box className={classes.sectionHeader}>
-                <PeopleIcon className={classes.sectionIcon} />
-                <Typography variant="h6" className={classes.sectionTitle}>
+              <Box sx={{ display: "flex", alignItems: "center", marginBottom: 2 }}>
+                <PeopleIcon sx={{ marginRight: 1, color: "primary.main" }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Teams
                 </Typography>
               </Box>
-              <Divider className={classes.divider} />
-              <Teams userId={userId} game={game} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
+              <Divider sx={{ marginBottom: 2 }} />
+              <Teams game={game} userId={userId} joinTeam={joinTeam} setSpyMaster={setSpyMaster} />
             </CardContent>
           </Card>
-        </Grid>
 
-        {/* Action Buttons */}
-        <Grid item xs={12}>
-          <Card className={classes.card} elevation={2}>
-            <CardContent>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    disabled={!canRandomizeTeams}
-                    variant="outlined"
-                    size="large"
-                    color="secondary"
-                    className={classes.actionButton}
-                    onClick={() => randomizeTeams()}
-                    startIcon={<ShuffleIcon />}
-                    fullWidth
-                  >
-                    Randomize Teams
-                  </Button>
-                </Grid>
+          {/* Action Buttons */}
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            <Box sx={{ flex: "1 1 250px" }}>
+              <Button
+                variant="outlined"
+                size="large"
+                disabled={!canRandomizeTeams}
+                onClick={randomizeTeams}
+                startIcon={<ShuffleIcon />}
+                fullWidth
+                sx={{
+                  height: 48,
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  textTransform: "none",
+                }}
+              >
+                Randomize Teams
+              </Button>
+            </Box>
+            <Box sx={{ flex: "1 1 250px" }}>
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={() => openInvitePlayers(true)}
+                startIcon={<PersonAddIcon />}
+                fullWidth
+                sx={{
+                  height: 48,
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  textTransform: "none",
+                }}
+              >
+                Invite Players
+              </Button>
+            </Box>
+          </Box>
 
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    color="secondary"
-                    className={classes.actionButton}
-                    onClick={() => openInvitePlayers(true)}
-                    startIcon={<PersonAddIcon />}
-                    fullWidth
-                  >
-                    Invite Players
-                  </Button>
-                </Grid>
+          {/* Start/Restart Game Button */}
+          <Box>
+            {game.state === GameModels.GameStates.idle ? (
+              <Button
+                variant="contained"
+                size="large"
+                disabled={!canStartGame}
+                onClick={() => startGame(config)}
+                startIcon={<PlayArrowIcon />}
+                fullWidth
+                sx={{
+                  height: 56,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  fontSize: "1.1rem",
+                  background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+                  "&:hover": {
+                    background: "linear-gradient(45deg, #1976D2 30%, #0288D1 90%)",
+                  },
+                }}
+              >
+                Start Game
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={() => setNewGameDialogOpened(true)}
+                startIcon={<RefreshIcon />}
+                fullWidth
+                sx={{
+                  height: 56,
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  fontSize: "1.1rem",
+                }}
+              >
+                New Game
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Box>
 
-                <Grid item xs={12}>
-                  {game.state === GameModels.GameStates.running ? (
-                    <Button
-                      variant="contained"
-                      size="large"
-                      color="primary"
-                      className={classes.primaryButton}
-                      onClick={() => setNewGameDialogOpened(true)}
-                      startIcon={<RefreshIcon />}
-                      fullWidth
-                    >
-                      Start New Game
-                    </Button>
-                  ) : (
-                    <Button
-                      disabled={!canStartGame}
-                      variant="contained"
-                      size="large"
-                      color="primary"
-                      className={classes.primaryButton}
-                      onClick={() => startGame(config)}
-                      startIcon={<PlayArrowIcon />}
-                      fullWidth
-                    >
-                      Start Game
-                    </Button>
-                  )}
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <InvitePlayersDialog onClose={() => openInvitePlayers(false)} open={invitePlayersOpened} gameId={game.gameId} />
-    </div>
+      <InvitePlayersDialog gameId={gameId} open={invitePlayersOpened} onClose={() => openInvitePlayers(false)} />
+    </Box>
   )
 }
 
@@ -376,129 +426,3 @@ const ConfirmNewGameDialog: React.FC<ConfirmNewGameDialogProps> = ({ open, close
     </Dialog>
   )
 }
-
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    width: "100%",
-    maxWidth: 800,
-    margin: "0 auto",
-    padding: theme.spacing(2),
-  },
-  dialogContainer: {
-    width: "100%",
-    padding: 0,
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing(3),
-    width: "100%",
-    [theme.breakpoints.down("sm")]: {
-      flexDirection: "column",
-      gap: theme.spacing(1),
-      alignItems: "center",
-      textAlign: "center",
-    },
-  },
-  title: {
-    fontWeight: 600,
-    color: theme.palette.primary.main,
-    margin: 0,
-    lineHeight: 1.2,
-  },
-  statusChip: {
-    flexShrink: 0,
-    alignSelf: "center",
-    transform: "translateY(-1px)",
-  },
-  gridContainer: {
-    width: "100%",
-  },
-  card: {
-    borderRadius: theme.spacing(1),
-    transition: "all 0.3s ease",
-    "&:hover": {
-      transform: "translateY(-2px)",
-      boxShadow: theme.shadows[4],
-    },
-  },
-  sectionHeader: {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: theme.spacing(1),
-  },
-  sectionIcon: {
-    marginRight: theme.spacing(1),
-    color: theme.palette.primary.main,
-  },
-  sectionTitle: {
-    fontWeight: 500,
-    color: theme.palette.text.primary,
-  },
-  divider: {
-    marginBottom: theme.spacing(1),
-  },
-  radioGroupContainer: {
-    marginTop: theme.spacing(1),
-  },
-  formControl: {
-    width: "100%",
-    marginBottom: theme.spacing(1),
-  },
-  radioGroupLabel: {
-    fontWeight: 500,
-    color: theme.palette.text.primary,
-    marginTop: 0,
-    marginBottom: theme.spacing(1),
-    "& .MuiFormLabel-root": {
-      color: theme.palette.text.primary,
-    },
-  },
-  radioGroup: {
-    marginTop: theme.spacing(1),
-  },
-  radioOption: {
-    margin: theme.spacing(0.5, 0),
-    "& .MuiFormControlLabel-label": {
-      fontSize: "0.9rem",
-    },
-    "& .MuiRadio-root": {
-      padding: theme.spacing(0.5),
-    },
-  },
-  select: {
-    "& .MuiSelect-select": {
-      paddingTop: theme.spacing(2),
-      paddingBottom: theme.spacing(2),
-    },
-  },
-  inputIcon: {
-    fontSize: 20,
-    marginRight: theme.spacing(0.5),
-    marginLeft: theme.spacing(0.5),
-    verticalAlign: "middle",
-  },
-  actionButton: {
-    height: 48,
-    borderRadius: theme.spacing(1),
-    fontWeight: 500,
-    textTransform: "none",
-    fontSize: "1rem",
-  },
-  primaryButton: {
-    height: 56,
-    borderRadius: theme.spacing(1),
-    fontWeight: 600,
-    textTransform: "none",
-    fontSize: "1.1rem",
-    background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.light} 90%)`,
-    boxShadow: theme.shadows[3],
-    "&:hover": {
-      boxShadow: theme.shadows[6],
-    },
-    "&:disabled": {
-      background: theme.palette.action.disabledBackground,
-    },
-  },
-}))

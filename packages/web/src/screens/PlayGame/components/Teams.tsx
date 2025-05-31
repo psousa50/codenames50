@@ -1,26 +1,12 @@
 import { GameModels } from "@codenames50/core"
-import {
-  Button,
-  makeStyles,
-  Theme,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Avatar,
-  Chip,
-  IconButton,
-  Tooltip,
-  Divider,
-  Grid,
-} from "@material-ui/core"
+import { Button, Card, CardContent, Typography, Box, Avatar, Chip, IconButton, Tooltip, Divider } from "@mui/material"
 import {
   Star as StarIcon,
   StarBorder as StarBorderIcon,
   Person as PersonIcon,
   PersonAdd as PersonAddIcon,
   EmojiEvents as TrophyIcon,
-} from "@material-ui/icons"
+} from "@mui/icons-material"
 import React from "react"
 import { teamColor } from "../../../utils/styles"
 
@@ -35,7 +21,6 @@ interface TeamProps {
 }
 
 const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, joinTeam, setSpyMaster }) => {
-  const classes = useStyles()
   const teamMembers = players.filter(p => p.team === team)
   const regularMembers = teamMembers.filter(p => p.userId !== teamConfig.spyMaster)
 
@@ -47,54 +32,103 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
   const teamColorValue = teamColor(team)
 
   return (
-    <Card className={classes.teamCard} style={{ borderColor: teamColorValue }}>
+    <Card
+      sx={{
+        height: "100%",
+        border: "2px solid",
+        borderColor: teamColorValue,
+        borderRadius: 2,
+        transition: "all 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-2px)",
+          boxShadow: 4,
+        },
+      }}
+    >
       <CardContent>
         {/* Team Header */}
-        <Box className={classes.teamHeader}>
-          <Typography variant="h6" className={classes.teamName} style={{ color: teamColorValue }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 1,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              fontSize: "1.25rem",
+              color: teamColorValue,
+            }}
+          >
             {teamName}
           </Typography>
           <Chip
             label={`${teamMembers.length} ${teamMembers.length === 1 ? "Player" : "Players"}`}
             size="small"
-            style={{
+            sx={{
               backgroundColor: teamColorValue,
               color: "white",
             }}
           />
         </Box>
 
-        <Divider className={classes.divider} />
+        <Divider sx={{ margin: "12px 0" }} />
 
         {/* Spy Master Section */}
-        <Box className={classes.spyMasterSection}>
-          <Box className={classes.spyMasterHeader}>
-            <TrophyIcon className={classes.trophyIcon} style={{ color: teamColorValue }} />
-            <Typography variant="subtitle1" className={classes.spyMasterTitle}>
+        <Box sx={{ marginBottom: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: 1,
+            }}
+          >
+            <TrophyIcon sx={{ marginRight: 1, fontSize: 20, color: teamColorValue }} />
+            <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
               Spy Master
             </Typography>
           </Box>
 
           {teamConfig.spyMaster ? (
             <Box
-              className={classes.spyMasterCard}
-              style={{
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                padding: 1.5,
+                borderRadius: 1,
+                transition: "all 0.2s ease",
                 backgroundColor: `${teamColorValue}10`,
                 border: `1px solid ${teamColorValue}30`,
               }}
             >
-              <Avatar className={classes.spyMasterAvatar} style={{ backgroundColor: teamColorValue }}>
+              <Avatar
+                sx={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 1.5,
+                  backgroundColor: teamColorValue,
+                }}
+              >
                 <StarIcon />
               </Avatar>
-              <Box className={classes.spyMasterInfo}>
-                <Typography variant="subtitle1" className={classes.spyMasterName}>
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 500,
+                    marginBottom: 0.5,
+                  }}
+                >
                   {teamConfig.spyMaster}
                 </Typography>
                 {isUserSpyMaster && (
                   <Chip
                     label="You"
                     size="small"
-                    style={{
+                    sx={{
                       backgroundColor: teamColorValue,
                       color: "white",
                     }}
@@ -106,8 +140,11 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
                   <IconButton
                     size="small"
                     onClick={() => setSpyMaster(team)}
-                    className={classes.takeOverButton}
-                    style={{ color: teamColorValue }}
+                    sx={{
+                      padding: 0.5,
+                      marginLeft: 1,
+                      color: teamColorValue,
+                    }}
                   >
                     <StarBorderIcon />
                   </IconButton>
@@ -115,8 +152,14 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
               )}
             </Box>
           ) : (
-            <Box className={classes.emptySpyMaster}>
-              <Typography variant="body2" className={classes.emptyText}>
+            <Box sx={{ textAlign: "center", padding: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  marginBottom: 1,
+                }}
+              >
                 No Spy Master assigned
               </Typography>
               {isUserOnThisTeam && (
@@ -125,8 +168,11 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
                   size="small"
                   startIcon={<StarIcon />}
                   onClick={() => setSpyMaster(team)}
-                  className={classes.becomeSpyMasterBtn}
-                  style={{ borderColor: teamColorValue, color: teamColorValue }}
+                  sx={{
+                    marginTop: 1,
+                    borderColor: teamColorValue,
+                    color: teamColorValue,
+                  }}
                 >
                   Become Spy Master
                 </Button>
@@ -135,21 +181,49 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
           )}
         </Box>
 
-        <Divider className={classes.divider} />
+        <Divider sx={{ margin: "12px 0" }} />
 
         {/* Team Members Section */}
-        <Box className={classes.membersSection}>
-          <Typography variant="subtitle2" className={classes.membersTitle}>
+        <Box sx={{ marginBottom: 1 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 500,
+              marginBottom: 1,
+              color: "text.secondary",
+            }}
+          >
             Team Members
           </Typography>
 
           {regularMembers.length > 0 ? (
-            <Box className={classes.membersList}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+              }}
+            >
               {regularMembers.map(member => (
-                <Box key={member.userId} className={classes.memberItem}>
+                <Box
+                  key={member.userId}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: 0.5,
+                    borderRadius: 0.5,
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                      transform: "translateX(2px)",
+                    },
+                  }}
+                >
                   <Avatar
-                    className={classes.memberAvatar}
-                    style={{
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      marginRight: 1,
                       backgroundColor: `${teamColorValue}15`,
                       color: teamColorValue,
                       border: `1px solid ${teamColorValue}30`,
@@ -157,15 +231,24 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
                   >
                     <PersonIcon />
                   </Avatar>
-                  <Typography variant="body2" className={classes.memberName}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
                     {member.userId}
                     {member.userId === userId && (
                       <Chip
                         label="You"
                         size="small"
                         variant="outlined"
-                        className={classes.youChip}
-                        style={{
+                        sx={{
+                          height: 18,
+                          fontSize: "0.7rem",
                           borderColor: teamColorValue,
                           color: teamColorValue,
                         }}
@@ -177,8 +260,10 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
                       <IconButton
                         size="small"
                         onClick={() => setSpyMaster(team)}
-                        className={classes.starButton}
-                        style={{ color: teamColorValue }}
+                        sx={{
+                          padding: 0.5,
+                          color: teamColorValue,
+                        }}
                       >
                         <StarBorderIcon />
                       </IconButton>
@@ -189,7 +274,7 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
             </Box>
           ) : (
             !teamConfig.spyMaster && (
-              <Typography variant="body2" className={classes.emptyText}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 No team members yet
               </Typography>
             )
@@ -199,14 +284,23 @@ const Team: React.FC<TeamProps> = ({ userId, game, team, teamConfig, players, jo
         {/* Join Team Button */}
         {canJoinTeam && (
           <>
-            <Divider className={classes.divider} />
+            <Divider sx={{ margin: "12px 0" }} />
             <Button
               variant="contained"
               fullWidth
               startIcon={<PersonAddIcon />}
               onClick={() => joinTeam(team)}
-              className={classes.joinButton}
-              style={{ backgroundColor: teamColorValue }}
+              sx={{
+                height: 48,
+                fontWeight: 500,
+                textTransform: "none",
+                backgroundColor: teamColorValue,
+                color: "white",
+                "&:hover": {
+                  opacity: 0.9,
+                  backgroundColor: teamColorValue,
+                },
+              }}
             >
               Join {teamName}
             </Button>
@@ -225,11 +319,16 @@ interface TeamsProps {
 }
 
 export const Teams: React.FC<TeamsProps> = ({ userId, game, joinTeam, setSpyMaster }) => {
-  const classes = useStyles()
-
   return (
-    <Grid container spacing={3} className={classes.teamsContainer}>
-      <Grid item xs={12} md={6}>
+    <Box
+      sx={{
+        display: "flex",
+        gap: 3,
+        width: "100%",
+        flexDirection: { xs: "column", md: "row" },
+      }}
+    >
+      <Box sx={{ flex: 1 }}>
         <Team
           userId={userId}
           game={game}
@@ -239,8 +338,8 @@ export const Teams: React.FC<TeamsProps> = ({ userId, game, joinTeam, setSpyMast
           joinTeam={joinTeam}
           setSpyMaster={setSpyMaster}
         />
-      </Grid>
-      <Grid item xs={12} md={6}>
+      </Box>
+      <Box sx={{ flex: 1 }}>
         <Team
           userId={userId}
           game={game}
@@ -250,136 +349,7 @@ export const Teams: React.FC<TeamsProps> = ({ userId, game, joinTeam, setSpyMast
           joinTeam={joinTeam}
           setSpyMaster={setSpyMaster}
         />
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   )
 }
-
-const useStyles = makeStyles((theme: Theme) => ({
-  teamsContainer: {
-    width: "100%",
-  },
-  teamCard: {
-    height: "100%",
-    border: "2px solid",
-    borderRadius: theme.spacing(2),
-    transition: "all 0.3s ease",
-    "&:hover": {
-      transform: "translateY(-2px)",
-      boxShadow: theme.shadows[4],
-    },
-  },
-  teamHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing(1),
-  },
-  teamName: {
-    fontWeight: 600,
-    fontSize: "1.25rem",
-  },
-  divider: {
-    margin: theme.spacing(1.5, 0),
-  },
-  spyMasterSection: {
-    marginBottom: theme.spacing(1),
-  },
-  spyMasterHeader: {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: theme.spacing(1),
-  },
-  trophyIcon: {
-    marginRight: theme.spacing(1),
-    fontSize: 20,
-  },
-  spyMasterTitle: {
-    fontWeight: 500,
-  },
-  spyMasterCard: {
-    display: "flex",
-    alignItems: "center",
-    padding: theme.spacing(1.5),
-    borderRadius: theme.spacing(1),
-    transition: "all 0.2s ease",
-  },
-  spyMasterAvatar: {
-    width: 40,
-    height: 40,
-    marginRight: theme.spacing(1.5),
-  },
-  spyMasterInfo: {
-    flex: 1,
-  },
-  spyMasterName: {
-    fontWeight: 500,
-    marginBottom: theme.spacing(0.5),
-  },
-  emptySpyMaster: {
-    textAlign: "center",
-    padding: theme.spacing(2),
-  },
-  emptyText: {
-    color: theme.palette.text.secondary,
-    marginBottom: theme.spacing(1),
-  },
-  becomeSpyMasterBtn: {
-    marginTop: theme.spacing(1),
-  },
-  membersSection: {
-    marginBottom: theme.spacing(1),
-  },
-  membersTitle: {
-    fontWeight: 500,
-    marginBottom: theme.spacing(1),
-    color: theme.palette.text.secondary,
-  },
-  membersList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: theme.spacing(1),
-  },
-  memberItem: {
-    display: "flex",
-    alignItems: "center",
-    padding: theme.spacing(0.5),
-    borderRadius: theme.spacing(0.5),
-    transition: "all 0.2s ease",
-    "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-      transform: "translateX(2px)",
-    },
-  },
-  memberAvatar: {
-    width: 32,
-    height: 32,
-    marginRight: theme.spacing(1),
-  },
-  memberName: {
-    flex: 1,
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(1),
-  },
-  youChip: {
-    height: 18,
-    fontSize: "0.7rem",
-  },
-  starButton: {
-    padding: theme.spacing(0.5),
-  },
-  takeOverButton: {
-    padding: theme.spacing(0.5),
-    marginLeft: theme.spacing(1),
-  },
-  joinButton: {
-    height: 48,
-    fontWeight: 500,
-    textTransform: "none",
-    color: "white",
-    "&:hover": {
-      opacity: 0.9,
-    },
-  },
-}))

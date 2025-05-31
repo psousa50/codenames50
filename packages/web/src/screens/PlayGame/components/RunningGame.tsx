@@ -1,7 +1,7 @@
 import { GameModels, GameRules } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
-import { makeStyles, Theme } from "@material-ui/core"
 import React from "react"
+import { Box } from "@mui/material"
 import { EmitMessage, Hint as HintModel } from "../../../utils/types"
 import { teamName } from "../../../utils/ui"
 import { Hint } from "./Hint"
@@ -13,43 +13,25 @@ import { TimeLeft } from "./TimeLeft"
 
 const getPlayer = (game: GameModels.CodeNamesGame, userId: string) => game.players.find(p => p.userId === userId)
 
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  hint: {
-    display: "flex",
-    flexGrow: 1,
-    flexDirection: "row",
-  },
-}))
-
 interface RunningGameProps {
   emitMessage: EmitMessage
   game: GameModels.CodeNamesGame
   userId: string
+  onSetupClick?: () => void
 }
 
-export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMessage }) => {
-  const classes = useStyles()
-
+export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMessage, onSetupClick }) => {
   const gameId = game.gameId
 
   const endTurn = () => {
     emitMessage(Messages.changeTurn({ gameId, userId }))
   }
 
-  const onTimeout = () => {
-    emitMessage(Messages.checkTurnTimeout({ gameId, userId }))
-  }
-
   const sendHint = (hint: HintModel) => {
     emitMessage(Messages.sendHint({ gameId, userId, hintWord: hint.word, hintWordCount: hint.count }))
   }
 
-  const onWordClick: OnWordClick = (_, row, col) => {
+  const onWordClick: OnWordClick = (word, row, col) => {
     const userTeam = getPlayer(game, userId)?.team
 
     if (game.interceptPhase && game.interceptingTeam === userTeam) {
@@ -95,17 +77,38 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
 
   const hint = { word: game.hintWord, count: game.hintWordCount }
 
+  // Calculate time left for TimeLeft component
+  const getTimeLeft = () => {
+    if (game.turnTimeoutSec && game.turnStartedTime) {
+      const elapsed = Math.floor((Date.now() - game.turnStartedTime) / 1000)
+      return Math.max(0, game.turnTimeoutSec - elapsed)
+    }
+    return 0
+  }
+
   return (
-    <div className={classes.container}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       <WordsLeft game={game} text={buildTurnsMessage()} team={game.turn} />
       {exists(game.turnTimeoutSec) && exists(game.turnStartedTime) ? (
-        <TimeLeft started={game.turnStartedTime!} turnTimeoutSec={game.turnTimeoutSec!} onTimeout={onTimeout} />
+        <TimeLeft timeLeft={getTimeLeft()} />
       ) : (
-        <div style={{ marginTop: 20 }}></div>
+        <Box sx={{ marginTop: "20px" }} />
       )}
       <WordsBoard userId={userId} game={game} board={game.board} onWordClick={onWordClick} revealWords={false} />
-      <div style={{ marginTop: 10 }}></div>
-      <div className={classes.hint}>
+      <Box sx={{ marginTop: "10px" }} />
+      <Box
+        sx={{
+          display: "flex",
+          flexGrow: 1,
+          flexDirection: "row",
+        }}
+      >
         {(userId === game.redTeam.spyMaster || userId === game.blueTeam.spyMaster) &&
         game.turn === getPlayer(game, userId)?.team &&
         game.turnStartedTime &&
@@ -120,7 +123,7 @@ export const RunningGame: React.FC<RunningGameProps> = ({ game, userId, emitMess
             endTurn={endTurn}
           />
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }

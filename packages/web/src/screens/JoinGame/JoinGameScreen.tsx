@@ -1,56 +1,87 @@
-import { Button, InputAdornment, makeStyles, TextField } from "@material-ui/core"
-import Avatar from "@material-ui/core/Avatar"
-import Container from "@material-ui/core/Container"
-import Typography from "@material-ui/core/Typography"
-import AccountCircle from "@material-ui/icons/AccountCircle"
-import FastForward from "@material-ui/icons/FastForward"
+import { GameModels } from "@codenames50/core"
+import { Messages } from "@codenames50/messaging"
+import { Button, InputAdornment, TextField, Avatar, Container, Typography, Box } from "@mui/material"
+import AccountCircle from "@mui/icons-material/AccountCircle"
+import FastForward from "@mui/icons-material/FastForward"
 import React from "react"
 import { Navigate } from "react-router-dom"
 import { logoImage } from "../../assets/images"
-import { GameModels } from "@codenames50/core"
+import { useGameMessaging } from "../../utils/useGameMessaging"
 
 export interface JoinGameScreenProps {
   gameId: string
   userId: string
 }
 
-export const JoinGameScreen: React.FC<JoinGameScreenProps> = ({ userId: initialUserId, gameId }) => {
-  const classes = useStyles()
-  const [userId, setUserId] = React.useState(initialUserId || "")
-  const [game, setGame] = React.useState<GameModels.CodeNamesGame | null>(null)
+export const JoinGameScreen: React.FC<JoinGameScreenProps> = ({ gameId, userId: initialUserId }) => {
+  const { connect, emitMessage, addMessageHandler, game, setGame } = useGameMessaging()
+  const [userId, setUserId] = React.useState(initialUserId)
 
-  const canJoin = () => userId.trim().length > 0 && gameId.trim().length > 0
+  React.useEffect(() => {
+    connect()
+
+    const onGameUpdated = (game: GameModels.CodeNamesGame) => {
+      setGame(game)
+    }
+
+    const onJoinedGame = (input: { game: GameModels.CodeNamesGame }) => {
+      setGame(input.game)
+    }
+
+    const setupMessageHandlers = () => {
+      addMessageHandler(Messages.createGameMessagehandler("updateGame", onGameUpdated))
+      addMessageHandler(Messages.createGameMessagehandler("joinedGame", onJoinedGame))
+    }
+
+    setupMessageHandlers()
+  }, [addMessageHandler, connect, setGame])
 
   const joinGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (canJoin()) {
-      // For testing purposes, simulate joining the game
-      setGame({ gameId } as GameModels.CodeNamesGame)
+    if (userId.trim().length > 0) {
+      emitMessage(Messages.joinGame({ gameId, userId }))
     }
   }
 
   return game ? (
-    <Navigate to={`/game?gameId=${gameId || ""}&userId=${userId || ""}`} replace />
+    <Navigate to={`/game?gameId=${gameId}&userId=${userId}`} replace />
   ) : (
     <form onSubmit={joinGame}>
       <Container component="main" maxWidth="xs">
-        <div className={classes.paper}>
-          <img src={logoImage} alt="codenames 50" className={classes.logo} />
-          <Avatar className={classes.avatar}>
+        <Box
+          sx={{
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Box
+            component="img"
+            src={logoImage}
+            alt="codenames 50"
+            sx={{
+              padding: "50px",
+              width: "100%",
+            }}
+          />
+          <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
             <FastForward />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Join a game
+            Join game
           </Typography>
           <TextField
             variant="outlined"
             margin="normal"
+            required
             fullWidth
-            className={classes.margin}
+            sx={{ m: 1 }}
             id="user-id"
             label="Your Name"
             value={userId}
             onChange={event => setUserId(event.target.value)}
+            autoFocus
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -61,39 +92,17 @@ export const JoinGameScreen: React.FC<JoinGameScreenProps> = ({ userId: initialU
           />
           <Button
             type="submit"
-            disabled={!canJoin()}
             fullWidth
             variant="contained"
+            disabled={userId.trim().length === 0}
             color="primary"
-            className={classes.submit}
+            sx={{ margin: "24px 0 16px" }}
             data-testid="join-game-button"
           >
             Join Game
           </Button>
-        </div>
+        </Box>
       </Container>
     </form>
   )
 }
-
-const useStyles = makeStyles(theme => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  logo: {
-    padding: "50px",
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}))

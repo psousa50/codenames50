@@ -1,12 +1,20 @@
 import { GameModels } from "@codenames50/core"
 import { Messages } from "@codenames50/messaging"
-import { Button, CircularProgress, InputAdornment, makeStyles, Snackbar, TextField } from "@material-ui/core"
-import Avatar from "@material-ui/core/Avatar"
-import Container from "@material-ui/core/Container"
-import Typography from "@material-ui/core/Typography"
-import AccountCircle from "@material-ui/icons/AccountCircle"
-import NoteAdd from "@material-ui/icons/NoteAdd"
-import { Alert, AlertTitle } from "@material-ui/lab"
+import {
+  Button,
+  CircularProgress,
+  InputAdornment,
+  Snackbar,
+  TextField,
+  Avatar,
+  Container,
+  Typography,
+  Box,
+  Alert,
+  AlertTitle,
+} from "@mui/material"
+import AccountCircle from "@mui/icons-material/AccountCircle"
+import NoteAdd from "@mui/icons-material/NoteAdd"
 import React from "react"
 import { Navigate } from "react-router-dom"
 import { logoImage } from "../../assets/images"
@@ -17,8 +25,6 @@ export interface CreateGameScreenProps {
 }
 
 export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: initialUserId }) => {
-  const classes = useStyles()
-
   const { connect, emitMessage, addMessageHandler, game, setGame, error, clearError } = useGameMessaging()
   const [userId, setUserId] = React.useState(initialUserId || "")
   const [loading, setLoading] = React.useState(false)
@@ -49,9 +55,24 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
     return (
       <form onSubmit={createGame}>
         <Container component="main" maxWidth="xs">
-          <div className={classes.paper}>
-            <img src={logoImage} alt="codenames 50" className={classes.logo} />
-            <Avatar className={classes.avatar}>
+          <Box
+            sx={{
+              marginTop: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              component="img"
+              src={logoImage}
+              alt="codenames 50"
+              sx={{
+                padding: "50px",
+                width: "100%",
+              }}
+            />
+            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
               <NoteAdd />
             </Avatar>
             <Typography component="h1" variant="h5">
@@ -62,7 +83,7 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
               margin="normal"
               required
               fullWidth
-              className={classes.margin}
+              sx={{ m: 1 }}
               id="user-id"
               label="Your Name"
               value={userId}
@@ -76,21 +97,32 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
                 ),
               }}
             />
-            <div className={classes.wrapper}>
+            <Box sx={{ m: 1, position: "relative" }}>
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 disabled={loading || userId.trim().length === 0}
                 color="primary"
-                className={classes.submit}
+                sx={{ margin: "24px 0 16px" }}
                 data-testid="create-game-button"
               >
                 Create Game
               </Button>
-              {loading && <CircularProgress size={32} className={classes.buttonProgress} />}
-            </div>
-          </div>
+              {loading && (
+                <CircularProgress
+                  size={32}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    marginTop: "-12px",
+                    marginLeft: "-12px",
+                  }}
+                />
+              )}
+            </Box>
+          </Box>
         </Container>
       </form>
     )
@@ -110,37 +142,3 @@ export const CreateGameScreen: React.FC<CreateGameScreenProps> = ({ userId: init
     </>
   )
 }
-
-const useStyles = makeStyles(theme => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  logo: {
-    padding: "50px",
-    width: "100%",
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  wrapper: {
-    margin: theme.spacing(1),
-    position: "relative",
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-}))

@@ -1,4 +1,4 @@
-import { makeStyles, Theme } from "@material-ui/core"
+import { Box } from "@mui/material"
 import * as qs from "qs"
 import React from "react"
 import { Routes, Route, useLocation } from "react-router-dom"
@@ -6,19 +6,7 @@ import { PlayGameScreen } from "./screens/PlayGame/PlayGameScreen"
 import { CreateGameScreen } from "./screens/CreateGame/CreateGameScreen"
 import { JoinGameScreen } from "./screens/JoinGame/JoinGameScreen"
 
-const useStyles = makeStyles((theme: Theme) => ({
-  app: {
-    display: "flex",
-    flex: 1,
-    width: "100vw",
-    alignItems: "center",
-    flexDirection: "column",
-  },
-}))
-
 export const AppRouter = () => {
-  const classes = useStyles()
-
   const location = useLocation()
 
   const search = qs.parse(location.search, { ignoreQueryPrefix: true })
@@ -27,7 +15,15 @@ export const AppRouter = () => {
   const gameId = search.gameId?.toString()
 
   return (
-    <div className={classes.app}>
+    <Box
+      sx={{
+        display: "flex",
+        flex: 1,
+        width: "100vw",
+        alignItems: "center",
+        flexDirection: "column",
+      }}
+    >
       <Routes>
         <Route path="/" element={<CreateGameScreen userId={userId} />} />
         <Route
@@ -41,6 +37,6 @@ export const AppRouter = () => {
           }
         />
       </Routes>
-    </div>
+    </Box>
   )
 }

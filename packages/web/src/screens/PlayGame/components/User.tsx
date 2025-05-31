@@ -1,46 +1,42 @@
-import { GameModels } from "@codenames50/core"
-import { makeStyles, Theme } from "@material-ui/core"
-import { common } from "@material-ui/core/colors"
-import Typography from "@material-ui/core/Typography"
+import { Box, Typography } from "@mui/material"
+import { common } from "@mui/material/colors"
+import { Star as StarIcon } from "@mui/icons-material"
 import React from "react"
-import { teamColor } from "../../../utils/styles"
+import { GameModels } from "@codenames50/core"
 
-const useStyles = makeStyles((theme: Theme) => ({
-  text: {
-    userSelect: "none",
-    textAlign: "center",
-    padding: "2px 50px 2px 50px",
-    borderRadius: "10px",
-    minWidth: "100px",
-  },
-}))
-
-interface UserProps {
-  userId?: string
+export interface UserProps {
+  userId: string
   team?: GameModels.Teams
   spyMaster?: boolean
 }
 
 export const User: React.FC<UserProps> = ({ userId, team, spyMaster }) => {
-  const classes = useStyles()
-  const styles = {
-    spyMaster: {
-      backgroundColor: teamColor(team),
-      color: common.white,
-      border: `1px solid ${teamColor(team)}`,
-    },
-    notSpyMaster: {
-      backgroundColor: common.white,
-      color: teamColor(team),
-      border: `1px solid ${teamColor(team)}`,
-    },
-  }
-
-  const spyMasterStyle = spyMaster ? styles.spyMaster : styles.notSpyMaster
+  const teamColor = team === GameModels.Teams.red ? "#f8931f" : team === GameModels.Teams.blue ? "#1b74ca" : "#bdbdbd"
 
   return (
-    <Typography variant="h4" style={spyMasterStyle} className={classes.text}>
-      {userId}
-    </Typography>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        padding: 1,
+        borderRadius: 1,
+        backgroundColor: teamColor,
+        color: common.white,
+      }}
+    >
+      <Typography variant="body1" sx={{ fontWeight: spyMaster ? "bold" : "normal" }}>
+        {userId}
+      </Typography>
+      {spyMaster && (
+        <StarIcon
+          sx={{
+            fontSize: "18px",
+            color: common.white,
+            marginLeft: "4px",
+          }}
+        />
+      )}
+    </Box>
   )
 }

@@ -1,23 +1,6 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, makeStyles, Typography } from "@material-ui/core"
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography, Box } from "@mui/material"
 import copy from "copy-to-clipboard"
 import React from "react"
-
-const useStyles = makeStyles(theme => ({
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  closeButton: {
-    position: "absolute",
-    right: theme.spacing(1),
-    top: theme.spacing(1),
-    color: theme.palette.grey[500],
-  },
-  content: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-}))
 
 interface InvitePlayersDialogProps {
   gameId: string
@@ -26,8 +9,6 @@ interface InvitePlayersDialogProps {
 }
 
 export const InvitePlayersDialog: React.FC<InvitePlayersDialogProps> = ({ gameId, open, onClose }) => {
-  const classes = useStyles()
-
   React.useEffect(() => {
     if (open) {
       const url = `${window.location.origin}/join?gameId=${gameId}`
@@ -38,11 +19,18 @@ export const InvitePlayersDialog: React.FC<InvitePlayersDialogProps> = ({ gameId
   return (
     <Dialog aria-labelledby="simple-dialog-title" onClose={onClose} open={open}>
       <DialogTitle>
-        <div>
+        <Box>
           <Typography variant="h6">Invite Players</Typography>
-        </div>
+        </Box>
       </DialogTitle>
-      <DialogContent dividers className={classes.content}>
+      <DialogContent
+        dividers
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="subtitle2">Game link has been copied to Clipboard</Typography>
       </DialogContent>
       <DialogActions>

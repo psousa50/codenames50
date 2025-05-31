@@ -1,21 +1,20 @@
-import { GameHelpers, GameModels } from "@codenames50/core"
-import { makeStyles, Theme, IconButton, Tooltip } from "@material-ui/core"
-import VolumeOff from "@material-ui/icons/VolumeOff"
-import VolumeUp from "@material-ui/icons/VolumeUp"
-import SettingsIcon from "@material-ui/icons/Settings"
+import { IconButton, Tooltip, Box } from "@mui/material"
+import VolumeOff from "@mui/icons-material/VolumeOff"
+import VolumeUp from "@mui/icons-material/VolumeUp"
+import SettingsIcon from "@mui/icons-material/Settings"
 import React from "react"
+import { GameModels, GameHelpers } from "@codenames50/core"
 import { EnvironmentContext } from "../../../environment"
+import { calculatedWidth } from "../../../utils/styles"
 import { User } from "./User"
 
-interface HeaderProps {
+export interface HeaderProps {
   game: GameModels.CodeNamesGame
   userId: string
   onSetupClick?: () => void
 }
 
 export const Header: React.FC<HeaderProps> = ({ game, userId, onSetupClick }) => {
-  const classes = useStyles()
-
   const environment = React.useContext(EnvironmentContext)
 
   const handleSound = () => {
@@ -23,76 +22,50 @@ export const Header: React.FC<HeaderProps> = ({ game, userId, onSetupClick }) =>
   }
 
   return (
-    <div className={classes.header}>
-      <User
-        userId={userId}
-        team={GameHelpers.getPlayer(game, userId)?.team}
-        spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
-      />
-      <div className={classes.controls}>
+    <Box
+      sx={{
+        display: "flex",
+        width: calculatedWidth,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingTop: "10px",
+        paddingBottom: "10px",
+        margin: "0 auto",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          flex: 1,
+        }}
+      >
+        <User
+          userId={userId}
+          team={GameHelpers.getPlayer(game, userId)?.team}
+          spyMaster={game.blueTeam.spyMaster === userId || game.redTeam.spyMaster === userId}
+        />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          padding: "5px",
+        }}
+      >
         {onSetupClick && (
           <Tooltip title="Game Setup">
-            <IconButton onClick={onSetupClick} className={classes.setupButton}>
+            <IconButton onClick={onSetupClick} sx={{ color: "primary.main", padding: "8px" }}>
               <SettingsIcon />
             </IconButton>
           </Tooltip>
         )}
-        <IconButton onClick={handleSound} className={classes.soundButton}>
+        <IconButton onClick={handleSound} sx={{ cursor: "pointer", padding: "8px" }}>
           {environment.config.soundOn ? <VolumeUp /> : <VolumeOff />}
         </IconButton>
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
-
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    alignItems: "center",
-  },
-  game: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "10px",
-  },
-  header: {
-    display: "flex",
-    flex: 1,
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  controls: {
-    position: "absolute",
-    right: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(1),
-  },
-  setupButton: {
-    color: theme.palette.primary.main,
-  },
-  soundButton: {
-    cursor: "pointer",
-  },
-  content: {
-    justifyContent: "center",
-  },
-  teams: {
-    marginTop: "0.5rem",
-    marginBottom: "0.5rem",
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(20),
-    fontWeight: 500,
-    color: theme.palette.secondary.main,
-  },
-  copyId: {
-    fontSize: 10,
-    cursor: "pointer",
-    paddingBottom: "10px",
-  },
-}))

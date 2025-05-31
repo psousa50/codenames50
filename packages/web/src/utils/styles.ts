@@ -1,6 +1,6 @@
-import { Button } from "@material-ui/core"
-import { common, grey } from "@material-ui/core/colors"
-import { withStyles } from "@material-ui/styles"
+import { Button } from "@mui/material"
+import { common, grey } from "@mui/material/colors"
+import { styled } from "@mui/material/styles"
 import { GameModels } from "@codenames50/core"
 
 export const redColor = "#f8931f"
@@ -14,28 +14,21 @@ export const calculatedHeight = "calc(max(300px, min(min(650px, 65vw), 55vh)))"
 export const teamColor = (team?: GameModels.Teams) =>
   team === GameModels.Teams.red ? redColor : team === GameModels.Teams.blue ? blueColor : undefined
 
-const teamStyle = (color: string) =>
-  withStyles({
-    root: {
-      backgroundColor: color,
-      color: common.white,
+const createTeamButton = (color: string) =>
+  styled(Button)(({ theme, variant }) => ({
+    backgroundColor: variant === "outlined" ? common.white : color,
+    color: variant === "outlined" ? color : common.white,
+    "&:hover": {
+      backgroundColor: variant === "outlined" ? grey[100] : theme.palette.grey[700],
     },
-    outlined: {
-      color,
-      backgroundColor: common.white,
-    },
-    icon: {
+    "& .MuiSvgIcon-root": {
       color: grey[800],
     },
-  })
+  }))
 
-export const redTeamStyles = teamStyle(redColor)
-export const blueTeamStyles = teamStyle(blueColor)
+export const RedTeamButton = createTeamButton(redColor)
+export const BlueTeamButton = createTeamButton(blueColor)
 
-const smallButtonStyle = withStyles({
-  root: {
-    minWidth: 0,
-  },
+export const SmallButton = styled(Button)({
+  minWidth: 0,
 })
-
-export const SmallButton = smallButtonStyle(Button)

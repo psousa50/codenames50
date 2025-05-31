@@ -1,5 +1,5 @@
 import { GameModels } from "@codenames50/core"
-import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
+import { Button, Paper, TextField, Box } from "@mui/material"
 import * as R from "ramda"
 import React from "react"
 import { calculatedWidth, SmallButton, teamColor } from "../../../utils/styles"
@@ -11,27 +11,43 @@ interface SendHintProps {
 }
 
 export const SendHint: React.FC<SendHintProps> = ({ team, sendHint }) => {
-  const classes = useStyles()
-
   const [hint, setHint] = React.useState<HintModel>({ word: "", count: 0 })
 
-  const styles = {
-    paper: {
-      border: `3px solid ${teamColor(team)}`,
-      width: calculatedWidth,
-    },
-  }
-
   return (
-    <div className={classes.container}>
-      <Paper elevation={3} variant="outlined" style={styles.paper}>
-        <div className={classes.hint}>
+    <Box
+      sx={{
+        display: "flex",
+        flexGrow: 1,
+        flexDirection: "row",
+        width: calculatedWidth,
+      }}
+    >
+      <Paper
+        elevation={3}
+        variant="outlined"
+        sx={{
+          border: `3px solid ${teamColor(team)}`,
+          width: calculatedWidth,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "10px",
+          }}
+        >
           <TextField
             id="hint-word"
             label="Hint Word"
             value={hint.word}
             onChange={event => setHint({ ...hint, word: event.target.value })}
-            inputProps={{ maxLength: 30 }}
+            sx={{
+              width: "80%",
+              marginRight: "10px",
+              fontSize: "20px",
+            }}
           />
           <Button
             variant="contained"
@@ -41,8 +57,15 @@ export const SendHint: React.FC<SendHintProps> = ({ team, sendHint }) => {
           >
             Send Hint
           </Button>
-        </div>
-        <div className={classes.numbers}>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           {R.range(1, 10).map(c => (
             <HintCount
               key={c}
@@ -52,9 +75,9 @@ export const SendHint: React.FC<SendHintProps> = ({ team, sendHint }) => {
               onChange={count => setHint({ ...hint, count })}
             />
           ))}
-        </div>
+        </Box>
       </Paper>
-    </div>
+    </Box>
   )
 }
 
@@ -66,47 +89,18 @@ interface HintCountProps {
 }
 
 const HintCount: React.FC<HintCountProps> = ({ team, count, selected, onChange }) => {
-  const classes = useStyles()
-
-  const styles = {
-    teamColor: {
-      color: teamColor(team),
-    },
-  }
   return (
     <SmallButton
       size="small"
       disabled={onChange === undefined}
-      className={classes.number}
       variant={selected ? "contained" : "outlined"}
-      style={styles.teamColor}
       onClick={() => onChange(count)}
+      sx={{
+        margin: "5px",
+        color: teamColor(team),
+      }}
     >
       {count}
     </SmallButton>
   )
 }
-
-const useStyles = makeStyles((theme: Theme) => ({
-  container: {
-    display: "flex",
-    flexGrow: 1,
-    flexDirection: "row",
-    width: calculatedWidth,
-  },
-  hint: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "10px",
-  },
-  numbers: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  number: {
-    margin: "5px",
-  },
-}))

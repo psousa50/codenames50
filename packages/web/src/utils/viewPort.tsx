@@ -9,7 +9,7 @@ const ViewportContext = React.createContext<ViewPort>({})
 
 const getViewport = () => ({ width: window.innerWidth, height: window.innerHeight })
 
-export const ViewportProvider: React.FC = ({ children }) => {
+export const ViewportProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [viewport, setViewport] = React.useState(getViewport())
 
   const onResize = () => {
