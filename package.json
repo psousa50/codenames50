@@ -29,8 +29,11 @@
     "pretty:fix": "prettier --write \"**/*.{css,js,html,json,md,scss,ts}\""
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "devDependencies": {
-    "@types/node": "18",
+    "@types/node": "^22",
     "@types/ramda": "0.29.12",
     "@types/supertest": "^6.0.2",
     "lerna": "^8.1.8",

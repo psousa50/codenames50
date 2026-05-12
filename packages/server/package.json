@@ -43,7 +43,7 @@
     "@types/convict": "^5.2.0",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.6",
-    "@types/node": "^14.0.5",
+    "@types/node": "^22",
     "@types/ramda": "^0.27.4",
     "@types/uuid": "^8.0.0",
     "@vitest/coverage-v8": "^3.1.4",
