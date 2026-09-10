@@ -1,6 +1,6 @@
 import * as R from "ramda"
 import * as GameActions from "../src/actions"
-import { GameStates, Teams, WordType } from "../src/models"
+import { GameStates, GameVariant, Teams, WordType } from "../src/models"
 
 describe("addPlayer", () => {
   it("adds a player to the game", () => {
@@ -412,11 +412,30 @@ describe("restartGame", () => {
 
 describe("sendHint", () => {
   it("sets the hint for the turn", () => {
-    const game = { turn: Teams.blue }
+    const game = { turn: Teams.blue, config: { variant: GameVariant.classic } }
     const hintWord = "some-hint"
     const hintWordCount = 3
     const expectedGame = {
       turn: Teams.blue,
+      config: { variant: GameVariant.classic },
+      hintWord,
+      hintWordCount,
+      wordsRevealedCount: 0,
+      interceptPhase: false,
+      interceptUsed: false,
+      interceptingTeam: undefined,
+    }
+
+    expect(GameActions.sendHint(hintWord, hintWordCount)(game as any)).toEqual(expectedGame)
+  })
+
+  it("enters the intercept phase in interception variant", () => {
+    const game = { turn: Teams.blue, config: { variant: GameVariant.interception } }
+    const hintWord = "some-hint"
+    const hintWordCount = 3
+    const expectedGame = {
+      turn: Teams.blue,
+      config: { variant: GameVariant.interception },
       hintWord,
       hintWordCount,
       wordsRevealedCount: 0,

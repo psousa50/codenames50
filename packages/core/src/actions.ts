@@ -151,9 +151,9 @@ export const sendHint =
     hintWord,
     hintWordCount,
     wordsRevealedCount: 0,
-    interceptPhase: true,
+    interceptPhase: game.config.variant === GameVariant.interception,
     interceptUsed: false,
-    interceptingTeam: game.turn === Teams.red ? Teams.blue : Teams.red,
+    interceptingTeam: game.config.variant === GameVariant.interception ? otherTeam(game.turn) : undefined,
   })
 
 const decreaseWordsLeft =

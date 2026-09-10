@@ -2,7 +2,9 @@ import { Snackbar, Dialog, DialogContent, IconButton, Box, Alert, AlertTitle } f
 import CloseIcon from "@mui/icons-material/Close"
 import React from "react"
 import { GameModels } from "@codenames50/core"
+import { Messages } from "@codenames50/messaging"
 import { EmitMessage } from "../../../utils/types"
+import { EndedGame } from "./EndedGame"
 import { RunningGame } from "./RunningGame"
 import { SetupGame } from "./SetupGame"
 import { Header } from "./Header"
@@ -34,7 +36,11 @@ export const PlayGame: React.FC<PlayGameProps> = ({ game, userId, emitMessage, e
         )
       case GameModels.GameStates.ended:
         return (
-          <RunningGame game={game} userId={userId} emitMessage={emitMessage} onSetupClick={() => setDialogOpen(true)} />
+          <EndedGame
+            userId={userId}
+            game={game}
+            newGame={() => emitMessage(Messages.restartGame({ gameId: game.gameId, userId }))}
+          />
         )
       default:
         return <div>Unknown game state</div>
